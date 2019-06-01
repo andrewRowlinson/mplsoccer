@@ -1,0 +1,15 @@
+# ignore binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ignore desktop.ini
+desktop.ini
+
+# ignore jupyter notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# ignore pycache
+__pycache__/

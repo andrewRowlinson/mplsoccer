@@ -1,0 +1,9 @@
+name: fbplot
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - jupyter
+  - nbdime
+  - python
+  - matplotlib
