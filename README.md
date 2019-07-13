@@ -5,3 +5,4 @@ Fbplot currently supports several data formats:
 - opta
 - tracab (ChyronHego) tracking data
 - statsbomb
+- stats.com (formely Prozone)
