@@ -1,7 +1,7 @@
 # fbplot
-Fbplot is a Python plotting library for drawing football pitches quickly in matplotlib.
+mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.
 
-Fbplot currently supports several data formats:
+mplsoccer currently supports several data formats:
 - Opta
 - Tracab (ChyronHego) tracking data
 - Statsbomb

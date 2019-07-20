@@ -1,4 +1,4 @@
-name: fbplot
+name: mplsoccer
 channels:
   - anaconda
   - conda-forge

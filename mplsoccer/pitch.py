@@ -5,7 +5,7 @@
 #raise error warning if not horizontal/ vertical
 #raise error for goal type
 
-''' `fbplot` is a python library for plotting football pitches in Matplotlib.
+''' `mplsoccer` is a python library for plotting soccer / football pitches in Matplotlib.
 '''
 
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
@@ -16,8 +16,8 @@ import matplotlib.patches as patches
 import matplotlib.lines as lines
 import numpy as np
 
-class FootballPitch(object):
-    ''' A class for plotting football pitches in Matplotlib
+class Pitch(object):
+    ''' A class for plotting soccer / football pitches in Matplotlib
     
     Parameters
     ----------
@@ -509,7 +509,7 @@ class FootballPitch(object):
             ax.add_patch(arc2_patch)     
 
     def draw(self):
-        ''' Returns a numpy array of Matplotlib axes with drawn football pitches.
+        ''' Returns a numpy array of Matplotlib axes with drawn soccer / football pitches.
         '''
         self._setup_subplots()
         self._set_axes()
