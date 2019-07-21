@@ -112,7 +112,8 @@ class Pitch(object):
      
     def __init__(self, figsize=None, layout=None, pitch_type='opta',orientation='horizontal',view='full',
                  pitch_color='#aabb97',line_color='white',linewidth=2,stripe=False,stripe_color='#c2d59d',
-                 xpad=(3,3),ypad=(3,3),pitch_length=None,pitch_width=None,goal_type='goal',axis='off',*args, **kwargs):       
+                 xpad=(3,3),ypad=(3,3),pitch_length=None,pitch_width=None,goal_type='goal',
+                 label=False,tick=False,axis=False,*args, **kwargs):       
                 
         # set figure and axes attributes
         self.axes = None
@@ -120,6 +121,8 @@ class Pitch(object):
         self.figsize = figsize
         self.layout = layout
         self.axis = axis
+        self.tick = tick
+        self.label = label
 
         # set attributes
         self.line_color = line_color
@@ -208,12 +211,18 @@ class Pitch(object):
         self.axes = axes
                          
     def _set_axes(self):
+        if self.axis==True:
+            axis_option='on'
+        elif self.axis==False:
+            axis_option='off'
         # set up vertical pitch
         if self.orientation=='vertical':
             if self.view=='full':
                 for ax in self.axes:
                     ax.set_aspect(1/self.aspect)
-                    ax.axis(self.axis)
+                    ax.axis(axis_option)
+                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                                   labelleft=self.label,labelbottom=self.label)
                     if self.pitch_type in ['statsbomb','stats']:
                         ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
                         ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
@@ -221,11 +230,13 @@ class Pitch(object):
                         ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
                         ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
                     ax.set_ylim(self.bottom-self.ypad_left,self.top+self.ypad_right)
-                      
+                    
             elif self.view=='half':
                 for ax in self.axes:
                     ax.set_aspect(1/self.aspect)
-                    ax.axis(self.axis)
+                    ax.axis(axis_option)
+                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                                   labelleft=self.label,labelbottom=self.label)
                     if self.pitch_type in ['statsbomb','stats']:
                         ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
                         ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color) 
@@ -239,7 +250,9 @@ class Pitch(object):
             if self.view=='full':
                 for ax in self.axes:
                     ax.set_aspect(self.aspect)
-                    ax.axis(self.axis)
+                    ax.axis(axis_option)
+                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                                   labelleft=self.label,labelbottom=self.label)
                     if self.pitch_type in ['statsbomb','stats']:
                         ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
                         ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
@@ -251,7 +264,9 @@ class Pitch(object):
             elif self.view=='half':
                 for ax in self.axes:
                     ax.set_aspect(self.aspect)
-                    ax.axis(self.axis)
+                    ax.axis(axis_option)
+                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                                   labelleft=self.label,labelbottom=self.label)
                     if self.pitch_type in ['statsbomb','stats']:
                         ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
                         ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
