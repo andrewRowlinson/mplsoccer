@@ -430,22 +430,18 @@ class Pitch(object):
             ax.add_patch(arc2_patch)  
                 
     def _draw_scaled_circles_and_arcs(self):
-        # intersection of the box and arc
-        if self.pitch_type=='opta':
-            intersection = self.center_width-10.44
-        elif self.pitch_type=='wyscout':
-            intersection = self.center_width-9.76
-        
         if self.pitch_type in ['opta','wyscout']:
-            scaled_circle1 = self.circle_size*100/68
-            scaled_circle2 = self.circle_size*100/105
+            r1 = self.circle_size*100/68
+            r2 = self.circle_size*100/105
             scaled_spot1 = self.length/(2*68)
             scaled_spot2 = self.length/(2*105)
             xy = (self.center_width,self.center_length)
             
+        intersection = self.center_width-(r1*r2*(r2**2-(self.penalty_area_length - self.left_penalty)**2)**(0.5))/(r2**2)
+            
         if self.orientation=='vertical':
-            xy1 = (self.center_width+scaled_circle1,self.center_length)
-            xy2 = (self.center_width,self.center_length+scaled_circle2)
+            xy1 = (self.center_width+r1,self.center_length)
+            xy2 = (self.center_width,self.center_length+r2)
             spot1 = (self.center_width,self.left_penalty)
             spot2 = (self.center_width,self.right_penalty)
             center_spot = (self.center_width,self.center_length)
@@ -454,8 +450,8 @@ class Pitch(object):
             arc_pen_top1 = (intersection, self.penalty_area_length)
                 
         elif self.orientation=='horizontal':
-            xy1 = (self.center_width+scaled_circle2,self.center_length)
-            xy2 = (self.center_width,self.center_length+scaled_circle1)
+            xy1 = (self.center_width+r2,self.center_length)
+            xy2 = (self.center_width,self.center_length+r1)
             spot1 = (self.left_penalty,self.center_width)
             spot2 = (self.right_penalty,self.center_width)
             center_spot = (self.center_length,self.center_width)
