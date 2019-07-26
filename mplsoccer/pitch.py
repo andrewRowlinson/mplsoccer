@@ -143,21 +143,29 @@ class Pitch(object):
         if pitch_type=='opta':
             for attr in self._pitch_dimensions:
                 setattr(self, attr, self._opta_dimensions.get(attr, None))
+            self.pitch_length = 105
+            self.pitch_width = 68
             self.aspect = 68/105
            
         elif pitch_type=='wyscout':
             for attr in self._pitch_dimensions:
                 setattr(self, attr, self._wyscout_dimensions.get(attr, None))
+            self.pitch_length = 105
+            self.pitch_width = 68
             self.aspect = 68/105
             
         elif pitch_type == 'statsbomb':
             for attr in self._pitch_dimensions:
                 setattr(self, attr, self._statsbomb_dimensions.get(attr, None))
+            self.pitch_length = self.length
+            self.pitch_width = self.width
             self.aspect = 1
             
         elif pitch_type == 'stats':
             for attr in self._pitch_dimensions:
                 setattr(self, attr, self._stats_dimensions.get(attr, None))
+            self.pitch_length = self.length
+            self.pitch_width = self.width
             self.aspect = 1
             
         elif pitch_type == 'tracab':
@@ -172,23 +180,23 @@ class Pitch(object):
             self.length = pitch_length * 100
             self.left_penalty = self.bottom + 1100
             self.right_penalty = self.top - 1100
-            self.xpad_left = self.xpad_left*100
-            self.ypad_left = self.ypad_left*100
-            self.xpad_right = self.xpad_right*100
-            self.ypad_right = self.ypad_right*100            
+            self.xpad_left = self.xpad_left * 100
+            self.ypad_left = self.ypad_left * 100
+            self.xpad_right = self.xpad_right * 100
+            self.ypad_right = self.ypad_right * 100            
         
         # scale the padding where the aspect is equal to one
         if pitch_type in ['opta','wyscout']:
             if self.orientation=='vertical':
-                self.xpad_left = self.xpad_left * (100/68)
-                self.xpad_right = self.xpad_right * (100/68)
-                self.ypad_left = self.ypad_left * (100/105)
-                self.ypad_right = self.ypad_right * (100/105)
+                self.xpad_left = self.xpad_left * (self.width/self.pitch_width)
+                self.xpad_right = self.xpad_right * (self.width/self.pitch_width)
+                self.ypad_left = self.ypad_left * (self.length/self.pitch_length)
+                self.ypad_right = self.ypad_right * (self.length/self.pitch_length)
             elif self.orientation=='horizontal':
-                self.xpad_left = self.xpad_left * (100/105)
-                self.xpad_right = self.xpad_right * (100/105)
-                self.ypad_left = self.ypad_left * (100/68)
-                self.ypad_right = self.ypad_right * (100/68)        
+                self.xpad_left = self.xpad_left * (self.length/self.pitch_length)
+                self.xpad_right = self.xpad_right * (self.length/self.pitch_length)
+                self.ypad_left = self.ypad_left * (self.width/self.pitch_width)
+                self.ypad_right = self.ypad_right * (self.width/self.pitch_width)        
             
     def _setup_subplots(self):
         
@@ -430,13 +438,11 @@ class Pitch(object):
             ax.add_patch(arc2_patch)  
                 
     def _draw_scaled_circles_and_arcs(self):
-        if self.pitch_type in ['opta','wyscout']:
-            r1 = self.circle_size*100/68
-            r2 = self.circle_size*100/105
-            scaled_spot1 = self.length/(2*68)
-            scaled_spot2 = self.length/(2*105)
-            xy = (self.center_width,self.center_length)
-            
+        r1 = self.circle_size*self.width/self.pitch_width
+        r2 = self.circle_size*self.length/self.pitch_length
+        scaled_spot1 = self.length/(2*self.pitch_width)
+        scaled_spot2 = self.length/(2*self.pitch_length)
+        xy = (self.center_width,self.center_length)
         intersection = self.center_width-(r1*r2*(r2**2-(self.penalty_area_length - self.left_penalty)**2)**(0.5))/(r2**2)
             
         if self.orientation=='vertical':
