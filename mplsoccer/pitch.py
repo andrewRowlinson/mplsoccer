@@ -236,19 +236,16 @@ class Pitch(object):
                         ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
                         ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
                     ax.set_ylim(self.bottom-self.ypad_left,self.top+self.ypad_right)
-                    
+        #            
             elif self.view=='half':
                 for ax in self.axes:
-                    x = np.array([90,110,105,86,89,70])
-                    y = np.array([40,41,36,45,49,52])
-                    ax.scatter(y,x)
                     ax.set_aspect(1/self.aspect)
                     ax.axis(axis_option)
                     ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
                                    labelleft=self.label,labelbottom=self.label)
                     if self.pitch_type in ['statsbomb','stats']:
                         ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                        ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color) 
+                        ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
                     elif self.pitch_type in ['tracab','opta','wyscout']:
                         ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
                         ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
@@ -548,3 +545,9 @@ class Pitch(object):
             self.axes[ax_num].plot(x,y,*args, **kwargs)
         elif self.orientation=='vertical':
             self.axes[ax_num].plot(y,x,*args, **kwargs)
+            
+    def scatter(self,x,y,*args,ax_num, **kwargs):
+        if self.orientation=='horizontal':
+            self.axes[ax_num].plot(x,y,zorder=2,*args, **kwargs)
+        elif self.orientation=='vertical':
+            self.axes[ax_num].plot(y,x,zorder=2,*args, **kwargs)
