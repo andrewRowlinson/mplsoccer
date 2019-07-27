@@ -546,8 +546,15 @@ class Pitch(object):
         elif self.orientation=='vertical':
             self.axes[ax_num].plot(y,x,*args, **kwargs)
             
-    def scatter(self,x,y,*args,ax_num, **kwargs):
+    def scatter(self,x,y,*args,ax_num,zorder=None, **kwargs):
         if self.orientation=='horizontal':
-            self.axes[ax_num].plot(x,y,zorder=2,*args, **kwargs)
+            if zorder==None:
+                self.axes[ax_num].plot(x,y,zorder=2,*args, **kwargs)
+            else:
+                self.axes[ax_num].plot(x,y,zorder=zorder,*args, **kwargs)
+                
         elif self.orientation=='vertical':
-            self.axes[ax_num].plot(y,x,zorder=2,*args, **kwargs)
+            if zorder==None:
+                self.axes[ax_num].plot(y,x,zorder=2,*args, **kwargs)
+            else:
+                self.axes[ax_num].plot(y,x,zorder=zorder,*args, **kwargs)
