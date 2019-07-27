@@ -112,8 +112,8 @@ class Pitch(object):
      
     def __init__(self, figsize=None, layout=None, pitch_type='opta',orientation='horizontal',view='full',
                  pitch_color='#aabb97',line_color='white',linewidth=2,stripe=False,stripe_color='#c2d59d',
-                 xpad=(3,3),ypad=(3,3),pitch_length=None,pitch_width=None,goal_type='goal',
-                 label=False,tick=False,axis=False,*args, **kwargs):       
+                 xpad=(4,4),ypad=(4,4),pitch_length=None,pitch_width=None,goal_type='goal',
+                 label=False,tick=False,axis=False,tight_layout=True,*args, **kwargs):       
                 
         # set figure and axes attributes
         self.axes = None
@@ -123,6 +123,7 @@ class Pitch(object):
         self.axis = axis
         self.tick = tick
         self.label = label
+        self.tight_layout = tight_layout
 
         # set attributes
         self.line_color = line_color
@@ -183,20 +184,16 @@ class Pitch(object):
             self.xpad_left = self.xpad_left * 100
             self.ypad_left = self.ypad_left * 100
             self.xpad_right = self.xpad_right * 100
-            self.ypad_right = self.ypad_right * 100            
-        
+            self.ypad_right = self.ypad_right * 100    
+
         # scale the padding where the aspect is equal to one
         if pitch_type in ['opta','wyscout']:
             if self.orientation=='vertical':
-                self.xpad_left = self.xpad_left * (self.width/self.pitch_width)
-                self.xpad_right = self.xpad_right * (self.width/self.pitch_width)
-                self.ypad_left = self.ypad_left * (self.length/self.pitch_length)
-                self.ypad_right = self.ypad_right * (self.length/self.pitch_length)
+                self.ypad_left = self.ypad_left * self.aspect
+                self.ypad_right = self.ypad_right * self.aspect
             elif self.orientation=='horizontal':
-                self.xpad_left = self.xpad_left * (self.length/self.pitch_length)
-                self.xpad_right = self.xpad_right * (self.length/self.pitch_length)
-                self.ypad_left = self.ypad_left * (self.width/self.pitch_width)
-                self.ypad_right = self.ypad_right * (self.width/self.pitch_width)        
+                self.xpad_left = self.xpad_left * self.aspect
+                self.xpad_right = self.xpad_right * self.aspect
             
     def _setup_subplots(self):
         
@@ -219,6 +216,7 @@ class Pitch(object):
         self.axes = axes
                          
     def _set_axes(self):
+        self.fig.set_tight_layout(self.tight_layout)
         if self.axis==True:
             axis_option='on'
         elif self.axis==False:
@@ -241,6 +239,9 @@ class Pitch(object):
                     
             elif self.view=='half':
                 for ax in self.axes:
+                    x = np.array([90,110,105,86,89,70])
+                    y = np.array([40,41,36,45,49,52])
+                    ax.scatter(y,x)
                     ax.set_aspect(1/self.aspect)
                     ax.axis(axis_option)
                     ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
@@ -540,4 +541,10 @@ class Pitch(object):
             self._draw_circles_and_arcs()
         else:
             self._draw_scaled_circles_and_arcs()
-        return self.axes
+        return self.fig, self.axes
+    
+    def plot(self,x,y,*args,ax_num, **kwargs):
+        if self.orientation=='horizontal':
+            self.axes[ax_num].plot(x,y,*args, **kwargs)
+        elif self.orientation=='vertical':
+            self.axes[ax_num].plot(y,x,*args, **kwargs)
