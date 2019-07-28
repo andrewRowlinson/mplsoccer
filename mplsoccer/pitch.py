@@ -215,74 +215,70 @@ class Pitch(object):
         self.fig = fig
         self.axes = axes
                          
-    def _set_axes(self):
-        self.fig.set_tight_layout(self.tight_layout)
+    def _set_axes(self,ax):
         if self.axis==True:
             axis_option='on'
         elif self.axis==False:
             axis_option='off'
+            
         # set up vertical pitch
         if self.orientation=='vertical':
             if self.view=='full':
-                for ax in self.axes:
-                    ax.set_aspect(1/self.aspect)
-                    ax.axis(axis_option)
-                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
-                                   labelleft=self.label,labelbottom=self.label)
-                    if self.pitch_type in ['statsbomb','stats']:
-                        ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                        ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
-                    elif self.pitch_type in ['tracab','opta','wyscout']:
-                        ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
-                        ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
-                    ax.set_ylim(self.bottom-self.ypad_left,self.top+self.ypad_right)
-        #            
+                ax.set_aspect(1/self.aspect)
+                ax.axis(axis_option)
+                ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                               labelleft=self.label,labelbottom=self.label)
+                if self.pitch_type in ['statsbomb','stats']:
+                    ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
+                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
+                elif self.pitch_type in ['tracab','opta','wyscout']:
+                    ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
+                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
+                ax.set_ylim(self.bottom-self.ypad_left,self.top+self.ypad_right)
+                    
             elif self.view=='half':
-                for ax in self.axes:
-                    ax.set_aspect(1/self.aspect)
-                    ax.axis(axis_option)
-                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
-                                   labelleft=self.label,labelbottom=self.label)
-                    if self.pitch_type in ['statsbomb','stats']:
-                        ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                        ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
-                    elif self.pitch_type in ['tracab','opta','wyscout']:
-                        ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
-                        ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
-                    ax.set_ylim(self.center_length-self.ypad_left,self.top+self.ypad_right)
+                ax.set_aspect(1/self.aspect)
+                ax.axis(axis_option)
+                ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                               labelleft=self.label,labelbottom=self.label)
+                if self.pitch_type in ['statsbomb','stats']:
+                    ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
+                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
+                elif self.pitch_type in ['tracab','opta','wyscout']:
+                    ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
+                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
+                ax.set_ylim(self.center_length-self.ypad_left,self.top+self.ypad_right)
                         
         # set up horizontal pitch
         elif self.orientation=='horizontal':
             if self.view=='full':
-                for ax in self.axes:
-                    ax.set_aspect(self.aspect)
-                    ax.axis(axis_option)
-                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
-                                   labelleft=self.label,labelbottom=self.label)
-                    if self.pitch_type in ['statsbomb','stats']:
-                        ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
-                        ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
-                    elif self.pitch_type in ['tracab','opta','wyscout']:
-                        ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
-                        ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color) 
-                    ax.set_xlim(self.bottom-self.xpad_left,self.top+self.xpad_right)
+                ax.set_aspect(self.aspect)
+                ax.axis(axis_option)
+                ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                               labelleft=self.label,labelbottom=self.label)
+                if self.pitch_type in ['statsbomb','stats']:
+                    ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
+                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
+                elif self.pitch_type in ['tracab','opta','wyscout']:
+                    ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
+                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color) 
+                ax.set_xlim(self.bottom-self.xpad_left,self.top+self.xpad_right)
                                           
             elif self.view=='half':
-                for ax in self.axes:
-                    ax.set_aspect(self.aspect)
-                    ax.axis(axis_option)
-                    ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
-                                   labelleft=self.label,labelbottom=self.label)
-                    if self.pitch_type in ['statsbomb','stats']:
-                        ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
-                        ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
-                    elif self.pitch_type in ['tracab','opta','wyscout']:
-                        ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
-                        ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color)
-                    ax.set_xlim(self.center_length-self.xpad_left,self.top+self.xpad_right)
+                ax.set_aspect(self.aspect)
+                ax.axis(axis_option)
+                ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
+                               labelleft=self.label,labelbottom=self.label)
+                if self.pitch_type in ['statsbomb','stats']:
+                    ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
+                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
+                elif self.pitch_type in ['tracab','opta','wyscout']:
+                    ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
+                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color)
+                ax.set_xlim(self.center_length-self.xpad_left,self.top+self.xpad_right)
 
  
-    def _draw_stripes(self):
+    def _draw_stripes(self,ax):
         # calculate stripe length
         pitch_length = self.top - self.bottom
         stripe1_length = self.six_yard_length
@@ -306,76 +302,71 @@ class Pitch(object):
             stripe_end = min((self.ypad_left + pitch_width)/total_width,1)
         
         # draw stripes
-        for ax in self.axes:
-            start = self.bottom
-            for stripe in range(1,19):
-                if stripe in [1,18]:
-                    end = round(start + stripe1_length,2)
-                elif stripe in [2,3,4,15,16,17]:
-                    end = round(start + stripe2_length,2)
-                else:
-                    end = round(start + stripe3_length,2)
-                if (stripe % 2 == 1) & (self.orientation=='vertical'):
-                    ax.axhspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color)
-                elif (stripe % 2 == 1) & (self.orientation=='horizontal'):
-                    ax.axvspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color)
-                start = end
+        start = self.bottom
+        for stripe in range(1,19):
+            if stripe in [1,18]:
+                end = round(start + stripe1_length,2)
+            elif stripe in [2,3,4,15,16,17]:
+                end = round(start + stripe2_length,2)
+            else:
+                end = round(start + stripe3_length,2)
+            if (stripe % 2 == 1) & (self.orientation=='vertical'):
+                ax.axhspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color)
+            elif (stripe % 2 == 1) & (self.orientation=='horizontal'):
+                ax.axvspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color)
+            start = end
 
-    def _draw_pitch_lines(self):
-        for ax in self.axes:
-            if self.orientation=='horizontal':
-                if self.pitch_type in ['statsbomb','stats']:
-                    pitch_markings = patches.Rectangle((self.bottom,self.left),self.length,self.width,
-                                                       fill=False,linewidth=self.linewidth,color=self.line_color)
-                else:
-                    pitch_markings = patches.Rectangle((self.bottom,self.right),self.length,self.width,
-                                                       fill=False,linewidth=self.linewidth,color=self.line_color)
-                midline = lines.Line2D([self.center_length,self.center_length],[self.right,self.left],
+    def _draw_pitch_lines(self,ax):
+        if self.orientation=='horizontal':
+            if self.pitch_type in ['statsbomb','stats']:
+                pitch_markings = patches.Rectangle((self.bottom,self.left),self.length,self.width,
+                                                   fill=False,linewidth=self.linewidth,color=self.line_color)
+            else:
+                pitch_markings = patches.Rectangle((self.bottom,self.right),self.length,self.width,
+                                                   fill=False,linewidth=self.linewidth,color=self.line_color)
+            midline = lines.Line2D([self.center_length,self.center_length],[self.right,self.left],
                                        linewidth=self.linewidth,color=self.line_color)
-            elif self.orientation=='vertical':
-                if self.pitch_type in ['statsbomb','stats']:
-                    pitch_markings = patches.Rectangle((self.left,self.bottom),self.width,self.length,
+        elif self.orientation=='vertical':
+            if self.pitch_type in ['statsbomb','stats']:
+                pitch_markings = patches.Rectangle((self.left,self.bottom),self.width,self.length,
                                                    fill=False,linewidth=self.linewidth,color=self.line_color)  
-                else:
-                    pitch_markings = patches.Rectangle((self.right,self.bottom),self.width,self.length,
-                                                       fill=False,linewidth=self.linewidth,color=self.line_color)
-                midline = lines.Line2D([self.left,self.right],[self.center_length,self.center_length],
-                                       linewidth=self.linewidth,color=self.line_color)
-            ax.add_patch(pitch_markings)
-            ax.add_artist(midline)
+            else:
+                pitch_markings = patches.Rectangle((self.right,self.bottom),self.width,self.length,
+                                                   fill=False,linewidth=self.linewidth,color=self.line_color)
+            midline = lines.Line2D([self.left,self.right],[self.center_length,self.center_length],
+                                   linewidth=self.linewidth,color=self.line_color)
+        ax.add_patch(pitch_markings)
+        ax.add_artist(midline)
     
-    def _draw_goals(self):
-        for ax in self.axes:
-            
-            if self.goal_type=='box':
-                if self.orientation=='horizontal':
-                    goal1 = patches.Rectangle((self.top,self.goal_post),self.goal_depth,self.goal_width,
-                                              fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
-                    goal2 = patches.Rectangle((self.bottom-self.goal_depth,self.goal_post),self.goal_depth,self.goal_width,
-                                              fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
-                elif self.orientation=='vertical':
-                    goal1 = patches.Rectangle((self.goal_post,self.top),self.goal_width,self.goal_depth,
-                                              fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
-                    goal2 = patches.Rectangle((self.goal_post,self.bottom-self.goal_depth),self.goal_width,self.goal_depth,
-                                              fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
-                ax.add_patch(goal1)
-                ax.add_patch(goal2)
+    def _draw_goals(self,ax):
+        if self.goal_type=='box':
+            if self.orientation=='horizontal':
+                goal1 = patches.Rectangle((self.top,self.goal_post),self.goal_depth,self.goal_width,
+                                          fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
+                goal2 = patches.Rectangle((self.bottom-self.goal_depth,self.goal_post),self.goal_depth,self.goal_width,
+                                          fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
+            elif self.orientation=='vertical':
+                goal1 = patches.Rectangle((self.goal_post,self.top),self.goal_width,self.goal_depth,
+                                          fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
+                goal2 = patches.Rectangle((self.goal_post,self.bottom-self.goal_depth),self.goal_width,self.goal_depth,
+                                          fill=False,linewidth=self.linewidth,color=self.line_color,alpha=0.7)
+            ax.add_patch(goal1)
+            ax.add_patch(goal2)
                     
-            elif self.goal_type=='line':
-                if self.orientation=='horizontal':
-                    goal1 = lines.Line2D([self.top,self.top],[self.goal_post+self.goal_width,self.goal_post],
-                                         linewidth=self.linewidth*2,color=self.line_color)
-                    goal2 = lines.Line2D([self.bottom,self.bottom],[self.goal_post+self.goal_width,self.goal_post],
-                                         linewidth=self.linewidth*2,color=self.line_color)
-                elif self.orientation=='vertical':
-                    goal1 = lines.Line2D([self.goal_post+self.goal_width,self.goal_post],[self.top,self.top],
-                                         linewidth=self.linewidth*2,color=self.line_color)
-                    goal2 = lines.Line2D([self.goal_post+self.goal_width,self.goal_post],[self.bottom,self.bottom],
-                                         linewidth=self.linewidth*2,color=self.line_color)
-                ax.add_artist(goal1)
-                ax.add_artist(goal2)
+        elif self.goal_type=='line':
+            if self.orientation=='horizontal':
+                goal1 = lines.Line2D([self.top,self.top],[self.goal_post+self.goal_width,self.goal_post],
+                                     linewidth=self.linewidth*2,color=self.line_color)
+                goal2 = lines.Line2D([self.bottom,self.bottom],[self.goal_post+self.goal_width,self.goal_post],
+                                     linewidth=self.linewidth*2,color=self.line_color)
+            elif self.orientation=='vertical':
+                goal1 = lines.Line2D([self.goal_post+self.goal_width,self.goal_post],[self.top,self.top],
+                                     linewidth=self.linewidth*2,color=self.line_color)
+                goal2 = lines.Line2D([self.goal_post+self.goal_width,self.goal_post],[self.bottom,self.bottom],
+                                     linewidth=self.linewidth*2,color=self.line_color)
+            ax.add_artist(goal1)
+            ax.add_artist(goal2)
 
-            
     def _boxes(self,box_from_side,box_length,box_width,ax):
         if self.orientation=='horizontal':
             box1 = patches.Rectangle((self.bottom,box_from_side),box_length,box_width,
@@ -390,12 +381,11 @@ class Pitch(object):
         ax.add_patch(box1)
         ax.add_patch(box2)
         
-    def _draw_boxes(self):
-        for ax in self.axes:
-            self._boxes(self.six_yard_from_side,self.six_yard_length,self.six_yard_width,ax)
-            self._boxes(self.penalty_area_from_side,self.penalty_area_length,self.penalty_area_width,ax)
+    def _draw_boxes(self,ax):
+        self._boxes(self.six_yard_from_side,self.six_yard_length,self.six_yard_width,ax)
+        self._boxes(self.penalty_area_from_side,self.penalty_area_length,self.penalty_area_width,ax)
             
-    def _draw_circles_and_arcs(self):
+    def _draw_circles_and_arcs(self,ax):
         size_spot = 0.005 * self.length
         if self.orientation=='vertical':
             xy = (self.center_width,self.center_length)
@@ -417,25 +407,24 @@ class Pitch(object):
             arc2_theta1 = 180 - self.arc2_leftH
             arc2_theta2 = 180 + self.arc2_leftH                
 
-        for ax in self.axes:
-            circle = patches.Circle(xy,self.circle_size,linewidth=self.linewidth,color=self.line_color, fill=False)
-            center_spot = patches.Circle(center,size_spot,color=self.line_color)
-            penalty1_spot = patches.Circle(penalty1,size_spot,color=self.line_color)
-            penalty2_spot = patches.Circle(penalty2,size_spot,color=self.line_color)
-            arc1_patch = patches.Arc(penalty1,self.circle_size*2,self.circle_size*2,
-                                     theta1=arc1_theta1,theta2=arc1_theta2,
-                                     linewidth=self.linewidth,color=self.line_color,fill=False)
-            arc2_patch = patches.Arc(penalty2,self.circle_size*2,self.circle_size*2,
-                                     theta1=arc2_theta1,theta2=arc2_theta2,
-                                     linewidth=self.linewidth,color=self.line_color,fill=False)
-            ax.add_patch(circle)
-            ax.add_patch(center_spot)
-            ax.add_patch(penalty1_spot)  
-            ax.add_patch(penalty2_spot)  
-            ax.add_patch(arc1_patch)
-            ax.add_patch(arc2_patch)  
+        circle = patches.Circle(xy,self.circle_size,linewidth=self.linewidth,color=self.line_color, fill=False)
+        center_spot = patches.Circle(center,size_spot,color=self.line_color)
+        penalty1_spot = patches.Circle(penalty1,size_spot,color=self.line_color)
+        penalty2_spot = patches.Circle(penalty2,size_spot,color=self.line_color)
+        arc1_patch = patches.Arc(penalty1,self.circle_size*2,self.circle_size*2,
+                                 theta1=arc1_theta1,theta2=arc1_theta2,
+                                 linewidth=self.linewidth,color=self.line_color,fill=False)
+        arc2_patch = patches.Arc(penalty2,self.circle_size*2,self.circle_size*2,
+                                 theta1=arc2_theta1,theta2=arc2_theta2,
+                                 linewidth=self.linewidth,color=self.line_color,fill=False)
+        ax.add_patch(circle)
+        ax.add_patch(center_spot)
+        ax.add_patch(penalty1_spot)  
+        ax.add_patch(penalty2_spot)  
+        ax.add_patch(arc1_patch)
+        ax.add_patch(arc2_patch)  
                 
-    def _draw_scaled_circles_and_arcs(self):
+    def _draw_scaled_circles_and_arcs(self,ax):
         r1 = self.circle_size*self.width/self.pitch_width
         r2 = self.circle_size*self.length/self.pitch_length
         scaled_spot1 = self.length/(2*self.pitch_width)
@@ -466,95 +455,121 @@ class Pitch(object):
         def to_ax_coord(ax,coord_system,point):
             return coord_system.inverted().transform(ax.transData.transform_point(point))
         
-        for ax in self.axes:
-            ax_coordinate_system = ax.transAxes
-            ax_xy = to_ax_coord(ax,ax_coordinate_system,xy)
-            ax_spot1 = to_ax_coord(ax,ax_coordinate_system,spot1)
-            ax_spot2 = to_ax_coord(ax,ax_coordinate_system,spot2)
-            ax_center = to_ax_coord(ax,ax_coordinate_system,center_spot)
-            ax_xy1 = to_ax_coord(ax,ax_coordinate_system,xy1)
-            ax_xy2 = to_ax_coord(ax,ax_coordinate_system,xy2)
-            ax_p1 = to_ax_coord(ax,ax_coordinate_system,p1)
-            ax_p2 = to_ax_coord(ax,ax_coordinate_system,p2)
-            ax_arc_pen_top1 = to_ax_coord(ax,ax_coordinate_system,arc_pen_top1) 
-            diameter1 = (ax_xy1[0] - ax_xy[0])*2
-            diameter2 = (ax_xy2[1] - ax_xy[1])*2
-            diameter_spot1 = (ax_p1[0] - ax_spot1[0])*2
-            diameter_spot2 = (ax_p2[1] - ax_spot1[1])*2
+        ax_coordinate_system = ax.transAxes
+        ax_xy = to_ax_coord(ax,ax_coordinate_system,xy)
+        ax_spot1 = to_ax_coord(ax,ax_coordinate_system,spot1)
+        ax_spot2 = to_ax_coord(ax,ax_coordinate_system,spot2)
+        ax_center = to_ax_coord(ax,ax_coordinate_system,center_spot)
+        ax_xy1 = to_ax_coord(ax,ax_coordinate_system,xy1)
+        ax_xy2 = to_ax_coord(ax,ax_coordinate_system,xy2)
+        ax_p1 = to_ax_coord(ax,ax_coordinate_system,p1)
+        ax_p2 = to_ax_coord(ax,ax_coordinate_system,p2)
+        ax_arc_pen_top1 = to_ax_coord(ax,ax_coordinate_system,arc_pen_top1) 
+        diameter1 = (ax_xy1[0] - ax_xy[0])*2
+        diameter2 = (ax_xy2[1] - ax_xy[1])*2
+        diameter_spot1 = (ax_p1[0] - ax_spot1[0])*2
+        diameter_spot2 = (ax_p2[1] - ax_spot1[1])*2
                 
-            if self.orientation=='vertical':
-                a = ax_spot1[0] - ax_arc_pen_top1[0]
-                o = ax_arc_pen_top1[1] - ax_spot1[1]
-                arc1_left = np.degrees(np.arctan(o/a))
-                arc1_right = 180 - arc1_left
-                arc2_left = 180 + arc1_left
-                arc2_right = 360 - arc1_left
+        if self.orientation=='vertical':
+            a = ax_spot1[0] - ax_arc_pen_top1[0]
+            o = ax_arc_pen_top1[1] - ax_spot1[1]
+            arc1_left = np.degrees(np.arctan(o/a))
+            arc1_right = 180 - arc1_left
+            arc2_left = 180 + arc1_left
+            arc2_right = 360 - arc1_left
                     
-            elif self.orientation=='horizontal':
-                a = ax_arc_pen_top1[0] - ax_spot1[0]
-                o = ax_spot1[1] - ax_arc_pen_top1[1]  
-                arc1_right = np.degrees(np.arctan(o/a))
-                arc1_left = 360 - arc1_right
-                arc2_left = 180 - arc1_right
-                arc2_right = 180 + arc1_right
+        elif self.orientation=='horizontal':
+            a = ax_arc_pen_top1[0] - ax_spot1[0]
+            o = ax_spot1[1] - ax_arc_pen_top1[1]  
+            arc1_right = np.degrees(np.arctan(o/a))
+            arc1_left = 360 - arc1_right
+            arc2_left = 180 - arc1_right
+            arc2_right = 180 + arc1_right
                 
-            circle = patches.Ellipse(ax_xy, diameter1, diameter2,transform=ax_coordinate_system,fill=False,
-                                     linewidth=self.linewidth,color=self.line_color)
-            penalty_spot1 = patches.Ellipse(ax_spot1, diameter_spot1, diameter_spot2,
-                                            transform=ax_coordinate_system,
-                                            linewidth=self.linewidth,color=self.line_color)
-            penalty_spot2 = patches.Ellipse(ax_spot2, diameter_spot1, diameter_spot2,
-                                            transform=ax_coordinate_system,
-                                            linewidth=self.linewidth,color=self.line_color)
-            kick_off_spot = patches.Ellipse(ax_center, diameter_spot1, diameter_spot2,
-                                            transform=ax_coordinate_system,
-                                            linewidth=self.linewidth,color=self.line_color)
-            arc1_patch = patches.Arc(ax_spot1,diameter1, diameter2,transform=ax_coordinate_system,fill=False,
-                                     theta1=arc1_left,theta2=arc1_right,
-                                     linewidth=self.linewidth,color=self.line_color)
-            arc2_patch = patches.Arc(ax_spot2,diameter1, diameter2,transform=ax_coordinate_system,fill=False,
-                                     theta1=arc2_left,theta2=arc2_right,
-                                     linewidth=self.linewidth,color=self.line_color)
+        circle = patches.Ellipse(ax_xy, diameter1, diameter2,transform=ax_coordinate_system,fill=False,
+                                 linewidth=self.linewidth,color=self.line_color)
+        penalty_spot1 = patches.Ellipse(ax_spot1, diameter_spot1, diameter_spot2,
+                                        transform=ax_coordinate_system,
+                                        linewidth=self.linewidth,color=self.line_color)
+        penalty_spot2 = patches.Ellipse(ax_spot2, diameter_spot1, diameter_spot2,
+                                        transform=ax_coordinate_system,
+                                        linewidth=self.linewidth,color=self.line_color)
+        kick_off_spot = patches.Ellipse(ax_center, diameter_spot1, diameter_spot2,
+                                        transform=ax_coordinate_system,
+                                        linewidth=self.linewidth,color=self.line_color)
+        arc1_patch = patches.Arc(ax_spot1,diameter1, diameter2,transform=ax_coordinate_system,fill=False,
+                                 theta1=arc1_left,theta2=arc1_right,
+                                 linewidth=self.linewidth,color=self.line_color)
+        arc2_patch = patches.Arc(ax_spot2,diameter1, diameter2,transform=ax_coordinate_system,fill=False,
+                                 theta1=arc2_left,theta2=arc2_right,
+                                 linewidth=self.linewidth,color=self.line_color)
                 
-            ax.add_patch(penalty_spot1)
-            ax.add_patch(penalty_spot2)
-            ax.add_patch(kick_off_spot)
-            ax.add_patch(circle)
-            ax.add_patch(arc1_patch)     
-            ax.add_patch(arc2_patch)     
+        ax.add_patch(penalty_spot1)
+        ax.add_patch(penalty_spot2)
+        ax.add_patch(kick_off_spot)
+        ax.add_patch(circle)
+        ax.add_patch(arc1_patch)     
+        ax.add_patch(arc2_patch)
+            
+    def _draw_ax(self,ax):
+        self._set_axes(ax)
+        if self.stripe == True:
+            self._draw_stripes(ax)
+        self._draw_pitch_lines(ax)
+        if self.goal_type != None:
+            self._draw_goals(ax)
+        self._draw_boxes(ax)
+        if self.aspect == 1:
+            self._draw_circles_and_arcs(ax)
+        else:
+            self._draw_scaled_circles_and_arcs(ax)
 
-    def draw(self):
+    def draw(self,ax=None):
         ''' Returns a numpy array of Matplotlib axes with drawn soccer / football pitches.
         '''
-        self._setup_subplots()
-        self._set_axes()
-        if self.stripe == True:
-            self._draw_stripes()
-        self._draw_pitch_lines()
-        if self.goal_type != None:
-            self._draw_goals()
-        self._draw_boxes()
-        if self.aspect == 1:
-            self._draw_circles_and_arcs()
+        if ax==None:
+            self._setup_subplots()
+            self.fig.set_tight_layout(self.tight_layout)
+            for ax in self.axes:
+                self._draw_ax(ax)
+            return self.fig, self.axes
         else:
-            self._draw_scaled_circles_and_arcs()
-        return self.fig, self.axes
+            self._draw_ax(ax)
     
-    def plot(self,x,y,*args,ax_num, **kwargs):
-        if self.orientation=='horizontal':
-            self.axes[ax_num].plot(x,y,*args, **kwargs)
-        elif self.orientation=='vertical':
-            self.axes[ax_num].plot(y,x,*args, **kwargs)
+    def plot(self,x,y,*args,ax_num=None,ax=None, **kwargs):
+        if ax==None:
+            if self.orientation=='horizontal':
+                self.axes[ax_num].plot(x,y,*args, **kwargs)
+            elif self.orientation=='vertical':
+                self.axes[ax_num].plot(y,x,*args, **kwargs)
+        else:
+            if self.orientation=='horizontal':
+                ax.plot(x,y,*args, **kwargs)
+            elif self.orientation=='vertical':
+                ax.plot(y,x,*args, **kwargs)
             
-    def scatter(self,x,y,*args,ax_num,zorder=None, **kwargs):
-        if self.orientation=='horizontal':
-            if zorder==None:
-                self.axes[ax_num].plot(x,y,zorder=2,*args, **kwargs)
-            else:
-                self.axes[ax_num].plot(x,y,zorder=zorder,*args, **kwargs)
+    def scatter(self,x,y,*args,ax_num=None,ax=None, zorder=None, **kwargs):
+        if ax==None:
+            if self.orientation=='horizontal':
+                if zorder==None:
+                    self.axes[ax_num].plot(x,y,zorder=2,*args, **kwargs)
+                else:
+                    self.axes[ax_num].plot(x,y,zorder=zorder,*args, **kwargs)
                 
-        elif self.orientation=='vertical':
-            if zorder==None:
-                self.axes[ax_num].plot(y,x,zorder=2,*args, **kwargs)
-            else:
-                self.axes[ax_num].plot(y,x,zorder=zorder,*args, **kwargs)
+            elif self.orientation=='vertical':
+                if zorder==None:
+                    self.axes[ax_num].plot(y,x,zorder=2,*args, **kwargs)
+                else:
+                    self.axes[ax_num].plot(y,x,zorder=zorder,*args, **kwargs)
+        else:
+            if self.orientation=='horizontal':
+                if zorder==None:
+                    ax.plot(x,y,zorder=2,*args, **kwargs)
+                else:
+                    ax.plot(x,y,zorder=zorder,*args, **kwargs)
+                
+            elif self.orientation=='vertical':
+                if zorder==None:
+                    ax.plot(y,x,zorder=2,*args, **kwargs)
+                else:
+                    ax.plot(y,x,zorder=zorder,*args, **kwargs)
