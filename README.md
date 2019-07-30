@@ -17,4 +17,4 @@ pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
 ```
 
-![alt text](https://github.com/andrewRowlinson/mplsoccer/doc/figures/README_example_pitch.png "pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_pitch.png "pitch xkcd style")
