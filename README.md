@@ -8,13 +8,22 @@ mplsoccer currently supports several data formats:
 - STATS (formely Prozone)
 - Wyscout (pitch dimensions from ggsoccer: https://github.com/Torvaney/ggsoccer)
 
-The following example draws an Opta pitch(the default) using mplsoccer in xkcd comic mode.
+The following example draws an Opta pitch (the default) with stripes.
+``` python
+from pitch import Pitch
+pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
+fig, ax = pitch.draw()
+fig.savefig('opta.png',pad_inches=0,bbox_inches='tight')
+```
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_opta_pitch.png "pitch xkcd style")
+
+For fun you can also plot the same pitch in xkcd mode.
 ``` python
 from pitch import Pitch
 import matplotlib.pyplot as plt
 plt.xkcd()
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
+fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
-
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_pitch.png "pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_xkcd_pitch.png "pitch xkcd style")
