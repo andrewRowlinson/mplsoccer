@@ -532,35 +532,24 @@ class Pitch(object):
             self.fig.set_tight_layout(self.tight_layout)
             for ax in self.axes:
                 self._draw_ax(ax)
+            if self.axes.size == 1:
+                self.axes = self.axes.item()
             return self.fig, self.axes
         else:
             self._draw_ax(ax)
     
-    def plot(self,x,y,*args,ax_num=None,ax=None, **kwargs):
+    def plot(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
-            if self.orientation=='horizontal':
-                self.axes[ax_num].plot(x,y,*args, **kwargs)
-            elif self.orientation=='vertical':
-                self.axes[ax_num].plot(y,x,*args, **kwargs)
+            raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         else:
             if self.orientation=='horizontal':
                 ax.plot(x,y,*args, **kwargs)
             elif self.orientation=='vertical':
                 ax.plot(y,x,*args, **kwargs)
             
-    def scatter(self,x,y,*args,ax_num=None,ax=None, zorder=None, **kwargs):
+    def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
         if ax==None:
-            if self.orientation=='horizontal':
-                if zorder==None:
-                    self.axes[ax_num].plot(x,y,zorder=2,*args, **kwargs)
-                else:
-                    self.axes[ax_num].plot(x,y,zorder=zorder,*args, **kwargs)
-                
-            elif self.orientation=='vertical':
-                if zorder==None:
-                    self.axes[ax_num].plot(y,x,zorder=2,*args, **kwargs)
-                else:
-                    self.axes[ax_num].plot(y,x,zorder=zorder,*args, **kwargs)
+            raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         else:
             if self.orientation=='horizontal':
                 if zorder==None:
