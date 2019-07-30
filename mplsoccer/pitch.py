@@ -14,6 +14,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.lines as lines
+from matplotlib.colors import to_rgb
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap
 import numpy as np
 
 class Pitch(object):
@@ -541,24 +544,36 @@ class Pitch(object):
     def plot(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        else:
-            if self.orientation=='horizontal':
-                ax.plot(x,y,*args, **kwargs)
-            elif self.orientation=='vertical':
-                ax.plot(y,x,*args, **kwargs)
+        if self.orientation=='horizontal':
+            ax.plot(x,y,*args, **kwargs)
+        elif self.orientation=='vertical':
+            ax.plot(y,x,*args, **kwargs)
             
     def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
         if ax==None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        else:
-            if self.orientation=='horizontal':
-                if zorder==None:
-                    ax.plot(x,y,zorder=2,*args, **kwargs)
-                else:
-                    ax.plot(x,y,zorder=zorder,*args, **kwargs)
+        if self.orientation=='horizontal':
+            if zorder==None:
+                ax.plot(x,y,zorder=2,*args, **kwargs)
+            else:
+                ax.plot(x,y,zorder=zorder,*args, **kwargs)
                 
-            elif self.orientation=='vertical':
-                if zorder==None:
-                    ax.plot(y,x,zorder=2,*args, **kwargs)
-                else:
-                    ax.plot(y,x,zorder=zorder,*args, **kwargs)
+        elif self.orientation=='vertical':
+            if zorder==None:
+                ax.plot(y,x,zorder=2,*args, **kwargs)
+            else:
+                ax.plot(y,x,zorder=zorder,*args, **kwargs)
+                    
+    def plot_line_fade(self,x,y,color='#2f3653',n_alpha=20,ax=None, **kwargs):
+        if ax==None:
+            raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        color = to_rgb(color)
+        color = np.tile(np.array(color),(n_alpha,1))
+        color = np.append(color,np.linspace(0.1,1,n_alpha).reshape(-1,1),axis=1)
+        cmap = ListedColormap(color, name='line fade', N=n_alpha)
+        points = np.array([x,y]).T.reshape(-1,1,2)
+        segments = np.concatenate([points[:-1],points[1:]], axis=1)
+        lc = LineCollection(segments, cmap=cmap, linewidth=3)
+        lc.set_array(np.linspace(0,1,n_alpha))
+        ax.add_collection(lc)
+        
