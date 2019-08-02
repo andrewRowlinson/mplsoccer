@@ -564,15 +564,23 @@ class Pitch(object):
             else:
                 ax.plot(y,x,zorder=zorder,*args, **kwargs)
                     
-    def plot_line_fade(self,x,y,color='#2f3653',n_alpha=20,ax=None, **kwargs):
+    def plot_line_fade(self,color='#34afed',n_alpha=20,ax=None, **kwargs):
+        #add x,y back
         if ax==None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         color = to_rgb(color)
         color = np.tile(np.array(color),(n_alpha,1))
         color = np.append(color,np.linspace(0.1,1,n_alpha).reshape(-1,1),axis=1)
         cmap = ListedColormap(color, name='line fade', N=n_alpha)
-        points = np.array([x,y]).T.reshape(-1,1,2)
+        x1 = np.array([50,60,70,80])
+        x2 = np.array([70,80,90,100])
+        y1 = np.array([0,20,40,60])
+        y2 = np.array([20,40,60,80])
+        x = np.linspace(x1,x2,n_alpha+1)
+        y = np.linspace(y1,y2,n_alpha+1)
+        points = np.expand_dims(np.transpose(np.array([x,y]),[1,0,2]),1)
         segments = np.concatenate([points[:-1],points[1:]], axis=1)
+        segments = np.swapaxes(segments.T,1,3).reshape(-1,2,2)
         lc = LineCollection(segments, cmap=cmap, linewidth=3)
         lc.set_array(np.linspace(0,1,n_alpha))
         ax.add_collection(lc)
