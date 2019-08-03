@@ -564,24 +564,35 @@ class Pitch(object):
             else:
                 ax.plot(y,x,zorder=zorder,*args, **kwargs)
                     
-    def plot_line_fade(self,color='#34afed',n_alpha=20,ax=None, **kwargs):
+    def plot_line_fade(self,xstart,xend,ystart,yend,color='#34afed',line_type='fade',n_segments=100,ax=None, **kwargs):
         #add x,y back
         if ax==None:
-            raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            raise TypeError("plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         color = to_rgb(color)
-        color = np.tile(np.array(color),(n_alpha,1))
-        color = np.append(color,np.linspace(0.1,1,n_alpha).reshape(-1,1),axis=1)
-        cmap = ListedColormap(color, name='line fade', N=n_alpha)
-        x1 = np.array([50,60,70,80])
-        x2 = np.array([70,80,90,100])
-        y1 = np.array([0,20,40,60])
-        y2 = np.array([20,40,60,80])
-        x = np.linspace(x1,x2,n_alpha+1)
-        y = np.linspace(y1,y2,n_alpha+1)
+
+
+        if self.orientation=='horizontal':
+            x = np.linspace(xstart,xend,n_segments+1)
+            y = np.linspace(ystart,yend,n_segments+1)
+        elif self.orientation=='vertical':
+            y = np.linspace(xstart,xend,n_segments+1)
+            x = np.linspace(ystart,yend,n_segments+1)            
         points = np.expand_dims(np.transpose(np.array([x,y]),[1,0,2]),1)
         segments = np.concatenate([points[:-1],points[1:]], axis=1)
-        segments = np.swapaxes(segments.T,1,3).reshape(-1,2,2)
-        lc = LineCollection(segments, cmap=cmap, linewidth=3)
-        lc.set_array(np.linspace(0,1,n_alpha))
+        segments = np.transpose(segments,(3,0,1,2)).reshape(-1,2,2)
+        if line_type =='fade':
+            color = np.tile(np.array(color),(n_segments,1))
+            color = np.append(color,np.linspace(0.1,1,n_segments).reshape(-1,1),axis=1)
+            cmap = ListedColormap(color, name='line fade', N=n_segments)
+            lw = 2
+            lc = LineCollection(segments, cmap=cmap, linewidth=lw)
+        if line_type == 'comet':
+            color = np.tile(np.array(color),(n_segments,1))
+            color = np.append(color,np.linspace(0.5,1,n_segments).reshape(-1,1),axis=1)
+            cmap = ListedColormap(color, name='line fade', N=n_segments)
+            lw = np.linspace(0.5,5,n_segments)  
+            lc = LineCollection(segments, cmap=cmap, linewidth=lw)
+        lc.set_array(np.linspace(0,1,n_segments))
+        lc.set_capstyle('round')
         ax.add_collection(lc)
         
