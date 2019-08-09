@@ -571,28 +571,79 @@ class Pitch(object):
         color = to_rgb(color)
 
 
-        if self.orientation=='horizontal':
-            x = np.linspace(xstart,xend,n_segments+1)
-            y = np.linspace(ystart,yend,n_segments+1)
-        elif self.orientation=='vertical':
-            y = np.linspace(xstart,xend,n_segments+1)
-            x = np.linspace(ystart,yend,n_segments+1)            
-        points = np.expand_dims(np.transpose(np.array([x,y]),[1,0,2]),1)
-        segments = np.concatenate([points[:-1],points[1:]], axis=1)
-        segments = np.transpose(segments,(3,0,1,2)).reshape(-1,2,2)
-        if line_type =='fade':
-            color = np.tile(np.array(color),(n_segments,1))
-            color = np.append(color,np.linspace(0.1,1,n_segments).reshape(-1,1),axis=1)
-            cmap = ListedColormap(color, name='line fade', N=n_segments)
-            lw = 2
-            lc = LineCollection(segments, cmap=cmap, linewidth=lw)
+        #if self.orientation=='horizontal':
+        #    x = np.linspace(xstart,xend,n_segments+2,axis=1)
+        #    y = np.linspace(ystart,yend,n_segments+2,axis=1)
+        #    #x = np.linspace(xstart,xend,n_segments+2)
+        #    #y = np.linspace(ystart,yend,n_segments+2)
+        #elif self.orientation=='vertical':
+        #    y = np.linspace(xstart,xend,n_segments+2)
+        #    x = np.linspace(ystart,yend,n_segments+2)   
+        #points = np.transpose(np.array([x, y]),(2,1,0))
+        #print(points.shape)
+        #segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
+        #print(segments.shape)
+        #points = #np.transpose(np.array([x, y]),(1,2,0))#.reshape(-1,len(xstart),2)
+        #print(points)
+        #segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
+        #print(segments.shape)
+        #print(segments)
+        #print(segments[:,0,0])
+        #print(segments.shape)
+        #segments = np.transpose(segments,(1,0,2)).reshape(-1,2)
+        #print(segments.shape)
+        #print(segments.ndim)
+        #print(segments.shape[1])
+        
+
+        
+        
+        
+        #######segments = np.concatenate([points[:-1],points[1:]], axis=1)
+        #segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
+        #segments = np.transpose(segments,(3,0,1,2)).reshape(-1,2,2)
+        #if line_type =='fade':
+        #    color = np.tile(np.array(color),(n_segments,1))
+        #    color = np.append(color,np.linspace(0.1,0.5,n_segments).reshape(-1,1),axis=1)
+        #    cmap = ListedColormap(color, name='line fade', N=n_segments)
+        #    lw = 2
+        #    lc = LineCollection(segments, cmap=cmap, linewidth=lw)
+        
+       # x1 = np.array([0,20,3])
+       # x2 = np.array([100,40,4])
+       # y1 = np.array([60,12,5])
+       # y2 = np.array([30,50,6])
+        x1 = np.array([0,40])
+        x2 = np.array([20,40])
+        y1 = np.array([50,70])
+        y2 = np.array([80,100])
+        
+        n_segments = 5
+        x = np.linspace(x1,x2,n_segments+2,axis=1)
+        y = np.linspace(y1,y2,n_segments+2,axis=1)
+        print(x)
+        print(y)
+        points = np.transpose(np.concatenate([x,y],axis=0).reshape(2,-1,n_segments+2),(2,1,0))
+        #print(points)
+        segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
+        print(segments)
+        new_segments = np.zeros(shape=segments.shape)
+        new_segments[:,:3,:] = segments[:,0::len(x2),:]
+        new_segments[:,3:6,:] = segments[:,1::len(x2),:]
+        #new_segments[:,6:,:] = segments[:,2::len(x2),:]
+
+
         if line_type == 'comet':
             color = np.tile(np.array(color),(n_segments,1))
-            color = np.append(color,np.linspace(0.5,1,n_segments).reshape(-1,1),axis=1)
+            color = np.append(color,np.linspace(0.1,0.2,n_segments).reshape(-1,1),axis=1)
             cmap = ListedColormap(color, name='line fade', N=n_segments)
-            lw = np.linspace(0.5,5,n_segments)  
-            lc = LineCollection(segments, cmap=cmap, linewidth=lw)
-        lc.set_array(np.linspace(0,1,n_segments))
-        lc.set_capstyle('round')
+            lw = np.linspace(1,5,n_segments)
+            lc = LineCollection(segments,cmap=cmap, linewidth=lw)
+        #    #lc.set_array(np.linspace(0,100,n_segments))
+        #lc.set_capstyle('projecting')
+        #print(lc.get_capstyle())
         ax.add_collection(lc)
+        
+        return segments
+        
         
