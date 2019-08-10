@@ -233,10 +233,10 @@ class Pitch(object):
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
                     ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
+                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
                     ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
-                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
+                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 ax.set_ylim(self.bottom-self.ypad_left,self.top+self.ypad_right)
                     
             elif self.view=='half':
@@ -246,10 +246,10 @@ class Pitch(object):
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
                     ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
+                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
                     ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
-                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
+                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 ax.set_ylim(self.center_length-self.ypad_left,self.top+self.ypad_right)
                         
         # set up horizontal pitch
@@ -261,10 +261,10 @@ class Pitch(object):
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
                     ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
-                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
+                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
                     ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
-                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color) 
+                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color,zorder=1) 
                 ax.set_xlim(self.bottom-self.xpad_left,self.top+self.xpad_right)
                                           
             elif self.view=='half':
@@ -274,10 +274,10 @@ class Pitch(object):
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
                     ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
-                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
+                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
                     ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
-                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color)
+                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color,zorder=1)
                 ax.set_xlim(self.center_length-self.xpad_left,self.top+self.xpad_right)
 
  
@@ -314,9 +314,9 @@ class Pitch(object):
             else:
                 end = round(start + stripe3_length,2)
             if (stripe % 2 == 1) & (self.orientation=='vertical'):
-                ax.axhspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color)
+                ax.axhspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color,zorder=1)
             elif (stripe % 2 == 1) & (self.orientation=='horizontal'):
-                ax.axvspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color)
+                ax.axvspan(start,end,stripe_start,stripe_end,facecolor=self.stripe_color,zorder=1)
             start = end
 
     def _draw_pitch_lines(self,ax):
@@ -549,23 +549,17 @@ class Pitch(object):
         elif self.orientation=='vertical':
             ax.plot(y,x,*args, **kwargs)
             
-    def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
+    def scatter(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         if self.orientation=='horizontal':
-            if zorder==None:
-                ax.plot(x,y,zorder=2,*args, **kwargs)
-            else:
-                ax.plot(x,y,zorder=zorder,*args, **kwargs)
+            ax.scatter(x,y,*args, **kwargs)
                 
         elif self.orientation=='vertical':
-            if zorder==None:
-                ax.plot(y,x,zorder=2,*args, **kwargs)
-            else:
-                ax.plot(y,x,zorder=zorder,*args, **kwargs)
+            ax.scatter(y,x,*args, **kwargs)
                     
     def lines(self,xstart,xend,ystart,yend,color='#34afed',n_segments=100,
-              lw=5,comet=False, transparent=False,ax=None,**kwargs):
+              lw=5,comet=False, transparent=False,ax=None,*args, **kwargs):
         if ax==None:
             raise TypeError("plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
@@ -597,7 +591,7 @@ class Pitch(object):
         else:
             segments = np.transpose(np.array([[xstart,ystart],[xend,yend]]),(2,0,1))
         
-        lc = LineCollection(segments, cmap=cmap, linewidth=lw,snap=False)
+        lc = LineCollection(segments, cmap=cmap, linewidth=lw,snap=False,*args, **kwargs)
         pitch_array = np.linspace(self.left,self.right,n_segments) 
         lc.set_array(pitch_array)
         ax.add_collection(lc)
