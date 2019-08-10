@@ -564,86 +564,40 @@ class Pitch(object):
             else:
                 ax.plot(y,x,zorder=zorder,*args, **kwargs)
                     
-    def plot_line_fade(self,xstart,xend,ystart,yend,color='#34afed',line_type='fade',n_segments=100,ax=None, **kwargs):
-        #add x,y back
+    def lines(self,xstart,xend,ystart,yend,color='#34afed',n_segments=100,
+              lw=5,comet=False, transparent=False,ax=None,**kwargs):
         if ax==None:
             raise TypeError("plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+
+        if self.orientation=='horizontal':
+            x = np.linspace(xstart,xend,n_segments+1)
+            y = np.linspace(ystart,yend,n_segments+1)
+        elif self.orientation=='vertical':
+            y = np.linspace(xstart,xend,n_segments+1)
+            x = np.linspace(ystart,yend,n_segments+1)
+        
         color = to_rgb(color)
-
-
-        #if self.orientation=='horizontal':
-        #    x = np.linspace(xstart,xend,n_segments+2,axis=1)
-        #    y = np.linspace(ystart,yend,n_segments+2,axis=1)
-        #    #x = np.linspace(xstart,xend,n_segments+2)
-        #    #y = np.linspace(ystart,yend,n_segments+2)
-        #elif self.orientation=='vertical':
-        #    y = np.linspace(xstart,xend,n_segments+2)
-        #    x = np.linspace(ystart,yend,n_segments+2)   
-        #points = np.transpose(np.array([x, y]),(2,1,0))
-        #print(points.shape)
-        #segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
-        #print(segments.shape)
-        #points = #np.transpose(np.array([x, y]),(1,2,0))#.reshape(-1,len(xstart),2)
-        #print(points)
-        #segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
-        #print(segments.shape)
-        #print(segments)
-        #print(segments[:,0,0])
-        #print(segments.shape)
-        #segments = np.transpose(segments,(1,0,2)).reshape(-1,2)
-        #print(segments.shape)
-        #print(segments.ndim)
-        #print(segments.shape[1])
         
-
-        
-        
-        
-        #######segments = np.concatenate([points[:-1],points[1:]], axis=1)
-        #segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
-        #segments = np.transpose(segments,(3,0,1,2)).reshape(-1,2,2)
-        #if line_type =='fade':
-        #    color = np.tile(np.array(color),(n_segments,1))
-        #    color = np.append(color,np.linspace(0.1,0.5,n_segments).reshape(-1,1),axis=1)
-        #    cmap = ListedColormap(color, name='line fade', N=n_segments)
-        #    lw = 2
-        #    lc = LineCollection(segments, cmap=cmap, linewidth=lw)
-        
-       # x1 = np.array([0,20,3])
-       # x2 = np.array([100,40,4])
-       # y1 = np.array([60,12,5])
-       # y2 = np.array([30,50,6])
-        x1 = np.array([0,40])
-        x2 = np.array([20,40])
-        y1 = np.array([50,70])
-        y2 = np.array([80,100])
-        
-        n_segments = 5
-        x = np.linspace(x1,x2,n_segments+2,axis=1)
-        y = np.linspace(y1,y2,n_segments+2,axis=1)
-        print(x)
-        print(y)
-        points = np.transpose(np.concatenate([x,y],axis=0).reshape(2,-1,n_segments+2),(2,1,0))
-        #print(points)
-        segments = np.concatenate([points[:-2],points[1:-1], points[2:]], axis=1)
-        print(segments)
-        new_segments = np.zeros(shape=segments.shape)
-        new_segments[:,:3,:] = segments[:,0::len(x2),:]
-        new_segments[:,3:6,:] = segments[:,1::len(x2),:]
-        #new_segments[:,6:,:] = segments[:,2::len(x2),:]
-
-
-        if line_type == 'comet':
+        if comet == True:
+            lw = np.linspace(1,lw,n_segments)
+            
+        if transparent == True:
             color = np.tile(np.array(color),(n_segments,1))
-            color = np.append(color,np.linspace(0.1,0.2,n_segments).reshape(-1,1),axis=1)
-            cmap = ListedColormap(color, name='line fade', N=n_segments)
-            lw = np.linspace(1,5,n_segments)
-            lc = LineCollection(segments,cmap=cmap, linewidth=lw)
-        #    #lc.set_array(np.linspace(0,100,n_segments))
-        #lc.set_capstyle('projecting')
-        #print(lc.get_capstyle())
+            color = np.append(color,np.linspace(0.1,0.5,n_segments).reshape(-1,1),axis=1)
+            cmap = ListedColormap(color, name='line fade', N=n_segments)        
+        else:
+            cmap = ListedColormap([color], name='single color', N=n_segments)
+                 
+        if (comet == True) or (transparent==True):
+            points = np.array([x, y]).T
+            points = np.concatenate([points,np.expand_dims(points[:,-1,:],1)],axis=1)
+            points = np.expand_dims(points,1)
+            segments = np.concatenate([points[:,:,:-2,:],points[:,:,1:-1,:],points[:,:,2:,:]],axis=1)
+            segments = np.transpose(segments,(0,2,1,3)).reshape(-1,3,2)
+        else:
+            segments = np.transpose(np.array([[xstart,ystart],[xend,yend]]),(2,0,1))
+        
+        lc = LineCollection(segments, cmap=cmap, linewidth=lw,snap=False)
+        pitch_array = np.linspace(self.left,self.right,n_segments) 
+        lc.set_array(pitch_array)
         ax.add_collection(lc)
-        
-        return segments
-        
-        
