@@ -27,3 +27,17 @@ fig, ax = pitch.draw()
 fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_xkcd_pitch.png "pitch xkcd style")
+
+# This library is under developmen
+The following developments are planned
+- fix the lines plotting method so that the last point of a transparent line isn't lighter than the rest of the line
+- add a heatmap method
+- add a hexbins method
+- add a kernel density method from seaborn
+- add an arrow plot/ ability to plot rotated markers
+- add docstrings
+- create docs in Sphinx and upload to readthedocs.io
+- add examples (team line-up / pass map/ plot player pressure/ subplots/ animation?)
+- add dependencies
+- upload to pip/ anaconda
+- possible add method for voronoi plotting
