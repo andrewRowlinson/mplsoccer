@@ -558,50 +558,72 @@ class Pitch(object):
         if self.orientation=='horizontal':
             ax.scatter(x,y,zorder=zorder,*args, **kwargs)                
         elif self.orientation=='vertical':
-            ax.scatter(y,x,zorder=zorder,*args, **kwargs)            
+            ax.scatter(y,x,zorder=zorder,*args, **kwargs)       
+            
+    def _create_segments(self,xstart,xend,ystart,yend,n_segments):
+        if self.orientation=='horizontal':
+            x = np.linspace(xstart,xend,n_segments+1)
+            y = np.linspace(ystart,yend,n_segments+1)
+        elif self.orientation=='vertical':
+            x = np.linspace(ystart,yend,n_segments+1)
+            y = np.linspace(xstart,xend,n_segments+1)
+        points = np.array([x, y]).T
+        points = np.concatenate([points,np.expand_dims(points[:,-1,:],1)],axis=1)
+        points = np.expand_dims(points,1)
+        segments = np.concatenate([points[:,:,:-2,:],points[:,:,1:-1,:],points[:,:,2:,:]],axis=1)
+        segments = np.transpose(segments,(0,2,1,3)).reshape(-1,3,2)
+        return segments
+    
+    def _create_transparent_cmap(self,color,n_segments):
+        if self.orientation=='horizontal':
+            color = np.tile(np.array(color),(n_segments,1))
+            color = np.append(color,np.linspace(0.1,0.5,n_segments).reshape(-1,1),axis=1)
+            cmap = ListedColormap(color, name='line fade', N=n_segments)
+        elif self.orientation=='vertical':
+            color = np.tile(np.array(color),(n_segments,1))
+            color = np.append(color,np.linspace(0.5,0.1,n_segments).reshape(-1,1),axis=1)
+            cmap = ListedColormap(color, name='line fade', N=n_segments)                      
+        return cmap   
                                
     def lines(self,xstart,xend,ystart,yend,color='#34afed',n_segments=100,
               lw=5,comet=False, transparent=False,ax=None,*args, **kwargs):
         if ax==None:
             raise TypeError("plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
-        if self.orientation=='horizontal':
-            x = np.linspace(xstart,xend,n_segments+1)
-            y = np.linspace(ystart,yend,n_segments+1)
+        color = to_rgb(color)
+        
+        # set pitch array for line segments
+        if self.orientation=='horizontal':    
             if self.view=='full':
                 pitch_array = np.linspace(self.bottom,self.top,n_segments) 
             elif self.view=='half':
-                pitch_array = np.linspace(self.center_length,self.top,n_segments)        
-      
+                pitch_array = np.linspace(self.center_length,self.top,n_segments)  
+        
         elif self.orientation=='vertical':
-            y = np.linspace(xstart,xend,n_segments+1)
-            x = np.linspace(ystart,yend,n_segments+1)
-            pitch_array = np.linspace(self.left,self.right,n_segments) 
+            pitch_array = np.linspace(self.left,self.right,n_segments)         
         
-        color = to_rgb(color)
-        
-        # set line width for lines with segments
-        if comet == True:
+        # set color map, lw and segments
+        if (transparent == True) and (comet == True):
+            cmap = self._create_transparent_cmap(color,n_segments)
             lw = np.linspace(1,lw,n_segments)
+            segments = self._create_segments(xstart,xend,ystart,yend,n_segments)
         
-        # set color map
-        if transparent == True:
-            color = np.tile(np.array(color),(n_segments,1))
-            color = np.append(color,np.linspace(0.1,0.5,n_segments).reshape(-1,1),axis=1)
-            cmap = ListedColormap(color, name='line fade', N=n_segments)        
-        else:
+        elif (transparent == True) and (comet == False):
+            cmap = self._create_transparent_cmap(color,n_segments)
+            segments = self._create_segments(xstart,xend,ystart,yend,n_segments)
+        
+        elif (transparent == False) and (comet == True):
+            lw = np.linspace(1,lw,n_segments)
             cmap = ListedColormap([color], name='single color', N=n_segments)
+            segments = self._create_segments(xstart,xend,ystart,yend,n_segments)
         
-        # set points to plot
-        if (comet == True) or (transparent==True):
-            points = np.array([x, y]).T
-            points = np.concatenate([points,np.expand_dims(points[:,-1,:],1)],axis=1)
-            points = np.expand_dims(points,1)
-            segments = np.concatenate([points[:,:,:-2,:],points[:,:,1:-1,:],points[:,:,2:,:]],axis=1)
-            segments = np.transpose(segments,(0,2,1,3)).reshape(-1,3,2)
-        else:
-            segments = np.transpose(np.array([[xstart,ystart],[xend,yend]]),(2,0,1))
-        
+        elif (transparent == False) and (comet == False):
+            cmap = ListedColormap([color], name='single color', N=n_segments)
+            if self.orientation == 'horizontal':
+                segments = np.transpose(np.array([[xstart,ystart],[xend,yend]]),(2,0,1))
+            elif self.orientation == 'vertical':
+                segments = np.transpose(np.array([[ystart,xstart],[yend,xend]]),(2,0,1))
+                
         # add line collection
         lc = LineCollection(segments, cmap=cmap, linewidth=lw,snap=False,*args, **kwargs)
         lc.set_array(pitch_array)
