@@ -15,7 +15,7 @@ pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
 fig.savefig('opta.png',pad_inches=0,bbox_inches='tight')
 ```
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_opta_pitch.png "pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_opta_pitch.png "pitch xkcd style")
 
 For fun you can also plot the same pitch in xkcd mode.
 ``` python
@@ -26,9 +26,9 @@ pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
 fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/doc/figures/README_example_xkcd_pitch.png "pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png "pitch xkcd style")
 
-# This library is under developmen
+# This library is under development
 The following developments are planned
 - fix the lines plotting method so that the last point of a transparent line isn't lighter than the rest of the line
 - add a heatmap method
