@@ -30,12 +30,15 @@ fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
 
 # This library is under development
 The following developments are planned
-- fix the lines plotting method so that the last point of a transparent line isn't lighter than the rest of the line
 - add a heatmap method
 - add a hexbins method
-- add a kernel density method from seaborn
 - add an arrow plot/ ability to plot rotated markers
 - add docstrings
+- add warnings/ error messages:
+- raise error warning if no pitch width or length when tracab
+- raise error warning if view not full/ half
+- raise error warning if not horizontal/ vertical
+- raise error for goal type
 - create docs in Sphinx and upload to readthedocs.io
 - add examples (team line-up / pass map/ plot player pressure/ subplots/ animation?)
 - add dependencies

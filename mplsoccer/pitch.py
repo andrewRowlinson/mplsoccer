@@ -1,10 +1,3 @@
-# TO DO:
-#add error messages/warnings:
-#raise error warning if no pitch width or length when tracab
-#raise error warning if view not full/ half
-#raise error warning if not horizontal/ vertical
-#raise error for goal type
-
 ''' `mplsoccer` is a python library for plotting soccer / football pitches in Matplotlib.
 '''
 
@@ -17,6 +10,7 @@ import matplotlib.lines as lines
 from matplotlib.colors import to_rgb
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap
+import seaborn as sns
 import numpy as np
 
 class Pitch(object):
@@ -548,6 +542,14 @@ class Pitch(object):
             ax.plot(x,y,*args, **kwargs)
         elif self.orientation=='vertical':
             ax.plot(y,x,*args, **kwargs)
+            
+    def kdeplot(self,x,y,*args,ax=None, **kwargs):
+        if ax==None:
+            raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        if self.orientation=='horizontal':
+            sns.kdeplot(x,y,ax=ax,*args, **kwargs)
+        elif self.orientation=='vertical':
+            sns.kdeplot(y,x,ax=ax,*args, **kwargs)        
             
     def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
         if ax==None:
