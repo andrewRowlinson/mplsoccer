@@ -543,13 +543,17 @@ class Pitch(object):
         elif self.orientation=='vertical':
             ax.plot(y,x,*args, **kwargs)
             
-    def kdeplot(self,x,y,*args,ax=None, **kwargs):
+    def kdeplot(self,x,y,*args,ax=None,clip=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         if self.orientation=='horizontal':
-            sns.kdeplot(x,y,ax=ax,*args, **kwargs)
+            if clip == None:
+                clip=((self.bottom,self.top),(self.right,self.left))
+            sns.kdeplot(x,y,ax=ax,clip=clip,*args, **kwargs)
         elif self.orientation=='vertical':
-            sns.kdeplot(y,x,ax=ax,*args, **kwargs)        
+            if clip == None:
+                clip=((self.left,self.right),(self.bottom,self.top))
+            sns.kdeplot(y,x,ax=ax,clip=clip,*args, **kwargs)          
             
     def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
         if ax==None:
