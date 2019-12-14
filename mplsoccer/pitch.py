@@ -539,11 +539,64 @@ class Pitch(object):
     def plot(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        if self.orientation=='horizontal':
-            ax.plot(x,y,*args, **kwargs)
-        elif self.orientation=='vertical':
-            ax.plot(y,x,*args, **kwargs)
             
+        # if using the football marker set the colors and lines, delete from kwargs so not used twice
+        plot_football = False
+        if 'marker' in kwargs.keys():       
+            if kwargs['marker']=='football':
+                del kwargs['marker']
+                plot_football = True
+                
+                if 'markeredgewidth' not in kwargs.keys():
+                    markeredgewidth = 0.25
+                else:
+                    markeredgewidth = kwargs['markeredgewidth']
+                    del kwargs['markeredgewidth']
+
+                if 'markersize' not in kwargs.keys():
+                    markersize = 15
+                else:
+                    markersize = kwargs['markersize']
+                    del kwargs['markersize']                    
+                    
+                if 'markerfacecolor' not in kwargs.keys():
+                    hexcolor = 'white'
+                else:
+                    hexcolor = kwargs['markerfacecolor']
+                    del kwargs['markerfacecolor']                
+                    
+                if 'markeredgecolor' not in kwargs.keys():
+                    pentcolor = 'black'
+                else:
+                    pentcolor = kwargs['markeredgecolor']
+                    del kwargs['markeredgecolor'] 
+
+        # plot. Reverse coordinates if vertical plot            
+        if self.orientation=='horizontal':
+            if plot_football == True:
+                ax.plot(x,y,
+                        marker=football_pentagon_marker,
+                        markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
+                        markeredgewidth=markeredgewidth,*args, **kwargs)
+                ax.plot(x,y,marker=football_hexagon_marker,
+                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
+                        markeredgewidth=markeredgewidth,linestyle='None',)
+            else:
+                ax.plot(x,y,*args, **kwargs)
+                
+        elif self.orientation=='vertical':
+            if plot_football == True:
+                ax.plot(y,x,
+                        marker=football_pentagon_marker,
+                        markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
+                        markeredgewidth=markeredgewidth,*args, **kwargs)
+                ax.plot(y,x,
+                        marker=football_hexagon_marker,
+                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
+                        markeredgewidth=markeredgewidth,linestyle='None',)
+            else:
+                ax.plot(y,x,*args, **kwargs)
+                        
     def kdeplot(self,x,y,*args,ax=None,clip=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
@@ -612,7 +665,7 @@ class Pitch(object):
                            facecolor=hexcolor,edgecolor=pentcolor,
                            linewidths=linewidths,zorder=zorder,*args, **kwargs)     
             else:
-                ax.scatter(y,x,zorder=zorder,*args, **kwargs)    
+                ax.scatter(y,x,zorder=zorder,*args, **kwargs)
               
             
     def _create_segments(self,xstart,xend,ystart,yend,n_segments):
