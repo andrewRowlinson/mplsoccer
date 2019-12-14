@@ -597,18 +597,23 @@ class Pitch(object):
             else:
                 ax.plot(y,x,*args, **kwargs)
                         
-    def kdeplot(self,x,y,*args,ax=None,clip=None, **kwargs):
+    def kdeplot(self,x,y,*args,ax=None, zorder=None, clip=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
+        # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
+        if zorder==None:
+            zorder=2
+        
         # plot kde plot. reverse x and y if vertical
         if self.orientation=='horizontal':
             if clip == None:
                 clip=((self.bottom,self.top),(self.right,self.left))
-            sns.kdeplot(x,y,ax=ax,clip=clip,*args, **kwargs)
+            sns.kdeplot(x,y,ax=ax,clip=clip,zorder=zorder,*args, **kwargs)
         elif self.orientation=='vertical':
             if clip == None:
                 clip=((self.left,self.right),(self.bottom,self.top))
-            sns.kdeplot(y,x,ax=ax,clip=clip,*args, **kwargs)          
+            sns.kdeplot(y,x,ax=ax,clip=clip,zorder=zorder,*args, **kwargs)          
             
     def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
         if ax==None:

@@ -30,7 +30,6 @@ fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
 
 # This library is under development
 The following developments are planned
-- add a heatmap method
 - add a hexbins method
 - add an arrow plot/ ability to plot rotated markers
 - add docstrings
