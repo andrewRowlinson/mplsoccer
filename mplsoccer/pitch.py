@@ -12,6 +12,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap
 import seaborn as sns
 import numpy as np
+from utils import football_hexagon_marker, football_pentagon_marker
 
 class Pitch(object):
     ''' A class for plotting soccer / football pitches in Matplotlib
@@ -546,6 +547,7 @@ class Pitch(object):
     def kdeplot(self,x,y,*args,ax=None,clip=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        # plot kde plot. reverse x and y if vertical
         if self.orientation=='horizontal':
             if clip == None:
                 clip=((self.bottom,self.top),(self.right,self.left))
@@ -558,13 +560,60 @@ class Pitch(object):
     def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
         if ax==None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
         # rise scatter above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
         if zorder==None:
             zorder=2
+   
+        # if using the football marker set the colors and lines, delete from kwargs so not used twice
+        plot_football = False
+        if 'marker' in kwargs.keys():       
+            if kwargs['marker']=='football':
+                del kwargs['marker']
+                plot_football = True
+                
+                if 'linewidths' not in kwargs.keys():
+                    linewidths = 0.25
+                else:
+                    linewidths = kwargs['linewidths']
+                    del kwargs['linewidths']
+                    
+                if 'facecolor' not in kwargs.keys():
+                    hexcolor = 'white'
+                else:
+                    hexcolor = kwargs['facecolor']
+                    del kwargs['facecolor']                
+                    
+                if 'edgecolor' not in kwargs.keys():
+                    pentcolor = 'black'
+                else:
+                    pentcolor = kwargs['edgecolor']
+                    del kwargs['edgecolor']
+            
+        # plot scatter. Reverse coordinates if vertical plot
         if self.orientation=='horizontal':
-            ax.scatter(x,y,zorder=zorder,*args, **kwargs)                
+            if plot_football == True:
+                ax.scatter(x,y,marker=football_pentagon_marker,
+                           facecolor=pentcolor,edgecolor=pentcolor,
+                           linewidths=linewidths,zorder=zorder,*args,**kwargs) 
+                ax.scatter(x,y,marker=football_hexagon_marker,
+                           facecolor=hexcolor,edgecolor=pentcolor,
+                           linewidths=linewidths,zorder=zorder,*args, **kwargs)
+             
+            else:
+                ax.scatter(x,y,zorder=zorder,*args, **kwargs)
+                
         elif self.orientation=='vertical':
-            ax.scatter(y,x,zorder=zorder,*args, **kwargs)       
+            if plot_football == True:
+                ax.scatter(y,x,marker=football_pentagon_marker,
+                           facecolor=pentcolor,edgecolor=pentcolor,
+                           linewidths=linewidths,zorder=zorder,*args, **kwargs)
+                ax.scatter(y,x,marker=football_hexagon_marker,
+                           facecolor=hexcolor,edgecolor=pentcolor,
+                           linewidths=linewidths,zorder=zorder,*args, **kwargs)     
+            else:
+                ax.scatter(y,x,zorder=zorder,*args, **kwargs)    
+              
             
     def _create_segments(self,xstart,xend,ystart,yend,n_segments):
         if self.orientation=='horizontal':
