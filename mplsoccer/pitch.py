@@ -542,34 +542,14 @@ class Pitch(object):
             
         # if using the football marker set the colors and lines, delete from kwargs so not used twice
         plot_football = False
-        if 'marker' in kwargs.keys():       
+        if 'marker' in kwargs.keys():
             if kwargs['marker']=='football':
                 del kwargs['marker']
-                plot_football = True
-                
-                if 'markeredgewidth' not in kwargs.keys():
-                    markeredgewidth = 0.25
-                else:
-                    markeredgewidth = kwargs['markeredgewidth']
-                    del kwargs['markeredgewidth']
-
-                if 'markersize' not in kwargs.keys():
-                    markersize = 15
-                else:
-                    markersize = kwargs['markersize']
-                    del kwargs['markersize']                    
-                    
-                if 'markerfacecolor' not in kwargs.keys():
-                    hexcolor = 'white'
-                else:
-                    hexcolor = kwargs['markerfacecolor']
-                    del kwargs['markerfacecolor']                
-                    
-                if 'markeredgecolor' not in kwargs.keys():
-                    pentcolor = 'black'
-                else:
-                    pentcolor = kwargs['markeredgecolor']
-                    del kwargs['markeredgecolor'] 
+                plot_football = True               
+                markeredgewidth = kwargs.pop('markeredgewidth', 0.25)
+                markersize = kwargs.pop('markersize', 20)
+                hexcolor = kwargs.pop('markerfacecolor', 'white')
+                pentcolor = kwargs.pop('markeredgecolor', 'black')      
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation=='horizontal':
@@ -630,23 +610,9 @@ class Pitch(object):
                 del kwargs['marker']
                 plot_football = True
                 
-                if 'linewidths' not in kwargs.keys():
-                    linewidths = 0.25
-                else:
-                    linewidths = kwargs['linewidths']
-                    del kwargs['linewidths']
-                    
-                if 'facecolor' not in kwargs.keys():
-                    hexcolor = 'white'
-                else:
-                    hexcolor = kwargs['facecolor']
-                    del kwargs['facecolor']                
-                    
-                if 'edgecolor' not in kwargs.keys():
-                    pentcolor = 'black'
-                else:
-                    pentcolor = kwargs['edgecolor']
-                    del kwargs['edgecolor']
+                linewidths = kwargs.pop('linewidths', 0.5)
+                hexcolor = kwargs.pop('facecolor', 'white')
+                pentcolor = kwargs.pop('edgecolor', 'black')
             
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation=='horizontal':
