@@ -12,6 +12,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap
 import seaborn as sns
 import numpy as np
+import math
 from utils import football_hexagon_marker, football_pentagon_marker
 
 class Pitch(object):
@@ -577,31 +578,43 @@ class Pitch(object):
             else:
                 ax.plot(y,x,*args, **kwargs)
                         
-    def kdeplot(self,x,y,*args,ax=None, zorder=None, clip=None, **kwargs):
+    def kdeplot(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         
         # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
-        if zorder==None:
-            zorder=2
-        
+        zorder = kwargs.pop('zorder', 2)
+                
         # plot kde plot. reverse x and y if vertical
         if self.orientation=='horizontal':
-            if clip == None:
-                clip=((self.bottom,self.top),(self.right,self.left))
+            clip = kwargs.pop('clip',((self.bottom,self.top),(self.right,self.left)))
             sns.kdeplot(x,y,ax=ax,clip=clip,zorder=zorder,*args, **kwargs)
         elif self.orientation=='vertical':
-            if clip == None:
-                clip=((self.left,self.right),(self.bottom,self.top))
-            sns.kdeplot(y,x,ax=ax,clip=clip,zorder=zorder,*args, **kwargs)          
+            clip = kwargs.pop('clip',((self.left,self.right),(self.bottom,self.top)))
+            sns.kdeplot(y,x,ax=ax,clip=clip,zorder=zorder,*args, **kwargs)
             
-    def scatter(self,x,y,*args,ax=None, zorder=None, **kwargs):
+    def hexbin(self,x,y,*args,ax=None, **kwargs):
+        if ax==None:
+            raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
+        # rise hexbin above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
+        zorder = kwargs.pop('zorder', 2)
+        mincnt = kwargs.pop('mincnt', 1)
+        cmap = kwargs.pop('cmap', 'rainbow')
+        gridsize = kwargs.pop('gridsize', 20)
+                
+        # plot kde plot. reverse x and y if vertical
+        if self.orientation=='horizontal':
+            ax.hexbin(x,y,zorder=zorder,mincnt=mincnt,gridsize=gridsize,cmap=cmap,*args, **kwargs)
+        elif self.orientation=='vertical':
+            ax.hexbin(y,x,zorder=zorder,mincnt=mincnt,gridsize=gridsize,cmap=cmap,*args, **kwargs)
+                    
+    def scatter(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         
         # rise scatter above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
-        if zorder==None:
-            zorder=2
+        zorder = kwargs.pop('zorder', 2)
    
         # if using the football marker set the colors and lines, delete from kwargs so not used twice
         plot_football = False
@@ -664,11 +677,12 @@ class Pitch(object):
             cmap = ListedColormap(color, name='line fade', N=n_segments)                      
         return cmap   
                                
-    def lines(self,xstart,xend,ystart,yend,color='#34afed',n_segments=100,
-              lw=5,comet=False, transparent=False,ax=None,*args, **kwargs):
+    def lines(self,xstart,xend,ystart,yend,n_segments=100, comet=False, transparent=False, ax=None,*args, **kwargs):
         if ax==None:
             raise TypeError("plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
+        lw = kwargs.pop('lw', 5)
+        color = kwargs.pop('color','#34afed')
         color = to_rgb(color)
         
         # set pitch array for line segments
