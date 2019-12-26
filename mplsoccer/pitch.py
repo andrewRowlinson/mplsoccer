@@ -603,11 +603,14 @@ class Pitch(object):
         cmap = kwargs.pop('cmap', 'rainbow')
         gridsize = kwargs.pop('gridsize', 20)
                 
-        # plot kde plot. reverse x and y if vertical
+        # plot hexbin plot. reverse x and y if vertical
         if self.orientation=='horizontal':
-            ax.hexbin(x,y,zorder=zorder,mincnt=mincnt,gridsize=gridsize,cmap=cmap,*args, **kwargs)
+            extent = kwargs.pop('extent', (self.bottom,self.top,self.right,self.left))
+            ax.hexbin(x,y,zorder=zorder,mincnt=mincnt,gridsize=gridsize,extent=extent,cmap=cmap,*args, **kwargs)           
+            
         elif self.orientation=='vertical':
-            ax.hexbin(y,x,zorder=zorder,mincnt=mincnt,gridsize=gridsize,cmap=cmap,*args, **kwargs)
+            extent = kwargs.pop('extent', (self.left,self.right,self.bottom,self.top))
+            ax.hexbin(y,x,zorder=zorder,mincnt=mincnt,gridsize=gridsize,extent=extent,cmap=cmap,*args, **kwargs)
                     
     def scatter(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
