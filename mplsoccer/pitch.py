@@ -324,7 +324,7 @@ class Pitch(object):
                 pitch_markings = patches.Rectangle((self.bottom,self.right),self.length,self.width,
                                                    fill=False,linewidth=self.linewidth,color=self.line_color)
             midline = lines.Line2D([self.center_length,self.center_length],[self.right,self.left],
-                                       linewidth=self.linewidth,color=self.line_color)
+                                   linewidth=self.linewidth,color=self.line_color,zorder=1)
         elif self.orientation=='vertical':
             if self.pitch_type in ['statsbomb','stats']:
                 pitch_markings = patches.Rectangle((self.left,self.bottom),self.width,self.length,
@@ -333,7 +333,7 @@ class Pitch(object):
                 pitch_markings = patches.Rectangle((self.right,self.bottom),self.width,self.length,
                                                    fill=False,linewidth=self.linewidth,color=self.line_color)
             midline = lines.Line2D([self.left,self.right],[self.center_length,self.center_length],
-                                   linewidth=self.linewidth,color=self.line_color)
+                                   linewidth=self.linewidth,color=self.line_color,zorder=1)
         ax.add_patch(pitch_markings)
         ax.add_artist(midline)
     
