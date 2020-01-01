@@ -550,7 +550,12 @@ class Pitch(object):
                 markeredgewidth = kwargs.pop('markeredgewidth', 0.25)
                 markersize = kwargs.pop('markersize', 20)
                 hexcolor = kwargs.pop('markerfacecolor', 'white')
-                pentcolor = kwargs.pop('markeredgecolor', 'black')      
+                pentcolor = kwargs.pop('markeredgecolor', 'black')
+                alpha = kwargs.pop('alpha', 1)
+                # to make the football the same size as the circle marker we need to expand it
+                # the markers are a different shape and this is the easiest way to make them similar
+                expansion_factor = 1.026
+                markersize = markersize * expansion_factor
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation=='horizontal':
@@ -558,10 +563,10 @@ class Pitch(object):
                 ax.plot(x,y,
                         marker=football_pentagon_marker,
                         markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,*args, **kwargs)
+                        markeredgewidth=markeredgewidth,alpha=alpha,*args, **kwargs)
                 ax.plot(x,y,marker=football_hexagon_marker,
                         markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,linestyle='None',)
+                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')  
             else:
                 ax.plot(x,y,*args, **kwargs)
                 
@@ -570,11 +575,11 @@ class Pitch(object):
                 ax.plot(y,x,
                         marker=football_pentagon_marker,
                         markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,*args, **kwargs)
+                        markeredgewidth=markeredgewidth,alpha=alpha,*args, **kwargs)
                 ax.plot(y,x,
                         marker=football_hexagon_marker,
                         markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,linestyle='None',)
+                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')  
             else:
                 ax.plot(y,x,*args, **kwargs)
                         
@@ -625,18 +630,22 @@ class Pitch(object):
             if kwargs['marker']=='football':
                 del kwargs['marker']
                 plot_football = True
-                
                 linewidths = kwargs.pop('linewidths', 0.5)
                 hexcolor = kwargs.pop('facecolor', 'white')
                 pentcolor = kwargs.pop('edgecolor', 'black')
+                # to make the football the same size as the circle marker we need to expand it
+                # the markers are a different shape and this is the easiest way to make them similar
+                expansion_factor = 1.053
+                s = kwargs.pop('s', 400)
+                s = s * expansion_factor
             
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation=='horizontal':
             if plot_football == True:
-                ax.scatter(x,y,marker=football_pentagon_marker,
+                ax.scatter(x,y,marker=football_pentagon_marker,s=s,
                            facecolor=pentcolor,edgecolor=pentcolor,
                            linewidths=linewidths,zorder=zorder,*args,**kwargs) 
-                ax.scatter(x,y,marker=football_hexagon_marker,
+                ax.scatter(x,y,marker=football_hexagon_marker,s=s,
                            facecolor=hexcolor,edgecolor=pentcolor,
                            linewidths=linewidths,zorder=zorder,*args, **kwargs)
              
@@ -645,10 +654,10 @@ class Pitch(object):
                 
         elif self.orientation=='vertical':
             if plot_football == True:
-                ax.scatter(y,x,marker=football_pentagon_marker,
+                ax.scatter(y,x,marker=football_pentagon_marker,s=s,
                            facecolor=pentcolor,edgecolor=pentcolor,
                            linewidths=linewidths,zorder=zorder,*args, **kwargs)
-                ax.scatter(y,x,marker=football_hexagon_marker,
+                ax.scatter(y,x,marker=football_hexagon_marker,s=s,
                            facecolor=hexcolor,edgecolor=pentcolor,
                            linewidths=linewidths,zorder=zorder,*args, **kwargs)     
             else:
