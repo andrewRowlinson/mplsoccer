@@ -560,26 +560,26 @@ class Pitch(object):
         # plot. Reverse coordinates if vertical plot            
         if self.orientation=='horizontal':
             if plot_football == True:
+                ax.plot(x,y,marker=football_hexagon_marker,
+                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
+                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')
                 ax.plot(x,y,
                         marker=football_pentagon_marker,
                         markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
                         markeredgewidth=markeredgewidth,alpha=alpha,*args, **kwargs)
-                ax.plot(x,y,marker=football_hexagon_marker,
-                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')  
             else:
                 ax.plot(x,y,*args, **kwargs)
                 
         elif self.orientation=='vertical':
             if plot_football == True:
                 ax.plot(y,x,
+                        marker=football_hexagon_marker,
+                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
+                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')
+                ax.plot(y,x,
                         marker=football_pentagon_marker,
                         markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
                         markeredgewidth=markeredgewidth,alpha=alpha,*args, **kwargs)
-                ax.plot(y,x,
-                        marker=football_hexagon_marker,
-                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')  
             else:
                 ax.plot(y,x,*args, **kwargs)
                         
@@ -587,7 +587,7 @@ class Pitch(object):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         
-        # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
+        # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the kdeplot)
         zorder = kwargs.pop('zorder', 2)
                 
         # plot kde plot. reverse x and y if vertical
@@ -602,7 +602,7 @@ class Pitch(object):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         
-        # rise hexbin above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
+        # rise hexbin above background/ stripes (the axhspan/axvspan have the same zorder as the hexbin)
         zorder = kwargs.pop('zorder', 2)
         mincnt = kwargs.pop('mincnt', 1)
         cmap = kwargs.pop('cmap', 'rainbow')
@@ -642,24 +642,23 @@ class Pitch(object):
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation=='horizontal':
             if plot_football == True:
-                ax.scatter(x,y,marker=football_pentagon_marker,s=s,
-                           facecolor=pentcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args,**kwargs) 
                 ax.scatter(x,y,marker=football_hexagon_marker,s=s,
                            facecolor=hexcolor,edgecolor=pentcolor,
                            linewidths=linewidths,zorder=zorder,*args, **kwargs)
-             
+                ax.scatter(x,y,marker=football_pentagon_marker,s=s,
+                           facecolor=pentcolor,edgecolor=pentcolor,
+                           linewidths=linewidths,zorder=zorder,*args,**kwargs)              
             else:
                 ax.scatter(x,y,zorder=zorder,*args, **kwargs)
                 
         elif self.orientation=='vertical':
             if plot_football == True:
-                ax.scatter(y,x,marker=football_pentagon_marker,s=s,
-                           facecolor=pentcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args, **kwargs)
                 ax.scatter(y,x,marker=football_hexagon_marker,s=s,
                            facecolor=hexcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args, **kwargs)     
+                           linewidths=linewidths,zorder=zorder,*args, **kwargs)
+                ax.scatter(y,x,marker=football_pentagon_marker,s=s,
+                           facecolor=pentcolor,edgecolor=pentcolor,
+                           linewidths=linewidths,zorder=zorder,*args, **kwargs) 
             else:
                 ax.scatter(y,x,zorder=zorder,*args, **kwargs)
               
