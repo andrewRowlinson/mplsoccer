@@ -23,7 +23,8 @@ class Pitch(object):
     
     self, figsize=None, layout=None, pitch_type='opta',orientation='horizontal',view='full',
                  pitch_color='#aabb97',line_color='white',linewidth=2,stripe=False,stripe_color='#c2d59d',
-                 xpad=(3,3),ypad=(3,3),pitch_length=None,pitch_width=None,axis='off',*args, **kwargs):
+                 pad_left=4, pad_right=4, pad_bottom=4, pad_top=4,
+                 pitch_length=None,pitch_width=None,axis='off',*args, **kwargs):
     
     figsize : tuple of float, default Matplotlib figure size
         The figure size in inches by default.
@@ -45,12 +46,18 @@ class Pitch(object):
         Whether to show pitch stripes.    
     stripe_color : any Matplotlib color, default '#c2d59d'
         The color of the pitch stripes if stripe=True    
-    xpad : tuple of float, default (3,3)
-        Tuple of (pad_left, pad_right), which adjusts the xlim of the axis.
-        Postive values increase the plot area, while negative values decrease the plot area.
-    ypad : tuple of float, default (3,3)
-        Tuple of (pad_bottom, pad_top), which adjusts the ylim of the axis.
-        Postive values increase the plot area, while negative values decrease the plot area.
+    pad_left : float, default 4
+        Adjusts the left xlim of the axis. Postive values increase the plot area,
+        while negative values decrease the plot area.
+    pad_right : float, default 4
+        Adjusts the right xlim of the axis. Postive values increase the plot area,
+        while negative values decrease the plot area. 
+    pad_bottom : float, default 4
+        Adjusts the bottom ylim of the axis. Postive values increase the plot area,
+        while negative values decrease the plot area.
+    pad_top : float, default 4
+        Adjusts the top ylim of the axis. Postive values increase the plot area,
+        while negative values decrease the plot area.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' pitch_type.
     pitch_width : float, default None
@@ -111,7 +118,7 @@ class Pitch(object):
      
     def __init__(self, figsize=None, layout=None, pitch_type='opta',orientation='horizontal',view='full',
                  pitch_color='#aabb97',line_color='white',linewidth=2,stripe=False,stripe_color='#c2d59d',
-                 xpad=(4,4),ypad=(4,4),pitch_length=None,pitch_width=None,goal_type='goal',
+                 pad_left=4,pad_right=4,pad_bottom=4,pad_top=4,pitch_length=None,pitch_width=None,goal_type='goal',
                  label=False,tick=False,axis=False,tight_layout=True,*args, **kwargs):       
                 
         # set figure and axes attributes
@@ -133,8 +140,10 @@ class Pitch(object):
         self.pitch_type = pitch_type      
         self.orientation = orientation
         self.view = view
-        self.xpad_left, self.xpad_right = xpad
-        self.ypad_left, self.ypad_right = ypad   
+        self.pad_left = pad_left
+        self.pad_right = pad_right
+        self.pad_bottom = pad_bottom
+        self.pad_top = pad_top
         self.stripe = stripe
         self.stripe_color = stripe_color
         self.goal_type = goal_type
@@ -180,19 +189,19 @@ class Pitch(object):
             self.length = pitch_length * 100
             self.left_penalty = self.bottom + 1100
             self.right_penalty = self.top - 1100
-            self.xpad_left = self.xpad_left * 100
-            self.ypad_left = self.ypad_left * 100
-            self.xpad_right = self.xpad_right * 100
-            self.ypad_right = self.ypad_right * 100    
+            self.pad_left = self.pad_left * 100
+            self.pad_bottom = self.pad_bottom * 100
+            self.pad_right = self.pad_right * 100
+            self.pad_top = self.pad_top * 100    
 
         # scale the padding where the aspect is equal to one
         if pitch_type in ['opta','wyscout']:
             if self.orientation=='vertical':
-                self.ypad_left = self.ypad_left * self.aspect
-                self.ypad_right = self.ypad_right * self.aspect
+                self.pad_bottom = self.pad_bottom * self.aspect
+                self.pad_top = self.pad_top * self.aspect
             elif self.orientation=='horizontal':
-                self.xpad_left = self.xpad_left * self.aspect
-                self.xpad_right = self.xpad_right * self.aspect
+                self.pad_left = self.pad_left * self.aspect
+                self.pad_right = self.pad_right * self.aspect
             
     def _setup_subplots(self):
         
@@ -228,12 +237,12 @@ class Pitch(object):
                 ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
-                    ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
+                    ax.set_xlim(self.left-self.pad_left,self.right+self.pad_right)
+                    ax.axvspan(self.left-self.pad_left,self.right+self.pad_right,0,1,facecolor=self.pitch_color)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
-                    ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
-                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
-                ax.set_ylim(self.bottom-self.ypad_left,self.top+self.ypad_right)
+                    ax.set_xlim(self.left+self.pad_left,self.right-self.pad_right)
+                    ax.axvspan(self.left+self.pad_left,self.right-self.pad_right,0,1,facecolor=self.pitch_color)
+                ax.set_ylim(self.bottom-self.pad_bottom,self.top+self.pad_top)
                     
             elif self.view=='half':
                 ax.set_aspect(1/self.aspect)
@@ -241,12 +250,12 @@ class Pitch(object):
                 ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
-                    ax.set_xlim(self.left-self.xpad_left,self.right+self.xpad_right)
-                    ax.axvspan(self.left-self.xpad_left,self.right+self.xpad_right,0,1,facecolor=self.pitch_color)
+                    ax.set_xlim(self.left-self.pad_left,self.right+self.pad_right)
+                    ax.axvspan(self.left-self.pad_left,self.right+self.pad_right,0,1,facecolor=self.pitch_color)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
-                    ax.set_xlim(self.left+self.xpad_left,self.right-self.xpad_right)
-                    ax.axvspan(self.left+self.xpad_left,self.right-self.xpad_right,0,1,facecolor=self.pitch_color)
-                ax.set_ylim(self.center_length-self.ypad_left,self.top+self.ypad_right)
+                    ax.set_xlim(self.left+self.pad_left,self.right-self.pad_right)
+                    ax.axvspan(self.left+self.pad_left,self.right-self.pad_right,0,1,facecolor=self.pitch_color)
+                ax.set_ylim(self.center_length-self.pad_bottom,self.top+self.pad_top)
                         
         # set up horizontal pitch
         elif self.orientation=='horizontal':
@@ -256,12 +265,12 @@ class Pitch(object):
                 ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
-                    ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
-                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
+                    ax.set_ylim(self.right+self.pad_bottom,self.left-self.pad_top)
+                    ax.axhspan(self.right+self.pad_bottom,self.left-self.pad_top,0,1,facecolor=self.pitch_color)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
-                    ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
-                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color) 
-                ax.set_xlim(self.bottom-self.xpad_left,self.top+self.xpad_right)
+                    ax.set_ylim(self.right-self.pad_bottom,self.left+self.pad_top)
+                    ax.axhspan(self.right-self.pad_bottom,self.left+self.pad_top,0,1,facecolor=self.pitch_color) 
+                ax.set_xlim(self.bottom-self.pad_left,self.top+self.pad_right)
                                           
             elif self.view=='half':
                 ax.set_aspect(self.aspect)
@@ -269,12 +278,12 @@ class Pitch(object):
                 ax.tick_params(top=self.tick,bottom=self.tick,left=self.tick,right=self.tick,
                                labelleft=self.label,labelbottom=self.label)
                 if self.pitch_type in ['statsbomb','stats']:
-                    ax.set_ylim(self.right+self.ypad_left,self.left-self.ypad_right)
-                    ax.axhspan(self.right+self.ypad_left,self.left-self.ypad_right,0,1,facecolor=self.pitch_color)
+                    ax.set_ylim(self.right+self.pad_bottom,self.left-self.pad_top)
+                    ax.axhspan(self.right+self.pad_bottom,self.left-self.pad_top,0,1,facecolor=self.pitch_color)
                 elif self.pitch_type in ['tracab','opta','wyscout']:
-                    ax.set_ylim(self.right-self.ypad_left,self.left+self.ypad_right)
-                    ax.axhspan(self.right-self.ypad_left,self.left+self.ypad_right,0,1,facecolor=self.pitch_color)
-                ax.set_xlim(self.center_length-self.xpad_left,self.top+self.xpad_right)
+                    ax.set_ylim(self.right-self.pad_bottom,self.left+self.pad_top)
+                    ax.axhspan(self.right-self.pad_bottom,self.left+self.pad_top,0,1,facecolor=self.pitch_color)
+                ax.set_xlim(self.center_length-self.pad_left,self.top+self.pad_right)
 
  
     def _draw_stripes(self,ax):
@@ -292,13 +301,13 @@ class Pitch(object):
         
         # calculate stripe start and end
         if self.orientation=='vertical':
-            total_width = pitch_width + self.xpad_left + self.xpad_right
-            stripe_start = max(self.xpad_left,0)/total_width
-            stripe_end = min((self.xpad_left + pitch_width)/total_width,1)
+            total_width = pitch_width + self.pad_left + self.pad_right
+            stripe_start = max(self.pad_left,0)/total_width
+            stripe_end = min((self.pad_left + pitch_width)/total_width,1)
         elif self.orientation=='horizontal':
-            total_width = pitch_width + self.ypad_left + self.ypad_right
-            stripe_start = max(self.ypad_left,0)/total_width
-            stripe_end = min((self.ypad_left + pitch_width)/total_width,1)
+            total_width = pitch_width + self.pad_bottom + self.pad_top
+            stripe_start = max(self.pad_bottom,0)/total_width
+            stripe_end = min((self.pad_bottom + pitch_width)/total_width,1)
         
         # draw stripes
         start = self.bottom
