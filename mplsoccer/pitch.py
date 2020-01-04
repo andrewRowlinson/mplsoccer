@@ -540,48 +540,13 @@ class Pitch(object):
     def plot(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-            
-        # if using the football marker set the colors and lines, delete from kwargs so not used twice
-        plot_football = False
-        if 'marker' in kwargs.keys():
-            if kwargs['marker']=='football':
-                del kwargs['marker']
-                plot_football = True               
-                markeredgewidth = kwargs.pop('markeredgewidth', 0.25)
-                markersize = kwargs.pop('markersize', 20)
-                hexcolor = kwargs.pop('markerfacecolor', 'white')
-                pentcolor = kwargs.pop('markeredgecolor', 'black')
-                alpha = kwargs.pop('alpha', 1)
-                # to make the football the same size as the circle marker we need to expand it
-                # the markers are a different shape and this is the easiest way to make them similar
-                expansion_factor = 1.026
-                markersize = markersize * expansion_factor
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation=='horizontal':
-            if plot_football == True:
-                ax.plot(x,y,marker=football_hexagon_marker,
-                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')
-                ax.plot(x,y,
-                        marker=football_pentagon_marker,
-                        markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,alpha=alpha,*args, **kwargs)
-            else:
-                ax.plot(x,y,*args, **kwargs)
+            ax.plot(x,y,*args, **kwargs)
                 
         elif self.orientation=='vertical':
-            if plot_football == True:
-                ax.plot(y,x,
-                        marker=football_hexagon_marker,
-                        markerfacecolor=hexcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,alpha=alpha,linestyle='None')
-                ax.plot(y,x,
-                        marker=football_pentagon_marker,
-                        markerfacecolor=pentcolor,markeredgecolor=pentcolor,markersize=markersize,
-                        markeredgewidth=markeredgewidth,alpha=alpha,*args, **kwargs)
-            else:
-                ax.plot(y,x,*args, **kwargs)
+            ax.plot(y,x,*args, **kwargs)
                         
     def kdeplot(self,x,y,*args,ax=None, **kwargs):
         if ax==None:
@@ -631,39 +596,38 @@ class Pitch(object):
                 del kwargs['marker']
                 plot_football = True
                 linewidths = kwargs.pop('linewidths', 0.5)
-                hexcolor = kwargs.pop('facecolor', 'white')
-                pentcolor = kwargs.pop('edgecolor', 'black')
+                hexcolor = kwargs.pop('c', 'white')
+                pentcolor = kwargs.pop('edgecolors', 'black')
+                N = len(x)
+                x = np.repeat(x,2).copy()
+                y = np.repeat(y,2).copy()
+                paths = np.tile([football_hexagon_marker, football_pentagon_marker],N)
+                c = np.tile([hexcolor,pentcolor],N)                
                 # to make the football the same size as the circle marker we need to expand it
                 # the markers are a different shape and this is the easiest way to make them similar
-                expansion_factor = 1.053
+                expansion_factor = 0.249
                 s = kwargs.pop('s', 400)
                 s = s * expansion_factor
-            
+         
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation=='horizontal':
             if plot_football == True:
-                ax.scatter(x,y,marker=football_hexagon_marker,s=s,
-                           facecolor=hexcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args, **kwargs)
-                ax.scatter(x,y,marker=football_pentagon_marker,s=s,
-                           facecolor=pentcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args,**kwargs)              
+                sc = ax.scatter(x,y,c=c,edgecolors=pentcolor,s=s,
+                                linewidths=linewidths,zorder=zorder,*args, **kwargs)
+                sc.set_paths(paths)    
             else:
                 ax.scatter(x,y,zorder=zorder,*args, **kwargs)
                 
         elif self.orientation=='vertical':
             if plot_football == True:
-                ax.scatter(y,x,marker=football_hexagon_marker,s=s,
-                           facecolor=hexcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args, **kwargs)
-                ax.scatter(y,x,marker=football_pentagon_marker,s=s,
-                           facecolor=pentcolor,edgecolor=pentcolor,
-                           linewidths=linewidths,zorder=zorder,*args, **kwargs) 
+                sc = ax.scatter(y,x,c=c,edgecolors=pentcolor,s=s,
+                                linewidths=linewidths,zorder=zorder,*args, **kwargs)
+                sc.set_paths(paths)     
             else:
                 ax.scatter(y,x,zorder=zorder,*args, **kwargs)
               
             
-    def _create_segments(self,xstart,xend,ystart,yend,n_segments):
+    def _create_segments(self,xstart,ystart,xend,yend,n_segments):
         if self.orientation=='horizontal':
             x = np.linspace(xstart,xend,n_segments+1)
             y = np.linspace(ystart,yend,n_segments+1)
@@ -688,7 +652,7 @@ class Pitch(object):
             cmap = ListedColormap(color, name='line fade', N=n_segments)                      
         return cmap   
                                
-    def lines(self,xstart,xend,ystart,yend,n_segments=100, comet=False, transparent=False, ax=None,*args, **kwargs):
+    def lines(self,xstart,ystart,xend,yend,n_segments=100, comet=False, transparent=False, ax=None,*args, **kwargs):
         if ax==None:
             raise TypeError("plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
@@ -710,16 +674,16 @@ class Pitch(object):
         if (transparent == True) and (comet == True):
             cmap = self._create_transparent_cmap(color,n_segments)
             lw = np.linspace(1,lw,n_segments)
-            segments = self._create_segments(xstart,xend,ystart,yend,n_segments)
+            segments = self._create_segments(xstart,ystart,xend,yend,n_segments)
         
         elif (transparent == True) and (comet == False):
             cmap = self._create_transparent_cmap(color,n_segments)
-            segments = self._create_segments(xstart,xend,ystart,yend,n_segments)
+            segments = self._create_segments(xstart,ystart,xend,yend,n_segments)
         
         elif (transparent == False) and (comet == True):
             lw = np.linspace(1,lw,n_segments)
             cmap = ListedColormap([color], name='single color', N=n_segments)
-            segments = self._create_segments(xstart,xend,ystart,yend,n_segments)
+            segments = self._create_segments(xstart,ystart,xend,yend,n_segments)
         
         elif (transparent == False) and (comet == False):
             cmap = ListedColormap([color], name='single color', N=n_segments)
@@ -732,3 +696,46 @@ class Pitch(object):
         lc = LineCollection(segments, cmap=cmap, linewidth=lw,snap=False,*args, **kwargs)
         lc.set_array(pitch_array)
         ax.add_collection(lc)
+        
+    def quiver(self,xstart,ystart,xend,yend,*args,ax=None,**kwargs):
+        if ax==None:
+            raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
+        # rise quiver above background/ stripes (the axhspan/axvspan have the same zorder as the quiver)
+        zorder = kwargs.pop('zorder', 2)
+        
+        # set so plots in data units
+        units = kwargs.pop('units', 'dots')
+        scale_units = kwargs.pop('scale_units', 'xy')
+        angles = kwargs.pop('angles', 'xy')
+        scale = kwargs.pop('scale', 1)
+        width = kwargs.pop('width', 4)
+        
+        # vectors for direction
+        u = xend - xstart
+        v = yend - ystart
+        
+        # plot. Reverse coordinates if vertical plot            
+        if self.orientation=='horizontal':
+            ax.quiver(xstart,ystart,u,v,
+                      units=units, scale_units=scale_units, angles=angles, scale=scale,zorder=zorder,width=width,
+                      *args, **kwargs)
+                
+        elif self.orientation=='vertical':
+            ax.quiver(ystart,xstart,v,u,
+                      units=units, scale_units=scale_units, angles=angles, scale=scale,zorder=zorder,width=width,
+                      *args, **kwargs)
+            
+    def joint_plot(self,x,y,*args,**kwargs):
+        zorder = kwargs.pop('zorder', 2)
+        height = kwargs.pop('height',self.figsize[1])
+        # plot. Reverse coordinates if vertical plot 
+        if self.orientation=='horizontal':
+            joint_plot = sns.jointplot(x,y,zorder=zorder,height=height,*args, **kwargs)
+        elif self.orientation=='vertical':
+            joint_plot = sns.jointplot(y,x,zorder=zorder,height=height,*args, **kwargs)
+            
+        joint_plot_ax = joint_plot.ax_joint
+        self.draw(ax=joint_plot_ax)  
+        
+        return joint_plot

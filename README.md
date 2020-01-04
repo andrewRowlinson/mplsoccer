@@ -1,4 +1,4 @@
-# fbplot
+# mplsoccer
 mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.
 
 mplsoccer currently supports several data formats:
