@@ -173,6 +173,8 @@ class Pitch(object):
         elif pitch_type == 'tracab':
             for k, v in self._tracab_dimensions.items():
                 setattr(self, k, v)
+            if (pitch_length is None) or (pitch_width is None):
+                raise TypeError("Invalid argument: pitch_length and pitch_width must be specified for a tracab pitch.")
             self.aspect = 1
             self.left = pitch_width / 2 * 100
             self.right = -(pitch_width / 2) * 100
