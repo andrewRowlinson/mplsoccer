@@ -10,7 +10,7 @@ mplsoccer currently supports several data formats:
 
 The following example draws an Opta pitch (the default) with stripes.
 ``` python
-from mplsoccer import Pitch
+from mplsoccer.pitch import Pitch
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
 fig.savefig('opta.png',pad_inches=0,bbox_inches='tight')
@@ -19,7 +19,7 @@ fig.savefig('opta.png',pad_inches=0,bbox_inches='tight')
 
 For fun you can also plot the same pitch in xkcd mode.
 ``` python
-from mplsoccer import Pitch
+from mplsoccer.pitch import Pitch
 import matplotlib.pyplot as plt
 plt.xkcd()
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
@@ -30,12 +30,6 @@ fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
 
 # This library is under development
 The following developments are planned
-- add docstrings
-- add warnings/ error messages:
-- raise error warning if no pitch width or length when tracab
-- raise error warning if view not full/ half
-- raise error warning if not horizontal/ vertical
-- raise error for goal type
 - rotation of scatter plot markers
 - create pass map methods
 - add examples (team line-up / pass maps/ pressure maps/ subplots)

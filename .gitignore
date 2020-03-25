@@ -13,3 +13,8 @@ desktop.ini
 
 # ignore pycache
 __pycache__/
+
+# development environment
+dev_environment.yml
+
+
