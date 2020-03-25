@@ -62,18 +62,11 @@ class Pitch(object):
         The pitch length in meters. Only used for the 'tracab' pitch_type.
     pitch_width : float, default None
         The pitch width in meters. Only used for the 'tracab' pitch type. 
-    goal_Type : str, default 'goal'
+    goal_type : str, default 'goal'
         Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
     axis : str, default 'off'
         Whether to include the axis: 'on' or 'off'
     """
-
-    _pitch_dimensions = ['left', 'right', 'bottom', 'top', 'width', 'center_width', 'length', 'center_length',
-                         'six_yard_from_side', 'six_yard_width', 'six_yard_length',
-                         'penalty_area_from_side', 'penalty_area_width', 'penalty_area_length',
-                         'left_penalty', 'right_penalty', 'circle_size',
-                         'goal_width', 'goal_depth', 'goal_post',
-                         'arc1_leftV', 'arc2_leftH']
 
     _opta_dimensions = {'left': 100, 'right': 0, 'bottom': 0, 'top': 100,
                         'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
@@ -150,36 +143,36 @@ class Pitch(object):
 
         # set pitch dimensions
         if pitch_type == 'opta':
-            for attr in self._pitch_dimensions:
-                setattr(self, attr, self._opta_dimensions.get(attr, None))
+            for k, v in self._opta_dimensions.items():
+                setattr(self, k, v)
             self.pitch_length = 105
             self.pitch_width = 68
             self.aspect = 68 / 105
 
         elif pitch_type == 'wyscout':
-            for attr in self._pitch_dimensions:
-                setattr(self, attr, self._wyscout_dimensions.get(attr, None))
+            for k, v in self._wyscout_dimensions.items():
+                setattr(self, k, v)
             self.pitch_length = 105
             self.pitch_width = 68
             self.aspect = 68 / 105
 
         elif pitch_type == 'statsbomb':
-            for attr in self._pitch_dimensions:
-                setattr(self, attr, self._statsbomb_dimensions.get(attr, None))
+            for k, v in self._statsbomb_dimensions.items():
+                setattr(self, k, v)
             self.pitch_length = self.length
             self.pitch_width = self.width
             self.aspect = 1
 
         elif pitch_type == 'stats':
-            for attr in self._pitch_dimensions:
-                setattr(self, attr, self._stats_dimensions.get(attr, None))
+            for k, v in self._stats_dimensions.items():
+                setattr(self, k, v)
             self.pitch_length = self.length
             self.pitch_width = self.width
             self.aspect = 1
 
         elif pitch_type == 'tracab':
-            for attr in self._pitch_dimensions:
-                setattr(self, attr, self._tracab_dimensions.get(attr, None))
+            for k, v in self._tracab_dimensions.items():
+                setattr(self, k, v)
             self.aspect = 1
             self.left = pitch_width / 2 * 100
             self.right = -(pitch_width / 2) * 100
@@ -203,8 +196,28 @@ class Pitch(object):
                 self.pad_left = self.pad_left * self.aspect
                 self.pad_right = self.pad_right * self.aspect
 
+        # data checks
         if not isinstance(self.axis, bool):
-            raise TypeError("Invalid argument: axis should be True or False.")
+            raise TypeError("Invalid argument: axis should be bool (True or False).")
+
+        if not isinstance(self.stripe, bool):
+            raise TypeError("Invalid argument: stripe should be bool (True or False).")
+
+        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout']
+        if self.pitch_type not in valid_pitch:
+            raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
+
+        valid_orientation = ['horizontal', 'vertical']
+        if self.orientation not in valid_orientation:
+            raise TypeError(f'Invalid argument: orientation should be in {valid_orientation}')
+
+        valid_goal_type = ['line', 'box']
+        if self.goal_type not in valid_goal_type:
+            raise TypeError(f'Invalid argument: goal_type should be in {valid_goal_type}')
+
+        valid_view = ['full', 'half']
+        if self.view not in valid_view:
+            raise TypeError(f'Invalid argument: view should be in {valid_view}')
 
     def _setup_subplots(self):
 
@@ -670,6 +683,10 @@ class Pitch(object):
         if ax is None:
             raise TypeError(
                 "plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        if not isinstance(comet, bool):
+            raise TypeError("Invalid argument: comet should be bool (True or False).")
+        if not isinstance(transparent, bool):
+            raise TypeError("Invalid argument: transparent should be bool (True or False).")
 
         lw = kwargs.pop('lw', 5)
         color = kwargs.pop('color', '#34afed')
