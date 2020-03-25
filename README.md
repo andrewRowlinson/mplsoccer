@@ -5,7 +5,7 @@ mplsoccer currently supports several data formats:
 - Opta
 - Tracab (ChyronHego) tracking data
 - Statsbomb
-- STATS (formely Prozone)
+- STATS (formerly Prozone)
 - Wyscout (the pitch dimensions are taken from ggsoccer: https://github.com/Torvaney/ggsoccer)
 
 The following example draws an Opta pitch (the default) with stripes.
@@ -39,5 +39,5 @@ The following developments are planned
 - rotation of scatter plot markers
 - create pass map methods
 - add examples (team line-up / pass maps/ pressure maps/ subplots)
-- add method for plotting voronoi diagrams
+- add method for plotting Voronoi diagrams
 - create documentation using Sphinx

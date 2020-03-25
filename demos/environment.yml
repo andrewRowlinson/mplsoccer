@@ -12,4 +12,4 @@ dependencies:
   - conda-forge::ffmpeg
   - pip
   - pip:
-    - mplsoccer
+      - mplsoccer
