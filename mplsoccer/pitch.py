@@ -20,12 +20,6 @@ class Pitch(object):
     
     Parameters
     ----------
-    
-    self, figsize=None, layout=None, pitch_type='opta',orientation='horizontal',view='full',
-                 pitch_color='#aabb97',line_color='white',linewidth=2,stripe=False,stripe_color='#c2d59d',
-                 pad_left=4, pad_right=4, pad_bottom=4, pad_top=4,
-                 pitch_length=None,pitch_width=None,axis='off',*args, **kwargs):
-
     figsize : tuple of float, default Matplotlib figure size
         The figure size in inches by default.
     layout : tuple of int, default (1,1)
@@ -579,7 +573,29 @@ class Pitch(object):
             self._draw_scaled_circles_and_arcs(ax)
 
     def draw(self, ax=None):
-        """ Returns a numpy array of Matplotlib axes with drawn soccer / football pitches."""
+        """ Draws the specified soccer/ football pitch(es).
+        If an ax is specified the pitch is drawn on an existing axis.
+
+        Parameters
+        ----------
+        ax : matplotlib axis, default None
+            A matplotlib axis to draw the pitch on. If None is specified the pitch is plotted on a new figure.
+
+        Returns
+        -------
+        If ax=None returns a matplotlib Figure and Axes. Else plotted on existing axis and returns None.
+
+        Examples
+        --------
+        # plot on new figure
+        pitch = Pitch()
+        fig, ax = pitch.draw()
+
+        # plot on an existing figure
+        fig, ax = plt.subplots()
+        pitch = Pitch()
+        pitch.draw(ax=ax)
+        """
         if ax is None:
             self._setup_subplots()
             self.fig.set_tight_layout(self.tight_layout)
@@ -592,6 +608,17 @@ class Pitch(object):
             self._draw_ax(ax)
 
     def plot(self, x, y, *args, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.plot,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+
+        ax : matplotlib axis, default None
+            A matplotlib axis to plot on.
+        """
         if ax is None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
@@ -603,8 +630,19 @@ class Pitch(object):
             ax.plot(y, x, *args, **kwargs)
 
     def kdeplot(self, x, y, *args, ax=None, **kwargs):
+        """ Utility wrapper around seaborn.kdeplot,
+        which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+
+        ax : matplotlib axis, default None
+            A matplotlib axis to plot on.
+        """
         if ax is None:
-            raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            raise TypeError("kdeplot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
         # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the kdeplot)
         zorder = kwargs.pop('zorder', 2)
@@ -618,8 +656,19 @@ class Pitch(object):
             sns.kdeplot(y, x, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
 
     def hexbin(self, x, y, *args, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.hexbin,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+
+        ax : matplotlib axis, default None
+            A matplotlib axis to plot on.
+        """
         if ax is None:
-            raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            raise TypeError("hexbin() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
         # rise hexbin above background/ stripes (the axhspan/axvspan have the same zorder as the hexbin)
         zorder = kwargs.pop('zorder', 2)
@@ -637,6 +686,18 @@ class Pitch(object):
             ax.hexbin(y, x, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
 
     def scatter(self, x, y, *args, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.scatter,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+        Can optionally use a football marker with marker='football'.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+
+        ax : matplotlib axis, default None
+            A matplotlib axis to plot on.
+        """
         if ax is None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
@@ -707,9 +768,34 @@ class Pitch(object):
 
     def lines(self, xstart, ystart, xend, yend, n_segments=100, comet=False, transparent=False, ax=None, *args,
               **kwargs):
+        """ Plots lines using matplotlib.collections.LineCollection.
+        This is a fast way to plot multiple lines without loops.
+
+        Also enables lines that increase in width or opacity by splitting the line into n_segments of increasing
+        width or opacity as the line progresses.
+
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+
+        ax : matplotlib axis, default None
+            A matplotlib axis to plot on.
+
+        n_segments : int, default 100
+            If comet=True or transparent=True this is used to split the line
+            into n_segments of increasing width/opacity.
+
+        comet : bool default False
+            Whether to plot the lines increasing in width.
+
+        transparent : bool, default False
+            Whether to plot the lines increasing in opacity.
+        """
+
         if ax is None:
             raise TypeError(
-                "plot_line_fade() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+                "lines() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         if not isinstance(comet, bool):
             raise TypeError("Invalid argument: comet should be bool (True or False).")
         if not isinstance(transparent, bool):
@@ -757,8 +843,21 @@ class Pitch(object):
         ax.add_collection(lc)
 
     def quiver(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.quiver,
+        Quiver uses locations and directions usually. Here these are instead calculated automatically
+        from the start and end points of the arrow.
+        The function also automatically flips the x and y coordinates if the pitch is vertical.
+
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+
+        ax : matplotlib axis, default None
+            A matplotlib axis to plot on.
+        """
         if ax is None:
-            raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            raise TypeError("quiver() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
         # rise quiver above background/ stripes (the axhspan/axvspan have the same zorder as the quiver)
         zorder = kwargs.pop('zorder', 2)
@@ -786,6 +885,13 @@ class Pitch(object):
                       *args, **kwargs)
 
     def joint_plot(self, x, y, *args, **kwargs):
+        """ Utility wrapper around seaborn.jointplot
+        which automatically flips the x and y coordinates if the pitch is vertical and sets the height from the figsize.
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        """
         zorder = kwargs.pop('zorder', 2)
         height = kwargs.pop('height', self.figsize[1])
         # plot. Reverse coordinates if vertical plot 
