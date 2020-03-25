@@ -25,7 +25,7 @@ class Pitch(object):
                  pitch_color='#aabb97',line_color='white',linewidth=2,stripe=False,stripe_color='#c2d59d',
                  pad_left=4, pad_right=4, pad_bottom=4, pad_top=4,
                  pitch_length=None,pitch_width=None,axis='off',*args, **kwargs):
-    
+
     figsize : tuple of float, default Matplotlib figure size
         The figure size in inches by default.
     layout : tuple of int, default (1,1)
@@ -63,10 +63,16 @@ class Pitch(object):
         The pitch length in meters. Only used for the 'tracab' pitch_type.
     pitch_width : float, default None
         The pitch width in meters. Only used for the 'tracab' pitch type. 
-    goal_type : str, default 'goal'
+    goal_type : str, default 'line'
         Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
-    axis : str, default 'off'
-        Whether to include the axis: 'on' or 'off'
+    axis : bool, default False
+        Whether to include the axis: True means the axis is 'on' and False means the axis is'off'.
+    label : bool, default False
+        Whether to include the axis labels.
+    tick : bool, default False
+        Whether to include the axis ticks.
+    tight_layout : bool, default True
+        Whether to use matplotlib's tight layout.
     """
 
     _opta_dimensions = {'left': 100, 'right': 0, 'bottom': 0, 'top': 100,
@@ -219,10 +225,10 @@ class Pitch(object):
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
 
-        if (self.axis is False) and (self.label):
+        if (self.axis is False) and self.label:
             warnings.warn("Labels will not be shown unless axis=True")
 
-        if (self.axis is False) and (self.tick):
+        if (self.axis is False) and self.tick:
             warnings.warn("Ticks will not be shown unless axis=True")
 
         if (self.pitch_type != 'tracab') and ((self.pitch_length is not None) or (self.pitch_width is not None)):
