@@ -10,3 +10,6 @@ dependencies:
   - scipy
   - seaborn
   - conda-forge::ffmpeg
+  - pip
+  - pip:
+    - mplsoccer
