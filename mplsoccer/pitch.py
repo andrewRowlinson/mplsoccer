@@ -112,7 +112,7 @@ class Pitch(object):
     def __init__(self, figsize=None, layout=None, pitch_type='opta', orientation='horizontal', view='full',
                  pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
                  pad_left=4, pad_right=4, pad_bottom=4, pad_top=4, pitch_length=None, pitch_width=None,
-                 goal_type='goal', label=False, tick=False, axis=False, tight_layout=True):
+                 goal_type='line', label=False, tick=False, axis=False, tight_layout=True):
 
         # set figure and axes attributes
         self.axes = None
