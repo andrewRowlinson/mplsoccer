@@ -225,7 +225,7 @@ class Pitch(object):
         if (self.axis is False) and (self.tick):
             warnings.warn("Ticks will not be shown unless axis=True")
 
-        if (self.pitch_type != 'tracab') and ((self.pitch_length not None) or (self.pitch_width not None)):
+        if (self.pitch_type != 'tracab') and ((self.pitch_length is not None) or (self.pitch_width is not None)):
             warnings.warn("Pitch length and widths are only used for tracab pitches and will be ignored")
 
         valid_orientation = ['horizontal', 'vertical']
