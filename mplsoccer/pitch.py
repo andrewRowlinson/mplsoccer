@@ -205,6 +205,15 @@ class Pitch(object):
         if not isinstance(self.stripe, bool):
             raise TypeError("Invalid argument: stripe should be bool (True or False).")
 
+        if not isinstance(self.tick, bool):
+            raise TypeError("Invalid argument: tick should be bool (True or False).")
+
+        if not isinstance(self.label, bool):
+            raise TypeError("Invalid argument: label should be bool (True or False).")
+
+        if not isinstance(self.tight_layout, bool):
+            raise TypeError("Invalid argument: tight_layout should be bool (True or False).")
+
         valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout']
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
