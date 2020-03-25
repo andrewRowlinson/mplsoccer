@@ -12,6 +12,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap
 from matplotlib.colors import to_rgb
 from .utils import football_hexagon_marker, football_pentagon_marker
+import warnings
 
 
 class Pitch(object):
@@ -217,6 +218,15 @@ class Pitch(object):
         valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout']
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
+
+        if (self.axis is False) and (self.label):
+            warnings.warn("Labels will not be shown unless axis=True")
+
+        if (self.axis is False) and (self.tick):
+            warnings.warn("Ticks will not be shown unless axis=True")
+
+        if (self.pitch_type != 'tracab') and ((self.pitch_length not None) or (self.pitch_width not None)):
+            warnings.warn("Pitch length and widths are only used for tracab pitches and will be ignored")
 
         valid_orientation = ['horizontal', 'vertical']
         if self.orientation not in valid_orientation:
