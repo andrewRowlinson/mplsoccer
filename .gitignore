@@ -17,4 +17,6 @@ __pycache__/
 # development environment
 dev_environment.yml
 
-
+mplsoccer.egg-info
+build
+dist
