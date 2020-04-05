@@ -14,7 +14,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib import cm
 from matplotlib.colors import to_rgb
 from matplotlib import rcParams
-from .utils import football_hexagon_marker, football_pentagon_marker
+from .utils import football_hexagon_marker, football_pentagon_marker, _mscatter
 import collections
 import warnings
 
@@ -70,7 +70,7 @@ class Pitch(object):
     tick : bool, default False
         Whether to include the axis ticks.
     tight_layout : bool, default True
-        Whether to use matplotlib's tight layout.
+        Whether to use Matplotlib's tight layout.
     """
 
     _opta_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
@@ -117,10 +117,10 @@ class Pitch(object):
     _statsperform_dimensions = {'top': 68, 'bottom': 0, 'left': 0, 'right': 105,
                                 'width': 68, 'center_width': 34, 'length': 105, 'center_length': 52.5,
                                 'six_yard_from_side': 24.84, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
-                                'penalty_area_from_side': 13.84, 'penalty_area_width': 40.32, 'penalty_area_length': 16.5,
-                                'left_penalty': 11, 'right_penalty':94, 'circle_size': 9.15,
-                                'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 30.34,
-                                'arc1_leftV':36.95, 'arc2_leftH': 53.05}
+                                'penalty_area_from_side': 13.84, 'penalty_area_width': 40.32,
+                                'penalty_area_length': 16.5, 'left_penalty': 11, 'right_penalty': 94,
+                                'circle_size': 9.15, 'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 30.34,
+                                'arc1_leftV': 36.95, 'arc2_leftH': 53.05}
     
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
                  pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
@@ -222,7 +222,7 @@ class Pitch(object):
         if pitch_color == 'grass':
             terrain_cmap = cm.get_cmap('terrain')
             grass = terrain_cmap((np.linspace(0.29, 0.38, 128)))
-            grass = np.concatenate([grass[::-1],grass])
+            grass = np.concatenate([grass[::-1], grass])
             grass = grass[50:]
             self.grass_cmap = ListedColormap(grass)
         
@@ -245,7 +245,7 @@ class Pitch(object):
                     self.extent = [self.top - self.pad_left, self.bottom + self.pad_right,
                                    self.center_length - self.pad_bottom, self.right + self.pad_top]              
                     
-        elif self.pitch_type in ['tracab', 'opta', 'wyscout','statsperform']:
+        elif self.pitch_type in ['tracab', 'opta', 'wyscout', 'statsperform']:
             
             if self.orientation == 'horizontal':                     
                 if self.view == 'full':
@@ -279,7 +279,7 @@ class Pitch(object):
         if not isinstance(self.tight_layout, bool):
             raise TypeError("Invalid argument: tight_layout should be bool (True or False).")
 
-        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout','statsperform']
+        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform']
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
 
@@ -306,21 +306,21 @@ class Pitch(object):
         
         # make sure padding not too large for the pitch
         if self.orientation == 'horizontal':                 
-            if abs(min(self.pad_left,0) + min(self.pad_right,0)) >= self.length:
+            if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.length:
                 raise ValueError("pad_left/pad_right too negative for pitch length")
-            if abs(min(self.pad_top,0) + min(self.pad_bottom,0)) >= self.width:
+            if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.width:
                 raise ValueError("pad_top/pad_bottom too negative for pitch width")
             if self.view == 'half':
-                if abs(min(self.pad_left,0) + min(self.pad_right,0)) >= self.length/2:
+                if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.length/2:
                     raise ValueError("pad_left/pad_right too negative for pitch length")
 
         if self.orientation == 'vertical':
-            if abs(min(self.pad_left,0) + min(self.pad_right,0)) >= self.width:
+            if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.width:
                 raise ValueError("pad_left/pad_right too negative for pitch width")
-            if abs(min(self.pad_top,0) + min(self.pad_bottom,0)) >= self.length:
+            if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.length:
                 raise ValueError("pad_top/pad_bottom too negative for pitch length")
             if self.view == 'half':
-                if abs(min(self.pad_top,0) + min(self.pad_bottom,0)) >= self.length/2:
+                if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.length/2:
                     raise ValueError("pad_top/pad_bottom too negative for pitch length")   
 
     def _setup_subplots(self):
@@ -357,13 +357,13 @@ class Pitch(object):
         ax.set_ylim(self.extent[2], self.extent[3])
         ax.set_aspect(self.aspect)
              
-    def _set_background(self,ax):
-        if (self.pitch_color != 'grass'):
+    def _set_background(self, ax):
+        if self.pitch_color != 'grass':
             ax.axhspan(self.extent[2], self.extent[3], 0, 1, facecolor=self.pitch_color)
             
-        if (self.stripe==False) & (self.pitch_color=='grass'):
-            pitch_color = np.random.normal(size=(1000,1000))
-            ax.imshow(pitch_color,cmap=self.grass_cmap,extent=self.extent,aspect=self.aspect)   
+        if (self.stripe is False) & (self.pitch_color == 'grass'):
+            pitch_color = np.random.normal(size=(1000, 1000))
+            ax.imshow(pitch_color, cmap=self.grass_cmap, extent=self.extent, aspect=self.aspect)
             
         if self.stripe:
             # calculate stripe length
@@ -373,9 +373,9 @@ class Pitch(object):
             stripe3_length = (pitch_length - (
                 self.penalty_area_length - self.six_yard_length) * 3 - self.six_yard_length * 2) / 10
             
-            if self.pitch_color=='grass':
+            if self.pitch_color == 'grass':
                 # the scale has been manually selected so at that scale the stripe lengths are integers
-                if self.pitch_type in ['statsbomb','wyscout']:
+                if self.pitch_type in ['statsbomb', 'wyscout']:
                     scale = 5
                 elif self.pitch_type == 'opta':
                     scale = 25
@@ -392,8 +392,8 @@ class Pitch(object):
                 s = int(scale*pitch_length)        
                 
                 if self.orientation == 'horizontal':
-                    s = s + int((max(self.pad_left,0) + max(self.pad_right,0))*scale)
-                    start = int(max(self.pad_left,0) * scale)
+                    s = s + int((max(self.pad_left, 0) + max(self.pad_right, 0))*scale)
+                    start = int(max(self.pad_left, 0) * scale)
                     if self.pad_left < 0:
                         slice1 = int(-self.pad_left * scale)
                     else:
@@ -412,8 +412,8 @@ class Pitch(object):
                         pitch_end = s - int(s * self.pad_top/(self.pad_bottom+self.pad_top+self.width))
                                 
                 elif self.orientation == 'vertical':
-                    s = s + int((max(self.pad_bottom,0) + max(self.pad_top,0))*scale)
-                    start = int(max(self.pad_bottom,0) * scale)
+                    s = s + int((max(self.pad_bottom, 0) + max(self.pad_top, 0))*scale)
+                    start = int(max(self.pad_bottom, 0) * scale)
                     if self.pad_bottom < 0:
                         slice1 = int(-self.pad_bottom * scale)
                     else:
@@ -438,12 +438,12 @@ class Pitch(object):
                     else:
                         slice1 = int((self.length/2)*scale)
                 
-                pitch_color = np.random.normal(size=(s,s))
+                pitch_color = np.random.normal(size=(s, s))
             
             # calculate pitch width
             if self.pitch_type in ['statsbomb', 'stats']:
                 pitch_width = self.bottom - self.top
-            elif self.pitch_type in ['tracab', 'opta', 'wyscout','statsperform']:
+            elif self.pitch_type in ['tracab', 'opta', 'wyscout', 'statsperform']:
                 pitch_width = self.top - self.bottom
                 
             # calculate stripe start and end
@@ -458,7 +458,7 @@ class Pitch(object):
                 stripe_end = min((self.pad_bottom + pitch_width) / total_width, 1)
 
             # draw stripes
-            if self.pitch_color!='grass':
+            if self.pitch_color != 'grass':
                 start = int(self.left)
 
             for stripe in range(1, 19):
@@ -469,25 +469,27 @@ class Pitch(object):
                 else:
                     end = round(start + stripe3_length, 2)
                 if (stripe % 2 == 1) & (self.orientation == 'vertical'):
-                    if self.pitch_color!='grass':
+                    if self.pitch_color != 'grass':
                         ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
                     else:
-                        pitch_color[start:end,pitch_start:pitch_end] = pitch_color[start:end,pitch_start:pitch_end] + 2
+                        pitch_color[start:end, pitch_start:pitch_end] = \
+                            pitch_color[start:end, pitch_start:pitch_end] + 2
                         
                 elif (stripe % 2 == 1) & (self.orientation == 'horizontal'):
-                    if self.pitch_color!='grass':
+                    if self.pitch_color != 'grass':
                         ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
                     else:
-                        pitch_color[pitch_start:pitch_end,start:end] = pitch_color[pitch_start:pitch_end:,start:end] + 2
+                        pitch_color[pitch_start:pitch_end, start:end] = \
+                            pitch_color[pitch_start:pitch_end:, start:end] + 2
                 start = end
                 
         # draw grass background
-        if (self.stripe) & (self.pitch_color=='grass'):
+        if self.stripe & self.pitch_color == 'grass':
             if self.orientation == 'horizontal':
-                pitch_color = pitch_color[:,slice1:slice2]
+                pitch_color = pitch_color[:, slice1:slice2]
             elif self.orientation == 'vertical':
-                pitch_color = pitch_color[slice1:slice2,:]
-            ax.imshow(pitch_color,cmap=self.grass_cmap,extent=self.extent,aspect=self.aspect,origin='lower') 
+                pitch_color = pitch_color[slice1:slice2, :]
+            ax.imshow(pitch_color, cmap=self.grass_cmap, extent=self.extent, aspect=self.aspect, origin='lower')
                 
     def _draw_pitch_lines(self, ax):
         if self.orientation == 'horizontal':
@@ -510,7 +512,6 @@ class Pitch(object):
                                    linewidth=self.linewidth, color=self.line_color, zorder=1)
         ax.add_patch(pitch_markings)
         ax.add_artist(midline)
-
 
     def _draw_goals(self, ax):
         if self.goal_type == 'box':
@@ -822,21 +823,6 @@ class Pitch(object):
         elif self.orientation == 'vertical':
             extent = kwargs.pop('extent', (self.top, self.bottom, self.left, self.right))
             ax.hexbin(y, x, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
-            
-    def _mscatter(self, x, y, markers=None, ax=None, **kwargs):
-        # based on https://stackoverflow.com/questions/52303660/iterating-markers-in-plots/52303895#52303895
-        sc = ax.scatter(x, y, **kwargs)
-        if (markers is not None):
-            paths = []
-            for marker in markers:
-                if isinstance(marker, mmarkers.MarkerStyle):
-                    marker_obj = marker
-                else:
-                    marker_obj = mmarkers.MarkerStyle(marker)
-                path = marker_obj.get_path().transformed(marker_obj.get_transform())
-                paths.append(path)
-        sc.set_paths(paths)
-        return sc
         
     def scatter(self, x, y, *args, ax=None, rotation_degrees=None, marker=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.scatter,
@@ -847,6 +833,15 @@ class Pitch(object):
         ----------
         x, y : array-like or scalar.
             Commonly, these parameters are 1D arrays.
+
+        rotation_degrees: array-like or scalar, default None.
+            Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play.
+            In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
+
+        marker: MarkerStyle, optional
+            The marker style. marker can be either an instance of the class or the text shorthand for a
+            particular marker. Defaults to None, in which case it takes the value of rcParams["scatter.marker"]
+            (default: 'o') = 'o'.
 
         ax : matplotlib axis, default None
             A matplotlib axis to plot on.
@@ -887,7 +882,7 @@ class Pitch(object):
             if x.size != rotation_degrees.size:
                 raise ValueError("x and rotation_degrees must be the same size")
                 
-            if not isinstance(rotation_degrees,(collections.Sequence,np.ndarray)):
+            if not isinstance(rotation_degrees, (collections.Sequence, np.ndarray)):
                 # rotated counter clockwise - this makes it clockwise
                 rotation_degrees = np.array(-rotation_degrees)
                 if self.orientation == 'horizontal':
@@ -913,9 +908,9 @@ class Pitch(object):
                                 linewidths=linewidths, zorder=zorder, *args, **kwargs)
                 sc.set_paths(paths)
             elif rotation_degrees is not None:
-                sc = self._mscatter(x, y, zorder=zorder, markers=markers, ax=ax, **kwargs)
+                sc = _mscatter(x, y, zorder=zorder, markers=markers, ax=ax, **kwargs)
             else:
-                ax.scatter(x, y, zorder=zorder, *args, **kwargs)
+                sc = ax.scatter(x, y, zorder=zorder, *args, **kwargs)
 
         elif self.orientation == 'vertical':
             if plot_football:
@@ -923,9 +918,11 @@ class Pitch(object):
                                 linewidths=linewidths, zorder=zorder, *args, **kwargs)
                 sc.set_paths(paths)
             elif rotation_degrees is not None:
-                sc = self._mscatter(y, x, zorder=zorder, markers=markers, ax=ax, **kwargs)
+                sc = _mscatter(y, x, zorder=zorder, markers=markers, ax=ax, **kwargs)
             else:
-                ax.scatter(y, x, zorder=zorder, *args, **kwargs)
+                sc = ax.scatter(y, x, zorder=zorder, *args, **kwargs)
+
+        return sc
 
     def _create_segments(self, xstart, ystart, xend, yend, n_segments):
         if self.orientation == 'horizontal':
@@ -945,7 +942,7 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             color = np.tile(np.array(color), (n_segments, 1))
             color = np.append(color, np.linspace(0.1, 0.5, n_segments).reshape(-1, 1), axis=1)
-            if self.pitch_type in ['stats','statsbomb']:
+            if self.pitch_type in ['stats', 'statsbomb']:
                 color = color[::-1]
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         elif self.orientation == 'vertical':
@@ -1009,7 +1006,7 @@ class Pitch(object):
         # set pitch array for line segments
         pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
 
-            # set color map, lw and segments
+        # set color map, lw and segments
         if transparent and comet:
             cmap = self._create_transparent_cmap(color, n_segments)
             lw = np.linspace(1, lw, n_segments)

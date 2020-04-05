@@ -5,6 +5,7 @@
 
 import matplotlib.path as mpath
 import numpy as np
+import matplotlib.markers as mmarkers
 
 # Note that the football-marker arrays are based on the code in my other repo, but the arrays are copied here
 # https://github.com/andrewRowlinson/data-science/blob/master/data_visualization/matplotlib_football_marker.ipynb
@@ -162,5 +163,21 @@ football_pentagon_vertices = np.array([[0.000000000000000023439302766909766, 0.3
 
 football_hexagon_marker = mpath.Path(football_hexagon_vertices, football_hexagon_codes)
 football_pentagon_marker = mpath.Path(football_pentagon_vertices, football_pentagon_codes)
-arrowhead_marker = mpath.Path(np.array([[ 0.,  1.],[-1., -1.],[0., -0.4],[ 1., -1.],[ 0.,  1.]]),
-                              np.array([ 1,  2, 2,  2, 79], dtype=np.uint8))
+arrowhead_marker = mpath.Path(np.array([[0.,  1.], [-1., -1.], [0., -0.4], [1., -1.], [0.,  1.]]),
+                              np.array([1,  2, 2,  2, 79], dtype=np.uint8))
+
+
+def _mscatter(x, y, markers=None, ax=None, **kwargs):
+    # based on https://stackoverflow.com/questions/52303660/iterating-markers-in-plots/52303895#52303895
+    sc = ax.scatter(x, y, **kwargs)
+    if markers is not None:
+        paths = []
+        for marker in markers:
+            if isinstance(marker, mmarkers.MarkerStyle):
+                marker_obj = marker
+            else:
+                marker_obj = mmarkers.MarkerStyle(marker)
+            path = marker_obj.get_path().transformed(marker_obj.get_transform())
+            paths.append(path)
+        sc.set_paths(paths)
+        return sc

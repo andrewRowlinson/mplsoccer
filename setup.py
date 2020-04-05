@@ -6,9 +6,9 @@ with open('README.md') as readme_file:
 setup(name='mplsoccer',
       version='0.0.2',
       description='mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.',
-      long_description_content_type = "text/markdown",
-      long_description = README,
-      classifiers=[# Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      long_description_content_type="text/markdown",
+      long_description=README,
+      classifiers=[  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
@@ -24,6 +24,6 @@ setup(name='mplsoccer',
       python_requires='>=3.6',
       zip_safe=False)
 
-install_requires=['matplotlib',
-                  'seaborn',
-                  'numpy']
+install_requires = ['matplotlib',
+                    'seaborn',
+                    'numpy']
