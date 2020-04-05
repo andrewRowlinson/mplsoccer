@@ -13,9 +13,9 @@ The following example draws an Opta pitch (the default) with stripes.
 from mplsoccer.pitch import Pitch
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
-fig.savefig('opta.png',pad_inches=0,bbox_inches='tight')
+fig.savefig('statsbomb.png',pad_inches=0,bbox_inches='tight')
 ```
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_opta_pitch.png?raw=true "pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_statsbomb_pitch.png?raw=true "statsbomb pitch")
 
 For fun you can also plot the same pitch in xkcd mode.
 ``` python
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 plt.xkcd()
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
-fig.savefig('opta_xkcd.png',pad_inches=0,bbox_inches='tight')
+fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
 

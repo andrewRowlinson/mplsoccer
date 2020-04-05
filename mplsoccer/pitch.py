@@ -484,7 +484,7 @@ class Pitch(object):
                 start = end
                 
         # draw grass background
-        if self.stripe & self.pitch_color == 'grass':
+        if self.stripe & (self.pitch_color == 'grass'):
             if self.orientation == 'horizontal':
                 pitch_color = pitch_color[:, slice1:slice2]
             elif self.orientation == 'vertical':
