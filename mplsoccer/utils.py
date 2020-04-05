@@ -162,3 +162,5 @@ football_pentagon_vertices = np.array([[0.000000000000000023439302766909766, 0.3
 
 football_hexagon_marker = mpath.Path(football_hexagon_vertices, football_hexagon_codes)
 football_pentagon_marker = mpath.Path(football_pentagon_vertices, football_pentagon_codes)
+arrowhead_marker = mpath.Path(np.array([[ 0.,  1.],[-1., -1.],[0., -0.4],[ 1., -1.],[ 0.,  1.]]),
+                              np.array([ 1,  2, 2,  2, 79], dtype=np.uint8))

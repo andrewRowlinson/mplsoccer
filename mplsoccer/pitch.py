@@ -6,12 +6,16 @@
 import matplotlib.lines as lines
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
+import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap
+from matplotlib import cm
 from matplotlib.colors import to_rgb
+from matplotlib import rcParams
 from .utils import football_hexagon_marker, football_pentagon_marker
+import collections
 import warnings
 
 
@@ -24,9 +28,9 @@ class Pitch(object):
         The figure size in inches by default.
     layout : tuple of int, default (1,1)
         Tuple of (rows, columns) for the layout of the plot.
-    pitch_type : str, default 'opta'
+    pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
-        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats', 'wyscout'.
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats', 'wyscout', 'statsperform'.
     orientation : str, default 'horizontal'
         The pitch orientation: 'horizontal' or 'vertical'.
     view : str, default 'full'
@@ -69,7 +73,7 @@ class Pitch(object):
         Whether to use matplotlib's tight layout.
     """
 
-    _opta_dimensions = {'left': 100, 'right': 0, 'bottom': 0, 'top': 100,
+    _opta_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
                         'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                         'six_yard_from_side': 36.8, 'six_yard_width': 26.4, 'six_yard_length': 5.8,
                         'penalty_area_from_side': 21.1, 'penalty_area_width': 57.8, 'penalty_area_length': 17.0,
@@ -78,7 +82,7 @@ class Pitch(object):
                         'arc1_leftV': None, 'arc2_leftH': None}
 
     # wyscout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
-    _wyscout_dimensions = {'left': 100, 'right': 0, 'bottom': 0, 'top': 100,
+    _wyscout_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
                            'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                            'six_yard_from_side': 37, 'six_yard_width': 26, 'six_yard_length': 6,
                            'penalty_area_from_side': 19, 'penalty_area_width': 62, 'penalty_area_length': 16,
@@ -86,7 +90,7 @@ class Pitch(object):
                            'goal_depth': 1.9, 'goal_width': 12, 'goal_post': 44,
                            'arc1_leftV': None, 'arc2_leftH': None}
 
-    _statsbomb_dimensions = {'left': 0, 'right': 80, 'bottom': 0, 'top': 120,
+    _statsbomb_dimensions = {'top': 0, 'bottom': 80, 'left': 0, 'right': 120,
                              'width': 80, 'center_width': 40, 'length': 120, 'center_length': 60,
                              'six_yard_from_side': 30, 'six_yard_width': 20, 'six_yard_length': 6,
                              'penalty_area_from_side': 18, 'penalty_area_width': 44, 'penalty_area_length': 18,
@@ -94,7 +98,7 @@ class Pitch(object):
                              'goal_depth': 2.4, 'goal_width': 8, 'goal_post': 36,
                              'arc1_leftV': 35, 'arc2_leftH': 55}
 
-    _tracab_dimensions = {'left': None, 'right': None, 'bottom': None, 'top': None,
+    _tracab_dimensions = {'top': None, 'bottom': None, 'left': None, 'right': None,
                           'width': None, 'center_width': 0, 'length': None, 'center_length': 0,
                           'six_yard_from_side': -916, 'six_yard_width': 1832, 'six_yard_length': 550,
                           'penalty_area_from_side': -2016, 'penalty_area_width': 4032, 'penalty_area_length': 1650,
@@ -102,15 +106,23 @@ class Pitch(object):
                           'goal_depth': 200, 'goal_width': 732, 'goal_post': -366,
                           'arc1_leftV': 36.95, 'arc2_leftH': 53.05}
 
-    _stats_dimensions = {'left': 0, 'right': 70, 'bottom': 0, 'top': 105,
+    _stats_dimensions = {'top': 0, 'bottom': 70, 'left': 0, 'right': 105,
                          'width': 70, 'center_width': 35, 'length': 105, 'center_length': 52.5,
                          'six_yard_from_side': 26, 'six_yard_width': 18, 'six_yard_length': 6,
                          'penalty_area_from_side': 15, 'penalty_area_width': 40, 'penalty_area_length': 16.5,
                          'left_penalty': 11, 'right_penalty': 94, 'circle_size': 9.15,
                          'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 31.34,
                          'arc1_leftV': 36.95, 'arc2_leftH': 53.05}
-
-    def __init__(self, figsize=None, layout=None, pitch_type='opta', orientation='horizontal', view='full',
+    
+    _statsperform_dimensions = {'top': 68, 'bottom': 0, 'left': 0, 'right': 105,
+                                'width': 68, 'center_width': 34, 'length': 105, 'center_length': 52.5,
+                                'six_yard_from_side': 24.84, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
+                                'penalty_area_from_side': 13.84, 'penalty_area_width': 40.32, 'penalty_area_length': 16.5,
+                                'left_penalty': 11, 'right_penalty':94, 'circle_size': 9.15,
+                                'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 30.34,
+                                'arc1_leftV':36.95, 'arc2_leftH': 53.05}
+    
+    def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
                  pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
                  pad_left=4, pad_right=4, pad_bottom=4, pad_top=4, pitch_length=None, pitch_width=None,
                  goal_type='line', label=False, tick=False, axis=False, tight_layout=True):
@@ -170,6 +182,13 @@ class Pitch(object):
             self.pitch_length = self.length
             self.pitch_width = self.width
             self.aspect = 1
+        
+        elif pitch_type == 'statsperform':
+            for k, v in self._statsperform_dimensions.items():
+                setattr(self, k, v)
+            self.pitch_length = self.length
+            self.pitch_width = self.width
+            self.aspect = 1
 
         elif pitch_type == 'tracab':
             for k, v in self._tracab_dimensions.items():
@@ -177,31 +196,76 @@ class Pitch(object):
             if (pitch_length is None) or (pitch_width is None):
                 raise TypeError("Invalid argument: pitch_length and pitch_width must be specified for a tracab pitch.")
             self.aspect = 1
-            self.left = pitch_width / 2 * 100
-            self.right = -(pitch_width / 2) * 100
-            self.bottom = -(pitch_length / 2) * 100
-            self.top = (pitch_length / 2) * 100
+            self.top = pitch_width / 2 * 100
+            self.bottom = -(pitch_width / 2) * 100
+            self.left = -(pitch_length / 2) * 100
+            self.right = (pitch_length / 2) * 100
             self.width = pitch_width * 100
             self.length = pitch_length * 100
-            self.left_penalty = self.bottom + 1100
-            self.right_penalty = self.top - 1100
+            self.left_penalty = self.left + 1100
+            self.right_penalty = self.right - 1100
             self.pad_left = self.pad_left * 100
             self.pad_bottom = self.pad_bottom * 100
             self.pad_right = self.pad_right * 100
             self.pad_top = self.pad_top * 100
 
-            # scale the padding where the aspect is equal to one
+        # scale the padding where the aspect is not equal to one, reverse aspect if vertical
         if pitch_type in ['opta', 'wyscout']:
             if self.orientation == 'vertical':
-                self.pad_bottom = self.pad_bottom * self.aspect
-                self.pad_top = self.pad_top * self.aspect
+                self.pad_bottom = int(self.pad_bottom * self.aspect)
+                self.pad_top = int(self.pad_top * self.aspect)
+                self.aspect = 1 / self.aspect
             elif self.orientation == 'horizontal':
-                self.pad_left = self.pad_left * self.aspect
-                self.pad_right = self.pad_right * self.aspect
-
+                self.pad_left = int(self.pad_left * self.aspect)
+                self.pad_right = int(self.pad_right * self.aspect)
+       
+        if pitch_color == 'grass':
+            terrain_cmap = cm.get_cmap('terrain')
+            grass = terrain_cmap((np.linspace(0.29, 0.38, 128)))
+            grass = np.concatenate([grass[::-1],grass])
+            grass = grass[50:]
+            self.grass_cmap = ListedColormap(grass)
+        
+        # set pitch extents: [xmin, xmax, ymin, ymax]
+        if self.pitch_type in ['statsbomb', 'stats']:  
+            
+            if self.orientation == 'horizontal':
+                if self.view == 'full':
+                    self.extent = [self.left - self.pad_left, self.right + self.pad_right,
+                                   self.bottom + self.pad_bottom, self.top - self.pad_top]
+                elif self.view == 'half':
+                    self.extent = [self.center_length - self.pad_left, self.right + self.pad_right,
+                                   self.bottom + self.pad_bottom, self.top - self.pad_top]
+                    
+            elif self.orientation == 'vertical':               
+                if self.view == 'full':
+                    self.extent = [self.top - self.pad_left, self.bottom + self.pad_right,
+                                   self.left - self.pad_bottom, self.right + self.pad_top] 
+                elif self.view == 'half':
+                    self.extent = [self.top - self.pad_left, self.bottom + self.pad_right,
+                                   self.center_length - self.pad_bottom, self.right + self.pad_top]              
+                    
+        elif self.pitch_type in ['tracab', 'opta', 'wyscout','statsperform']:
+            
+            if self.orientation == 'horizontal':                     
+                if self.view == 'full':
+                    self.extent = [self.left - self.pad_left, self.right + self.pad_right,
+                                   self.bottom - self.pad_bottom, self.top + self.pad_top]
+                elif self.view == 'half':
+                    self.extent = [self.center_length - self.pad_left, self.right + self.pad_right,
+                                   self.bottom - self.pad_bottom, self.top + self.pad_top]                 
+                        
+            elif self.orientation == 'vertical':
+                if self.view == 'full':
+                    self.extent = [self.top + self.pad_left, self.bottom - self.pad_right,
+                                   self.left - self.pad_bottom, self.right + self.pad_top]
+                elif self.view == 'half':
+                    self.extent = [self.top + self.pad_left, self.bottom - self.pad_right,
+                                   self.center_length - self.pad_bottom, self.right + self.pad_top]
+                                    
         # data checks
         if not isinstance(self.axis, bool):
-            raise TypeError("Invalid argument: axis should be bool (True or False).")
+            raise TypeError("Invalid argument: axis should be bool (True or False).")                
 
         if not isinstance(self.stripe, bool):
             raise TypeError("Invalid argument: stripe should be bool (True or False).")
@@ -215,7 +279,7 @@ class Pitch(object):
         if not isinstance(self.tight_layout, bool):
             raise TypeError("Invalid argument: tight_layout should be bool (True or False).")
 
-        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout']
+        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout','statsperform']
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
 
@@ -239,6 +303,25 @@ class Pitch(object):
         valid_view = ['full', 'half']
         if self.view not in valid_view:
             raise TypeError(f'Invalid argument: view should be in {valid_view}')
+        
+        # make sure padding not too large for the pitch
+        if self.orientation == 'horizontal':                 
+            if abs(min(self.pad_left,0) + min(self.pad_right,0)) >= self.length:
+                raise ValueError("pad_left/pad_right too negative for pitch length")
+            if abs(min(self.pad_top,0) + min(self.pad_bottom,0)) >= self.width:
+                raise ValueError("pad_top/pad_bottom too negative for pitch width")
+            if self.view == 'half':
+                if abs(min(self.pad_left,0) + min(self.pad_right,0)) >= self.length/2:
+                    raise ValueError("pad_left/pad_right too negative for pitch length")
+
+        if self.orientation == 'vertical':
+            if abs(min(self.pad_left,0) + min(self.pad_right,0)) >= self.width:
+                raise ValueError("pad_left/pad_right too negative for pitch width")
+            if abs(min(self.pad_top,0) + min(self.pad_bottom,0)) >= self.length:
+                raise ValueError("pad_top/pad_bottom too negative for pitch length")
+            if self.view == 'half':
+                if abs(min(self.pad_top,0) + min(self.pad_bottom,0)) >= self.length/2:
+                    raise ValueError("pad_top/pad_bottom too negative for pitch length")   
 
     def _setup_subplots(self):
 
@@ -260,141 +343,187 @@ class Pitch(object):
         self.fig = fig
         self.axes = axes
 
-    def _set_axes(self, ax):
+    def _set_axes(self, ax):   
+        # set axis on/off, and labels and ticks
         if self.axis:
             axis_option = 'on'
         elif not self.axis:
-            axis_option = 'off'
+            axis_option = 'off'       
+        ax.axis(axis_option)        
+        ax.tick_params(top=self.tick, bottom=self.tick, left=self.tick, right=self.tick,
+                       labelleft=self.label, labelbottom=self.label)
+        # set limits and aspect
+        ax.set_xlim(self.extent[0], self.extent[1])
+        ax.set_ylim(self.extent[2], self.extent[3])
+        ax.set_aspect(self.aspect)
+             
+    def _set_background(self,ax):
+        if (self.pitch_color != 'grass'):
+            ax.axhspan(self.extent[2], self.extent[3], 0, 1, facecolor=self.pitch_color)
+            
+        if (self.stripe==False) & (self.pitch_color=='grass'):
+            pitch_color = np.random.normal(size=(1000,1000))
+            ax.imshow(pitch_color,cmap=self.grass_cmap,extent=self.extent,aspect=self.aspect)   
+            
+        if self.stripe:
+            # calculate stripe length
+            pitch_length = self.right - self.left
+            stripe1_length = self.six_yard_length
+            stripe2_length = (self.penalty_area_length - self.six_yard_length) / 2
+            stripe3_length = (pitch_length - (
+                self.penalty_area_length - self.six_yard_length) * 3 - self.six_yard_length * 2) / 10
+            
+            if self.pitch_color=='grass':
+                # the scale has been manually selected so at that scale the stripe lengths are integers
+                if self.pitch_type in ['statsbomb','wyscout']:
+                    scale = 5
+                elif self.pitch_type == 'opta':
+                    scale = 25
+                elif self.pitch_type == 'stats':
+                    scale = 20
+                elif self.pitch_type == 'statsperform':
+                    scale = 10
+                elif self.pitch_type == 'tracab':
+                    scale = 1/10
+                    
+                stripe1_length = int(scale*stripe1_length)
+                stripe2_length = int(scale*stripe2_length)
+                stripe3_length = int(scale*stripe3_length)
+                s = int(scale*pitch_length)        
+                
+                if self.orientation == 'horizontal':
+                    s = s + int((max(self.pad_left,0) + max(self.pad_right,0))*scale)
+                    start = int(max(self.pad_left,0) * scale)
+                    if self.pad_left < 0:
+                        slice1 = int(-self.pad_left * scale)
+                    else:
+                        slice1 = None
+                    if self.pad_right < 0:
+                        slice2 = int(self.pad_right * scale)
+                    else:
+                        slice2 = None
+                    if self.pad_bottom < 0:
+                        pitch_start = None
+                    else:
+                        pitch_start = int(s * self.pad_bottom/(self.pad_bottom+self.pad_top+self.width))
+                    if self.pad_top < 0:
+                        pitch_end = None
+                    else:
+                        pitch_end = s - int(s * self.pad_top/(self.pad_bottom+self.pad_top+self.width))
+                                
+                elif self.orientation == 'vertical':
+                    s = s + int((max(self.pad_bottom,0) + max(self.pad_top,0))*scale)
+                    start = int(max(self.pad_bottom,0) * scale)
+                    if self.pad_bottom < 0:
+                        slice1 = int(-self.pad_bottom * scale)
+                    else:
+                        slice1 = None
+                    if self.pad_top < 0:
+                        slice2 = int(self.pad_top * scale)
+                    else:
+                        slice2 = None
+                    if self.pad_left < 0:
+                        pitch_start = None
+                    else:
+                        pitch_start = int(s * self.pad_left/(self.pad_left+self.pad_right+self.width))
+                    if self.pad_right < 0:
+                        pitch_end = None
+                    else:
+                        pitch_end = s - int(s * self.pad_right/(self.pad_left+self.pad_right+self.width))
+                        
+                # if half a pitch slice off half of the grass background
+                if self.view == 'half':
+                    if slice1 is not None:
+                        slice1 = slice1 + int((self.length/2)*scale)
+                    else:
+                        slice1 = int((self.length/2)*scale)
+                
+                pitch_color = np.random.normal(size=(s,s))
+            
+            # calculate pitch width
+            if self.pitch_type in ['statsbomb', 'stats']:
+                pitch_width = self.bottom - self.top
+            elif self.pitch_type in ['tracab', 'opta', 'wyscout','statsperform']:
+                pitch_width = self.top - self.bottom
+                
+            # calculate stripe start and end
+            if self.orientation == 'vertical':
+                total_width = pitch_width + self.pad_left + self.pad_right
+                stripe_start = max(self.pad_left, 0) / total_width
+                stripe_end = min((self.pad_left + pitch_width) / total_width, 1)
+                
+            elif self.orientation == 'horizontal':
+                total_width = pitch_width + self.pad_bottom + self.pad_top
+                stripe_start = max(self.pad_bottom, 0) / total_width
+                stripe_end = min((self.pad_bottom + pitch_width) / total_width, 1)
 
-        # set up vertical pitch
-        if self.orientation == 'vertical':
-            if self.view == 'full':
-                ax.set_aspect(1 / self.aspect)
-                ax.axis(axis_option)
-                ax.tick_params(top=self.tick, bottom=self.tick, left=self.tick, right=self.tick,
-                               labelleft=self.label, labelbottom=self.label)
-                if self.pitch_type in ['statsbomb', 'stats']:
-                    ax.set_xlim(self.left - self.pad_left, self.right + self.pad_right)
-                    ax.axvspan(self.left - self.pad_left, self.right + self.pad_right, 0, 1, facecolor=self.pitch_color)
-                elif self.pitch_type in ['tracab', 'opta', 'wyscout']:
-                    ax.set_xlim(self.left + self.pad_left, self.right - self.pad_right)
-                    ax.axvspan(self.left + self.pad_left, self.right - self.pad_right, 0, 1, facecolor=self.pitch_color)
-                ax.set_ylim(self.bottom - self.pad_bottom, self.top + self.pad_top)
+            # draw stripes
+            if self.pitch_color!='grass':
+                start = int(self.left)
 
-            elif self.view == 'half':
-                ax.set_aspect(1 / self.aspect)
-                ax.axis(axis_option)
-                ax.tick_params(top=self.tick, bottom=self.tick, left=self.tick, right=self.tick,
-                               labelleft=self.label, labelbottom=self.label)
-                if self.pitch_type in ['statsbomb', 'stats']:
-                    ax.set_xlim(self.left - self.pad_left, self.right + self.pad_right)
-                    ax.axvspan(self.left - self.pad_left, self.right + self.pad_right, 0, 1, facecolor=self.pitch_color)
-                elif self.pitch_type in ['tracab', 'opta', 'wyscout']:
-                    ax.set_xlim(self.left + self.pad_left, self.right - self.pad_right)
-                    ax.axvspan(self.left + self.pad_left, self.right - self.pad_right, 0, 1, facecolor=self.pitch_color)
-                ax.set_ylim(self.center_length - self.pad_bottom, self.top + self.pad_top)
-
-        # set up horizontal pitch
-        elif self.orientation == 'horizontal':
-            if self.view == 'full':
-                ax.set_aspect(self.aspect)
-                ax.axis(axis_option)
-                ax.tick_params(top=self.tick, bottom=self.tick, left=self.tick, right=self.tick,
-                               labelleft=self.label, labelbottom=self.label)
-                if self.pitch_type in ['statsbomb', 'stats']:
-                    ax.set_ylim(self.right + self.pad_bottom, self.left - self.pad_top)
-                    ax.axhspan(self.right + self.pad_bottom, self.left - self.pad_top, 0, 1, facecolor=self.pitch_color)
-                elif self.pitch_type in ['tracab', 'opta', 'wyscout']:
-                    ax.set_ylim(self.right - self.pad_bottom, self.left + self.pad_top)
-                    ax.axhspan(self.right - self.pad_bottom, self.left + self.pad_top, 0, 1, facecolor=self.pitch_color)
-                ax.set_xlim(self.bottom - self.pad_left, self.top + self.pad_right)
-
-            elif self.view == 'half':
-                ax.set_aspect(self.aspect)
-                ax.axis(axis_option)
-                ax.tick_params(top=self.tick, bottom=self.tick, left=self.tick, right=self.tick,
-                               labelleft=self.label, labelbottom=self.label)
-                if self.pitch_type in ['statsbomb', 'stats']:
-                    ax.set_ylim(self.right + self.pad_bottom, self.left - self.pad_top)
-                    ax.axhspan(self.right + self.pad_bottom, self.left - self.pad_top, 0, 1, facecolor=self.pitch_color)
-                elif self.pitch_type in ['tracab', 'opta', 'wyscout']:
-                    ax.set_ylim(self.right - self.pad_bottom, self.left + self.pad_top)
-                    ax.axhspan(self.right - self.pad_bottom, self.left + self.pad_top, 0, 1, facecolor=self.pitch_color)
-                ax.set_xlim(self.center_length - self.pad_left, self.top + self.pad_right)
-
-    def _draw_stripes(self, ax):
-        # calculate stripe length
-        pitch_length = self.top - self.bottom
-        stripe1_length = self.six_yard_length
-        stripe2_length = (self.penalty_area_length - self.six_yard_length) / 2
-        stripe3_length = (pitch_length - (
-                    self.penalty_area_length - self.six_yard_length) * 3 - self.six_yard_length * 2) / 10
-
-        # calculate pitch width
-        if self.pitch_type in ['statsbomb', 'stats']:
-            pitch_width = self.right - self.left
-        elif self.pitch_type in ['tracab', 'opta', 'wyscout']:
-            pitch_width = self.left - self.right
-
-        # calculate stripe start and end
-        if self.orientation == 'vertical':
-            total_width = pitch_width + self.pad_left + self.pad_right
-            stripe_start = max(self.pad_left, 0) / total_width
-            stripe_end = min((self.pad_left + pitch_width) / total_width, 1)
-        elif self.orientation == 'horizontal':
-            total_width = pitch_width + self.pad_bottom + self.pad_top
-            stripe_start = max(self.pad_bottom, 0) / total_width
-            stripe_end = min((self.pad_bottom + pitch_width) / total_width, 1)
-
-        # draw stripes
-        start = self.bottom
-        for stripe in range(1, 19):
-            if stripe in [1, 18]:
-                end = round(start + stripe1_length, 2)
-            elif stripe in [2, 3, 4, 15, 16, 17]:
-                end = round(start + stripe2_length, 2)
-            else:
-                end = round(start + stripe3_length, 2)
-            if (stripe % 2 == 1) & (self.orientation == 'vertical'):
-                ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
-            elif (stripe % 2 == 1) & (self.orientation == 'horizontal'):
-                ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
-            start = end
-
+            for stripe in range(1, 19):
+                if stripe in [1, 18]:
+                    end = round(start + stripe1_length, 2)
+                elif stripe in [2, 3, 4, 15, 16, 17]:
+                    end = round(start + stripe2_length, 2)
+                else:
+                    end = round(start + stripe3_length, 2)
+                if (stripe % 2 == 1) & (self.orientation == 'vertical'):
+                    if self.pitch_color!='grass':
+                        ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
+                    else:
+                        pitch_color[start:end,pitch_start:pitch_end] = pitch_color[start:end,pitch_start:pitch_end] + 2
+                        
+                elif (stripe % 2 == 1) & (self.orientation == 'horizontal'):
+                    if self.pitch_color!='grass':
+                        ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
+                    else:
+                        pitch_color[pitch_start:pitch_end,start:end] = pitch_color[pitch_start:pitch_end:,start:end] + 2
+                start = end
+                
+        # draw grass background
+        if (self.stripe) & (self.pitch_color=='grass'):
+            if self.orientation == 'horizontal':
+                pitch_color = pitch_color[:,slice1:slice2]
+            elif self.orientation == 'vertical':
+                pitch_color = pitch_color[slice1:slice2,:]
+            ax.imshow(pitch_color,cmap=self.grass_cmap,extent=self.extent,aspect=self.aspect,origin='lower') 
+                
     def _draw_pitch_lines(self, ax):
         if self.orientation == 'horizontal':
             if self.pitch_type in ['statsbomb', 'stats']:
-                pitch_markings = patches.Rectangle((self.bottom, self.left), self.length, self.width,
+                pitch_markings = patches.Rectangle((self.left, self.top), self.length, self.width,
                                                    fill=False, linewidth=self.linewidth, color=self.line_color)
             else:
-                pitch_markings = patches.Rectangle((self.bottom, self.right), self.length, self.width,
+                pitch_markings = patches.Rectangle((self.left, self.bottom), self.length, self.width,
                                                    fill=False, linewidth=self.linewidth, color=self.line_color)
-            midline = lines.Line2D([self.center_length, self.center_length], [self.right, self.left],
+            midline = lines.Line2D([self.center_length, self.center_length], [self.bottom, self.top],
                                    linewidth=self.linewidth, color=self.line_color, zorder=1)
         elif self.orientation == 'vertical':
             if self.pitch_type in ['statsbomb', 'stats']:
-                pitch_markings = patches.Rectangle((self.left, self.bottom), self.width, self.length,
+                pitch_markings = patches.Rectangle((self.top, self.left), self.width, self.length,
                                                    fill=False, linewidth=self.linewidth, color=self.line_color)
             else:
-                pitch_markings = patches.Rectangle((self.right, self.bottom), self.width, self.length,
+                pitch_markings = patches.Rectangle((self.bottom, self.left), self.width, self.length,
                                                    fill=False, linewidth=self.linewidth, color=self.line_color)
-            midline = lines.Line2D([self.left, self.right], [self.center_length, self.center_length],
+            midline = lines.Line2D([self.top, self.bottom], [self.center_length, self.center_length],
                                    linewidth=self.linewidth, color=self.line_color, zorder=1)
         ax.add_patch(pitch_markings)
         ax.add_artist(midline)
 
+
     def _draw_goals(self, ax):
         if self.goal_type == 'box':
             if self.orientation == 'horizontal':
-                goal1 = patches.Rectangle((self.top, self.goal_post), self.goal_depth, self.goal_width,
+                goal1 = patches.Rectangle((self.right, self.goal_post), self.goal_depth, self.goal_width,
                                           fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
-                goal2 = patches.Rectangle((self.bottom - self.goal_depth, self.goal_post), self.goal_depth,
+                goal2 = patches.Rectangle((self.left - self.goal_depth, self.goal_post), self.goal_depth,
                                           self.goal_width,
                                           fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
             elif self.orientation == 'vertical':
-                goal1 = patches.Rectangle((self.goal_post, self.top), self.goal_width, self.goal_depth,
+                goal1 = patches.Rectangle((self.goal_post, self.right), self.goal_width, self.goal_depth,
                                           fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
-                goal2 = patches.Rectangle((self.goal_post, self.bottom - self.goal_depth), self.goal_width,
+                goal2 = patches.Rectangle((self.goal_post, self.left - self.goal_depth), self.goal_width,
                                           self.goal_depth,
                                           fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
             ax.add_patch(goal1)
@@ -402,28 +531,28 @@ class Pitch(object):
 
         elif self.goal_type == 'line':
             if self.orientation == 'horizontal':
-                goal1 = lines.Line2D([self.top, self.top], [self.goal_post + self.goal_width, self.goal_post],
+                goal1 = lines.Line2D([self.right, self.right], [self.goal_post + self.goal_width, self.goal_post],
                                      linewidth=self.linewidth * 2, color=self.line_color)
-                goal2 = lines.Line2D([self.bottom, self.bottom], [self.goal_post + self.goal_width, self.goal_post],
+                goal2 = lines.Line2D([self.left, self.left], [self.goal_post + self.goal_width, self.goal_post],
                                      linewidth=self.linewidth * 2, color=self.line_color)
             elif self.orientation == 'vertical':
-                goal1 = lines.Line2D([self.goal_post + self.goal_width, self.goal_post], [self.top, self.top],
+                goal1 = lines.Line2D([self.goal_post + self.goal_width, self.goal_post], [self.right, self.right],
                                      linewidth=self.linewidth * 2, color=self.line_color)
-                goal2 = lines.Line2D([self.goal_post + self.goal_width, self.goal_post], [self.bottom, self.bottom],
+                goal2 = lines.Line2D([self.goal_post + self.goal_width, self.goal_post], [self.left, self.left],
                                      linewidth=self.linewidth * 2, color=self.line_color)
             ax.add_artist(goal1)
             ax.add_artist(goal2)
 
     def _boxes(self, box_from_side, box_length, box_width, ax):
         if self.orientation == 'horizontal':
-            box1 = patches.Rectangle((self.bottom, box_from_side), box_length, box_width,
+            box1 = patches.Rectangle((self.left, box_from_side), box_length, box_width,
                                      fill=False, linewidth=self.linewidth, color=self.line_color)
-            box2 = patches.Rectangle((self.top - box_length, box_from_side), box_length, box_width,
+            box2 = patches.Rectangle((self.right - box_length, box_from_side), box_length, box_width,
                                      fill=False, linewidth=self.linewidth, color=self.line_color)
         elif self.orientation == 'vertical':
-            box1 = patches.Rectangle((box_from_side, self.bottom), box_width, box_length,
+            box1 = patches.Rectangle((box_from_side, self.left), box_width, box_length,
                                      fill=False, linewidth=self.linewidth, color=self.line_color)
-            box2 = patches.Rectangle((box_from_side, self.top - box_length), box_width, box_length,
+            box2 = patches.Rectangle((box_from_side, self.right - box_length), box_width, box_length,
                                      fill=False, linewidth=self.linewidth, color=self.line_color)
         ax.add_patch(box1)
         ax.add_patch(box2)
@@ -561,8 +690,7 @@ class Pitch(object):
 
     def _draw_ax(self, ax):
         self._set_axes(ax)
-        if self.stripe:
-            self._draw_stripes(ax)
+        self._set_background(ax)
         self._draw_pitch_lines(ax)
         if self.goal_type is not None:
             self._draw_goals(ax)
@@ -643,16 +771,21 @@ class Pitch(object):
         """
         if ax is None:
             raise TypeError("kdeplot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
 
         # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the kdeplot)
         zorder = kwargs.pop('zorder', 2)
 
         # plot kde plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
-            clip = kwargs.pop('clip', ((self.bottom, self.top), (self.right, self.left)))
+            clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
             sns.kdeplot(x, y, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
         elif self.orientation == 'vertical':
-            clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
+            clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
             sns.kdeplot(y, x, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
 
     def hexbin(self, x, y, *args, ax=None, **kwargs):
@@ -669,6 +802,11 @@ class Pitch(object):
         """
         if ax is None:
             raise TypeError("hexbin() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
 
         # rise hexbin above background/ stripes (the axhspan/axvspan have the same zorder as the hexbin)
         zorder = kwargs.pop('zorder', 2)
@@ -678,14 +816,29 @@ class Pitch(object):
 
         # plot hexbin plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
-            extent = kwargs.pop('extent', (self.bottom, self.top, self.right, self.left))
+            extent = kwargs.pop('extent', (self.left, self.right, self.bottom, self.top))
             ax.hexbin(x, y, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
 
         elif self.orientation == 'vertical':
-            extent = kwargs.pop('extent', (self.left, self.right, self.bottom, self.top))
+            extent = kwargs.pop('extent', (self.top, self.bottom, self.left, self.right))
             ax.hexbin(y, x, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
-
-    def scatter(self, x, y, *args, ax=None, **kwargs):
+            
+    def _mscatter(self, x, y, markers=None, ax=None, **kwargs):
+        # based on https://stackoverflow.com/questions/52303660/iterating-markers-in-plots/52303895#52303895
+        sc = ax.scatter(x, y, **kwargs)
+        if (markers is not None):
+            paths = []
+            for marker in markers:
+                if isinstance(marker, mmarkers.MarkerStyle):
+                    marker_obj = marker
+                else:
+                    marker_obj = mmarkers.MarkerStyle(marker)
+                path = marker_obj.get_path().transformed(marker_obj.get_transform())
+                paths.append(path)
+        sc.set_paths(paths)
+        return sc
+        
+    def scatter(self, x, y, *args, ax=None, rotation_degrees=None, marker=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.scatter,
         which automatically flips the x and y coordinates if the pitch is vertical.
         Can optionally use a football marker with marker='football'.
@@ -700,36 +853,67 @@ class Pitch(object):
         """
         if ax is None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
+        if marker is None:
+            marker = rcParams['scatter.marker']
 
         # rise scatter above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
         zorder = kwargs.pop('zorder', 2)
 
         # if using the football marker set the colors and lines, delete from kwargs so not used twice
         plot_football = False
-        if 'marker' in kwargs.keys():
-            if kwargs['marker'] == 'football':
-                del kwargs['marker']
-                plot_football = True
-                linewidths = kwargs.pop('linewidths', 0.5)
-                hexcolor = kwargs.pop('c', 'white')
-                pentcolor = kwargs.pop('edgecolors', 'black')
-                n = len(x)
-                x = np.repeat(x, 2).copy()
-                y = np.repeat(y, 2).copy()
-                paths = np.tile([football_hexagon_marker, football_pentagon_marker], n)
-                c = np.tile([hexcolor, pentcolor], n)
-                # to make the football the same size as the circle marker we need to expand it
-                # the markers are a different shape and this is the easiest way to make them similar
-                expansion_factor = 0.249
-                s = kwargs.pop('s', 400)
-                s = s * expansion_factor
-
+        if marker == 'football':
+            plot_football = True
+            linewidths = kwargs.pop('linewidths', 0.5)
+            hexcolor = kwargs.pop('c', 'white')
+            pentcolor = kwargs.pop('edgecolors', 'black')
+            n = len(x)
+            x = np.repeat(x, 2).copy()
+            y = np.repeat(y, 2).copy()
+            paths = np.tile([football_hexagon_marker, football_pentagon_marker], n)
+            c = np.tile([hexcolor, pentcolor], n)
+            # to make the football the same size as the circle marker we need to expand it
+            # the markers are a different shape and this is the easiest way to make them similar
+            expansion_factor = 0.249
+            s = kwargs.pop('s', 400)
+            s = s * expansion_factor
+        
+        if rotation_degrees is not None:
+            x = np.ma.ravel(x)
+            y = np.ma.ravel(y)
+            rotation_degrees = np.ma.ravel(rotation_degrees)
+            if x.size != y.size:
+                raise ValueError("x and y must be the same size")
+            if x.size != rotation_degrees.size:
+                raise ValueError("x and rotation_degrees must be the same size")
+                
+            if not isinstance(rotation_degrees,(collections.Sequence,np.ndarray)):
+                # rotated counter clockwise - this makes it clockwise
+                rotation_degrees = np.array(-rotation_degrees)
+                if self.orientation == 'horizontal':
+                    rotation_degrees = rotation_degrees - 90                    
+                t = mmarkers.MarkerStyle(marker=marker)
+                t._transform = t.get_transform().rotate_deg(rotation_degrees)
+                markers = [t] 
+            else:
+                # rotated counter clockwise - this makes it clockwise with zero facing the direction of play
+                rotation_degrees = -rotation_degrees
+                if self.orientation == 'horizontal':
+                    rotation_degrees = rotation_degrees - 90  
+                markers = []
+                for i in range(len(rotation_degrees)):
+                    t = mmarkers.MarkerStyle(marker=marker)
+                    t._transform = t.get_transform().rotate_deg(rotation_degrees[i])
+                    markers.append(t)
+                    
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation == 'horizontal':
             if plot_football:
                 sc = ax.scatter(x, y, c=c, edgecolors=pentcolor, s=s,
                                 linewidths=linewidths, zorder=zorder, *args, **kwargs)
                 sc.set_paths(paths)
+            elif rotation_degrees is not None:
+                sc = self._mscatter(x, y, zorder=zorder, markers=markers, ax=ax, **kwargs)
             else:
                 ax.scatter(x, y, zorder=zorder, *args, **kwargs)
 
@@ -738,6 +922,8 @@ class Pitch(object):
                 sc = ax.scatter(y, x, c=c, edgecolors=pentcolor, s=s,
                                 linewidths=linewidths, zorder=zorder, *args, **kwargs)
                 sc.set_paths(paths)
+            elif rotation_degrees is not None:
+                sc = self._mscatter(y, x, zorder=zorder, markers=markers, ax=ax, **kwargs)
             else:
                 ax.scatter(y, x, zorder=zorder, *args, **kwargs)
 
@@ -759,10 +945,13 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             color = np.tile(np.array(color), (n_segments, 1))
             color = np.append(color, np.linspace(0.1, 0.5, n_segments).reshape(-1, 1), axis=1)
+            if self.pitch_type in ['stats','statsbomb']:
+                color = color[::-1]
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         elif self.orientation == 'vertical':
             color = np.tile(np.array(color), (n_segments, 1))
             color = np.append(color, np.linspace(0.5, 0.1, n_segments).reshape(-1, 1), axis=1)
+            color = color[::-1]
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         return cmap
 
@@ -800,20 +989,25 @@ class Pitch(object):
             raise TypeError("Invalid argument: comet should be bool (True or False).")
         if not isinstance(transparent, bool):
             raise TypeError("Invalid argument: transparent should be bool (True or False).")
-
+            
+        xstart = np.ravel(xstart)
+        ystart = np.ravel(ystart)
+        xend = np.ravel(xend)
+        yend = np.ravel(yend)
+        
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")        
+            
         lw = kwargs.pop('lw', 5)
         color = kwargs.pop('color', '#34afed')
         color = to_rgb(color)
 
         # set pitch array for line segments
-        if self.orientation == 'horizontal':
-            if self.view == 'full':
-                pitch_array = np.linspace(self.bottom, self.top, n_segments)
-            elif self.view == 'half':
-                pitch_array = np.linspace(self.center_length, self.top, n_segments)
-
-        elif self.orientation == 'vertical':
-            pitch_array = np.linspace(self.left, self.right, n_segments)
+        pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
 
             # set color map, lw and segments
         if transparent and comet:
@@ -868,6 +1062,18 @@ class Pitch(object):
         angles = kwargs.pop('angles', 'xy')
         scale = kwargs.pop('scale', 1)
         width = kwargs.pop('width', 4)
+        
+        xstart = np.ravel(xstart)
+        ystart = np.ravel(ystart)
+        xend = np.ravel(xend)
+        yend = np.ravel(yend)
+        
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")  
 
         # vectors for direction
         u = xend - xstart
@@ -884,7 +1090,7 @@ class Pitch(object):
                       units=units, scale_units=scale_units, angles=angles, scale=scale, zorder=zorder, width=width,
                       *args, **kwargs)
 
-    def joint_plot(self, x, y, *args, **kwargs):
+    def jointplot(self, x, y, *args, **kwargs):
         """ Utility wrapper around seaborn.jointplot
         which automatically flips the x and y coordinates if the pitch is vertical and sets the height from the figsize.
         Parameters
@@ -892,6 +1098,10 @@ class Pitch(object):
         x, y : array-like or scalar.
             Commonly, these parameters are 1D arrays.
         """
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
         zorder = kwargs.pop('zorder', 2)
         height = kwargs.pop('height', self.figsize[1])
         # plot. Reverse coordinates if vertical plot 
