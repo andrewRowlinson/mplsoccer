@@ -220,9 +220,9 @@ class Pitch(object):
                 self.pad_right = int(self.pad_right * self.aspect)
        
         if pitch_color == 'grass':
-            cm = LinearSegmentedColormap.from_list('grass', [(0.25,0.44,0.12,1),(0.48,1,0.55,1)], N=50)
+            cm = LinearSegmentedColormap.from_list('grass', [(0.25, 0.44, 0.12, 1), (0.48, 1, 0.55, 1)], N=50)
             grass = cm(np.linspace(0, 1, 50))
-            grass = np.concatenate((grass[::-1],grass))
+            grass = np.concatenate((grass[::-1], grass))
             grass = grass[40:-20]
             self.grass_cmap = ListedColormap(grass)
         
