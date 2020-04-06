@@ -2,13 +2,14 @@
 mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.
 
 mplsoccer currently supports several data formats:
-- Opta
-- Tracab (ChyronHego) tracking data
 - Statsbomb
+- Stats Perform
+- Tracab (ChyronHego) tracking data
+- Opta
 - STATS (formerly Prozone)
 - Wyscout (the pitch dimensions are taken from ggsoccer: https://github.com/Torvaney/ggsoccer)
 
-The following example draws an Opta pitch (the default) with stripes.
+The following example draws a Statsbomb pitch (the default) with stripes.
 ``` python
 from mplsoccer.pitch import Pitch
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
@@ -30,7 +31,6 @@ fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
 
 # This library is under development
 The following developments are planned
-- rotation of scatter plot markers
 - create pass map methods
 - add examples (team line-up / pass maps/ pressure maps/ subplots)
 - add method for plotting Voronoi diagrams
