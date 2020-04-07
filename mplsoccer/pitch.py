@@ -14,6 +14,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.colors import to_rgb
 from matplotlib import rcParams
+from scipy.stats import binned_statistic_2d
 from .utils import football_hexagon_marker, football_pentagon_marker, _mscatter
 import collections
 import warnings
@@ -1101,3 +1102,118 @@ class Pitch(object):
         self.draw(ax=joint_plot_ax)
 
         return joint_plot
+    
+    def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5,4)):
+        """ Utility wrapper around scipy.stats.binned_statistic_2d
+        which automatically sets the range, changes some of the defaults,
+        and outputs the grids and centers for plotting.
+        
+        The default statistic has been changed to count instead of mean.
+        The default bins has been set to (5,4).
+
+        Parameters
+        ----------
+        x, y, values : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+            If the statistic is 'count' then values are ignored.       
+        statistic : string or callable, optional
+            The statistic to compute (default is 'count').
+            The following statistics are available:
+              * 'count' : compute the count of points within each bin.  This is
+                 identical to an unweighted histogram.  `values` array is not
+                 referenced.
+              * 'mean' : compute the mean of values for points within each bin.
+                 Empty bins will be represented by NaN.
+              * 'std' : compute the standard deviation within each bin. This
+                 is implicitly calculated with ddof=0.
+              * 'median' : compute the median of values for points within each
+                 bin. Empty bins will be represented by NaN.
+              * 'sum' : compute the sum of values for points within each bin.
+                 This is identical to a weighted histogram.
+              * 'min' : compute the minimum of values for points within each bin.
+                 Empty bins will be represented by NaN.
+              * 'max' : compute the maximum of values for point within each bin.
+                 Empty bins will be represented by NaN.
+              * function : a user-defined function which takes a 1D array of
+                 values, and outputs a single numerical statistic. This function
+                 will be called on the values in each bin.  Empty bins will be
+                 represented by function([]), or NaN if this returns an error.
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification:
+              * the number of bins for the two dimensions (nx = ny = bins),
+              * the number of bins in each dimension (nx, ny = bins),
+              * the bin edges for the two dimensions (x_edge = y_edge = bins),
+              * the bin edges in each dimension (x_edge, y_edge = bins).
+            If the bin edges are specified, the number of bins will be,
+            (nx = len(x_edge)-1, ny = len(y_edge)-1).
+            
+        Returns
+        ----------
+        statistic : (nx, ny) ndarray
+            The values of the selected statistic in each two-dimensional bin.
+        X : (nx + 1, ny + 1) ndarray
+            The grid edges along the first dimension.
+        Y : (ny + 1, nx + 1) ndarray
+            The grid edges along the second dimension.
+        cx : (nx * ny) array
+            This contains the bin centers along the first dimension.
+        cy : (nx * ny) array
+            This contains the bin centers along the second dimension.
+        """
+        
+        x = np.ravel(x)
+        y = np.ravel(y)
+
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+            
+        if values is not None:
+            values = np.ravel(values)
+            
+        if (values is None) & (statistic=='count'):
+            values = x
+            
+        if (values is None) & (statistic!='count'):
+            raise ValueError("values on which to calculate the statistic are missing")
+        
+        if values.size != x.size:
+            raise ValueError("x and values must be the same size")
+                      
+        if self.invert_y:
+            pitch_range = [[self.left, self.right],[self.top,self.bottom]]
+        else:
+            pitch_range = [[self.left, self.right],[self.bottom,self.top]]
+            
+        statistic, xedge, yedge, _ = binned_statistic_2d(x,y,values,statistic='count',
+                                                         bins=bins,range=pitch_range)
+        
+        X, Y = np.meshgrid(xedge,yedge)
+        X = X.T
+        Y = Y.T
+        cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge),yedge[:-1] + 0.5 * np.diff(yedge))
+        binned_statistic = [statistic, X, Y, cx, cy]
+        return binned_statistic
+    
+    def heatmap(self, binned_statistic, *args, ax=None, **kwargs):
+        if ax is None:
+            raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
+        statistic, X, Y, cx, cy = binned_statistic
+        
+        if self.orientation == 'horizontal':
+            ax.pcolormesh(X,Y,statistic, alpha=0.5,zorder=2,cmap='viridis')
+        elif self.orientation == 'vertical':
+            ax.pcolormesh(Y,X,statistic, alpha=0.5,zorder=2,cmap='viridis')
+        
+        cx = cx.ravel()
+        cy = cy.ravel()
+        statistic = statistic.T.ravel()
+        
+        if self.orientation == 'horizontal':
+            for i in range(len(statistic)):
+                ax.annotate(int(statistic[i]),(cx[i],cy[i]),c='white',horizontalalignment='center',
+                            verticalalignment='center')
+        else:
+            for i in range(len(statistic)):
+                ax.annotate(int(statistic[i]),(cy[i],cx[i]),c='white',horizontalalignment='center',
+                            verticalalignment='center')    
