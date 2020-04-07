@@ -73,13 +73,15 @@ class Pitch(object):
         Whether to use Matplotlib's tight layout.
     """
 
+    # the stripe_scale has been manually selected so that all stripe widths
+    # are integers when multipled by the stripe_scale
     _opta_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
                         'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                         'six_yard_from_side': 36.8, 'six_yard_width': 26.4, 'six_yard_length': 5.8,
                         'penalty_area_from_side': 21.1, 'penalty_area_width': 57.8, 'penalty_area_length': 17.0,
                         'left_penalty': 11.5, 'right_penalty': 88.5, 'circle_size': 9.15,
                         'goal_depth': 1.9, 'goal_width': 10.76, 'goal_post': 44.62,
-                        'arc1_leftV': None, 'arc2_leftH': None}
+                        'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 25}
 
     # wyscout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
     _wyscout_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
@@ -88,7 +90,7 @@ class Pitch(object):
                            'penalty_area_from_side': 19, 'penalty_area_width': 62, 'penalty_area_length': 16,
                            'left_penalty': 10, 'right_penalty': 90, 'circle_size': 9.15,
                            'goal_depth': 1.9, 'goal_width': 12, 'goal_post': 44,
-                           'arc1_leftV': None, 'arc2_leftH': None}
+                           'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 5}
 
     _statsbomb_dimensions = {'top': 0, 'bottom': 80, 'left': 0, 'right': 120,
                              'width': 80, 'center_width': 40, 'length': 120, 'center_length': 60,
@@ -96,7 +98,7 @@ class Pitch(object):
                              'penalty_area_from_side': 18, 'penalty_area_width': 44, 'penalty_area_length': 18,
                              'left_penalty': 12, 'right_penalty': 108, 'circle_size': 10.46,
                              'goal_depth': 2.4, 'goal_width': 8, 'goal_post': 36,
-                             'arc1_leftV': 35, 'arc2_leftH': 55}
+                             'arc1_leftV': 35, 'arc2_leftH': 55, 'invert_y': True, 'stripe_scale': 5}
 
     _tracab_dimensions = {'top': None, 'bottom': None, 'left': None, 'right': None,
                           'width': None, 'center_width': 0, 'length': None, 'center_length': 0,
@@ -104,7 +106,7 @@ class Pitch(object):
                           'penalty_area_from_side': -2016, 'penalty_area_width': 4032, 'penalty_area_length': 1650,
                           'left_penalty': None, 'right_penalty': None, 'circle_size': 915,
                           'goal_depth': 200, 'goal_width': 732, 'goal_post': -366,
-                          'arc1_leftV': 36.95, 'arc2_leftH': 53.05}
+                          'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 0.1}
 
     _stats_dimensions = {'top': 0, 'bottom': 70, 'left': 0, 'right': 105,
                          'width': 70, 'center_width': 35, 'length': 105, 'center_length': 52.5,
@@ -112,7 +114,7 @@ class Pitch(object):
                          'penalty_area_from_side': 15, 'penalty_area_width': 40, 'penalty_area_length': 16.5,
                          'left_penalty': 11, 'right_penalty': 94, 'circle_size': 9.15,
                          'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 31.34,
-                         'arc1_leftV': 36.95, 'arc2_leftH': 53.05}
+                         'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': True, 'stripe_scale': 20}
     
     _statsperform_dimensions = {'top': 68, 'bottom': 0, 'left': 0, 'right': 105,
                                 'width': 68, 'center_width': 34, 'length': 105, 'center_length': 52.5,
@@ -120,8 +122,8 @@ class Pitch(object):
                                 'penalty_area_from_side': 13.84, 'penalty_area_width': 40.32,
                                 'penalty_area_length': 16.5, 'left_penalty': 11, 'right_penalty': 94,
                                 'circle_size': 9.15, 'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 30.34,
-                                'arc1_leftV': 36.95, 'arc2_leftH': 53.05}
-    
+                                'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
+      
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
                  pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
                  pad_left=4, pad_right=4, pad_bottom=4, pad_top=4, pitch_length=None, pitch_width=None,
@@ -210,7 +212,7 @@ class Pitch(object):
             self.pad_top = self.pad_top * 100
 
         # scale the padding where the aspect is not equal to one, reverse aspect if vertical
-        if pitch_type in ['opta', 'wyscout']:
+        if self.aspect != 1:
             if self.orientation == 'vertical':
                 self.pad_bottom = int(self.pad_bottom * self.aspect)
                 self.pad_top = int(self.pad_top * self.aspect)
@@ -227,7 +229,7 @@ class Pitch(object):
             self.grass_cmap = ListedColormap(grass)
         
         # set pitch extents: [xmin, xmax, ymin, ymax]
-        if self.pitch_type in ['statsbomb', 'stats']:  
+        if self.invert_y:
             
             if self.orientation == 'horizontal':
                 if self.view == 'full':
@@ -245,7 +247,7 @@ class Pitch(object):
                     self.extent = [self.top - self.pad_left, self.bottom + self.pad_right,
                                    self.center_length - self.pad_bottom, self.right + self.pad_top]              
                     
-        elif self.pitch_type in ['tracab', 'opta', 'wyscout', 'statsperform']:
+        else:
             
             if self.orientation == 'horizontal':                     
                 if self.view == 'full':
@@ -373,33 +375,21 @@ class Pitch(object):
             stripe3_length = (pitch_length - (
                 self.penalty_area_length - self.six_yard_length) * 3 - self.six_yard_length * 2) / 10
             
-            if self.pitch_color == 'grass':
-                # the scale has been manually selected so at that scale the stripe lengths are integers
-                if self.pitch_type in ['statsbomb', 'wyscout']:
-                    scale = 5
-                elif self.pitch_type == 'opta':
-                    scale = 25
-                elif self.pitch_type == 'stats':
-                    scale = 20
-                elif self.pitch_type == 'statsperform':
-                    scale = 10
-                elif self.pitch_type == 'tracab':
-                    scale = 1/10
-                    
-                stripe1_length = int(scale*stripe1_length)
-                stripe2_length = int(scale*stripe2_length)
-                stripe3_length = int(scale*stripe3_length)
-                s = int(scale*pitch_length)        
+            if self.pitch_color == 'grass':                   
+                stripe1_length = int(self.stripe_scale*stripe1_length)
+                stripe2_length = int(self.stripe_scale*stripe2_length)
+                stripe3_length = int(self.stripe_scale*stripe3_length)
+                s = int(self.stripe_scale*pitch_length)        
                 
                 if self.orientation == 'horizontal':
-                    s = s + int((max(self.pad_left, 0) + max(self.pad_right, 0))*scale)
-                    start = int(max(self.pad_left, 0) * scale)
+                    s = s + int((max(self.pad_left, 0) + max(self.pad_right, 0))*self.stripe_scale)
+                    start = int(max(self.pad_left, 0) * self.stripe_scale)
                     if self.pad_left < 0:
-                        slice1 = int(-self.pad_left * scale)
+                        slice1 = int(-self.pad_left * self.stripe_scale)
                     else:
                         slice1 = None
                     if self.pad_right < 0:
-                        slice2 = int(self.pad_right * scale)
+                        slice2 = int(self.pad_right * self.stripe_scale)
                     else:
                         slice2 = None
                     if self.pad_bottom < 0:
@@ -412,14 +402,14 @@ class Pitch(object):
                         pitch_end = s - int(s * self.pad_top/(self.pad_bottom+self.pad_top+self.width))
                                 
                 elif self.orientation == 'vertical':
-                    s = s + int((max(self.pad_bottom, 0) + max(self.pad_top, 0))*scale)
-                    start = int(max(self.pad_bottom, 0) * scale)
+                    s = s + int((max(self.pad_bottom, 0) + max(self.pad_top, 0))*self.stripe_scale)
+                    start = int(max(self.pad_bottom, 0) * self.stripe_scale)
                     if self.pad_bottom < 0:
-                        slice1 = int(-self.pad_bottom * scale)
+                        slice1 = int(-self.pad_bottom * self.stripe_scale)
                     else:
                         slice1 = None
                     if self.pad_top < 0:
-                        slice2 = int(self.pad_top * scale)
+                        slice2 = int(self.pad_top * self.stripe_scale)
                     else:
                         slice2 = None
                     if self.pad_left < 0:
@@ -434,16 +424,16 @@ class Pitch(object):
                 # if half a pitch slice off half of the grass background
                 if self.view == 'half':
                     if slice1 is not None:
-                        slice1 = slice1 + int((self.length/2)*scale)
+                        slice1 = slice1 + int((self.length/2)*self.stripe_scale)
                     else:
-                        slice1 = int((self.length/2)*scale)
+                        slice1 = int((self.length/2)*self.stripe_scale)
                 
                 pitch_color = np.random.normal(size=(s, s))
             
             # calculate pitch width
-            if self.pitch_type in ['statsbomb', 'stats']:
+            if self.invert_y:
                 pitch_width = self.bottom - self.top
-            elif self.pitch_type in ['tracab', 'opta', 'wyscout', 'statsperform']:
+            else:
                 pitch_width = self.top - self.bottom
                 
             # calculate stripe start and end
@@ -493,7 +483,7 @@ class Pitch(object):
                 
     def _draw_pitch_lines(self, ax):
         if self.orientation == 'horizontal':
-            if self.pitch_type in ['statsbomb', 'stats']:
+            if self.invert_y:
                 pitch_markings = patches.Rectangle((self.left, self.top), self.length, self.width,
                                                    fill=False, linewidth=self.linewidth, color=self.line_color)
             else:
@@ -502,7 +492,7 @@ class Pitch(object):
             midline = lines.Line2D([self.center_length, self.center_length], [self.bottom, self.top],
                                    linewidth=self.linewidth, color=self.line_color, zorder=1)
         elif self.orientation == 'vertical':
-            if self.pitch_type in ['statsbomb', 'stats']:
+            if self.invert_y:
                 pitch_markings = patches.Rectangle((self.top, self.left), self.width, self.length,
                                                    fill=False, linewidth=self.linewidth, color=self.line_color)
             else:
@@ -942,7 +932,7 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             color = np.tile(np.array(color), (n_segments, 1))
             color = np.append(color, np.linspace(0.1, 0.5, n_segments).reshape(-1, 1), axis=1)
-            if self.pitch_type in ['stats', 'statsbomb']:
+            if self.invert_y:
                 color = color[::-1]
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         elif self.orientation == 'vertical':
