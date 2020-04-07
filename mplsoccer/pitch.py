@@ -1103,7 +1103,7 @@ class Pitch(object):
 
         return joint_plot
     
-    def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5,4)):
+    def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5, 4)):
         """ Utility wrapper around scipy.stats.binned_statistic_2d
         which automatically sets the range, changes some of the defaults,
         and outputs the grids and centers for plotting.
@@ -1170,27 +1170,27 @@ class Pitch(object):
         if values is not None:
             values = np.ravel(values)
             
-        if (values is None) & (statistic=='count'):
+        if (values is None) & (statistic == 'count'):
             values = x
             
-        if (values is None) & (statistic!='count'):
+        if (values is None) & (statistic != 'count'):
             raise ValueError("values on which to calculate the statistic are missing")
         
         if values.size != x.size:
             raise ValueError("x and values must be the same size")
                       
         if self.invert_y:
-            pitch_range = [[self.left, self.right],[self.top,self.bottom]]
+            pitch_range = [[self.left, self.right], [self.top, self.bottom]]
         else:
-            pitch_range = [[self.left, self.right],[self.bottom,self.top]]
+            pitch_range = [[self.left, self.right], [self.bottom, self.top]]
             
-        statistic, xedge, yedge, _ = binned_statistic_2d(x,y,values,statistic='count',
-                                                         bins=bins,range=pitch_range)
+        statistic, xedge, yedge, _ = binned_statistic_2d(x, y, values, statistic='count',
+                                                         bins=bins, range=pitch_range)
         
-        X, Y = np.meshgrid(xedge,yedge)
+        X, Y = np.meshgrid(xedge, yedge)
         X = X.T
         Y = Y.T
-        cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge),yedge[:-1] + 0.5 * np.diff(yedge))
+        cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge), yedge[:-1] + 0.5 * np.diff(yedge))
         binned_statistic = [statistic, X, Y, cx, cy]
         return binned_statistic
     
@@ -1201,9 +1201,9 @@ class Pitch(object):
         statistic, X, Y, cx, cy = binned_statistic
         
         if self.orientation == 'horizontal':
-            ax.pcolormesh(X,Y,statistic, alpha=0.5,zorder=2,cmap='viridis')
+            ax.pcolormesh(X, Y, statistic, alpha=0.5, zorder=2, cmap='viridis')
         elif self.orientation == 'vertical':
-            ax.pcolormesh(Y,X,statistic, alpha=0.5,zorder=2,cmap='viridis')
+            ax.pcolormesh(Y, X, statistic, alpha=0.5, zorder=2, cmap='viridis')
         
         cx = cx.ravel()
         cy = cy.ravel()
@@ -1211,9 +1211,9 @@ class Pitch(object):
         
         if self.orientation == 'horizontal':
             for i in range(len(statistic)):
-                ax.annotate(int(statistic[i]),(cx[i],cy[i]),c='white',horizontalalignment='center',
+                ax.annotate(int(statistic[i]), (cx[i], cy[i]), c='white', horizontalalignment='center',
                             verticalalignment='center')
         else:
             for i in range(len(statistic)):
-                ax.annotate(int(statistic[i]),(cy[i],cx[i]),c='white',horizontalalignment='center',
+                ax.annotate(int(statistic[i]), (cy[i], cx[i]), c='white', horizontalalignment='center',
                             verticalalignment='center')    
