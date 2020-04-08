@@ -75,7 +75,7 @@ class Pitch(object):
     """
 
     # the stripe_scale has been manually selected so that all stripe widths
-    # are integers when multipled by the stripe_scale
+    # are integers when multiplied by the stripe_scale
     _opta_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
                         'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                         'six_yard_from_side': 36.8, 'six_yard_width': 26.4, 'six_yard_length': 5.8,
@@ -1187,23 +1187,23 @@ class Pitch(object):
         statistic, xedge, yedge, _ = binned_statistic_2d(x, y, values, statistic='count',
                                                          bins=bins, range=pitch_range)
         
-        X, Y = np.meshgrid(xedge, yedge)
-        X = X.T
-        Y = Y.T
+        x_grid, y_grid = np.meshgrid(xedge, yedge)
+        x_grid = x_grid.T
+        y_grid = y_grid.T
         cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge), yedge[:-1] + 0.5 * np.diff(yedge))
-        binned_statistic = [statistic, X, Y, cx, cy]
+        binned_statistic = [statistic, x_grid, y_grid, cx, cy]
         return binned_statistic
     
     def heatmap(self, binned_statistic, *args, ax=None, **kwargs):
         if ax is None:
             raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         
-        statistic, X, Y, cx, cy = binned_statistic
+        statistic, x_grid, y_grid, cx, cy = binned_statistic
         
         if self.orientation == 'horizontal':
-            ax.pcolormesh(X, Y, statistic, alpha=0.5, zorder=2, cmap='viridis')
+            ax.pcolormesh(x_grid, y_grid, statistic, alpha=0.5, zorder=2, cmap='viridis')
         elif self.orientation == 'vertical':
-            ax.pcolormesh(Y, X, statistic, alpha=0.5, zorder=2, cmap='viridis')
+            ax.pcolormesh(y_grid, x_grid, statistic, alpha=0.5, zorder=2, cmap='viridis')
         
         cx = cx.ravel()
         cy = cy.ravel()

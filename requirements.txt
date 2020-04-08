@@ -3,3 +3,4 @@ numpy
 seaborn
 scipy
 beautifulsoup4
+pandas
