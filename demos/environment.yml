@@ -9,6 +9,7 @@ dependencies:
   - pandas
   - scipy
   - seaborn
+  - beautifulsoup4
   - conda-forge::ffmpeg
   - pip
   - pip:

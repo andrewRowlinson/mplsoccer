@@ -2,3 +2,4 @@ matplotlib
 numpy
 seaborn
 scipy
+beautifulsoup4
