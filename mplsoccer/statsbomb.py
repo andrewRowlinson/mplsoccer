@@ -50,7 +50,7 @@ def _simplify_cols_and_drop(df, col):
     return df
 
 
-def read_event(path_or_buf):
+def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, tactics_lineup_df=True):
     """ Extracts individual event jsons and loads as four dataframes: df_event, df_related event,
     df_shot_freeze, and df_tactic_lineup.
     
@@ -66,12 +66,20 @@ def read_event(path_or_buf):
             By file-like object, we refer to objects with a ``read()`` method,
             such as a file handler (e.g. via builtin ``open`` function)
             or ``StringIO``.
-
-
+            
+        related_event_df : bool, default True
+            Whether to return a 'related_event' Dataframe in the returned dictionary.   
+        
+        shot_freeze_frame_df : bool, default True
+            Whether to return a 'shot_freeze_frame' in the returned dictionary.   
+        
+        tactics_lineup_df : bool, default True
+            Whether to return a 'tactics_lineup' Dataframe in the returned dictionary.
+            
         Returns
         -------
-        4 DataFrames: df_event, df_related_events, df_shot_freeze, df_tactics_lineup.
-        In that order.
+        Dict of up to 4 panda's DataFrames.
+            Dict keys: 'event', 'related_event', 'shot_freeze_frame', 'tactics_lineup'.
 
 
         Examples
@@ -80,15 +88,17 @@ def read_event(path_or_buf):
         from mplsoccer.statsbomb import read_event
         import os
         PATH_TO_EDIT = os.path.join('open-data','data','events','7430.json')
-        df_event, df_related_event, df_shot_freeze, df_tactics_lineup = read_event(PATH_TO_EDIT)
+        df_dict = read_event(PATH_TO_EDIT)
 
         # read from url
         from mplsoccer.statsbomb import read_event, EVENT_SLUG
         import os
         URL = os.path.join(EVENT_SLUG,'7430.json')
-        df_event, df_related_event, df_shot_freeze, df_tactic_lineup = read_event(URL)
+        df_dict = read_event(URL)
     
     """
+    
+    df_dict = {}
     
     # timestamp defaults to today's date so store as a string - feather can't store time objects
     df = pd.read_json(path_or_buf, encoding='utf-8')
@@ -132,41 +142,49 @@ def read_event(path_or_buf):
     df = _simplify_cols_and_drop(df, 'body_part_name')
     df = _simplify_cols_and_drop(df, 'aerial_won')
     
+    
     # create a related events dataframe
-    df_related_event = _list_dictionary_to_df(df, col='related_events',
-                                              value_name='related_event', var_name='event_related_id')
-    # some carries don't have the corresponding events. This makes sure all events are linked both ways
-    df_related_event.drop('event_related_id', axis=1, inplace=True)
-    df_related_event_reverse = df_related_event.rename({'related_event': 'id', 'id': 'related_event'}, axis=1)
-    df_related_event = pd.concat([df_related_event, df_related_event_reverse], sort=False)
-    df_related_event.drop_duplicates(inplace=True)
-    # and add on the type_names, index for easier lookups of how the events are related
-    df_event_type = df[['id', 'type_name', 'index']].copy()
-    df_related_event = df_related_event.merge(df_event_type, on='id', how='left', validate='m:1')
-    df_event_type.rename({'id': 'related_event'}, axis=1, inplace=True)
-    df_related_event = df_related_event.merge(df_event_type, on='related_event',
-                                              how='left', validate='m:1', suffixes=['', '_related'])
-    df_related_event.rename({'related_event': 'id_related'}, axis=1, inplace=True)
+    if related_event_df:
+        df_related_event = _list_dictionary_to_df(df, col='related_events',
+                                                  value_name='related_event', var_name='event_related_id')
+        # some carries don't have the corresponding events. This makes sure all events are linked both ways
+        df_related_event.drop('event_related_id', axis=1, inplace=True)
+        df_related_event_reverse = df_related_event.rename({'related_event': 'id', 'id': 'related_event'}, axis=1)
+        df_related_event = pd.concat([df_related_event, df_related_event_reverse], sort=False)
+        df_related_event.drop_duplicates(inplace=True)
+        # and add on the type_names, index for easier lookups of how the events are related
+        df_event_type = df[['id', 'type_name', 'index']].copy()
+        df_related_event = df_related_event.merge(df_event_type, on='id', how='left', validate='m:1')
+        df_event_type.rename({'id': 'related_event'}, axis=1, inplace=True)
+        df_related_event = df_related_event.merge(df_event_type, on='related_event',
+                                                  how='left', validate='m:1', suffixes=['', '_related'])
+        df_related_event.rename({'related_event': 'id_related'}, axis=1, inplace=True)
+        # add on match_id and add to dictionary
+        df_related_event['match_id'] = match_id
+        df_dict['related_event'] = df_related_event
     
     # create a shot freeze frame dataframe - also splits dictionary of player details into columns
-    df_shot_freeze = _list_dictionary_to_df(df, col='shot_freeze_frame',
-                                            value_name='player', var_name='event_freeze_id')
-    df_shot_freeze = _split_dict_col(df_shot_freeze, 'player')
-    _split_location_cols(df_shot_freeze, 'player_location', ['x', 'y'])
+    if shot_freeze_frame_df:
+        df_shot_freeze = _list_dictionary_to_df(df, col='shot_freeze_frame',
+                                                value_name='player', var_name='event_freeze_id')
+        df_shot_freeze = _split_dict_col(df_shot_freeze, 'player')
+        _split_location_cols(df_shot_freeze, 'player_location', ['x', 'y'])
+        # add on match_id and add to dictionary
+        df_shot_freeze['match_id'] = match_id
+        df_dict['shot_freeze_frame'] = df_shot_freeze
 
     # create a tactics lineup frame dataframe - also splits dictionary of player details into columns
-    df_tactic_lineup = _list_dictionary_to_df(df, col='tactics_lineup',
-                                              value_name='player', var_name='event_tactics_id')
-    df_tactic_lineup = _split_dict_col(df_tactic_lineup, 'player')
+    if tactics_lineup_df:
+        df_tactic_lineup = _list_dictionary_to_df(df, col='tactics_lineup',
+                                                  value_name='player', var_name='event_tactics_id')
+        df_tactic_lineup = _split_dict_col(df_tactic_lineup, 'player')
+        # add on match_id and add to dictionary
+        df_tactic_lineup['match_id'] = match_id
+        df_dict['tactics_lineup'] = df_tactic_lineup
     
     # drop columns stored as a separate table
     df.drop(['related_events', 'shot_freeze_frame', 'tactics_lineup'], axis=1, inplace=True)
-        
-    # add match id to dataframes
-    df_related_event['match_id'] = match_id
-    df_shot_freeze['match_id'] = match_id    
-    df_tactic_lineup['match_id'] = match_id
-    
+           
     # reorder columns so some of the most used ones are first
     cols = ['match_id', 'id', 'index', 'period', 'timestamp', 'minute',
             'second', 'type_id', 'type_name', 'outcome_id', 'outcome_name',  'play_pattern_id', 'play_pattern_name',
@@ -177,9 +195,12 @@ def read_event(path_or_buf):
             'goalkeeper_end_x', 'goalkeeper_end_y', 'body_part_id', 'body_part_name']
     other_cols = df.columns[~df.columns.isin(cols)]
     cols.extend(other_cols)
-    df_event = df[cols].copy()
+    df = df[cols].copy()
     
-    return df_event, df_related_event, df_shot_freeze, df_tactic_lineup
+    # add to dictionary
+    df_dict['event'] = df
+    
+    return df_dict
 
 
 def _get_links(url):
