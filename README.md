@@ -98,7 +98,7 @@ mplsoccer was inspired and built on others work:
 - [fcrstats](http://fcrstats.com/) - tutorials for using football data
 - [Karun Singh](https://twitter.com/karun1710) - tweets interesting football analytics and visuals
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
-- [John Burn-Murdoch](https://twitter.com/jburnmurdoch/status/1057907312030085120) - this tweet got me interested in soccer analytics.
+- [John Burn-Murdoch](https://twitter.com/jburnmurdoch/status/1057907312030085120) - this tweet got me interested in football analytics.
 
 ## Contributions
 Contributions are welcome. It would be great to add the following functionality:
