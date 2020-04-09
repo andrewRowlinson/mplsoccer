@@ -1,6 +1,22 @@
-# mplsoccer
+mplsoccer
+-----------
+
 mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.
 
+To install:
+```
+pip install matplotsoccer
+```
+
+mplsoccer was invented to quickly iterate through ideas by making it easy to plot on soccer / football pitches. It also makes it easy to plot the same chart horizontally or vertically with minimal code changes.
+
+
+Pitch basics
+-----------
+
+mplsoccer can either plot on existing axis or create new axis.
+
+#### Pitch type
 mplsoccer currently supports several data formats:
 - Statsbomb
 - Stats Perform
@@ -29,9 +45,72 @@ fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
 
-# This library is under development
-The following developments are planned
-- create pass map methods
-- add examples (team line-up / pass maps/ pressure maps/ subplots)
-- add method for plotting Voronoi diagrams
-- create documentation using Sphinx
+#### Views
+
+#### Layout
+- figsize
+- layout
+
+#### Appearance
+
+#### Padding
+
+#### Axis
+
+
+StatsBomb open-data
+-----------
+
+
+Plot
+-----------
+
+
+Scatter
+-----------
+
+
+Lines
+-----------
+
+
+Arrows
+-----------
+
+
+Kdeplot
+-----------
+
+
+Jointplot
+-----------
+
+
+Hexbin
+-----------
+
+
+Heatmap
+-----------
+
+
+Annotation
+-----------
+
+
+Animation
+-----------
+
+
+Inspiration
+-----------
+
+
+Contributions
+-----------
+Contributions to mplsoccer are welcome. It would be great to add the following functionality:
+- pass maps
+- pass sonars
+- voronoi diagrams
+
+Please get in touch at rowlinsonandy@gmail.com or [@numberstorm](https://twitter.com/numberstorm) on Twitter.
