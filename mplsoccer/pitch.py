@@ -1,4 +1,4 @@
-""" `mplsoccer` is a python library for plotting soccer / football pitches in Matplotlib. """
+""" `mplsoccer.pitch` is a python module for plotting soccer / football pitches in Matplotlib. """
 
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
 # License: MIT
