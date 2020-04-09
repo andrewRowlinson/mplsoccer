@@ -1,11 +1,16 @@
-""" `mplsoccer` is a python library for plotting soccer / football pitches in Matplotlib. """
+""" `mplsoccer.statsbomb` is a python module for loading StatsBomb data. """
 
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
 # License: MIT
 
 import pandas as pd
 import os
+import numpy as np
 
+EVENT_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/events'
+MATCH_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/matches'
+LINEUP_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/lineups'
+COMPETITION_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/competitions.json'
 
 def _split_location_cols(df, col, new_cols):
     """ Location is stored as a list. split into columns. """
@@ -51,8 +56,8 @@ def _simplify_cols_and_drop(df, col):
 
 
 def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, tactics_lineup_df=True):
-    """ Extracts individual event jsons and loads as four dataframes: df_event, df_related event,
-    df_shot_freeze, and df_tactic_lineup.
+    """ Extracts individual event json and loads as a dictionary of up to
+    four pandas.DataFrame: 'event', 'related event', 'shot_freeze_frame', and 'tactics_lineup'.
     
     Parameters
         ----------
@@ -78,7 +83,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
             
         Returns
         -------
-        Dict of up to 4 panda's DataFrames.
+        Dict of up to 4 pandas.DataFrame.
             Dict keys: 'event', 'related_event', 'shot_freeze_frame', 'tactics_lineup'.
 
 
@@ -88,14 +93,13 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         from mplsoccer.statsbomb import read_event
         import os
         PATH_TO_EDIT = os.path.join('open-data','data','events','7430.json')
-        df_dict = read_event(PATH_TO_EDIT)
+        dict_dfs = read_event(PATH_TO_EDIT)
 
         # read from url
         from mplsoccer.statsbomb import read_event, EVENT_SLUG
         import os
         URL = os.path.join(EVENT_SLUG,'7430.json')
-        df_dict = read_event(URL)
-    
+        dict_dfs = read_event(URL)
     """
     
     df_dict = {}
@@ -202,6 +206,159 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     
     return df_dict
 
+def read_match(path_or_buf):
+    """ Extracts individual match json and loads as a pandas.DataFrame.
+    
+    Parameters
+        ----------
+        path_or_buf : a valid JSON str, path object or file-like object
+            Any valid string path is acceptable. The string could be a URL. Valid
+            URL schemes include http, ftp, s3, and file. For file URLs, a host is
+            expected. A local file could be:
+            ``file://localhost/path/to/table.json``.
+            If you want to pass in a path object, pandas accepts any
+            ``os.PathLike``.
+            By file-like object, we refer to objects with a ``read()`` method,
+            such as a file handler (e.g. via builtin ``open`` function)
+            or ``StringIO``.
+            
+        Returns
+        -------
+        pandas.DataFrame
+
+        Examples
+        --------
+        # read from path - note change path to navigate to open-data folder
+        from mplsoccer.statsbomb import read_match
+        import os
+        PATH_TO_EDIT = os.path.join('open-data','data','matches','11','1.json')
+        df_match = read_match(PATH_TO_EDIT)
+
+        # read from url
+        from mplsoccer.statsbomb import read_match, MATCH_SLUG
+        import os
+        URL = os.path.join(MATCH_SLUG,'11','1.json')
+        df_match = read_match(URL)
+    """
+    df_match = pd.read_json(path_or_buf,convert_dates=['match_date','last_updated'])
+    
+    # loop through the columns that are still dictionary columns and add them as seperate cols to the datafram
+    dictionary_columns = ['competition','season','home_team','away_team','metadata','competition_stage',
+                      'stadium','referee']
+    for col in dictionary_columns:
+        df_match = _split_dict_col(df_match,col)
+        
+    # convert kickoff to datetime - date + kickoff time
+    df_match['kick_off'] = pd.to_datetime(df_match.match_date.astype(str) +' '+ df_match.kick_off)
+    # drop one gender column as always equal to the other
+    # drop match status as always available
+    df_match.drop(['away_team_gender','match_status'],axis=1,inplace=True)
+    df_match.rename({'home_team_gender':'competition_gender'},axis=1,inplace=True)
+    # manager is a list (len=1) containing a dictionary so lets split into columns
+    df_match['home_team_managers'] = df_match.home_team_managers.str[0]
+    df_match = _split_dict_col(df_match,'home_team_managers')
+    df_match['away_team_managers'] = df_match.away_team_managers.str[0]
+    df_match = _split_dict_col(df_match,'away_team_managers')
+    # dates to datetimes
+    df_match['home_team_managers_dob'] = pd.to_datetime(df_match['home_team_managers_dob'])
+    df_match['away_team_managers_dob'] = pd.to_datetime(df_match['away_team_managers_dob'])
+    # ids to integers
+    for col in ['competition_id','season_id','home_team_id','competition_stage_id']:
+        df_match[col] = df_match[col].astype(np.int64)
+    # sort and reset index: ready for exporting to feather
+    df_match.sort_values('kick_off',inplace=True)
+    df_match.reset_index(inplace=True,drop=True)
+    return df_match
+
+def read_competition(path_or_buf):
+    """ Extracts competition json and loads as a pandas.DataFrame.
+    
+    Parameters
+        ----------
+        path_or_buf : a valid JSON str, path object or file-like object
+            Any valid string path is acceptable. The string could be a URL. Valid
+            URL schemes include http, ftp, s3, and file. For file URLs, a host is
+            expected. A local file could be:
+            ``file://localhost/path/to/table.json``.
+            If you want to pass in a path object, pandas accepts any
+            ``os.PathLike``.
+            By file-like object, we refer to objects with a ``read()`` method,
+            such as a file handler (e.g. via builtin ``open`` function)
+            or ``StringIO``.
+            
+        Returns
+        -------
+        pandas.DataFrame
+
+        Examples
+        --------
+        # read from path - note change path to navigate to open-data folder
+        from mplsoccer.statsbomb import read_competition
+        import os
+        PATH_TO_EDIT = os.path.join('open-data','data','competitions.json')
+        df_competition = read_competition(PATH_TO_EDIT)
+
+        # read from url
+        from mplsoccer.statsbomb import read_competition, COMPETITION_URL
+        df_competition = read_competition(COMPETITION_URL)
+    """
+    df_competition = pd.read_json(path_or_buf,convert_dates=['match_updated','match_available'])
+    df_competition.sort_values(['competition_id','season_id'],inplace=True)
+    df_competition.reset_index(drop=True,inplace=True)
+    return df_competition
+
+def read_lineup(path_or_buf):
+    """ Extracts individual lineup jsons and loads as a pandas.DataFrame.
+    
+    Parameters
+        ----------
+        path_or_buf : a valid JSON str, path object or file-like object
+            Any valid string path is acceptable. The string could be a URL. Valid
+            URL schemes include http, ftp, s3, and file. For file URLs, a host is
+            expected. A local file could be:
+            ``file://localhost/path/to/table.json``.
+            If you want to pass in a path object, pandas accepts any
+            ``os.PathLike``.
+            By file-like object, we refer to objects with a ``read()`` method,
+            such as a file handler (e.g. via builtin ``open`` function)
+            or ``StringIO``.
+            
+        Returns
+        -------
+        pandas.DataFrame
+
+        Examples
+        --------
+        # read from path - note change path to navigate to open-data folder
+        from mplsoccer.statsbomb import read_lineup
+        import os
+        PATH_TO_EDIT = os.path.join('open-data','data','lineups','7430.json')
+        df_lineup = read_lineup(PATH_TO_EDIT)
+
+        # read from url
+        from mplsoccer.statsbomb import read_lineup, LINEUP_SLUG
+        import os
+        URL = os.path.join(LINEUP_SLUG,'7430.json')
+        df_lineup = read_lineup(URL)
+    """
+    df_lineup = pd.read_json(path_or_buf)
+    df_lineup['match_id'] = os.path.basename(path_or_buf[:-5])
+    # each line has a column named player that contains a list of dictionaries
+    # we split into seperate columns and then create a new row for each player using melt
+    df_lineup_players = df_lineup.lineup.apply(pd.Series)
+    df_lineup = df_lineup.merge(df_lineup_players,left_index=True,right_index=True)
+    df_lineup.drop('lineup',axis=1,inplace=True)
+    df_lineup = df_lineup.melt(id_vars = ['team_id','team_name','match_id'], value_name = 'player')
+    df_lineup.drop('variable',axis=1,inplace=True)
+    df_lineup = df_lineup[df_lineup.player.notnull()].copy()
+    df_lineup = _split_dict_col(df_lineup,'player')
+    # turn ids to integers if no missings
+    df_lineup['match_id'] = df_lineup.match_id.astype(np.int64)
+    df_lineup['player_id'] = df_lineup.player_id.astype(np.int64)
+    # sort and reset index: ready for exporting to feather
+    df_lineup.sort_values('player_id',inplace=True)
+    df_lineup.reset_index(inplace=True,drop=True)
+    return df_lineup
 
 def _get_links(url):
     # imports here as don't expect these functions to be used all the time
@@ -216,14 +373,13 @@ def _get_links(url):
 def get_match_links():
     """ Returns a list of links to the StatsBomb open-data match jsons."""
     match_url = 'https://github.com/statsbomb/open-data/tree/master/data/matches'
-    match_raw_slug = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/matches'
     match_folders = _get_links(match_url)
     match_folders = [(f'https://github.com/{link["href"]}',
                       link['title']) for link in match_folders if '/tree/master/data/matches' in link['href']]
     match_files = []
     for link, folder in match_folders:
         json_links = _get_links(link)
-        json_links = [f'{match_raw_slug}/{folder}/{link["title"]}' for link in json_links
+        json_links = [f'{MATCH_SLUG}/{folder}/{link["title"]}' for link in json_links
                       if link['href'][-4:] == 'json']
         match_files.extend(json_links)
     return match_files
@@ -232,16 +388,14 @@ def get_match_links():
 def get_event_links():
     """ Returns a list of links to the StatsBomb open-data event jsons."""
     url = 'https://github.com/statsbomb/open-data/tree/master/data/events'
-    raw_slug = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/events'
     links = _get_links(url)
-    links = [f'{raw_slug}/{link["title"]}' for link in links if link['href'][-4:] == 'json']
+    links = [f'{EVENT_SLUG}/{link["title"]}' for link in links if link['href'][-4:] == 'json']
     return links
 
 
 def get_lineup_links():
     """ Returns a list of links to the StatsBomb open-data lineup jsons."""
     url = 'https://github.com/statsbomb/open-data/tree/master/data/lineups'
-    raw_slug = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/lineups'
     links = _get_links(url)
-    event_files = [f'{raw_slug}/{link["title"]}' for link in links if link['href'][-4:] == 'json']
+    event_files = [f'{LINEUP_SLUG}/{link["title"]}' for link in links if link['href'][-4:] == 'json']
     return event_files
