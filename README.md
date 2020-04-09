@@ -5,7 +5,7 @@ mplsoccer is a Python plotting library for drawing soccer / football pitches qui
 
 To install:
 ```
-pip install matplotsoccer
+pip install mplsoccer
 ```
 
 mplsoccer was invented to quickly iterate through ideas by making it easy to plot on soccer / football pitches. It also makes it easy to plot the same chart horizontally or vertically with minimal code changes.
