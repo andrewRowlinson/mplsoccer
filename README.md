@@ -1,6 +1,6 @@
 # mplsoccer
 
-mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib. It also contains a module to load StatsBomb open-data.
+mplsoccer is a Python plotting library for drawing soccer / football pitches in Matplotlib and loading StatsBomb open-data.
 
 ## Installation
 
@@ -16,7 +16,7 @@ TO DO
 
 mplsoccer can either plot on existing axis or create new axis.
 
-#### Pitch type
+#### a) Pitch type
 mplsoccer currently supports several data formats:
 - Statsbomb
 - Stats Perform
@@ -45,17 +45,17 @@ fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
 
-#### Views
+####  b) Views
 
-#### Layout
+####  c) Layout
 - figsize
 - layout
 
-#### Appearance
+####  d) Appearance
 
-#### Padding
+####  e) Padding
 
-#### Axis
+####  f) Axis
 
 
 ## StatsBomb open-data
@@ -67,27 +67,27 @@ TO DO
 
 TO DO
 
-###### 1. Plot
+#### 1. Plot
 
-###### 2. Scatter
+####  2. Scatter
 
-###### 3. Lines
+####  3. Lines
 
-###### 4. Arrows
+####  4. Arrows
 
-###### 5. Kdeplot
+####  5. Kdeplot
 
-###### 6. Jointplot
+####  6. Jointplot
 
-###### 7. Hexbin
+####  7. Hexbin
 
-###### 8. Heatmap
+#### 8. Heatmap
 
-###### 9. Annotation
+#### 9. Annotation
 
-###### 10. Animation
+#### 10. Animation
 
-###### 11. Advanced examples
+#### 11. Advanced examples
 
 ## Inspiration
 
