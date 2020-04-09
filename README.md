@@ -25,7 +25,7 @@ mplsoccer currently supports several data formats:
 - STATS (formerly Prozone)
 - Wyscout (the pitch dimensions are taken from ggsoccer: https://github.com/Torvaney/ggsoccer)
 
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_pitch_type.png.png?raw=true "pitch types")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_pitch_type.png?raw=true "pitch types")
 
 The following example draws a Statsbomb pitch (the default) with stripes.
 ``` python
