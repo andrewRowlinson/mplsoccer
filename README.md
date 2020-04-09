@@ -93,10 +93,10 @@ TO DO
 
 mplsoccer was inspired and built on others work:
 - [Peter McKeever](http://petermckeever.com/2019/01/plotting-pitches-in-python/) inspired the API design
-- [ggsoccer](https://github.com/Torvaney/ggsoccer) - library for plotting pitches in R
-- [lastrow](https://twitter.com/lastrowview) - often tweets animations from matches and the code
-- [fcrstats](http://fcrstats.com/) - tutorials in using football data
-- [Karun Singh](https://twitter.com/karun1710) - interesting football analytics and visuals
+- [ggsoccer](https://github.com/Torvaney/ggsoccer) - a library for plotting pitches in R
+- [lastrow](https://twitter.com/lastrowview) - often tweets animations from matches and the accompanying code
+- [fcrstats](http://fcrstats.com/) - tutorials for using football data
+- [Karun Singh](https://twitter.com/karun1710) - tweets interesting football analytics and visuals
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
 - [John Burn-Murdoch](https://twitter.com/jburnmurdoch/status/1057907312030085120) - this tweet got me interested in soccer analytics.
 
