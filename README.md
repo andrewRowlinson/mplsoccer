@@ -91,12 +91,12 @@ TO DO
 
 ## Inspiration
 
-mplsoccer was inspired and built on others work:
+mplsoccer was inspired by other people's work:
 - [Peter McKeever](http://petermckeever.com/2019/01/plotting-pitches-in-python/) inspired the API design
 - [ggsoccer](https://github.com/Torvaney/ggsoccer) - a library for plotting pitches in R
 - [lastrow](https://twitter.com/lastrowview) - often tweets animations from matches and the accompanying code
 - [fcrstats](http://fcrstats.com/) - tutorials for using football data
-- [Karun Singh](https://twitter.com/karun1710) - tweets interesting football analytics and visuals
+- [Karun Singh](https://twitter.com/karun1710) - tweets some interesting football analytics and visuals
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
 - [John Burn-Murdoch](https://twitter.com/jburnmurdoch/status/1057907312030085120) - this tweet got me interested in football analytics.
 
@@ -106,7 +106,7 @@ Unfortunately, the different data providers haven't yet standardised on a common
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_pitch_type.png?raw=true "pitch types")
 
 ## Contributions
-Contributions are welcome. It would be great to add the following functionality:
+Contributions are welcome. It would be great to add the following functionality to mplsoccer:
 - pass maps
 - pass sonars
 - voronoi diagrams
