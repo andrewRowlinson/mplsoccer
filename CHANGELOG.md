@@ -1,6 +1,7 @@
 Version 0.0.2
 -----------
     - Default pitch_type is now 'statsbomb'. It was 'opta'.
+    - Fixed 'wyscout' pitch type. The 0,0 coordinate is meant to be top left.
     - Added support for 'statsperform' and 'metricasports' pitch types.
     - Added support for grass texture with pitch_color='grass', e.g. Pitch(pitch_color='grass').
     - Added Pitch.heatmap() to allow plotting of heatmaps over pitches.

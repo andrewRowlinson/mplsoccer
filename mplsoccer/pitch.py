@@ -89,13 +89,13 @@ class Pitch(object):
                         'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 25}
 
     # wyscout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
-    _wyscout_dimensions = {'top': 100, 'bottom': 0, 'left': 0, 'right': 100,
+    _wyscout_dimensions = {'top': 0, 'bottom': 100, 'left': 0, 'right': 100,
                            'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                            'six_yard_from_side': 37, 'six_yard_width': 26, 'six_yard_length': 6,
                            'penalty_area_from_side': 19, 'penalty_area_width': 62, 'penalty_area_length': 16,
                            'left_penalty': 10, 'right_penalty': 90, 'circle_size': 9.15,
                            'goal_depth': 1.9, 'goal_width': 12, 'goal_post': 44,
-                           'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 5}
+                           'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': True, 'stripe_scale': 5}
 
     _statsbomb_dimensions = {'top': 0, 'bottom': 80, 'left': 0, 'right': 120,
                              'width': 80, 'center_width': 40, 'length': 120, 'center_length': 60,
