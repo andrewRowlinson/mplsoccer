@@ -31,7 +31,7 @@ class Pitch(object):
         Tuple of (rows, columns) for the layout of the plot.
     pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
-        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats', 'wyscout', 'statsperform'.
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats', 'wyscout', 'statsperform', 'metricasports'.
     orientation : str, default 'horizontal'
         The pitch orientation: 'horizontal' or 'vertical'.
     view : str, default 'full'
@@ -46,22 +46,26 @@ class Pitch(object):
         Whether to show pitch stripes.    
     stripe_color : any Matplotlib color, default '#c2d59d'
         The color of the pitch stripes if stripe=True    
-    pad_left : float, default 4
+    pad_left : float, default None
         Adjusts the left xlim of the axis. Postive values increase the plot area,
         while negative values decrease the plot area.
-    pad_right : float, default 4
+        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+    pad_right : float, default None
         Adjusts the right xlim of the axis. Postive values increase the plot area,
-        while negative values decrease the plot area. 
-    pad_bottom : float, default 4
+        while negative values decrease the plot area.
+        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+    pad_bottom : float, default None
         Adjusts the bottom ylim of the axis. Postive values increase the plot area,
         while negative values decrease the plot area.
-    pad_top : float, default 4
+        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+    pad_top : float, default None
         Adjusts the top ylim of the axis. Postive values increase the plot area,
         while negative values decrease the plot area.
+        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
     pitch_length : float, default None
-        The pitch length in meters. Only used for the 'tracab' pitch_type.
+        The pitch length in meters. Only used for the 'tracab' and 'metricasports' pitch_type.
     pitch_width : float, default None
-        The pitch width in meters. Only used for the 'tracab' pitch type. 
+        The pitch width in meters. Only used for the 'tracab' and 'metricasports' pitch type. 
     goal_type : str, default 'line'
         Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
     axis : bool, default False
@@ -100,7 +104,9 @@ class Pitch(object):
                              'left_penalty': 12, 'right_penalty': 108, 'circle_size': 10.46,
                              'goal_depth': 2.4, 'goal_width': 8, 'goal_post': 36,
                              'arc1_leftV': 35, 'arc2_leftH': 55, 'invert_y': True, 'stripe_scale': 5}
-
+    
+    # real-life pitches are in yards and the meter conversions are slightly different
+    # but with this size of visualisation the differences will be minimal
     _tracab_dimensions = {'top': None, 'bottom': None, 'left': None, 'right': None,
                           'width': None, 'center_width': 0, 'length': None, 'center_length': 0,
                           'six_yard_from_side': -916, 'six_yard_width': 1832, 'six_yard_length': 550,
@@ -108,6 +114,16 @@ class Pitch(object):
                           'left_penalty': None, 'right_penalty': None, 'circle_size': 915,
                           'goal_depth': 200, 'goal_width': 732, 'goal_post': -366,
                           'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 0.1}
+
+    # real-life pitches are in yards and the meter conversions are slightly different
+    # but with this size of visualisation the differences will be minimal
+    _metricasports_dimensions = {'top': 0., 'bottom': 1., 'left': 0., 'right': 1.,
+                                 'width': 1, 'center_width': 0.5, 'length': 1, 'center_length': 0.5,
+                                 'six_yard_from_side': None, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
+                                 'penalty_area_from_side': None, 'penalty_area_width': 40.32, 'penalty_area_length': 16.5,
+                                 'left_penalty': 11., 'right_penalty': 11., 'circle_size': 9.15,
+                                 'goal_depth': 2., 'goal_width': 7.32, 'goal_post': 3.6,
+                                 'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': True, 'stripe_scale': 1000}
 
     _stats_dimensions = {'top': 0, 'bottom': 70, 'left': 0, 'right': 105,
                          'width': 70, 'center_width': 35, 'length': 105, 'center_length': 52.5,
@@ -127,7 +143,7 @@ class Pitch(object):
       
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
                  pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
-                 pad_left=4, pad_right=4, pad_bottom=4, pad_top=4, pitch_length=None, pitch_width=None,
+                 pad_left=None, pad_right=None, pad_bottom=None, pad_top=None, pitch_length=None, pitch_width=None,
                  goal_type='line', label=False, tick=False, axis=False, tight_layout=True):
 
         # set figure and axes attributes
@@ -156,6 +172,28 @@ class Pitch(object):
         self.stripe = stripe
         self.stripe_color = stripe_color
         self.goal_type = goal_type
+        
+        # set padding  
+        if self.pad_left is None:
+            if pitch_type != 'metricasports':
+                self.pad_left = 4
+            else:
+                self.pad_left = 0.04
+        if self.pad_right is None:
+            if pitch_type != 'metricasports':
+                self.pad_right = 4
+            else:
+                self.pad_right = 0.04
+        if self.pad_bottom is None:
+            if pitch_type != 'metricasports':
+                self.pad_bottom = 4
+            else:
+                self.pad_bottom = 0.04
+        if self.pad_top is None:
+            if pitch_type != 'metricasports':
+                self.pad_top = 4
+            else:
+                self.pad_top = 0.04
 
         # set pitch dimensions
         if pitch_type == 'opta':
@@ -211,16 +249,35 @@ class Pitch(object):
             self.pad_bottom = self.pad_bottom * 100
             self.pad_right = self.pad_right * 100
             self.pad_top = self.pad_top * 100
-
+            
+        elif pitch_type == 'metricasports':
+            # note do not scale the circle_size as scaled seperately for the width/ length when drawing circle/arcs
+            for k, v in self._metricasports_dimensions.items():
+                setattr(self, k, v)
+            if (pitch_length is None) or (pitch_width is None):
+                raise TypeError("Invalid argument: pitch_length and pitch_width must be specified for a metricasports pitch.")
+            self.aspect = self.pitch_width/self.pitch_length
+            self.six_yard_width = round(self.six_yard_width/self.pitch_width,4)
+            self.six_yard_length = round(self.six_yard_length/self.pitch_length,4)
+            self.six_yard_from_side = (self.width - self.six_yard_width)/2
+            self.penalty_area_width = round(self.penalty_area_width/self.pitch_width,4)
+            self.penalty_area_length = round(self.penalty_area_length/self.pitch_length,4)
+            self.penalty_area_from_side = (self.width - self.penalty_area_width)/2
+            self.left_penalty = round(self.left_penalty/self.pitch_length,4)
+            self.right_penalty = self.right - self.left_penalty
+            self.goal_depth = round(self.goal_depth/self.pitch_length,4)
+            self.goal_width = round(self.goal_width/self.pitch_width,4)
+            self.goal_post = self.center_width - round(self.goal_post/self.pitch_width,4)
+                          
         # scale the padding where the aspect is not equal to one, reverse aspect if vertical
         if self.aspect != 1:
             if self.orientation == 'vertical':
-                self.pad_bottom = int(self.pad_bottom * self.aspect)
-                self.pad_top = int(self.pad_top * self.aspect)
+                self.pad_bottom = self.pad_bottom * self.aspect
+                self.pad_top = self.pad_top * self.aspect
                 self.aspect = 1 / self.aspect
             elif self.orientation == 'horizontal':
-                self.pad_left = int(self.pad_left * self.aspect)
-                self.pad_right = int(self.pad_right * self.aspect)
+                self.pad_left = self.pad_left * self.aspect
+                self.pad_right = self.pad_right * self.aspect
        
         if pitch_color == 'grass':
             cm = LinearSegmentedColormap.from_list('grass', [(0.25, 0.44, 0.12, 1), (0.48, 1, 0.55, 1)], N=50)
@@ -282,7 +339,7 @@ class Pitch(object):
         if not isinstance(self.tight_layout, bool):
             raise TypeError("Invalid argument: tight_layout should be bool (True or False).")
 
-        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform']
+        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform', 'metricasports']
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
 
@@ -292,7 +349,7 @@ class Pitch(object):
         if (self.axis is False) and self.tick:
             warnings.warn("Ticks will not be shown unless axis=True")
 
-        if (self.pitch_type != 'tracab') and ((pitch_length is not None) or (pitch_width is not None)):
+        if (self.pitch_type not in ['tracab','metricasports']) and ((pitch_length is not None) or (pitch_width is not None)):
             warnings.warn("Pitch length and widths are only used for tracab pitches and will be ignored")
 
         valid_orientation = ['horizontal', 'vertical']
@@ -454,11 +511,11 @@ class Pitch(object):
 
             for stripe in range(1, 19):
                 if stripe in [1, 18]:
-                    end = round(start + stripe1_length, 2)
+                    end = round(start + stripe1_length, 4)
                 elif stripe in [2, 3, 4, 15, 16, 17]:
-                    end = round(start + stripe2_length, 2)
+                    end = round(start + stripe2_length, 4)
                 else:
-                    end = round(start + stripe3_length, 2)
+                    end = round(start + stripe3_length, 4)
                 if (stripe % 2 == 1) & (self.orientation == 'vertical'):
                     if self.pitch_color != 'grass':
                         ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)

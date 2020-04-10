@@ -1,7 +1,7 @@
 Version 0.0.2
 -----------
     - Default pitch_type is now 'statsbomb'. It was 'opta'.
-    - Added support for 'statsperform' pitch_type.
+    - Added support for 'statsperform' and 'metricasports' pitch types.
     - Added support for grass texture with pitch_color='grass', e.g. Pitch(pitch_color='grass').
     - Added Pitch.heatmap() to allow plotting of heatmaps over pitches.
     - Added an arrowhead_marker. Example use: from mplsoccer.utils import arrowhead_marker; Pitch.scatter(x,y,marker='arrowhead_marker).
