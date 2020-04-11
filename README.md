@@ -78,6 +78,7 @@ TO DO
 mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.quiver.html) to plot arrows. Behind the scenes, the Pitch.quiver() method modifies the start and end locations to a vector before plotting them. This avoids the need to use Matplotlib's annotate in a loop, which is another way of plotting arrows.
 
 Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_arrows_example.png?raw=true "arrow plot")
 
 Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/04-Plotting-Arrows.ipynb):
@@ -118,6 +119,7 @@ fig.savefig(os.path.join('figures','README_arrows_example.png'), bbox_inches = '
 mplsoccer uses [seaborn.kdeplot](https://seaborn.pydata.org/generated/seaborn.kdeplot.html) to plot kernel density plots. Behind the scenes, the Pitch.kdeplot() method also clips the plot to the edges of the pitch.
 
 Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_kdeplot_example.png?raw=true "kernel density plot")
 
 Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/05-Plotting-kdeplot.ipynb):
