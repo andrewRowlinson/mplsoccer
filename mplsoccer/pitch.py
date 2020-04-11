@@ -1291,7 +1291,7 @@ class Pitch(object):
         x_grid, y_grid = np.meshgrid(xedge, yedge)
         cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge), yedge[:-1] + 0.5 * np.diff(yedge))
         return statistic, x_grid, y_grid, cx, cy
-            
+              
     def heatmap(self, x_grid, y_grid, statistic, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
         which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
@@ -1326,7 +1326,7 @@ class Pitch(object):
         elif self.orientation == 'vertical':
             ax.pcolormesh(y_grid, x_grid, statistic, **kwargs)
             
-    def heatmap_positional(self, x, y, values=None, ax=None, statistic='count', **kwargs):
+    def binned_statistic_positional(self, x, y, values=None, statistic='count'):
         # x positions
         x1 = min(self.left, self.right)
         x4 = self.center_length
@@ -1408,18 +1408,20 @@ class Pitch(object):
         stat5 = stat5[0].reshape(1,-1).copy()
         
         cx = np.concatenate([cx1.ravel(),cx2.ravel(),cx3.ravel(),cx4.ravel(),cx5.ravel()])
-        cy = np.concatenate([cy1.ravel(),cy2.ravel(),cy3.ravel(),cy4.ravel(),cy5.ravel()])
-        stat = np.concatenate([stat1.ravel(),stat2.ravel(),stat3.ravel(),stat4.ravel(),stat5.ravel()])
-        vmax = np.array([stat1.max(),stat2.max(),stat3.max(),stat4.max(),stat5.max()]).max()
-        vmin = np.array([stat1.min(),stat2.min(),stat3.min(),stat4.min(),stat5.min()]).min()
+        cy = np.concatenate([cy1.ravel(),cy2.ravel(),cy3.ravel(),cy4.ravel(),cy5.ravel()])      
+        x_grid = [x_grid1, x_grid2, x_grid3, x_grid4, x_grid5]
+        y_grid = [y_grid1, y_grid2, y_grid3, y_grid4, y_grid5]
+        statistic_grid = [stat1, stat2, stat3, stat4, stat5]
+        statistic = np.hstack([stat.ravel() for stat in statistic_grid])
+
+        return statistic_grid, statistic, x_grid, y_grid, cx, cy      
+
+    def heatmap_positional(self, x_grid, y_grid, statistic_grid, statistic, ax=None, **kwargs):
+        vmax = kwargs.pop('vmax',statistic.max())
+        vmin = kwargs.pop('vmin',statistic.min())
         
-        self.heatmap(x_grid1.T, y_grid1.T, stat1, vmin=vmin, vmax=vmax, ax=ax, **kwargs)
-        self.heatmap(x_grid2.T, y_grid2.T, stat2, vmin=vmin, vmax=vmax, ax=ax, **kwargs)
-        self.heatmap(x_grid3.T, y_grid3.T, stat3, vmin=vmin, vmax=vmax, ax=ax, **kwargs)
-        self.heatmap(x_grid4.T, y_grid4.T, stat4, vmin=vmin, vmax=vmax, ax=ax, **kwargs)
-        self.heatmap(x_grid5.T, y_grid5.T, stat5, vmin=vmin, vmax=vmax, ax=ax, **kwargs)
-        
-        return stat, cx, cy
+        for i in range(len(x_grid)):
+            self.heatmap(x_grid[i].T, y_grid[i].T, statistic_grid[i], vmin=vmin, vmax=vmax, ax=ax, **kwargs)       
             
     def label_heatmap(self, statistic, cx, cy, ax=None, **kwargs):
         """ Labels the heatmaps and automatically flips the coordinates if the pitch is vertical.
