@@ -75,7 +75,7 @@ TO DO
 
 ####  4. Arrows
 
-mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.quiver.html) to plot arrows. Behing the scenes it changes the provided start and end locations to vector form before plotting. This avoids the need to use Matplotlib's annotate in a loop.
+mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.quiver.html) to plot arrows. Behind the scenes, the Pitch.quiver() method modifies the start and end locations to a vector before plotting them. This avoids the need to use Matplotlib's annotate in a loop, which is another way of plotting arrows.
 
 Example:
 ![mplsoccer arrow plot](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figure/README_arrows_example.png?raw=true)
