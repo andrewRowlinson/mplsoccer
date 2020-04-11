@@ -1326,7 +1326,7 @@ class Pitch(object):
         elif self.orientation == 'vertical':
             ax.pcolormesh(y_grid, x_grid, statistic, **kwargs)
             
-    def binned_statistic_positional(self, x, y, values=None, statistic='count'):
+    def binned_statistic_positional(self, x, y, values=None, statistic='count', positional='full'):
         # x positions
         x1 = min(self.left, self.right)
         x4 = self.center_length
@@ -1350,73 +1350,104 @@ class Pitch(object):
             y4 = y6 - self.six_yard_from_side
             y5 = y6 - self.penalty_area_from_side
             y4 = y6 - self.six_yard_from_side
-                  
-        # top and bottom of pitch - we create a grid with three rows and then ignore the middle row when slicing
-        xedge = np.array([x1,x2,x3,x4,x5,x6,x7])
-        yedge = np.array([y1,y2,y5,y6])
-        stat1, x_grid1, y_grid1, cx1, cy1 = self.binned_statistic_2d(x, y, values, statistic = statistic,
-                                                                          bins = (xedge, yedge))
-        stat1 = stat1.T
-        # slicing second row
-        x_grid2 = x_grid1[2:,:].copy()
-        y_grid2 = y_grid1[2:,:].copy()
-        cx2 = cx1[2,:].copy()
-        cy2 = cy1[2,:].copy()
-        stat2 = stat1[2,:].reshape(1,-1).copy()
-        # slice first row
-        x_grid1 = x_grid1[:2,:].copy()
-        y_grid1 = y_grid1[:2,:].copy()
-        cx1 = cx1[0,:].copy()
-        cy1 = cy1[0,:].copy()
-        stat1 = stat1[0,:].reshape(1,-1).copy()
         
-        # middle of pitch
-        xedge = np.array([x1,x2,x4,x6,x7])
-        yedge = np.array([y1,y2,y3,y4,y5,y6])
-        stat3, x_grid3, y_grid3, cx3, cy3 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                          bins = (xedge, yedge))
-        stat3 = stat3.T
-        x_grid3 = x_grid3[1:-1:,1:-1].copy()
-        y_grid3 = y_grid3[1:-1,1:-1].copy()
-        cx3 = cx3[1:-1,1:-1].copy()
-        cy3 = cy3[1:-1,1:-1].copy()
-        stat3 = stat3[1:-1,1:-1].copy()
+        # I tried several ways of creating positional bins. It's hard to do this because
+        # of points on the edges of bins. You have to be sure they are only counted once consistently
+        # I tried doing this by adding or subtracting a small value near the edges, but it didn't work for all cases
+        # I settled on this idea, which is to create binned statistics with an additional row, column either
+        # side (unless the side of the pitch) so that the scipy binned_statistic_2d functions handles the edges
+        if positional == 'full':
+            # top and bottom of pitch - we create a grid with three rows and then ignore the middle row when slicing
+            xedge = np.array([x1,x2,x3,x4,x5,x6,x7])
+            yedge = np.array([y1,y2,y5,y6])
+            stat1, x_grid1, y_grid1, cx1, cy1 = self.binned_statistic_2d(x, y, values, statistic = statistic,
+                                                                         bins = (xedge, yedge))
+            stat1 = stat1.T
+            # slicing second row
+            x_grid2 = x_grid1[2:,:].copy()
+            y_grid2 = y_grid1[2:,:].copy()
+            cx2 = cx1[2,:].copy()
+            cy2 = cy1[2,:].copy()
+            stat2 = stat1[2,:].reshape(1,-1).copy()
+            # slice first row
+            x_grid1 = x_grid1[:2,:].copy()
+            y_grid1 = y_grid1[:2,:].copy()
+            cx1 = cx1[0,:].copy()
+            cy1 = cy1[0,:].copy()
+            stat1 = stat1[0,:].reshape(1,-1).copy()
+            
+            # middle of pitch
+            xedge = np.array([x1,x2,x4,x6,x7])
+            yedge = np.array([y1,y2,y3,y4,y5,y6])
+            stat3, x_grid3, y_grid3, cx3, cy3 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
+                                                                         bins = (xedge, yedge))
+            stat3 = stat3.T
+            x_grid3 = x_grid3[1:-1:,1:-1].copy()
+            y_grid3 = y_grid3[1:-1,1:-1].copy()
+            cx3 = cx3[1:-1,1:-1].copy()
+            cy3 = cy3[1:-1,1:-1].copy()
+            stat3 = stat3[1:-1,1:-1].copy()
+            
+            #penalty area 1
+            xedge = np.array([x1,x2,x3]).astype(np.float64)
+            yedge = np.array([y2,y5,y6]).astype(np.float64)
+            stat4, x_grid4, y_grid4, cx4, cy4 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
+                                                                         bins = (xedge, yedge))
+            stat4 = stat4.T
+            stat4 = stat4[:-1,:-1].copy()
+            x_grid4 = x_grid4[:-1,:-1].copy()
+            y_grid4 = y_grid4[:-1,:-1].copy()
+            cx4 = cx4[:1,:1].copy()
+            cy4 = cy4[:1,:1].copy()
+            stat4 = stat4[:1,:1].reshape(1,-1).copy()
+            
+            #penalty area 2
+            xedge = np.array([x6,x7]).astype(np.float64)
+            yedge = np.array([y2,y5,y6]).astype(np.float64)
+            stat5, x_grid5, y_grid5, cx5, cy5 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
+                                                                         bins = (xedge, yedge))
+            stat5 = stat5.T
+            x_grid5 = x_grid5[:-1,:].copy()
+            y_grid5 = y_grid5[:-1,:].copy()
+            cy5 = cy5[0].copy()
+            cx5 = cx5[0].copy()
+            stat5 = stat5[0].reshape(1,-1).copy()
         
-        #penalty area 1
-        xedge = np.array([x1,x2,x3]).astype(np.float64)
-        yedge = np.array([y2,y5,y6]).astype(np.float64)
-        stat4, x_grid4, y_grid4, cx4, cy4 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                          bins = (xedge, yedge))
-        stat4 = stat4.T
-        stat4 = stat4[:-1,:-1].copy()
-        x_grid4 = x_grid4[:-1,:-1].copy()
-        y_grid4 = y_grid4[:-1,:-1].copy()
-        cx4 = cx4[:1,:1].copy()
-        cy4 = cy4[:1,:1].copy()
-        stat4 = stat4[:1,:1].reshape(1,-1).copy()
-        
-        #penalty area 2
-        xedge = np.array([x6,x7]).astype(np.float64)
-        yedge = np.array([y2,y5,y6]).astype(np.float64)
-        stat5, x_grid5, y_grid5, cx5, cy5 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                          bins = (xedge, yedge))
-        stat5 = stat5.T
-        x_grid5 = x_grid5[:-1,:].copy()
-        y_grid5 = y_grid5[:-1,:].copy()
-        cy5 = cy5[0].copy()
-        cx5 = cx5[0].copy()
-        stat5 = stat5[0].reshape(1,-1).copy()
-        
-        cx = np.concatenate([cx1.ravel(),cx2.ravel(),cx3.ravel(),cx4.ravel(),cx5.ravel()])
-        cy = np.concatenate([cy1.ravel(),cy2.ravel(),cy3.ravel(),cy4.ravel(),cy5.ravel()])      
-        x_grid = [x_grid1, x_grid2, x_grid3, x_grid4, x_grid5]
-        y_grid = [y_grid1, y_grid2, y_grid3, y_grid4, y_grid5]
-        statistic_grid = [stat1, stat2, stat3, stat4, stat5]
-        statistic = np.hstack([stat.ravel() for stat in statistic_grid])
-
+            cx = np.concatenate([cx1.ravel(),cx2.ravel(),cx3.ravel(),cx4.ravel(),cx5.ravel()])
+            cy = np.concatenate([cy1.ravel(),cy2.ravel(),cy3.ravel(),cy4.ravel(),cy5.ravel()])      
+            x_grid = [x_grid1, x_grid2, x_grid3, x_grid4, x_grid5]
+            y_grid = [y_grid1, y_grid2, y_grid3, y_grid4, y_grid5]
+            statistic_grid = [stat1, stat2, stat3, stat4, stat5]
+            statistic = np.hstack([stat.ravel() for stat in statistic_grid])
+            
+        elif positional == 'horizontal':
+            xedge = np.array([x1, x7])
+            yedge = np.array([y1, y2, y3, y4, y5, y6])
+            statistic, x_grid, y_grid, cx, cy = self.binned_statistic_2d(x, y, values, statistic = statistic, 
+                                                                         bins = (xedge, yedge))
+            statistic_grid = [statistic.T]
+            x_grid = [x_grid]
+            y_grid = [y_grid]
+            statistic = statistic.ravel()
+            
+        elif positional == 'vertical':
+            xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
+            yedge = np.array([y1, y6])
+            statistic, x_grid, y_grid, cx, cy = self.binned_statistic_2d(x, y, values, statistic = statistic, 
+                                                                         bins = (xedge, yedge))
+            statistic_grid = [statistic.T]
+            x_grid = [x_grid]
+            y_grid = [y_grid]
+            statistic = statistic.ravel()
+            
+        else:
+            raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
+      
         return statistic_grid, statistic, x_grid, y_grid, cx, cy      
 
     def heatmap_positional(self, x_grid, y_grid, statistic_grid, statistic, ax=None, **kwargs):
+        if ax is None:
+            raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
         vmax = kwargs.pop('vmax',statistic.max())
         vmin = kwargs.pop('vmin',statistic.min())
         
