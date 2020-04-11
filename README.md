@@ -98,7 +98,7 @@ df_pass = df.loc[mask_pass_seattle, ['x','y','pass_end_x','pass_end_y','outcome_
 mask_complete = df_pass.outcome_name.isnull()
 
 # Plot arrows
-pitch = Pitch(pitch_type = 'statsbomb', orientation = 'horizontal',
+pitch = Pitch(pitch_type = 'statsbomb', orientation = 'horizontal', tight_layout = True,
               pitch_color = '#22312b', line_color = '#c7d5cc', figsize = (16, 9), pad_top = 10)
 fig, ax = pitch.draw()
 pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
@@ -110,7 +110,7 @@ pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
 ax.legend(facecolor = 'None', edgecolor = 'None', fontsize = 'large')
 team1, team2 = df.team_name.unique()
 ax.set_title(f'{team1} vs {team2}', pad  = -40, fontsize = 30);
-fig.savefig(os.path.join('figures','README_arrows_example.png'))
+fig.savefig(os.path.join('figures','README_arrows_example.png'), bbox_inches = 'tight', pad_inches = 0)
 ```
 
 ####  5. Kdeplot
