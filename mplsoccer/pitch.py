@@ -1160,12 +1160,27 @@ class Pitch(object):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
         zorder = kwargs.pop('zorder', 2)
+        if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
+            if self.orientation == 'horizontal':
+                clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
+            elif self.orientation == 'vertical':
+                clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
+            
         # plot. Reverse coordinates if vertical plot 
         if self.orientation == 'horizontal':
-            joint_plot = sns.jointplot(x, y, zorder=zorder, *args, **kwargs)
+            if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
+                clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
+                joint_plot = sns.jointplot(x, y, zorder = zorder, clip = clip, *args, **kwargs)
+            else:
+                joint_plot = sns.jointplot(x, y, zorder = zorder, *args, **kwargs)
+            
         elif self.orientation == 'vertical':
-            joint_plot = sns.jointplot(y, x, zorder=zorder, *args, **kwargs)
-
+            if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
+                clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
+                joint_plot = sns.jointplot(y, x, zorder = zorder, clip = clip, *args, **kwargs)
+            else:
+                joint_plot = sns.jointplot(y, x, zorder = zorder, *args, **kwargs)
+                
         joint_plot_ax = joint_plot.ax_joint
         self.draw(ax=joint_plot_ax)
 
