@@ -78,7 +78,7 @@ TO DO
 mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.quiver.html) to plot arrows. Behind the scenes, the Pitch.quiver() method modifies the start and end locations to a vector before plotting them. This avoids the need to use Matplotlib's annotate in a loop, which is another way of plotting arrows.
 
 Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figure/README_arrows_example.png?raw=true "arrow plot")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_arrows_example.png?raw=true "arrow plot")
 
 Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/04-Plotting-Arrows.ipynb):
 ``` python
@@ -103,13 +103,13 @@ pitch = Pitch(pitch_type = 'statsbomb', orientation = 'horizontal',
 fig, ax = pitch.draw()
 pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
              df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width = 1,
-             headwidth = 10, headlength = 10, color = '#ad993c', ax=ax, label = 'complete passes')
+             headwidth = 10, headlength = 10, color = '#ad993c', ax = ax, label = 'complete passes')
 pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
              df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width = 1, 
-             headwidth = 10, headlength = 10, color = '#ba4f45', ax=ax, label = 'other passes')
+             headwidth = 10, headlength = 10, color = '#ba4f45', ax = ax, label = 'other passes')
 ax.legend(facecolor = 'None', edgecolor = 'None', fontsize = 'large')
 team1, team2 = df.team_name.unique()
-ax.set_title(f'{team1} vs {team2}', pad=-40, fontsize = 30);
+ax.set_title(f'{team1} vs {team2}', pad  = -40, fontsize = 30);
 fig.savefig(os.path.join('figures','README_arrows_example.png'))
 ```
 
