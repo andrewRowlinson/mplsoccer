@@ -113,7 +113,39 @@ ax.set_title(f'{team1} vs {team2}', pad  = -40, fontsize = 30);
 fig.savefig(os.path.join('figures','README_arrows_example.png'), bbox_inches = 'tight', pad_inches = 0)
 ```
 
-####  5. Kdeplot
+####  5. Kernel density plots
+
+mplsoccer uses [seaborn.kdeplot](https://seaborn.pydata.org/generated/seaborn.kdeplot.html) to plot kernel density plots. Behind the scenes, the Pitch.kdeplot() method also clips the plot to the edges of the pitch.
+
+Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_kdeplot_example.png?raw=true "kernel density plot")
+
+Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/05-Plotting-kdeplot.ipynb):
+``` python
+from mplsoccer.pitch import Pitch
+from mplsoccer.statsbomb import read_event, EVENT_SLUG
+import os
+
+# load first game that Messi played as a false-9 and the match before
+kwargs = {'related_event_df': False,'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
+df_false9 = read_event(os.path.join(EVENT_SLUG,'69249.json'), **kwargs)['event']
+df_before_false9 = read_event(os.path.join(EVENT_SLUG,'69251.json'), **kwargs)['event']
+# filter messi's actions (starting positions)
+df_false9 = df_false9.loc[df_false9.player_id == 5503,['x', 'y']]
+df_before_false9 = df_before_false9.loc[df_before_false9.player_id == 5503,['x', 'y']]
+# plotting
+pitch = Pitch(pitch_type = 'statsbomb', figsize = (16, 9), layout = (1, 2), pitch_color = 'grass', stripe = True)
+fig, ax = pitch.draw()
+ax[0].set_title('Messi in the game directly before \n the playing the false 9 role', fontsize = 25, pad = 20)
+pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax = ax[0], cmap = 'plasma', linewidths = 3)
+pitch.annotate('6-2 thrashing \nof Real Madrid', (25,10), color = 'white',
+               fontsize = 25, ha = 'center', va = 'center', ax = ax[1])
+ax[1].set_title('The first Game Messi \nplayed the false 9 role', fontsize = 25, pad = 20)
+pitch.kdeplot(df_false9.x, df_false9.y, ax = ax[1], cmap = 'plasma', linewidths = 3)
+pitch.annotate('2-2 draw \nagainst Valencia', (25,10), color = 'white',
+               fontsize = 25, ha = 'center', va = 'center', ax = ax[0])
+fig.savefig(os.path.join('figures', 'README_kdeplot_example.png'), bbox_inches = 'tight')
+```
 
 ####  6. Jointplot
 

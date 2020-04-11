@@ -255,13 +255,14 @@ def read_match(path_or_buf):
     df_match.drop(['away_team_gender','match_status'],axis=1,inplace=True)
     df_match.rename({'home_team_gender':'competition_gender'},axis=1,inplace=True)
     # manager is a list (len=1) containing a dictionary so lets split into columns
-    df_match['home_team_managers'] = df_match.home_team_managers.str[0]
-    df_match = _split_dict_col(df_match,'home_team_managers')
-    df_match['away_team_managers'] = df_match.away_team_managers.str[0]
-    df_match = _split_dict_col(df_match,'away_team_managers')
-    # dates to datetimes
-    df_match['home_team_managers_dob'] = pd.to_datetime(df_match['home_team_managers_dob'])
-    df_match['away_team_managers_dob'] = pd.to_datetime(df_match['away_team_managers_dob'])
+    if 'home_team_managers' in df_match.columns:
+        df_match['home_team_managers'] = df_match.home_team_managers.str[0]
+        df_match = _split_dict_col(df_match,'home_team_managers')
+        df_match['home_team_managers_dob'] = pd.to_datetime(df_match['home_team_managers_dob'])
+    if 'away_team_managers' in df_match.columns:
+        df_match['away_team_managers'] = df_match.away_team_managers.str[0]
+        df_match = _split_dict_col(df_match,'away_team_managers')
+        df_match['away_team_managers_dob'] = pd.to_datetime(df_match['away_team_managers_dob'])
     # ids to integers
     for col in ['competition_id','season_id','home_team_id','competition_stage_id']:
         df_match[col] = df_match[col].astype(np.int64)
