@@ -1143,7 +1143,8 @@ class Pitch(object):
 
     def jointplot(self, x, y, *args, **kwargs):
         """ Utility wrapper around seaborn.jointplot
-        which automatically flips the x and y coordinates if the pitch is vertical and sets the height from the figsize.
+        which automatically flips the x and y coordinates if the pitch is vertical, sets the height from the figsize,
+        and clips kernel density plots (kind = 'kde') to the pitch boundaries.
         
         Draw a plot of two variables with bivariate and univariate graphs.
         see: https://seaborn.pydata.org/generated/seaborn.jointplot.html
