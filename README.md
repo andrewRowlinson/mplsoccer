@@ -43,7 +43,7 @@ pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
 fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true"pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
 
 ####  b) Views
 
@@ -77,10 +77,10 @@ TO DO
 
 mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.quiver.html) to plot arrows. Behind the scenes, the Pitch.quiver() method modifies the start and end locations to a vector before plotting them. This avoids the need to use Matplotlib's annotate in a loop, which is another way of plotting arrows.
 
-Example:
-![mplsoccer arrow plot](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figure/README_arrows_example.png?raw=true)
+Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figure/README_arrows_example.png?raw=true "arrow plot")
 
-Code available in [notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/04-Plotting-Arrows.ipynb):
+Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/04-Plotting-Arrows.ipynb):
 ``` python
 from mplsoccer.pitch import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
