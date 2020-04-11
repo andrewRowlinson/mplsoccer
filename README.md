@@ -43,7 +43,7 @@ pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
 fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
 ```
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true"pitch xkcd style")
 
 ####  b) Views
 
@@ -74,6 +74,44 @@ TO DO
 ####  3. Lines
 
 ####  4. Arrows
+
+mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.quiver.html) to plot arrows. Behing the scenes it changes the provided start and end locations to vector form before plotting. This avoids the need to use Matplotlib's annotate in a loop.
+
+Example:
+![mplsoccer arrow plot](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figure/README_arrows_example.png?raw=true)
+
+Code available in [notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/04-Plotting-Arrows.ipynb):
+``` python
+from mplsoccer.pitch import Pitch
+from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from matplotlib import rcParams
+import os
+
+rcParams['text.color'] = '#c7d5cc' # set the default text color
+
+# get event dataframe for game 7478, create a dataframe of the passes, and a boolean mask for the outcome
+df_dict = read_event(os.path.join(EVENT_SLUG,'7478.json'),
+                     related_event_df = False, shot_freeze_frame_df = False, tactics_lineup_df = False)
+df = df_dict['event'] # read_event returns a dictionary of dataframes
+mask_pass_seattle = (df.type_name == 'Pass') & (df.team_name == 'Seattle Reign')
+df_pass = df.loc[mask_pass_seattle, ['x','y','pass_end_x','pass_end_y','outcome_name']]
+mask_complete = df_pass.outcome_name.isnull()
+
+# Plot arrows
+pitch = Pitch(pitch_type = 'statsbomb', orientation = 'horizontal',
+              pitch_color = '#22312b', line_color = '#c7d5cc', figsize = (16, 9), pad_top = 10)
+fig, ax = pitch.draw()
+pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
+             df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width = 1,
+             headwidth = 10, headlength = 10, color = '#ad993c', ax=ax, label = 'complete passes')
+pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+             df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width = 1, 
+             headwidth = 10, headlength = 10, color = '#ba4f45', ax=ax, label = 'other passes')
+ax.legend(facecolor = 'None', edgecolor = 'None', fontsize = 'large')
+team1, team2 = df.team_name.unique()
+ax.set_title(f'{team1} vs {team2}', pad=-40, fontsize = 30);
+fig.savefig(os.path.join('figures','README_arrows_example.png'))
+```
 
 ####  5. Kdeplot
 
