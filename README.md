@@ -151,6 +151,32 @@ fig.savefig(os.path.join('figures', 'README_kdeplot_example.png'), bbox_inches =
 
 ####  6. Jointplot
 
+mplsoccer uses [seaborn.jointplot](https://seaborn.pydata.org/generated/seaborn.jointplot.html) to plot joint plots. This method is the only Pitch plotting method that does not take a Matplotlib axis (ax) as an argument. Instead, first we plot a Seaborn jointplot and then we draw on a pitch after. Seaborn.jointplot's are square and take a height arguement to set up the figure size, the Pitch figsize is therefore ignored.
+
+Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_jointplot_example.png?raw=true "joint plot")
+
+Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/06-Plotting-jointplot.ipynb):
+``` python
+from mplsoccer.pitch import Pitch
+from mplsoccer.statsbomb import read_event, EVENT_SLUG
+import os
+
+# load first game that Messi played as a false-9
+kwargs = {'related_event_df': False,'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
+df_false9 = read_event(os.path.join(EVENT_SLUG,'69249.json'), **kwargs)['event']
+# filter messi's actions (starting positions)
+df_false9 = df_false9.loc[df_false9.player_id == 5503,['x', 'y']]
+
+# plotting
+pitch = Pitch(pitch_type = 'statsbomb', pitch_color = 'grass', stripe = True, view = 'half', pad_left = 20)
+joint_kws = {'shade': False, 'color': 'green', 'cmap': "plasma", 'linewidths': 3}
+g = pitch.jointplot(df_false9.x, df_false9.y, height = 9, kind='kde',**joint_kws);
+g.fig.suptitle("Messi's first game as a false 9", x = 0.5, y = 1.03, fontsize = 25, ha = 'center', va = 'center')
+g.savefig(os.path.join('figures', 'README_jointplot_example.png'), bbox_inches = 'tight')
+```
+
 ####  7. Hexbin
 
 #### 8. Heatmap
