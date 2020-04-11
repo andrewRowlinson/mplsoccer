@@ -1160,12 +1160,11 @@ class Pitch(object):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
         zorder = kwargs.pop('zorder', 2)
-        height = kwargs.pop('height', self.figsize[1])
         # plot. Reverse coordinates if vertical plot 
         if self.orientation == 'horizontal':
-            joint_plot = sns.jointplot(x, y, zorder=zorder, height=height, *args, **kwargs)
+            joint_plot = sns.jointplot(x, y, zorder=zorder, *args, **kwargs)
         elif self.orientation == 'vertical':
-            joint_plot = sns.jointplot(y, x, zorder=zorder, height=height, *args, **kwargs)
+            joint_plot = sns.jointplot(y, x, zorder=zorder, *args, **kwargs)
 
         joint_plot_ax = joint_plot.ax_joint
         self.draw(ax=joint_plot_ax)
