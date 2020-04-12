@@ -28,9 +28,10 @@ mplsoccer currently supports several data formats:
 The following example draws a Statsbomb pitch (the default) with stripes.
 ``` python
 from mplsoccer.pitch import Pitch
+import os
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
-fig.savefig('statsbomb.png',pad_inches=0,bbox_inches='tight')
+fig.savefig(os.path.join('figures','README_pitch_type.png'),pad_inches=0,bbox_inches='tight')
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_statsbomb_pitch.png?raw=true "statsbomb pitch")
 
@@ -41,7 +42,7 @@ import matplotlib.pyplot as plt
 plt.xkcd()
 pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
 fig, ax = pitch.draw()
-fig.savefig('statsbomb_xkcd.png',pad_inches=0,bbox_inches='tight')
+fig.savefig(os.path.join('figures','README_example_xkcd_pitch.png'),pad_inches=0,bbox_inches='tight')
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
 
