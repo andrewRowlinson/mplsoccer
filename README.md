@@ -193,13 +193,13 @@ There are three steps to creating heatmaps in mplsoccer:
 2) plot a heatmap, which uses [matplotlib.axes.Axes.pcolormesh](https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html)
 3) plot the labels (optional), which uses [matplotlib.axes.Axes.annotate](https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.annotate.html)
 
-I deliberately did not combine these methods so that you can post process the values, e.g. rounding, formating, subtracting or differencing from the league average.
+I deliberately did not combine these methods so that you can post-process the values, e.g. rounding, formating, subtracting or differencing from the league average.
 
 mplsoccer contains two ways to bin the data:
-a) bins. Specified by number of x coordinate bins and number of y coordinate bins
+a) bins. Specified by the number of x coordinate bins and the number of y coordinate bins
 b) positional. This bins the data according to the [Juego de Posición](https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanation/) concept
 
-Bins Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+###### Bins Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
 
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_heatmap_bins.png?raw=true "heatmap bins")
 
@@ -240,7 +240,7 @@ fig.suptitle('Location of pressure events - 3 home games for Chelsea FC Women', 
 fig.savefig(os.path.join('figures','README_heatmap_bins.png'), bbox_inches = 'tight')
 ```
 
-Positional Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
+######  Positional Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
 
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_heatmap_positional.png?raw=true "positional heatmap")
 
