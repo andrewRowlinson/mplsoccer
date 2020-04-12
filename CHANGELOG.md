@@ -1,6 +1,8 @@
 Version 0.0.2
 -----------
     - Default pitch_type is now 'statsbomb'. It was 'opta'.
+    - Added constrained_layout option for Pitch class
+    - Changed defaults for Pitch class: tight_layout=False and constrained_layout=True
     - Fixed 'wyscout' pitch type. The 0,0 coordinate is meant to be top left.
     - Fixed jointplot to clip to pitch outline.
     - Added support for 'statsperform' and 'metricasports' pitch types.

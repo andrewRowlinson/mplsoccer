@@ -74,8 +74,10 @@ class Pitch(object):
         Whether to include the axis labels.
     tick : bool, default False
         Whether to include the axis ticks.
-    tight_layout : bool, default True
+    tight_layout : bool, default False
         Whether to use Matplotlib's tight layout.
+    constrained_layout : bool, default True
+        Whether to use Matplotlib's constrained layout.
     """
 
     # the stripe_scale has been manually selected so that all stripe widths
@@ -144,7 +146,7 @@ class Pitch(object):
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
                  pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None, pitch_length=None, pitch_width=None,
-                 goal_type='line', label=False, tick=False, axis=False, tight_layout=True):
+                 goal_type='line', label=False, tick=False, axis=False, tight_layout=False, constrained_layout=True):
 
         # set figure and axes attributes
         self.axes = None
@@ -155,6 +157,7 @@ class Pitch(object):
         self.tick = tick
         self.label = label
         self.tight_layout = tight_layout
+        self.constrained_layout = constrained_layout
 
         # set attributes
         self.line_color = line_color
@@ -388,16 +391,19 @@ class Pitch(object):
         if self.layout is None:
             nrows = 1
             ncols = 1
-            fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize)
+            fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize,
+                                     constrained_layout=self.constrained_layout)
             axes = np.array([axes])
 
         else:
             nrows, ncols = self.layout
             if nrows > 1 or ncols > 1:
-                fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize)
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize,
+                                         constrained_layout=self.constrained_layout)
                 axes = axes.ravel()
             else:
-                fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize)
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize,
+                                         constrained_layout=self.constrained_layout)
                 axes = np.array([axes])
 
         self.fig = fig
