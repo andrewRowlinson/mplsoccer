@@ -100,18 +100,20 @@ mask_complete = df_pass.outcome_name.isnull()
 
 # Plot arrows
 pitch = Pitch(pitch_type = 'statsbomb', orientation = 'horizontal', tight_layout = True,
-              pitch_color = '#22312b', line_color = '#c7d5cc', figsize = (16, 9), pad_top = 10)
+              pitch_color = '#22312b', line_color = '#c7d5cc', figsize = (16, 9))
 fig, ax = pitch.draw()
 pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
              df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width = 1,
-             headwidth = 10, headlength = 10, color = '#ad993c', ax = ax, label = 'complete passes')
+             headwidth = 10, headlength = 10, color = '#ad993c', ax = ax, label = 'completed passes')
 pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
              df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width = 1, 
              headwidth = 10, headlength = 10, color = '#ba4f45', ax = ax, label = 'other passes')
-ax.legend(facecolor = 'None', edgecolor = 'None', fontsize = 'large')
+ax.legend(facecolor = '#22312b', edgecolor = 'None', fontsize = 'large')
 team1, team2 = df.team_name.unique()
-ax.set_title(f'{team1} vs {team2}', pad  = -40, fontsize = 30);
-fig.savefig(os.path.join('figures','README_arrows_example.png'), bbox_inches = 'tight', pad_inches = 0)
+ax.set_title(f'{team1} vs {team2}', fontsize = 30);
+fig.set_facecolor('#22312b')
+fig.set_constrained_layout(False)
+fig.savefig(os.path.join('figures','README_arrows_example.png'), facecolor = '#22312b', bbox_inches = 'tight')
 ```
 
 ####  5. Kernel density plots
