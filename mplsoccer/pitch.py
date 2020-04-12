@@ -1504,9 +1504,9 @@ class Pitch(object):
         if ax is None:
             raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
     
-        statistic = statistic.T.ravel()
-        cx = cx.ravel()
-        cy = cy.ravel()
+        statistic = np.asarray(statistic).T.ravel()
+        cx = np.ravel(cx)
+        cy = np.ravel(cy)
         
         for i, stat in enumerate(statistic):
             self.annotate(stat, (cx[i], cy[i]), ax=ax, **kwargs)
