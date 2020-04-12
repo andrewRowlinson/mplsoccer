@@ -1104,7 +1104,7 @@ class Pitch(object):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
             
-        **kwargs
+        kwargs
             Additional key word arguements are passed to matplotlib.axes.Axes.quiver.      
         """
         if ax is None:
@@ -1193,7 +1193,7 @@ class Pitch(object):
 
         return joint_plot
     
-    def annotate(self, text, xy, *args, ax=None, **kwargs):
+    def annotate(self, text, xy, xytext=None, *args, ax=None, **kwargs):
         """ Utility wrapper around ax.annotate
         which automatically flips the xy and xytext coordinates if the pitch is vertical.
         
@@ -1210,14 +1210,12 @@ class Pitch(object):
             The position (x, y) to place the text at. If None, defaults to xy.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-        **kwargs
+        kwargs
             Additional key word arguements are passed to matplotlib.axes.Axes.annotate.
         """
         if ax is None:
             raise TypeError("annotate() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        
-        xytext = kwargs.pop('xytext', None)          
-        
+               
         if self.orientation == 'vertical':
             xy = xy[::-1]
             if xytext is not None:
@@ -1332,7 +1330,7 @@ class Pitch(object):
             Use Pitch.binned_statistic_2d() to calculate these.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-        **kwargs
+        kwargs
             Additional key word arguements are passed to matplotlib.axes.Axes.pcolormesh.
         """
         if ax is None:
@@ -1488,7 +1486,7 @@ class Pitch(object):
             The y center coordinate of the bin.        
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-        **kwargs
+        kwargs
             Additional key word arguements are passed to matplotlib.axes.Axes.annotate.
         """        
         if ax is None:
