@@ -2,6 +2,7 @@ Version 0.0.2
 -----------
     - Default pitch_type is now 'statsbomb'. It was 'opta'.
     - Added constrained_layout option for Pitch class
+    - Added line_zorder so can raise or lower pitch markings in a plot. This was necessary so you could plot the pitch lines over a heatmap.
     - Changed defaults for Pitch class: tight_layout=False and constrained_layout=True
     - Fixed 'wyscout' pitch type. The 0,0 coordinate is meant to be top left.
     - Fixed jointplot to clip to pitch outline.

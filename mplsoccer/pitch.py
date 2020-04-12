@@ -40,6 +40,8 @@ class Pitch(object):
         The background color for each Matplotlib axis.
     line_color : any Matplotlib color, default 'white'
         The line color for the pitch markings.
+    line_zorder : float, default 1
+        Set the zorder for the pitch lines (a matplotlib artist). Artists with lower zorder values are drawn first.
     linewidth : float, default 2
         The line width for the pitch markings.
     stripe : bool, default False
@@ -144,7 +146,7 @@ class Pitch(object):
                                 'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
       
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
-                 pitch_color='#aabb97', line_color='white', linewidth=2, stripe=False, stripe_color='#c2d59d',
+                 pitch_color='#aabb97', line_color='white', line_zorder=1, linewidth=2, stripe=False, stripe_color='#c2d59d',
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None, pitch_length=None, pitch_width=None,
                  goal_type='line', label=False, tick=False, axis=False, tight_layout=False, constrained_layout=True):
 
@@ -161,6 +163,7 @@ class Pitch(object):
 
         # set attributes
         self.line_color = line_color
+        self.line_zorder = line_zorder
         self.pitch_color = pitch_color
         self.pitch_length = pitch_length
         self.pitch_width = pitch_width
@@ -549,21 +552,25 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             if self.invert_y:
                 pitch_markings = patches.Rectangle((self.left, self.top), self.length, self.width,
-                                                   fill=False, linewidth=self.linewidth, color=self.line_color)
+                                                   fill=False, linewidth=self.linewidth, color=self.line_color,
+                                                   zorder=self.line_zorder)
             else:
                 pitch_markings = patches.Rectangle((self.left, self.bottom), self.length, self.width,
-                                                   fill=False, linewidth=self.linewidth, color=self.line_color)
+                                                   fill=False, linewidth=self.linewidth, color=self.line_color,
+                                                   zorder=self.line_zorder)
             midline = lines.Line2D([self.center_length, self.center_length], [self.bottom, self.top],
-                                   linewidth=self.linewidth, color=self.line_color, zorder=1)
+                                   linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         elif self.orientation == 'vertical':
             if self.invert_y:
                 pitch_markings = patches.Rectangle((self.top, self.left), self.width, self.length,
-                                                   fill=False, linewidth=self.linewidth, color=self.line_color)
+                                                   fill=False, linewidth=self.linewidth, color=self.line_color,
+                                                   zorder=self.line_zorder)
             else:
                 pitch_markings = patches.Rectangle((self.bottom, self.left), self.width, self.length,
-                                                   fill=False, linewidth=self.linewidth, color=self.line_color)
+                                                   fill=False, linewidth=self.linewidth, color=self.line_color,
+                                                   zorder=self.line_zorder)
             midline = lines.Line2D([self.top, self.bottom], [self.center_length, self.center_length],
-                                   linewidth=self.linewidth, color=self.line_color, zorder=1)
+                                   linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         ax.add_patch(pitch_markings)
         ax.add_artist(midline)
 
@@ -571,44 +578,48 @@ class Pitch(object):
         if self.goal_type == 'box':
             if self.orientation == 'horizontal':
                 goal1 = patches.Rectangle((self.right, self.goal_post), self.goal_depth, self.goal_width,
-                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
+                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7,
+                                          zorder=self.line_zorder)
                 goal2 = patches.Rectangle((self.left - self.goal_depth, self.goal_post), self.goal_depth,
                                           self.goal_width,
-                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
+                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7,
+                                          zorder=self.line_zorder)
             elif self.orientation == 'vertical':
                 goal1 = patches.Rectangle((self.goal_post, self.right), self.goal_width, self.goal_depth,
-                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
+                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7,
+                                          zorder=self.line_zorder)
                 goal2 = patches.Rectangle((self.goal_post, self.left - self.goal_depth), self.goal_width,
                                           self.goal_depth,
-                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7)
+                                          fill=False, linewidth=self.linewidth, color=self.line_color, alpha=0.7,
+                                          zorder=self.line_zorder)
             ax.add_patch(goal1)
             ax.add_patch(goal2)
 
         elif self.goal_type == 'line':
             if self.orientation == 'horizontal':
                 goal1 = lines.Line2D([self.right, self.right], [self.goal_post + self.goal_width, self.goal_post],
-                                     linewidth=self.linewidth * 2, color=self.line_color)
+                                     linewidth=self.linewidth * 2, color=self.line_color, zorder=self.line_zorder)
                 goal2 = lines.Line2D([self.left, self.left], [self.goal_post + self.goal_width, self.goal_post],
-                                     linewidth=self.linewidth * 2, color=self.line_color)
+                                     linewidth=self.linewidth * 2, color=self.line_color, zorder=self.line_zorder)
             elif self.orientation == 'vertical':
                 goal1 = lines.Line2D([self.goal_post + self.goal_width, self.goal_post], [self.right, self.right],
-                                     linewidth=self.linewidth * 2, color=self.line_color)
+                                     linewidth=self.linewidth * 2, color=self.line_color, zorder=self.line_zorder)
                 goal2 = lines.Line2D([self.goal_post + self.goal_width, self.goal_post], [self.left, self.left],
-                                     linewidth=self.linewidth * 2, color=self.line_color)
+                                     linewidth=self.linewidth * 2, color=self.line_color, zorder=self.line_zorder)
             ax.add_artist(goal1)
             ax.add_artist(goal2)
 
     def _boxes(self, box_from_side, box_length, box_width, ax):
         if self.orientation == 'horizontal':
             box1 = patches.Rectangle((self.left, box_from_side), box_length, box_width,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color)
+                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
             box2 = patches.Rectangle((self.right - box_length, box_from_side), box_length, box_width,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color)
+                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         elif self.orientation == 'vertical':
             box1 = patches.Rectangle((box_from_side, self.left), box_width, box_length,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color)
+                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
             box2 = patches.Rectangle((box_from_side, self.right - box_length), box_width, box_length,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color)
+                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         ax.add_patch(box1)
         ax.add_patch(box2)
 
@@ -638,16 +649,17 @@ class Pitch(object):
             arc2_theta1 = 180 - self.arc2_leftH
             arc2_theta2 = 180 + self.arc2_leftH
 
-        circle = patches.Circle(xy, self.circle_size, linewidth=self.linewidth, color=self.line_color, fill=False)
-        center_spot = patches.Circle(center, size_spot, color=self.line_color)
-        penalty1_spot = patches.Circle(penalty1, size_spot, color=self.line_color)
-        penalty2_spot = patches.Circle(penalty2, size_spot, color=self.line_color)
+        circle = patches.Circle(xy, self.circle_size, linewidth=self.linewidth, color=self.line_color, fill=False,
+                                zorder=self.line_zorder)
+        center_spot = patches.Circle(center, size_spot, color=self.line_color, zorder=self.line_zorder)
+        penalty1_spot = patches.Circle(penalty1, size_spot, color=self.line_color, zorder=self.line_zorder)
+        penalty2_spot = patches.Circle(penalty2, size_spot, color=self.line_color, zorder=self.line_zorder)
         arc1_patch = patches.Arc(penalty1, self.circle_size * 2, self.circle_size * 2,
                                  theta1=arc1_theta1, theta2=arc1_theta2,
-                                 linewidth=self.linewidth, color=self.line_color, fill=False)
+                                 linewidth=self.linewidth, color=self.line_color, fill=False, zorder=self.line_zorder)
         arc2_patch = patches.Arc(penalty2, self.circle_size * 2, self.circle_size * 2,
                                  theta1=arc2_theta1, theta2=arc2_theta2,
-                                 linewidth=self.linewidth, color=self.line_color, fill=False)
+                                 linewidth=self.linewidth, color=self.line_color, fill=False, zorder=self.line_zorder)
         ax.add_patch(circle)
         ax.add_patch(center_spot)
         ax.add_patch(penalty1_spot)
@@ -719,22 +731,22 @@ class Pitch(object):
             arc2_right = 180 + arc1_right
 
         circle = patches.Ellipse(ax_xy, diameter1, diameter2, transform=ax_coordinate_system, fill=False,
-                                 linewidth=self.linewidth, color=self.line_color)
+                                 linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         penalty_spot1 = patches.Ellipse(ax_spot1, diameter_spot1, diameter_spot2,
                                         transform=ax_coordinate_system,
-                                        linewidth=self.linewidth, color=self.line_color)
+                                        linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         penalty_spot2 = patches.Ellipse(ax_spot2, diameter_spot1, diameter_spot2,
                                         transform=ax_coordinate_system,
-                                        linewidth=self.linewidth, color=self.line_color)
+                                        linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         kick_off_spot = patches.Ellipse(ax_center, diameter_spot1, diameter_spot2,
                                         transform=ax_coordinate_system,
                                         linewidth=self.linewidth, color=self.line_color)
         arc1_patch = patches.Arc(ax_spot1, diameter1, diameter2, transform=ax_coordinate_system, fill=False,
                                  theta1=arc1_left, theta2=arc1_right,
-                                 linewidth=self.linewidth, color=self.line_color)
+                                 linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         arc2_patch = patches.Arc(ax_spot2, diameter1, diameter2, transform=ax_coordinate_system, fill=False,
                                  theta1=arc2_left, theta2=arc2_right,
-                                 linewidth=self.linewidth, color=self.line_color)
+                                 linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
 
         ax.add_patch(penalty_spot1)
         ax.add_patch(penalty_spot2)
