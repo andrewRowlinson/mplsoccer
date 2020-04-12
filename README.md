@@ -121,6 +121,8 @@ fig.savefig(os.path.join('figures','README_arrow_example.png'), facecolor = '#22
 
 mplsoccer uses [seaborn.kdeplot](https://seaborn.pydata.org/generated/seaborn.kdeplot.html) to plot kernel density plots. Behind the scenes, the Pitch.kdeplot() method also clips the plot to the edges of the pitch.
 
+If you don't know much about Seaborn's kernel density plots, I recommend [fcpython's tutorial](https://fcpython.com/visualisation/football-heatmaps-seaborn) for a football related example.
+
 Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
 
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_kdeplot_example.png?raw=true "kernel density plot")
@@ -287,6 +289,8 @@ fig.savefig(os.path.join('figures','README_heatmap_positional.png'), bbox_inches
 
 #### 10. Advanced examples
 
+TO DO.
+
 ## Inspiration
 
 mplsoccer was inspired by other people's work:
@@ -294,6 +298,7 @@ mplsoccer was inspired by other people's work:
 - [ggsoccer](https://github.com/Torvaney/ggsoccer) - a library for plotting pitches in R
 - [lastrow](https://twitter.com/lastrowview) - often tweets animations from matches and the accompanying code
 - [fcrstats](http://fcrstats.com/) - tutorials for using football data
+- [fcpython](https://fcpython.com/) - Python tutorials for using football data
 - [Karun Singh](https://twitter.com/karun1710) - tweets some interesting football analytics and visuals
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
 - [John Burn-Murdoch](https://twitter.com/jburnmurdoch/status/1057907312030085120) - this tweet got me interested in football analytics.
