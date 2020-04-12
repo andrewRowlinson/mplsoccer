@@ -80,7 +80,7 @@ mplsoccer uses [matplotlib.axes.Axes.quiver](https://matplotlib.org/3.1.1/api/_a
 
 Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
 
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_arrows_example.png?raw=true "arrow plot")
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_arrow_example.png?raw=true "arrow plot")
 
 Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/04-Plotting-Arrows.ipynb):
 ``` python
@@ -114,7 +114,7 @@ team1, team2 = df.team_name.unique()
 ax.set_title(f'{team1} vs {team2}', fontsize = 30);
 fig.set_facecolor('#22312b')
 fig.set_constrained_layout(False)
-fig.savefig(os.path.join('figures','README_arrows_example.png'), facecolor = '#22312b', bbox_inches = 'tight')
+fig.savefig(os.path.join('figures','README_arrow_example.png'), facecolor = '#22312b', bbox_inches = 'tight')
 ```
 
 ####  5. Kernel density plots
