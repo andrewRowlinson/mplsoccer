@@ -12,51 +12,45 @@ pip install mplsoccer
 
 ## Pitch plotting basics
 
-TO DO
+The main aim of mplsoccer is to quickly plot pitches. Here is a lightweight example, which plots the default StatsBomb pitch:
 
-mplsoccer can either plot on existing axis or create new axis.
-
-#### a) Pitch type
-mplsoccer currently supports several data formats:
-- Statsbomb
-- Stats Perform
-- Tracab (ChyronHego) tracking data
-- Opta
-- STATS (formerly Prozone)
-- Wyscout (the pitch dimensions are taken from ggsoccer: https://github.com/Torvaney/ggsoccer)
-
-The following example draws a Statsbomb pitch (the default) with stripes.
 ``` python
 from mplsoccer.pitch import Pitch
 import os
-pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
+pitch = Pitch(orientation='horizontal',figsize=(5,3),stripe=True)
 fig, ax = pitch.draw()
-fig.savefig(os.path.join('figures','README_pitch_type.png'),pad_inches=0,bbox_inches='tight')
+fig.savefig(os.path.join('figures','README_example_statsbomb_pitch.png'),pad_inches=0,bbox_inches='tight')
 ```
+
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_statsbomb_pitch.png?raw=true "statsbomb pitch")
 
-For fun you can also plot the same pitch in xkcd mode.
+As a matplotlib figure and axis is returned you are free to use any of matplotlib's functions instead of those included in mplsoccer. 
+
+You can also draw pitches on an existing axis by specifying an axis when drawing the pitch.
+
 ``` python
 from mplsoccer.pitch import Pitch
 import matplotlib.pyplot as plt
-plt.xkcd()
-pitch = Pitch(orientation='horizontal',figsize=(10,10),stripe=True)
-fig, ax = pitch.draw()
-fig.savefig(os.path.join('figures','README_example_xkcd_pitch.png'),pad_inches=0,bbox_inches='tight')
+import os
+pitch = Pitch(orientation='vertical', view='half', pitch_color='grass')
+fig, ax = plt.subplots(figsize=(6,4))
+pitch.draw(ax=ax)
+fig.savefig(os.path.join('figures','README_example_existing_axis.png'),pad_inches=0,bbox_inches='tight')
 ```
-![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_xkcd_pitch.png?raw=true "pitch xkcd style")
 
-####  b) Views
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_existing_axis.png?raw=true "plot on existing axis")
 
-####  c) Layout
-- figsize
-- layout
+> The Pitch class also includes methods to quickly make plots. This is for two reasons:
+a) a common mistake is not flipping the x-axis and y-axis when changing from horizontal to vertical orientation. mplsoccer handles this automatically so plots look the same when rotated. *
+b) additional functionality such as plotting footballs, creating heatmaps, rotating markers and setting some defaults.
 
-####  d) Appearance
+There is support for seven pitch types, currently StatsBomb is the default pitch (pitch_type='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types).
 
-####  e) Padding
+There are two pitch orientations (orientation='vertical' or 'horizontal') and two pitch views (view='full' or 'half'). You can amend the colors of the pitch and its lines and stripes with the arguments: pitch_color, line_color, and stripe color. It's also possible to change the goals (goal_type='line' or 'box') and linewidth of the pitch markings.
 
-####  f) Axis
+Additionally it's possible to add padding to the pitch (pad_top, pad_bottom, pad_left, pad_right). Negative padding reduces the amount of visible pitch and positive padding increases the amount of visible pitch. Currently the padding relates to the current orientation to make it easier to adjust, i.e. pad_top/ pad_bottom always changes the y-axis of the current view and pad_left, pad_right always changes the x-axis of the current view.
+
+Lastly sometimes you may want to see the axis, you can turn this on with the boolean arguments: axis, label, and tick.
 
 
 ## StatsBomb open-data
@@ -70,9 +64,15 @@ TO DO
 
 #### 1. Plot
 
+TO DO
+
 ####  2. Scatter
 
+TO DO
+
 ####  3. Lines
+
+TO DO
 
 ####  4. Arrows
 
@@ -189,6 +189,8 @@ g.savefig(os.path.join('figures', 'README_jointplot_example.png'), bbox_inches =
 ####  7. Hexbin
 
 mplsoccer uses [matplotlib.axes.Axes.hexbin](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.hexbin.html) to plot hexbin plots. I don't particularly like them for football data, but I have seen them used a couple of times so have included them.
+
+Hexbins currently do not look the same in vertical and horizontal orientations. This is because matplotlib bins the data according to the number of bins in the x-direction. Unfortunately the x-direction changes when using different orientations.
 
 Example using [StatsBomb open-data](https://github.com/statsbomb/open-data):
 
