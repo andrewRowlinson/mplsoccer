@@ -40,17 +40,18 @@ fig.savefig(os.path.join('figures','README_example_existing_axis.png'),pad_inche
 
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_existing_axis.png?raw=true "plot on existing axis")
 
-> The Pitch class also includes methods to quickly make plots. This is for two reasons:
-a) a common mistake is not flipping the x-axis and y-axis when changing from horizontal to vertical orientation. mplsoccer handles this automatically so plots look the same when rotated. *
+
+**The Pitch class also includes methods to quickly make plots. This is for two reasons:
+a) a common mistake is not flipping the x-axis and y-axis when changing from horizontal to vertical orientation. mplsoccer handles this automatically so plots look the same when rotated.
 b) additional functionality such as plotting footballs, creating heatmaps, rotating markers and setting some defaults.
 
-There is support for seven pitch types, currently StatsBomb is the default pitch (pitch_type='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types).
+There is support for seven pitch types, currently StatsBomb is the default pitch (`pitch_type`='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types).
 
-There are two pitch orientations (orientation='vertical' or 'horizontal') and two pitch views (view='full' or 'half'). You can amend the colors of the pitch and its lines and stripes with the arguments: pitch_color, line_color, and stripe color. It's also possible to change the goals (goal_type='line' or 'box') and linewidth of the pitch markings.
+There are two pitch orientations (`orientation`='vertical' or 'horizontal') and two pitch views (`view`='full' or 'half'). You can amend the colors of the pitch and its lines and stripes with the arguments: `pitch_color`, `line_color`, and `stripe_color`. It's also possible to change the goals (`goal_type`='line' or 'box') and `linewidth` of the pitch markings.
 
-Additionally it's possible to add padding to the pitch (pad_top, pad_bottom, pad_left, pad_right). Negative padding reduces the amount of visible pitch and positive padding increases the amount of visible pitch. Currently the padding relates to the current orientation to make it easier to adjust, i.e. pad_top/ pad_bottom always changes the y-axis of the current view and pad_left, pad_right always changes the x-axis of the current view.
+Additionally it's possible to add padding to the pitch (`pad_top`, `pad_bottom`, `pad_left`, `pad_right`). Negative padding reduces the amount of visible pitch and positive padding increases the amount of visible pitch. Currently the padding relates to the current orientation to make it easier to adjust, i.e. `pad_top`/ `pad_bottom` always changes the y-axis of the current view and `pad_left`, `pad_right` always changes the x-axis of the current view.
 
-Lastly sometimes you may want to see the axis, you can turn this on with the boolean arguments: axis, label, and tick.
+Lastly sometimes you may want to see the axis, you can turn this on with the boolean arguments: `axis`, `label`, and `tick`.
 
 
 ## StatsBomb open-data
