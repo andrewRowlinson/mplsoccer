@@ -50,7 +50,7 @@ fig.savefig(os.path.join('figures','README_example_existing_axis.png'),pad_inche
 > b) additional functionality such as plotting footballs, creating heatmaps, rotating markers and setting some defaults.
 
 #### Pitch types
-There is support for seven pitch types, currently StatsBomb is the default pitch (`pitch_type`='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types).
+There is support for seven pitch types, currently StatsBomb is the default pitch (`pitch_type`='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types-1).
 
 ## StatsBomb open-data
 
