@@ -813,16 +813,22 @@ class Pitch(object):
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+            
+        Returns
+        -------              
+        lines : A list of Line2D objects representing the plotted data.
         """
         if ax is None:
             raise TypeError("plot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation == 'horizontal':
-            ax.plot(x, y, *args, **kwargs)
+            lines = ax.plot(x, y, *args, **kwargs)
 
         elif self.orientation == 'vertical':
-            ax.plot(y, x, *args, **kwargs)
+            lines = ax.plot(y, x, *args, **kwargs)
+            
+        return lines
 
     def kdeplot(self, x, y, *args, ax=None, **kwargs):
         """ Utility wrapper around seaborn.kdeplot,
@@ -835,6 +841,10 @@ class Pitch(object):
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+            
+        Returns
+        -------            
+        ax : matplotlib.axes
         """
         if ax is None:
             raise TypeError("kdeplot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
@@ -850,10 +860,12 @@ class Pitch(object):
         # plot kde plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
             clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
-            sns.kdeplot(x, y, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
+            kde = sns.kdeplot(x, y, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
         elif self.orientation == 'vertical':
             clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
-            sns.kdeplot(y, x, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
+            kde = sns.kdeplot(y, x, ax=ax, clip=clip, zorder=zorder, *args, **kwargs)
+            
+        return kde
 
     def hexbin(self, x, y, *args, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
@@ -866,6 +878,10 @@ class Pitch(object):
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+            
+        Returns
+        -------
+        polycollection : matplotlib.collections.PolyCollection
         """
         if ax is None:
             raise TypeError("hexbin() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
@@ -884,11 +900,13 @@ class Pitch(object):
         # plot hexbin plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
             extent = kwargs.pop('extent', (self.left, self.right, self.bottom, self.top))
-            ax.hexbin(x, y, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
+            hexb = ax.hexbin(x, y, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
 
         elif self.orientation == 'vertical':
             extent = kwargs.pop('extent', (self.top, self.bottom, self.left, self.right))
-            ax.hexbin(y, x, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
+            hexb = ax.hexbin(y, x, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, *args, **kwargs)
+            
+        return hexb
         
     def scatter(self, x, y, *args, ax=None, rotation_degrees=None, marker=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.scatter,
@@ -911,6 +929,11 @@ class Pitch(object):
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+            
+        Returns
+        -------
+        paths : matplotlib.collections.PathCollection
+        
         """
         if ax is None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
@@ -924,6 +947,8 @@ class Pitch(object):
         # if using the football marker set the colors and lines, delete from kwargs so not used twice
         plot_football = False
         if marker == 'football':
+            if rotation_degrees is not None:
+                raise NotImplementedError("rotated football markers are not implemented.")
             plot_football = True
             linewidths = kwargs.pop('linewidths', 0.5)
             hexcolor = kwargs.pop('c', 'white')
@@ -1043,6 +1068,10 @@ class Pitch(object):
             
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+            
+        Returns
+        -------
+        LineCollection : matplotlib.collections.LineCollection
         """
 
         if ax is None:
@@ -1097,7 +1126,9 @@ class Pitch(object):
         # add line collection
         lc = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, *args, **kwargs)
         lc.set_array(pitch_array)
-        ax.add_collection(lc)
+        lc = ax.add_collection(lc)
+        
+        return lc
 
     def quiver(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
@@ -1117,7 +1148,11 @@ class Pitch(object):
             The axis to plot on.
             
         kwargs
-            Additional key word arguements are passed to matplotlib.axes.Axes.quiver.      
+            Additional key word arguements are passed to matplotlib.axes.Axes.quiver.
+            
+        Returns
+        -------
+        PolyCollection : matplotlib.quiver.Quiver   
         """
         if ax is None:
             raise TypeError("quiver() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
@@ -1150,14 +1185,16 @@ class Pitch(object):
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation == 'horizontal':
-            ax.quiver(xstart, ystart, u, v,
-                      units=units, scale_units=scale_units, angles=angles, scale=scale, zorder=zorder, width=width,
-                      *args, **kwargs)
+            q = ax.quiver(xstart, ystart, u, v,
+                          units=units, scale_units=scale_units, angles=angles, scale=scale, zorder=zorder, width=width,
+                          *args, **kwargs)
 
         elif self.orientation == 'vertical':
-            ax.quiver(ystart, xstart, v, u,
-                      units=units, scale_units=scale_units, angles=angles, scale=scale, zorder=zorder, width=width,
-                      *args, **kwargs)
+            q = ax.quiver(ystart, xstart, v, u,
+                          units=units, scale_units=scale_units, angles=angles, scale=scale, zorder=zorder, width=width,
+                          *args, **kwargs)
+            
+        return q
 
     def jointplot(self, x, y, *args, **kwargs):
         """ Utility wrapper around seaborn.jointplot
@@ -1172,7 +1209,11 @@ class Pitch(object):
         x, y : array-like or scalar.
             Commonly, these parameters are 1D arrays.
         **kwargs
-            Additional key word arguements are passed to seaborn.jointplot.    
+            Additional key word arguements are passed to seaborn.jointplot.
+            
+        Returns
+        -------
+        grid : seaborn.axisgrid.JointGrid         
         """
         x = np.ravel(x)
         y = np.ravel(y)
@@ -1224,6 +1265,10 @@ class Pitch(object):
             The axis to plot on.
         kwargs
             Additional key word arguements are passed to matplotlib.axes.Axes.annotate.
+  
+        Returns
+        -------
+        annotation : matplotlib.text.Annotation
         """
         if ax is None:
             raise TypeError("annotate() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
@@ -1233,7 +1278,9 @@ class Pitch(object):
             if xytext is not None:
                 xytext = xytext[::-1]
                 
-        ax.annotate(text, xy, xytext, *args, **kwargs)
+        annotation = ax.annotate(text, xy, xytext, *args, **kwargs)
+        
+        return annotation
     
     def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5, 4)):
         """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
@@ -1242,7 +1289,127 @@ class Pitch(object):
         
         The default statistic has been changed to count instead of mean.
         The default bins has been set to (5,4).
+        Parameters
+        ----------
+        x, y, values : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+            If the statistic is 'count' then values are ignored.       
+        statistic : string or callable, optional
+            The statistic to compute (default is 'count').
+            The following statistics are available:
+              * 'count' : compute the count of points within each bin.  This is
+                 identical to an unweighted histogram.  `values` array is not
+                 referenced.
+              * 'mean' : compute the mean of values for points within each bin.
+                 Empty bins will be represented by NaN.
+              * 'std' : compute the standard deviation within each bin. This
+                 is implicitly calculated with ddof=0.
+              * 'median' : compute the median of values for points within each
+                 bin. Empty bins will be represented by NaN.
+              * 'sum' : compute the sum of values for points within each bin.
+                 This is identical to a weighted histogram.
+              * 'min' : compute the minimum of values for points within each bin.
+                 Empty bins will be represented by NaN.
+              * 'max' : compute the maximum of values for point within each bin.
+                 Empty bins will be represented by NaN.
+              * function : a user-defined function which takes a 1D array of
+                 values, and outputs a single numerical statistic. This function
+                 will be called on the values in each bin.  Empty bins will be
+                 represented by function([]), or NaN if this returns an error.
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification:
+              * the number of bins for the two dimensions (nx = ny = bins),
+              * the number of bins in each dimension (nx, ny = bins),
+              * the bin edges for the two dimensions (x_edge = y_edge = bins),
+              * the bin edges in each dimension (x_edge, y_edge = bins).
+            If the bin edges are specified, the number of bins will be,
+            (nx = len(x_edge)-1, ny = len(y_edge)-1).
+            
+        Returns
+        ----------
+        statistic : (nx, ny) ndarray
+            The values of the selected statistic in each two-dimensional bin.
+        x_grid : (nx + 1, ny + 1) ndarray
+            The grid edges along the first dimension.
+        y_grid : (ny + 1, nx + 1) ndarray
+            The grid edges along the second dimension.
+        cx : (nx * ny) array
+            This contains the bin centers along the first dimension.
+        cy : (nx * ny) array
+            This contains the bin centers along the second dimension.
+        """
+        
+        x = np.ravel(x)
+        y = np.ravel(y)
 
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+            
+        if values is not None:
+            values = np.ravel(values)
+            
+        if (values is None) & (statistic == 'count'):
+            values = x
+            
+        if (values is None) & (statistic != 'count'):
+            raise ValueError("values on which to calculate the statistic are missing")
+        
+        if values.size != x.size:
+            raise ValueError("x and values must be the same size")
+                      
+        if self.invert_y:
+            pitch_range = [[self.left, self.right], [self.top, self.bottom]]
+        else:
+            pitch_range = [[self.left, self.right], [self.bottom, self.top]]
+            
+        statistic, xedge, yedge, _ = binned_statistic_2d(x, y, values, statistic='count',
+                                                         bins=bins, range=pitch_range)
+        
+        x_grid, y_grid = np.meshgrid(xedge, yedge)
+        cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge), yedge[:-1] + 0.5 * np.diff(yedge))
+        return statistic, x_grid, y_grid, cx, cy
+              
+    def heatmap(self, x_grid, y_grid, statistic, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
+        which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
+        
+        see: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
+       
+        Parameters
+        ----------
+        x_grid : ndarray
+            The x coordinates of the quadrilateral corners.
+            Use Pitch.binned_statistic_2d() to calculate these.
+        y_grid : ndarray
+            The y coordinates of the quadrilateral corners.
+            Use Pitch.binned_statistic_2d() to calculate these.
+        statistic : ndarray
+            The values will be color-mapped.
+            Use Pitch.binned_statistic_2d() to calculate these.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        kwargs
+            Additional key word arguements are passed to matplotlib.axes.Axes.pcolormesh.
+        """
+        if ax is None:
+            raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            
+        x_grid = x_grid.T
+        y_grid = y_grid.T
+               
+        if self.orientation == 'horizontal':
+            ax.pcolormesh(x_grid, y_grid, statistic, **kwargs)
+            
+        elif self.orientation == 'vertical':
+            ax.pcolormesh(y_grid, x_grid, statistic, **kwargs)
+            
+    def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5, 4)):
+        """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
+        This method automatically sets the range, changes some of the scipy defaults,
+        and outputs the grids and centers for plotting.
+        
+        The default statistic has been changed to count instead of mean.
+        The default bins has been set to (5,4).
         Parameters
         ----------
         x, y, values : array-like or scalar.
@@ -1483,7 +1650,25 @@ class Pitch(object):
         vmin = kwargs.pop('vmin',statistic.min())
         
         for i in range(len(x_grid)):
-            self.heatmap(x_grid[i].T, y_grid[i].T, statistic_grid[i], vmin=vmin, vmax=vmax, ax=ax, **kwargs)       
+            self.heatmap(x_grid[i].T, y_grid[i].T, statistic_grid[i], vmin=vmin, vmax=vmax, ax=ax, **kwargs)  
+
+    #def heatmap_positional(self, x_grid, y_grid, statistic_grid, statistic, ax=None, **kwargs):
+    #    """
+    #    Returns
+    #    ----------
+    #    meshes : A list of meshmatplotlib.collections.QuadMesh representing the positional bins.
+    #    """
+    #    if ax is None:
+    #        raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+    #    vmax = kwargs.pop('vmax',statistic.max())
+    #    vmin = kwargs.pop('vmin',statistic.min())
+    #    
+    #    mesh_list = []
+    #    for i in range(len(x_grid)):
+    #        mesh = self.heatmap(x_grid[i].T, y_grid[i].T, statistic_grid[i], vmin=vmin, vmax=vmax, ax=ax, **kwargs)
+    #        mesh_list.append(mesh)
+    #        
+    #    return mesh_list
             
     def label_heatmap(self, statistic, cx, cy, ax=None, **kwargs):
         """ Labels the heatmaps and automatically flips the coordinates if the pitch is vertical.
@@ -1500,7 +1685,10 @@ class Pitch(object):
             The axis to plot on.
         kwargs
             Additional key word arguements are passed to matplotlib.axes.Axes.annotate.
-        """        
+        Returns
+        ----------
+        annotations : A list of matplotlib.text.Annotation.
+        """      
         if ax is None:
             raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
     
@@ -1508,6 +1696,10 @@ class Pitch(object):
         cx = np.ravel(cx)
         cy = np.ravel(cy)
         
+        annotation_list = []
         for i, stat in enumerate(statistic):
-            self.annotate(stat, (cx[i], cy[i]), ax=ax, **kwargs)
+            annotation = self.annotate(stat, (cx[i], cy[i]), ax=ax, **kwargs)
+            annotation_list.append(annotation)
+            
+        return annotation_list
             
