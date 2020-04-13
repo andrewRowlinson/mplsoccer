@@ -16,9 +16,14 @@ from matplotlib.colors import to_rgb
 from matplotlib import rcParams
 from scipy.stats import binned_statistic_2d
 from .utils import football_hexagon_marker, football_pentagon_marker, _mscatter
-import collections
+from collections import Sequence, namedtuple
 import warnings
 
+BinnedStatisticResult = namedtuple('BinnedStatisticResult',
+                                   ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
+
+#PositionalStatisticResult = namedtuple('BinnedStatisticResult',
+#                                      ('statistic', 'statistic_grid', 'x_grid', 'y_grid', 'cx', 'cy'))
 
 class Pitch(object):
     """ A class for plotting soccer / football pitches in Matplotlib
@@ -973,7 +978,7 @@ class Pitch(object):
             if x.size != rotation_degrees.size:
                 raise ValueError("x and rotation_degrees must be the same size")
                 
-            if not isinstance(rotation_degrees, (collections.Sequence, np.ndarray)):
+            if not isinstance(rotation_degrees, (Sequence, np.ndarray)):
                 # rotated counter clockwise - this makes it clockwise
                 rotation_degrees = np.array(-rotation_degrees)
                 if self.orientation == 'horizontal':
@@ -1282,7 +1287,7 @@ class Pitch(object):
         
         return annotation
     
-    def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5, 4)):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4)):
         """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
         This method automatically sets the range, changes some of the scipy defaults,
         and outputs the grids and centers for plotting.
@@ -1362,135 +1367,17 @@ class Pitch(object):
         else:
             pitch_range = [[self.left, self.right], [self.bottom, self.top]]
             
-        statistic, xedge, yedge, _ = binned_statistic_2d(x, y, values, statistic='count',
-                                                         bins=bins, range=pitch_range)
+        result = binned_statistic_2d(x, y, values, statistic='count', bins=bins, range=pitch_range)
         
-        x_grid, y_grid = np.meshgrid(xedge, yedge)
-        cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge), yedge[:-1] + 0.5 * np.diff(yedge))
-        return statistic, x_grid, y_grid, cx, cy
-              
-    def heatmap(self, x_grid, y_grid, statistic, ax=None, **kwargs):
-        """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
-        which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
-        
-        see: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
-       
-        Parameters
-        ----------
-        x_grid : ndarray
-            The x coordinates of the quadrilateral corners.
-            Use Pitch.binned_statistic_2d() to calculate these.
-        y_grid : ndarray
-            The y coordinates of the quadrilateral corners.
-            Use Pitch.binned_statistic_2d() to calculate these.
-        statistic : ndarray
-            The values will be color-mapped.
-            Use Pitch.binned_statistic_2d() to calculate these.
-        ax : matplotlib.axes.Axes, default None
-            The axis to plot on.
-        kwargs
-            Additional key word arguements are passed to matplotlib.axes.Axes.pcolormesh.
-        """
-        if ax is None:
-            raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-            
-        x_grid = x_grid.T
-        y_grid = y_grid.T
-               
-        if self.orientation == 'horizontal':
-            ax.pcolormesh(x_grid, y_grid, statistic, **kwargs)
-            
-        elif self.orientation == 'vertical':
-            ax.pcolormesh(y_grid, x_grid, statistic, **kwargs)
-            
-    def binned_statistic_2d(self, x, y, values=None, statistic='count', bins=(5, 4)):
-        """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
-        This method automatically sets the range, changes some of the scipy defaults,
-        and outputs the grids and centers for plotting.
-        
-        The default statistic has been changed to count instead of mean.
-        The default bins has been set to (5,4).
-        Parameters
-        ----------
-        x, y, values : array-like or scalar.
-            Commonly, these parameters are 1D arrays.
-            If the statistic is 'count' then values are ignored.       
-        statistic : string or callable, optional
-            The statistic to compute (default is 'count').
-            The following statistics are available:
-              * 'count' : compute the count of points within each bin.  This is
-                 identical to an unweighted histogram.  `values` array is not
-                 referenced.
-              * 'mean' : compute the mean of values for points within each bin.
-                 Empty bins will be represented by NaN.
-              * 'std' : compute the standard deviation within each bin. This
-                 is implicitly calculated with ddof=0.
-              * 'median' : compute the median of values for points within each
-                 bin. Empty bins will be represented by NaN.
-              * 'sum' : compute the sum of values for points within each bin.
-                 This is identical to a weighted histogram.
-              * 'min' : compute the minimum of values for points within each bin.
-                 Empty bins will be represented by NaN.
-              * 'max' : compute the maximum of values for point within each bin.
-                 Empty bins will be represented by NaN.
-              * function : a user-defined function which takes a 1D array of
-                 values, and outputs a single numerical statistic. This function
-                 will be called on the values in each bin.  Empty bins will be
-                 represented by function([]), or NaN if this returns an error.
-        bins : int or [int, int] or array_like or [array, array], optional
-            The bin specification:
-              * the number of bins for the two dimensions (nx = ny = bins),
-              * the number of bins in each dimension (nx, ny = bins),
-              * the bin edges for the two dimensions (x_edge = y_edge = bins),
-              * the bin edges in each dimension (x_edge, y_edge = bins).
-            If the bin edges are specified, the number of bins will be,
-            (nx = len(x_edge)-1, ny = len(y_edge)-1).
-            
-        Returns
-        ----------
-        statistic : (nx, ny) ndarray
-            The values of the selected statistic in each two-dimensional bin.
-        x_grid : (nx + 1, ny + 1) ndarray
-            The grid edges along the first dimension.
-        y_grid : (ny + 1, nx + 1) ndarray
-            The grid edges along the second dimension.
-        cx : (nx * ny) array
-            This contains the bin centers along the first dimension.
-        cy : (nx * ny) array
-            This contains the bin centers along the second dimension.
-        """
-        
-        x = np.ravel(x)
-        y = np.ravel(y)
+        x_grid, y_grid = np.meshgrid(result.x_edge, result.y_edge)
+        cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
+                             result.y_edge[:-1] + 0.5 * np.diff(result.y_edge))
 
-        if x.size != y.size:
-            raise ValueError("x and y must be the same size")
-            
-        if values is not None:
-            values = np.ravel(values)
-            
-        if (values is None) & (statistic == 'count'):
-            values = x
-            
-        if (values is None) & (statistic != 'count'):
-            raise ValueError("values on which to calculate the statistic are missing")
+        bin_statistic = BinnedStatisticResult(result.statistic, x_grid, y_grid, cx, cy)
         
-        if values.size != x.size:
-            raise ValueError("x and values must be the same size")
-                      
-        if self.invert_y:
-            pitch_range = [[self.left, self.right], [self.top, self.bottom]]
-        else:
-            pitch_range = [[self.left, self.right], [self.bottom, self.top]]
-            
-        statistic, xedge, yedge, _ = binned_statistic_2d(x, y, values, statistic='count',
-                                                         bins=bins, range=pitch_range)
-        
-        x_grid, y_grid = np.meshgrid(xedge, yedge)
-        cx, cy = np.meshgrid(xedge[:-1] + 0.5 * np.diff(xedge), yedge[:-1] + 0.5 * np.diff(yedge))
-        return statistic, x_grid, y_grid, cx, cy
+        return bin_statistic
               
-    def heatmap(self, x_grid, y_grid, statistic, ax=None, **kwargs):
+    def heatmap(self, bin_statistic, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
         which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
         
@@ -1500,7 +1387,7 @@ class Pitch(object):
         ----------
         x_grid : ndarray
             The x coordinates of the quadrilateral corners.
-            Use Pitch.binned_statistic_2d() to calculate these.
+            Use Pitch.bin_statistic() to calculate these.
         y_grid : ndarray
             The y coordinates of the quadrilateral corners.
             Use Pitch.binned_statistic_2d() to calculate these.
@@ -1515,16 +1402,15 @@ class Pitch(object):
         if ax is None:
             raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
             
-        x_grid = x_grid.T
-        y_grid = y_grid.T
+        zorder = kwargs.pop('zorder', 2)
                
         if self.orientation == 'horizontal':
-            ax.pcolormesh(x_grid, y_grid, statistic, **kwargs)
+            ax.pcolormesh(bin_statistic.x_grid.T, bin_statistic.y_grid.T, bin_statistic.statistic, zorder=zorder, **kwargs)
             
         elif self.orientation == 'vertical':
-            ax.pcolormesh(y_grid, x_grid, statistic, **kwargs)
+            ax.pcolormesh(bin_statistic.y_grid.T, bin_statistic.x_grid.T, bin_statistic.statistic, zorder=zorder, **kwargs)
             
-    def binned_statistic_positional(self, x, y, values=None, statistic='count', positional='full'):
+    def bin_statistic_positional(self, x, y, values=None, statistic='count', positional='full'):
         # x positions
         x1 = min(self.left, self.right)
         x4 = self.center_length
@@ -1558,119 +1444,96 @@ class Pitch(object):
             # top and bottom of pitch - we create a grid with three rows and then ignore the middle row when slicing
             xedge = np.array([x1,x2,x3,x4,x5,x6,x7])
             yedge = np.array([y1,y2,y5,y6])
-            stat1, x_grid1, y_grid1, cx1, cy1 = self.binned_statistic_2d(x, y, values, statistic = statistic,
-                                                                         bins = (xedge, yedge))
+            stat1, x_grid1, y_grid1, cx1, cy1 = self.bin_statistic(x, y, values, statistic = statistic,
+                                                                   bins = (xedge, yedge)) 
             stat1 = stat1.T
             # slicing second row
             x_grid2 = x_grid1[2:,:].copy()
             y_grid2 = y_grid1[2:,:].copy()
             cx2 = cx1[2,:].copy()
             cy2 = cy1[2,:].copy()
-            stat2 = stat1[2,:].reshape(1,-1).copy()
+            stat2 = stat1[2,:].reshape(1,-1).T.copy()
             # slice first row
             x_grid1 = x_grid1[:2,:].copy()
             y_grid1 = y_grid1[:2,:].copy()
             cx1 = cx1[0,:].copy()
             cy1 = cy1[0,:].copy()
-            stat1 = stat1[0,:].reshape(1,-1).copy()
+            stat1 = stat1[0,:].reshape(1,-1).T.copy()           
             
             # middle of pitch
             xedge = np.array([x1,x2,x4,x6,x7])
             yedge = np.array([y1,y2,y3,y4,y5,y6])
-            stat3, x_grid3, y_grid3, cx3, cy3 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                         bins = (xedge, yedge))
+            stat3, x_grid3, y_grid3, cx3, cy3 = self.bin_statistic(x, y, values, statistic = statistic, 
+                                                                   bins = (xedge, yedge))
             stat3 = stat3.T
             x_grid3 = x_grid3[1:-1:,1:-1].copy()
             y_grid3 = y_grid3[1:-1,1:-1].copy()
             cx3 = cx3[1:-1,1:-1].copy()
             cy3 = cy3[1:-1,1:-1].copy()
-            stat3 = stat3[1:-1,1:-1].copy()
+            stat3 = stat3[1:-1,1:-1].T.copy()
             
             #penalty area 1
             xedge = np.array([x1,x2,x3]).astype(np.float64)
             yedge = np.array([y2,y5,y6]).astype(np.float64)
-            stat4, x_grid4, y_grid4, cx4, cy4 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                         bins = (xedge, yedge))
+            stat4, x_grid4, y_grid4, cx4, cy4 = self.bin_statistic(x, y, values, statistic = statistic, 
+                                                                   bins = (xedge, yedge))
             stat4 = stat4.T
             stat4 = stat4[:-1,:-1].copy()
             x_grid4 = x_grid4[:-1,:-1].copy()
             y_grid4 = y_grid4[:-1,:-1].copy()
             cx4 = cx4[:1,:1].copy()
             cy4 = cy4[:1,:1].copy()
-            stat4 = stat4[:1,:1].reshape(1,-1).copy()
+            stat4 = stat4[:1,:1].reshape(1,-1).T.copy()
             
             #penalty area 2
             xedge = np.array([x6,x7]).astype(np.float64)
             yedge = np.array([y2,y5,y6]).astype(np.float64)
-            stat5, x_grid5, y_grid5, cx5, cy5 = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                         bins = (xedge, yedge))
+            stat5, x_grid5, y_grid5, cx5, cy5 = self.bin_statistic(x, y, values, statistic = statistic, 
+                                                                   bins = (xedge, yedge))
             stat5 = stat5.T
             x_grid5 = x_grid5[:-1,:].copy()
             y_grid5 = y_grid5[:-1,:].copy()
             cy5 = cy5[0].copy()
             cx5 = cx5[0].copy()
-            stat5 = stat5[0].reshape(1,-1).copy()
-        
-            cx = np.concatenate([cx1.ravel(),cx2.ravel(),cx3.ravel(),cx4.ravel(),cx5.ravel()])
-            cy = np.concatenate([cy1.ravel(),cy2.ravel(),cy3.ravel(),cy4.ravel(),cy5.ravel()])      
-            x_grid = [x_grid1, x_grid2, x_grid3, x_grid4, x_grid5]
-            y_grid = [y_grid1, y_grid2, y_grid3, y_grid4, y_grid5]
-            statistic_grid = [stat1, stat2, stat3, stat4, stat5]
-            statistic = np.hstack([stat.ravel() for stat in statistic_grid])
+            stat5 = stat5[0].reshape(1,-1).T.copy()
+            
+            # collect stats
+            result1 = BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)
+            result2 = BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)
+            result3 = BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)
+            result4 = BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)
+            result5 = BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)
+            
+            bin_statistic = [result1, result2, result3, result4, result5]    
             
         elif positional == 'horizontal':
             xedge = np.array([x1, x7])
             yedge = np.array([y1, y2, y3, y4, y5, y6])
-            statistic, x_grid, y_grid, cx, cy = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                         bins = (xedge, yedge))
-            statistic_grid = [statistic.T]
-            x_grid = [x_grid]
-            y_grid = [y_grid]
-            statistic = statistic.ravel()
+            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic = statistic, 
+                                                                   bins = (xedge, yedge))      
+            bin_statistic = [BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
             
         elif positional == 'vertical':
             xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
             yedge = np.array([y1, y6])
-            statistic, x_grid, y_grid, cx, cy = self.binned_statistic_2d(x, y, values, statistic = statistic, 
-                                                                         bins = (xedge, yedge))
-            statistic_grid = [statistic.T]
-            x_grid = [x_grid]
-            y_grid = [y_grid]
-            statistic = statistic.ravel()
-            
+            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic = statistic, 
+                                                                   bins = (xedge, yedge))
+            bin_statistic = [BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
         else:
             raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
-      
-        return statistic_grid, statistic, x_grid, y_grid, cx, cy      
+                  
+        return bin_statistic  
 
-    def heatmap_positional(self, x_grid, y_grid, statistic_grid, statistic, ax=None, **kwargs):
+    def heatmap_positional(self, bin_statistic, ax=None, **kwargs):
         if ax is None:
             raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        vmax = kwargs.pop('vmax',statistic.max())
-        vmin = kwargs.pop('vmin',statistic.min())
+        vmax = kwargs.pop('vmax',np.array([stat.statistic.max() for stat in bin_statistic]).max())
+        vmin = kwargs.pop('vmin',np.array([stat.statistic.min() for stat in bin_statistic]).min())
         
-        for i in range(len(x_grid)):
-            self.heatmap(x_grid[i].T, y_grid[i].T, statistic_grid[i], vmin=vmin, vmax=vmax, ax=ax, **kwargs)  
-
-    #def heatmap_positional(self, x_grid, y_grid, statistic_grid, statistic, ax=None, **kwargs):
-    #    """
-    #    Returns
-    #    ----------
-    #    meshes : A list of meshmatplotlib.collections.QuadMesh representing the positional bins.
-    #    """
-    #    if ax is None:
-    #        raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-    #    vmax = kwargs.pop('vmax',statistic.max())
-    #    vmin = kwargs.pop('vmin',statistic.min())
-    #    
-    #    mesh_list = []
-    #    for i in range(len(x_grid)):
-    #        mesh = self.heatmap(x_grid[i].T, y_grid[i].T, statistic_grid[i], vmin=vmin, vmax=vmax, ax=ax, **kwargs)
-    #        mesh_list.append(mesh)
-    #        
-    #    return mesh_list
+        for bin_stat in bin_statistic:
+            self.heatmap(bin_stat, vmin=vmin, vmax=vmax, ax=ax, **kwargs)  
             
-    def label_heatmap(self, statistic, cx, cy, ax=None, **kwargs):
+    def label_heatmap(self, bin_statistic, ax=None, **kwargs):
         """ Labels the heatmaps and automatically flips the coordinates if the pitch is vertical.
               
         Parameters
@@ -1692,12 +1555,13 @@ class Pitch(object):
         if ax is None:
             raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
     
-        statistic = np.asarray(statistic).T.ravel()
-        cx = np.ravel(cx)
-        cy = np.ravel(cy)
+
         
         annotation_list = []
-        for i, stat in enumerate(statistic):
+        for stat in bin_statistic:
+            statistic = np.asarray(bin_statistic.statistic).T.ravel()
+            cx = np.ravel(bin_statistic.cx)
+            cy = np.ravel(bin_statistic.cy)
             annotation = self.annotate(stat, (cx[i], cy[i]), ax=ax, **kwargs)
             annotation_list.append(annotation)
             
