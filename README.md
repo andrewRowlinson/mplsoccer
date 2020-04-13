@@ -41,9 +41,10 @@ fig.savefig(os.path.join('figures','README_example_existing_axis.png'),pad_inche
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_example_existing_axis.png?raw=true "plot on existing axis")
 
 
-**The Pitch class also includes methods to quickly make plots. This is for two reasons:
-a) a common mistake is not flipping the x-axis and y-axis when changing from horizontal to vertical orientation. mplsoccer handles this automatically so plots look the same when rotated.
-b) additional functionality such as plotting footballs, creating heatmaps, rotating markers and setting some defaults.
+> The Pitch class also includes methods to quickly make plots. This is for two reasons:
+> a) a common mistake is not flipping the x-axis and y-axis when changing from horizontal to vertical orientation. mplsoccer
+> handles this automatically so plots look the same when rotated.
+> b) additional functionality such as plotting footballs, creating heatmaps, rotating markers and setting some defaults.
 
 There is support for seven pitch types, currently StatsBomb is the default pitch (`pitch_type`='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types).
 
