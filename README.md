@@ -260,16 +260,16 @@ pitch = Pitch(pitch_type = 'statsbomb', figsize = (16, 9), layout = (1,3), line_
 fig, ax = pitch.draw()
 bins = [(6,5),(1,5),(6,1)]
 for i, bin in enumerate(bins):
-    (statistic, x_grid, y_grid, cx, cy) = pitch.binned_statistic_2d(df.x, df.y,
-                                                                    statistic='count', bins = bin)
-    # work out proportions
-    all_pressure_count = statistic.sum()
-    statistic = (statistic/all_pressure_count * 100).round(1)
+    bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins = bin)
     # draw
-    pitch.heatmap(x_grid, y_grid, statistic, ax=ax[i], zorder=2, cmap='coolwarm', edgecolors = '#22312b')
+    pitch.heatmap(bin_statistic, ax=ax[i], cmap='coolwarm', edgecolors = '#22312b')
     pitch.scatter(df.x, df.y, c='white', s=2, ax=ax[i])
-    statistic = statistic.astype(str) + np.char.array(['%'])
-    pitch.label_heatmap(statistic, cx, cy, color='white', fontsize=18, ax=ax[i], ha = 'center', va = 'bottom')
+    
+    # replace raw counts with percentages and add percentage sign (note immutable named tuple so used _replace)
+    bin_statistic = bin_statistic._replace(statistic = 
+                                           (bin_statistic.statistic / len(df) * 100)
+                                           .round(1).astype(str) + np.char.array(['%']))
+    pitch.label_heatmap(bin_statistic, color='white', fontsize=18, ax=ax[i], ha = 'center', va = 'bottom')
 fig.suptitle('Location of pressure events - 3 home games for Chelsea FC Women', x=0.5, y=0.98, fontsize=30,);
 fig.savefig(os.path.join('figures','README_heatmap_bins.png'), bbox_inches = 'tight')
 ```
@@ -301,23 +301,116 @@ pitch = Pitch(pitch_type = 'statsbomb', figsize = (16, 9), layout = (1,3), line_
 fig, ax = pitch.draw()
 positions = ['full','horizontal','vertical']
 for i, pos in enumerate(positions):
-    (statistic_grid, statistic, x_grid, y_grid, cx, cy) = pitch.binned_statistic_positional(df.x, df.y,
-                                                                                            statistic='count',
-                                                                                            positional=pos)
-    # work out proportions
-    all_pressure_count = statistic.sum()
-    statistic_grid = [(array/all_pressure_count*100).round(1) for array in statistic_grid]
-    statistic = (statistic/all_pressure_count * 100).round(1)
-    pitch.heatmap_positional(x_grid, y_grid, statistic_grid, statistic, ax=ax[i], zorder=2,
-                             cmap='coolwarm', edgecolors='#22312b')
+    bin_statistic = pitch.bin_statistic_positional(df.x, df.y,statistic='count',positional=pos)
+    pitch.heatmap_positional(bin_statistic, ax=ax[i], cmap='coolwarm', edgecolors='#22312b')
     pitch.scatter(df.x, df.y, c='white', s=2, ax=ax[i])
-    statistic = [f'{stat}%' for stat in statistic]
-    pitch.label_heatmap(statistic, cx, cy, color = 'white', fontsize = 18, ax = ax[i], ha = 'center', va = 'bottom')
+    # replace raw counts with percentages and add percentage sign (note immutable named tuple so used _replace)
+    bin_statistic = [b._replace(statistic=
+                                 (b.statistic/len(df)*100).round(1).astype(str) + np.char.array(['%']))
+                      for b in bin_statistic]
+    pitch.label_heatmap(bin_statistic, color = 'white', fontsize = 18, ax = ax[i], ha = 'center', va = 'bottom')
 fig.suptitle('Location of pressure events - 3 home games for Chelsea FC Women', x=0.5, y=0.98, fontsize=30,);
 fig.savefig(os.path.join('figures','README_heatmap_positional.png'), bbox_inches = 'tight')
 ```
 
 #### 09. Animation
+
+Sometimes is useful to use animation. There is a short demo below using [metrica sports](https://github.com/metrica-sports/sample-data) sample tracking data.
+
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/figures/README_animation_example.gif?raw=true "tracking data animation")
+
+Code available in [this notebook](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/09-Plotting-animation.ipynb):
+``` python
+from mplsoccer.pitch import Pitch
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib import animation
+import os
+
+# load away data
+link1 = ('https://raw.githubusercontent.com/metrica-sports/sample-data/master/'
+         'data/Sample_Game_1/Sample_Game_1_RawTrackingData_Away_Team.csv')
+df_away = pd.read_csv(link1,skiprows=2)
+df_away.sort_values('Time [s]', inplace=True)
+
+# load home data
+link2 = ('https://raw.githubusercontent.com/metrica-sports/sample-data/master/'
+         'data/Sample_Game_1/Sample_Game_1_RawTrackingData_Home_Team.csv')
+df_home = pd.read_csv(link2,skiprows=2)
+df_home.sort_values('Time [s]', inplace=True)
+
+# column names aren't great so this sets the player ones with _x and _y suffixes
+def set_col_names(df):
+    cols = list(np.repeat(df.columns[3::2],2))
+    cols = [col+'_x' if i%2==0 else col+'_y' for i, col in enumerate(cols)]
+    cols = np.concatenate([df.columns[:3],cols])
+    df.columns = cols
+set_col_names(df_away)
+set_col_names(df_home)
+
+# get a subset of the data (10 seconds)
+df_away = df_away[(df_away['Time [s]'] > 815) & ((df_away['Time [s]'] <= 825))].copy()
+df_home = df_home[(df_home['Time [s]'] > 815) & ((df_home['Time [s]'] <= 825))].copy()
+
+# split off a df_ball dataframe and drop the ball columns from the player dataframes
+df_ball = df_away[['Period','Frame','Time [s]', 'Ball_x', 'Ball_y']].copy()
+df_home.drop(['Ball_x','Ball_y'],axis=1,inplace=True)
+df_away.drop(['Ball_x','Ball_y'],axis=1,inplace=True)
+
+# convert to long form from wide form
+def to_long_form(df):
+    df = pd.melt(df, id_vars=df.columns[:3], value_vars=df.columns[3:], var_name = 'player')
+    df.loc[df.player.str.contains('_x'),'coordinate'] = 'x'
+    df.loc[df.player.str.contains('_y'),'coordinate'] = 'y'
+    df = df.dropna(axis=0, how='any')
+    df['player'] = df.player.str[6:-2]
+    df = (df.set_index(['Period','Frame','Time [s]','player','coordinate'])['value']
+          .unstack()
+          .reset_index()
+          .rename_axis(None, axis=1))
+    return df
+
+df_away = to_long_form(df_away)
+df_home = to_long_form(df_home)
+
+# First set up the figure, the axis, and the plot elements we want to animate
+pitch = Pitch(pitch_type='metricasports', figsize=(16,10.4), pitch_color='grass',
+              pitch_width=68, pitch_length=105, goal_type='line', stripe = True)
+fig, ax = pitch.draw()
+marker_kwargs = {'marker':'o', 'markeredgecolor': 'black', 'linestyle': 'None'}
+ball, = pitch.plot([], [], ms=6, markerfacecolor='w', zorder=3, ax=ax, **marker_kwargs)
+away, = pitch.plot([], [], ms=10, markerfacecolor='#b94b75', ax=ax, **marker_kwargs) #red/maroon
+home, = pitch.plot([], [], ms=10, markerfacecolor='#7f63b8', ax=ax, **marker_kwargs) #purple
+
+# initialization function: plot the background of each frame
+def init():
+    ball.set_data([], [])
+    away.set_data([], [])
+    home.set_data([], [])
+    return ball,away,home
+
+# animation function of dataframes' list
+def animate(i):
+    # set the ball data with the x and y positions for the ith frame
+    ball.set_data(df_ball.iloc[i,3], df_ball.iloc[i,4])
+    # get the frame id for the ith frame
+    frame = df_ball.iloc[i,1]
+    # set the player data using the frame id
+    away.set_data(df_away.loc[df_away.Frame==frame,'x'],
+                  df_away.loc[df_away.Frame==frame,'y'])
+    home.set_data(df_home.loc[df_home.Frame==frame,'x'],
+                  df_home.loc[df_home.Frame==frame,'y']) 
+    return ball, away, home
+
+# call the animator, animate every 300 ms
+# note that its hard to get the ffmpeg requirements right. I installed from conda-forge: see the conda.yml file
+anim = animation.FuncAnimation(fig, animate, frames=len(df_ball), init_func=init, interval=50,
+                               blit=True, repeat=False)
+anim.save(os.path.join('figures','README_animation_example.mp4'), dpi=300, fps=25,
+          extra_args=['-vcodec', 'libx264'],
+          savefig_kwargs={'pad_inches':0, 'facecolor':'#457E29'})
+```
 
 #### 10. Advanced examples
 
