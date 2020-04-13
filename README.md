@@ -52,16 +52,6 @@ fig.savefig(os.path.join('figures','README_example_existing_axis.png'),pad_inche
 #### Pitch types
 There is support for seven pitch types, currently StatsBomb is the default pitch (`pitch_type`='statsbomb'). More details about which pitches are supported is [here](https://github.com/andrewRowlinson/mplsoccer/blob/master/README.md#pitch-types).
 
-#### Pitch appearance
-There are two pitch orientations (`orientation`='vertical' or 'horizontal') and two pitch views (`view`='full' or 'half'). You can amend the colors of the pitch and its lines and stripes with the arguments: `pitch_color`, `line_color`, and `stripe_color`. It's also possible to change the goals (`goal_type`='line' or 'box') and `linewidth` of the pitch markings.
-
-#### Pitch padding
-Additionally it's possible to add padding to the pitch (`pad_top`, `pad_bottom`, `pad_left`, `pad_right`). Negative padding reduces the amount of visible pitch and positive padding increases the amount of visible pitch. Currently the padding relates to the current orientation to make it easier to adjust, i.e. `pad_top`/ `pad_bottom` always changes the y-axis of the current view and `pad_left`, `pad_right` always changes the x-axis of the current view.
-
-#### Pitch axis
-Lastly sometimes you may want to see the axis, you can turn this on with the boolean arguments: `axis`, `label`, and `tick`.
-
-
 ## StatsBomb open-data
 
 TO DO
@@ -423,7 +413,17 @@ anim.save(os.path.join('figures','README_animation_example.mp4'), dpi=300, fps=2
           savefig_kwargs={'pad_inches':0, 'facecolor':'#457E29'})
 ```
 
-#### 10. Advanced examples
+#### 10. Pitch appearance
+
+There are two pitch orientations (`orientation`='vertical' or 'horizontal') and two pitch views (`view`='full' or 'half').
+
+You can amend the colors of the pitch and its lines and stripes with the arguments: `pitch_color`, `line_color`, and `stripe_color`. It's also possible to change the goals (`goal_type`='line' or 'box') and `linewidth` of the pitch markings.
+
+You can add padding to the pitch (`pad_top`, `pad_bottom`, `pad_left`, `pad_right`). Negative padding reduces the amount of visible pitch and positive padding increases the amount of visible pitch. Currently the padding relates to the current orientation to make it easier to adjust, i.e. `pad_top`/ `pad_bottom` always changes the y-axis of the current view and `pad_left`, `pad_right` always changes the x-axis of the current view.
+
+You can view the axis, labela and ticks. These are turned on with the boolean arguments: `axis`, `label`, and `tick`.
+
+#### 11. Advanced examples
 
 TO DO.
 
