@@ -22,6 +22,7 @@ import warnings
 BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
+
 class Pitch(object):
     """ A class for plotting soccer / football pitches in Matplotlib
     
@@ -33,7 +34,8 @@ class Pitch(object):
         Tuple of (rows, columns) for the layout of the plot.
     pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
-        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats', 'wyscout', 'statsperform', 'metricasports'.
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats',
+        'wyscout', 'statsperform', 'metricasports'.
     orientation : str, default 'horizontal'
         The pitch orientation: 'horizontal' or 'vertical'.
     view : str, default 'full'
@@ -126,7 +128,8 @@ class Pitch(object):
     _metricasports_dimensions = {'top': 0., 'bottom': 1., 'left': 0., 'right': 1.,
                                  'width': 1, 'center_width': 0.5, 'length': 1, 'center_length': 0.5,
                                  'six_yard_from_side': None, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
-                                 'penalty_area_from_side': None, 'penalty_area_width': 40.32, 'penalty_area_length': 16.5,
+                                 'penalty_area_from_side': None, 'penalty_area_width': 40.32,
+                                 'penalty_area_length': 16.5,
                                  'left_penalty': 11., 'right_penalty': 11., 'circle_size': 9.15,
                                  'goal_depth': 2., 'goal_width': 7.32, 'goal_post': 3.6,
                                  'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': True, 'stripe_scale': 1000}
@@ -148,9 +151,10 @@ class Pitch(object):
                                 'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
       
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
-                 pitch_color='#aabb97', line_color='white', line_zorder=1, linewidth=2, stripe=False, stripe_color='#c2d59d',
-                 pad_left=None, pad_right=None, pad_bottom=None, pad_top=None, pitch_length=None, pitch_width=None,
-                 goal_type='line', label=False, tick=False, axis=False, tight_layout=False, constrained_layout=True):
+                 pitch_color='#aabb97', line_color='white', line_zorder=1, linewidth=2, stripe=False,
+                 stripe_color='#c2d59d', pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
+                 pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
+                 tight_layout=False, constrained_layout=True):
 
         # set figure and axes attributes
         self.axes = None
@@ -263,19 +267,20 @@ class Pitch(object):
             for k, v in self._metricasports_dimensions.items():
                 setattr(self, k, v)
             if (pitch_length is None) or (pitch_width is None):
-                raise TypeError("Invalid argument: pitch_length and pitch_width must be specified for a metricasports pitch.")
+                raise TypeError("Invalid argument: pitch_length and pitch_width "
+                                "must be specified for a metricasports pitch.")
             self.aspect = self.pitch_width/self.pitch_length
-            self.six_yard_width = round(self.six_yard_width/self.pitch_width,4)
-            self.six_yard_length = round(self.six_yard_length/self.pitch_length,4)
+            self.six_yard_width = round(self.six_yard_width/self.pitch_width, 4)
+            self.six_yard_length = round(self.six_yard_length/self.pitch_length, 4)
             self.six_yard_from_side = (self.width - self.six_yard_width)/2
-            self.penalty_area_width = round(self.penalty_area_width/self.pitch_width,4)
-            self.penalty_area_length = round(self.penalty_area_length/self.pitch_length,4)
+            self.penalty_area_width = round(self.penalty_area_width/self.pitch_width, 4)
+            self.penalty_area_length = round(self.penalty_area_length/self.pitch_length, 4)
             self.penalty_area_from_side = (self.width - self.penalty_area_width)/2
-            self.left_penalty = round(self.left_penalty/self.pitch_length,4)
+            self.left_penalty = round(self.left_penalty/self.pitch_length, 4)
             self.right_penalty = self.right - self.left_penalty
-            self.goal_depth = round(self.goal_depth/self.pitch_length,4)
-            self.goal_width = round(self.goal_width/self.pitch_width,4)
-            self.goal_post = self.center_width - round(self.goal_post/self.pitch_width,4)
+            self.goal_depth = round(self.goal_depth/self.pitch_length, 4)
+            self.goal_width = round(self.goal_width/self.pitch_width, 4)
+            self.goal_post = self.center_width - round(self.goal_post/self.pitch_width, 4)
                           
         # scale the padding where the aspect is not equal to one, reverse aspect if vertical
         if self.aspect != 1:
@@ -357,7 +362,8 @@ class Pitch(object):
         if (self.axis is False) and self.tick:
             warnings.warn("Ticks will not be shown unless axis=True")
 
-        if (self.pitch_type not in ['tracab','metricasports']) and ((pitch_length is not None) or (pitch_width is not None)):
+        if ((self.pitch_type not in ['tracab', 'metricasports'])
+                and ((pitch_length is not None) or (pitch_width is not None))):
             warnings.warn("Pitch length and widths are only used for tracab pitches and will be ignored")
 
         valid_orientation = ['horizontal', 'vertical']
@@ -613,15 +619,16 @@ class Pitch(object):
 
     def _boxes(self, box_from_side, box_length, box_width, ax):
         if self.orientation == 'horizontal':
-            box1 = patches.Rectangle((self.left, box_from_side), box_length, box_width,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
+            box1 = patches.Rectangle((self.left, box_from_side), box_length, box_width, fill=False,
+                                     linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
             box2 = patches.Rectangle((self.right - box_length, box_from_side), box_length, box_width,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
+                                     fill=False, linewidth=self.linewidth, color=self.line_color,
+                                     zorder=self.line_zorder)
         elif self.orientation == 'vertical':
-            box1 = patches.Rectangle((box_from_side, self.left), box_width, box_length,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
-            box2 = patches.Rectangle((box_from_side, self.right - box_length), box_width, box_length,
-                                     fill=False, linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
+            box1 = patches.Rectangle((box_from_side, self.left), box_width, box_length, fill=False,
+                                     linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
+            box2 = patches.Rectangle((box_from_side, self.right - box_length), box_width, box_length, fill=False,
+                                     linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
         ax.add_patch(box1)
         ax.add_patch(box2)
 
@@ -828,12 +835,12 @@ class Pitch(object):
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation == 'horizontal':
-            lines = ax.plot(x, y, **kwargs)
+            plot = ax.plot(x, y, **kwargs)
 
         elif self.orientation == 'vertical':
-            lines = ax.plot(y, x, **kwargs)
+            plot = ax.plot(y, x, **kwargs)
             
-        return lines
+        return plot
 
     def kdeplot(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around seaborn.kdeplot,
@@ -1252,16 +1259,16 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
                 clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
-                joint_plot = sns.jointplot(x, y, zorder = zorder, clip = clip, **kwargs)
+                joint_plot = sns.jointplot(x, y, zorder=zorder, clip=clip, **kwargs)
             else:
-                joint_plot = sns.jointplot(x, y, zorder = zorder, **kwargs)
+                joint_plot = sns.jointplot(x, y, zorder=zorder, **kwargs)
             
         elif self.orientation == 'vertical':
             if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
                 clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
-                joint_plot = sns.jointplot(y, x, zorder = zorder, clip = clip, **kwargs)
+                joint_plot = sns.jointplot(y, x, zorder=zorder, clip=clip, **kwargs)
             else:
-                joint_plot = sns.jointplot(y, x, zorder = zorder, **kwargs)
+                joint_plot = sns.jointplot(y, x, zorder=zorder, **kwargs)
                 
         joint_plot_ax = joint_plot.ax_joint
         self.draw(ax=joint_plot_ax)
@@ -1527,54 +1534,54 @@ class Pitch(object):
         # side (unless the side of the pitch) so that the scipy binned_statistic_2d functions handles the edges
         if positional == 'full':
             # top and bottom of pitch - we create a grid with three rows and then ignore the middle row when slicing
-            xedge = np.array([x1,x2,x3,x4,x5,x6,x7])
-            yedge = np.array([y1,y2,y5,y6])
-            stat1, x_grid1, y_grid1, cx1, cy1 = self.bin_statistic(x, y, values, statistic = statistic,
-                                                                   bins = (xedge, yedge))
+            xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
+            yedge = np.array([y1, y2, y5, y6])
+            stat1, x_grid1, y_grid1, cx1, cy1 = self.bin_statistic(x, y, values, statistic=statistic,
+                                                                   bins=(xedge, yedge))
 
             # slicing second row
-            stat2 = stat1[:,2].reshape(-1,1).copy()
-            x_grid2 = x_grid1[2:,:].copy()
-            y_grid2 = y_grid1[2:,:].copy()
-            cx2 = cx1[2,:].copy()
-            cy2 = cy1[2,:].copy()
+            stat2 = stat1[:, 2].reshape(-1, 1).copy()
+            x_grid2 = x_grid1[2:, :].copy()
+            y_grid2 = y_grid1[2:, :].copy()
+            cx2 = cx1[2, :].copy()
+            cy2 = cy1[2, :].copy()
             # slice first row
-            stat1 = stat1[:,0].reshape(-1,1).copy()
-            x_grid1 = x_grid1[:2,:].copy()
-            y_grid1 = y_grid1[:2,:].copy()
-            cx1 = cx1[0,:].copy()
-            cy1 = cy1[0,:].copy()
+            stat1 = stat1[:, 0].reshape(-1, 1).copy()
+            x_grid1 = x_grid1[:2, :].copy()
+            y_grid1 = y_grid1[:2, :].copy()
+            cx1 = cx1[0, :].copy()
+            cy1 = cy1[0, :].copy()
 
             # middle of pitch
-            xedge = np.array([x1,x2,x4,x6,x7])
-            yedge = np.array([y1,y2,y3,y4,y5,y6])
-            stat3, x_grid3, y_grid3, cx3, cy3 = self.bin_statistic(x, y, values, statistic = statistic, 
-                                                                   bins = (xedge, yedge))
-            stat3 = stat3[1:-1,1:-1]
-            x_grid3 = x_grid3[1:-1:,1:-1].copy()
-            y_grid3 = y_grid3[1:-1,1:-1].copy()
-            cx3 = cx3[1:-1,1:-1].copy()
-            cy3 = cy3[1:-1,1:-1].copy()
+            xedge = np.array([x1, x2, x4, x6, x7])
+            yedge = np.array([y1, y2, y3, y4, y5, y6])
+            stat3, x_grid3, y_grid3, cx3, cy3 = self.bin_statistic(x, y, values, statistic=statistic,
+                                                                   bins=(xedge, yedge))
+            stat3 = stat3[1:-1, 1:-1]
+            x_grid3 = x_grid3[1:-1:, 1:-1].copy()
+            y_grid3 = y_grid3[1:-1, 1:-1].copy()
+            cx3 = cx3[1:-1, 1:-1].copy()
+            cy3 = cy3[1:-1, 1:-1].copy()
             
-            #penalty area 1
-            xedge = np.array([x1,x2,x3]).astype(np.float64)
-            yedge = np.array([y2,y5,y6]).astype(np.float64)
-            stat4, x_grid4, y_grid4, cx4, cy4 = self.bin_statistic(x, y, values, statistic = statistic, 
-                                                                   bins = (xedge, yedge))
-            stat4 = stat4[:-1,:-1]
-            x_grid4 = x_grid4[:-1,:-1].copy()
-            y_grid4 = y_grid4[:-1,:-1].copy()
-            cx4 = cx4[:1,:1].copy()
-            cy4 = cy4[:1,:1].copy()
+            # penalty area 1
+            xedge = np.array([x1, x2, x3]).astype(np.float64)
+            yedge = np.array([y2, y5, y6]).astype(np.float64)
+            stat4, x_grid4, y_grid4, cx4, cy4 = self.bin_statistic(x, y, values, statistic=statistic,
+                                                                   bins=(xedge, yedge))
+            stat4 = stat4[:-1, :-1]
+            x_grid4 = x_grid4[:-1, :-1].copy()
+            y_grid4 = y_grid4[:-1, :-1].copy()
+            cx4 = cx4[:1, :1].copy()
+            cy4 = cy4[:1, :1].copy()
             
-            #penalty area 2
-            xedge = np.array([x6,x7]).astype(np.float64)
-            yedge = np.array([y2,y5,y6]).astype(np.float64)
-            stat5, x_grid5, y_grid5, cx5, cy5 = self.bin_statistic(x, y, values, statistic = statistic, 
-                                                                   bins = (xedge, yedge))
-            stat5 = stat5[:,:-1]
-            x_grid5 = x_grid5[:-1,:].copy()
-            y_grid5 = y_grid5[:-1,:].copy()
+            # penalty area 2
+            xedge = np.array([x6, x7]).astype(np.float64)
+            yedge = np.array([y2, y5, y6]).astype(np.float64)
+            stat5, x_grid5, y_grid5, cx5, cy5 = self.bin_statistic(x, y, values, statistic=statistic,
+                                                                   bins=(xedge, yedge))
+            stat5 = stat5[:, :-1]
+            x_grid5 = x_grid5[:-1, :].copy()
+            y_grid5 = y_grid5[:-1, :].copy()
             cy5 = cy5[0].copy()
             cx5 = cx5[0].copy()
                         
@@ -1590,15 +1597,15 @@ class Pitch(object):
         elif positional == 'horizontal':
             xedge = np.array([x1, x7])
             yedge = np.array([y1, y2, y3, y4, y5, y6])
-            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic = statistic, 
-                                                                   bins = (xedge, yedge))      
+            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic=statistic,
+                                                                   bins=(xedge, yedge))
             bin_statistic = [BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
             
         elif positional == 'vertical':
             xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
             yedge = np.array([y1, y6])
-            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic = statistic, 
-                                                                   bins = (xedge, yedge))
+            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic=statistic,
+                                                                   bins=(xedge, yedge))
             bin_statistic = [BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
         else:
             raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
@@ -1633,9 +1640,10 @@ class Pitch(object):
         mesh : matplotlib.collections.QuadMesh
         """
         if ax is None:
-            raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        vmax = kwargs.pop('vmax',np.array([stat.statistic.max() for stat in bin_statistic]).max())
-        vmin = kwargs.pop('vmin',np.array([stat.statistic.min() for stat in bin_statistic]).min())
+            raise TypeError("label_heatmap() missing 1 required argument:"
+                            " ax. A Matplotlib axis is required for plotting.")
+        vmax = kwargs.pop('vmax', np.array([stat.statistic.max() for stat in bin_statistic]).max())
+        vmin = kwargs.pop('vmin', np.array([stat.statistic.min() for stat in bin_statistic]).min())
         
         mesh_list = []
         for bin_stat in bin_statistic:
@@ -1673,7 +1681,8 @@ class Pitch(object):
         """
         
         if ax is None:
-            raise TypeError("label_heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            raise TypeError("label_heatmap() missing 1 required argument: "
+                            "ax. A Matplotlib axis is required for plotting.")
             
         if not isinstance(bin_statistic, list):
             bin_statistic = [bin_statistic]
@@ -1688,4 +1697,3 @@ class Pitch(object):
                 annotation_list.append(annotation)
             
         return annotation_list
-            
