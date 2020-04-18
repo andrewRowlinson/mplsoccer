@@ -12,6 +12,7 @@ MATCH_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/
 LINEUP_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/lineups'
 COMPETITION_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/competitions.json'
 
+
 def _split_location_cols(df, col, new_cols):
     """ Location is stored as a list. split into columns. """
     if col in df.columns:
@@ -145,8 +146,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df = _simplify_cols_and_drop(df, 'body_part_id')
     df = _simplify_cols_and_drop(df, 'body_part_name')
     df = _simplify_cols_and_drop(df, 'aerial_won')
-    
-    
+
     # create a related events dataframe
     if related_event_df:
         df_related_event = _list_dictionary_to_df(df, col='related_events',
@@ -206,6 +206,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     
     return df_dict
 
+
 def read_match(path_or_buf):
     """ Extracts individual match json and loads as a pandas.DataFrame.
     
@@ -240,36 +241,37 @@ def read_match(path_or_buf):
         URL = os.path.join(MATCH_SLUG,'11','1.json')
         df_match = read_match(URL)
     """
-    df_match = pd.read_json(path_or_buf,convert_dates=['match_date','last_updated'])
+    df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
     
     # loop through the columns that are still dictionary columns and add them as seperate cols to the datafram
-    dictionary_columns = ['competition','season','home_team','away_team','metadata','competition_stage',
-                      'stadium','referee']
+    dictionary_columns = ['competition', 'season', 'home_team', 'away_team', 'metadata', 'competition_stage',
+                          'stadium', 'referee']
     for col in dictionary_columns:
-        df_match = _split_dict_col(df_match,col)
+        df_match = _split_dict_col(df_match, col)
         
     # convert kickoff to datetime - date + kickoff time
-    df_match['kick_off'] = pd.to_datetime(df_match.match_date.astype(str) +' '+ df_match.kick_off)
+    df_match['kick_off'] = pd.to_datetime(df_match.match_date.astype(str) + ' ' + df_match.kick_off)
     # drop one gender column as always equal to the other
     # drop match status as always available
-    df_match.drop(['away_team_gender','match_status'],axis=1,inplace=True)
-    df_match.rename({'home_team_gender':'competition_gender'},axis=1,inplace=True)
+    df_match.drop(['away_team_gender', 'match_status'], axis=1, inplace=True)
+    df_match.rename({'home_team_gender': 'competition_gender'}, axis=1, inplace=True)
     # manager is a list (len=1) containing a dictionary so lets split into columns
     if 'home_team_managers' in df_match.columns:
         df_match['home_team_managers'] = df_match.home_team_managers.str[0]
-        df_match = _split_dict_col(df_match,'home_team_managers')
+        df_match = _split_dict_col(df_match, 'home_team_managers')
         df_match['home_team_managers_dob'] = pd.to_datetime(df_match['home_team_managers_dob'])
     if 'away_team_managers' in df_match.columns:
         df_match['away_team_managers'] = df_match.away_team_managers.str[0]
-        df_match = _split_dict_col(df_match,'away_team_managers')
+        df_match = _split_dict_col(df_match, 'away_team_managers')
         df_match['away_team_managers_dob'] = pd.to_datetime(df_match['away_team_managers_dob'])
     # ids to integers
-    for col in ['competition_id','season_id','home_team_id','competition_stage_id']:
+    for col in ['competition_id', 'season_id', 'home_team_id', 'competition_stage_id']:
         df_match[col] = df_match[col].astype(np.int64)
     # sort and reset index: ready for exporting to feather
-    df_match.sort_values('kick_off',inplace=True)
-    df_match.reset_index(inplace=True,drop=True)
+    df_match.sort_values('kick_off', inplace=True)
+    df_match.reset_index(inplace=True, drop=True)
     return df_match
+
 
 def read_competition(path_or_buf):
     """ Extracts competition json and loads as a pandas.DataFrame.
@@ -303,10 +305,11 @@ def read_competition(path_or_buf):
         from mplsoccer.statsbomb import read_competition, COMPETITION_URL
         df_competition = read_competition(COMPETITION_URL)
     """
-    df_competition = pd.read_json(path_or_buf,convert_dates=['match_updated','match_available'])
-    df_competition.sort_values(['competition_id','season_id'],inplace=True)
-    df_competition.reset_index(drop=True,inplace=True)
+    df_competition = pd.read_json(path_or_buf, convert_dates=['match_updated', 'match_available'])
+    df_competition.sort_values(['competition_id', 'season_id'], inplace=True)
+    df_competition.reset_index(drop=True, inplace=True)
     return df_competition
+
 
 def read_lineup(path_or_buf):
     """ Extracts individual lineup jsons and loads as a pandas.DataFrame.
@@ -347,19 +350,20 @@ def read_lineup(path_or_buf):
     # each line has a column named player that contains a list of dictionaries
     # we split into seperate columns and then create a new row for each player using melt
     df_lineup_players = df_lineup.lineup.apply(pd.Series)
-    df_lineup = df_lineup.merge(df_lineup_players,left_index=True,right_index=True)
-    df_lineup.drop('lineup',axis=1,inplace=True)
-    df_lineup = df_lineup.melt(id_vars = ['team_id','team_name','match_id'], value_name = 'player')
-    df_lineup.drop('variable',axis=1,inplace=True)
+    df_lineup = df_lineup.merge(df_lineup_players, left_index=True, right_index=True)
+    df_lineup.drop('lineup', axis=1, inplace=True)
+    df_lineup = df_lineup.melt(id_vars=['team_id', 'team_name', 'match_id'], value_name='player')
+    df_lineup.drop('variable', axis=1, inplace=True)
     df_lineup = df_lineup[df_lineup.player.notnull()].copy()
-    df_lineup = _split_dict_col(df_lineup,'player')
+    df_lineup = _split_dict_col(df_lineup, 'player')
     # turn ids to integers if no missings
     df_lineup['match_id'] = df_lineup.match_id.astype(np.int64)
     df_lineup['player_id'] = df_lineup.player_id.astype(np.int64)
     # sort and reset index: ready for exporting to feather
-    df_lineup.sort_values('player_id',inplace=True)
-    df_lineup.reset_index(inplace=True,drop=True)
+    df_lineup.sort_values('player_id', inplace=True)
+    df_lineup.reset_index(inplace=True, drop=True)
     return df_lineup
+
 
 def _get_links(url):
     # imports here as don't expect these functions to be used all the time
