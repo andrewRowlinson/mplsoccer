@@ -1618,19 +1618,9 @@ class Pitch(object):
        
         Parameters
         ----------
-        bin_statistic : A list of _BinnedStatisticResult. This should be calculated via Pitch.bin_statistic_positional().
-            It contains:
-              * statistic : (nx, ny) ndarray
-                    The values of the selected statistic in each two-dimensional bin.
-              * x_grid : (ny + 1, nx + 1) ndarray
-                    The grid edges along the first dimension.
-              * y_grid : (ny + 1, nx + 1) ndarray
-                    The grid edges along the second dimension.
-              * cx : (ny, nx) array
-                    his contains the bin centers along the first dimension.
-              * cy : (ny, nx) array
-                    This contains the bin centers along the second dimension.
-        
+        bin_statistic : A list of BinnedStatisticResult.
+            This should be calculated via Pitch.bin_statistic_positional().
+
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         
@@ -1658,18 +1648,8 @@ class Pitch(object):
               
         Parameters
         ----------
-        bin_statistic : A list of _BinnedStatisticResult. This should be calculated via Pitch.bin_statistic_positional().
-            It contains:
-              * statistic : (nx, ny) ndarray
-                    The values of the selected statistic in each two-dimensional bin.
-              * x_grid : (ny + 1, nx + 1) ndarray
-                    The grid edges along the first dimension.
-              * y_grid : (ny + 1, nx + 1) ndarray
-                    The grid edges along the second dimension.
-              * cx : (ny, nx) array
-                    his contains the bin centers along the first dimension.
-              * cy : (ny, nx) array
-                    This contains the bin centers along the second dimension.
+        bin_statistic : A list of BinnedStatisticResult.
+            This should be calculated via Pitch.bin_statistic_positional().
         
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
