@@ -15,12 +15,12 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.colors import to_rgb
 from matplotlib import rcParams
 from scipy.stats import binned_statistic_2d
-from .utils import football_hexagon_marker, football_pentagon_marker, _mscatter
+from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
 from collections import Sequence, namedtuple
 import warnings
 
-BinnedStatisticResult = namedtuple('BinnedStatisticResult',
-                                   ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
+_BinnedStatisticResult = namedtuple('BinnedStatisticResult',
+                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
 
 class Pitch(object):
@@ -1322,6 +1322,7 @@ class Pitch(object):
         
         The default statistic has been changed to count instead of mean.
         The default bins has been set to (5,4).
+        
         Parameters
         ----------
         x, y, values : array-like or scalar.
@@ -1362,7 +1363,7 @@ class Pitch(object):
             
         Returns
         ----------
-        namedtuple : BinnedStatisticResult. Containing:
+        namedtuple : _BinnedStatisticResult. Containing:
             * statistic : (nx, ny) ndarray
                 The values of the selected statistic in each two-dimensional bin.
             * x_grid : (ny + 1, nx + 1) ndarray
@@ -1404,7 +1405,7 @@ class Pitch(object):
         cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
                              result.y_edge[:-1] + 0.5 * np.diff(result.y_edge))
 
-        bin_statistic = BinnedStatisticResult(result.statistic, x_grid, y_grid, cx, cy)
+        bin_statistic = _BinnedStatisticResult(result.statistic, x_grid, y_grid, cx, cy)
         
         return bin_statistic
               
@@ -1416,7 +1417,7 @@ class Pitch(object):
        
         Parameters
         ----------
-        bin_statistic : BinnedStatisticResult. This should be calculated via Pitch.bin_statistic().
+        bin_statistic : _BinnedStatisticResult. This should be calculated via Pitch.bin_statistic().
             It contains:
               * statistic : (nx, ny) ndarray
                     The values of the selected statistic in each two-dimensional bin.
@@ -1491,7 +1492,7 @@ class Pitch(object):
             
         Returns
         ----------
-        list of BinnedStatisticResult : A list of namedtuple. The namedtuples contain:
+        list of _BinnedStatisticResult : A list of namedtuple. The namedtuples contain:
             statistic : (nx, ny) ndarray
                 The values of the selected statistic in each two-dimensional bin.
             x_grid : (ny + 1, nx + 1) ndarray
@@ -1586,11 +1587,11 @@ class Pitch(object):
             cx5 = cx5[0].copy()
                         
             # collect stats
-            result1 = BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)
-            result2 = BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)
-            result3 = BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)
-            result4 = BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)
-            result5 = BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)
+            result1 = _BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)
+            result2 = _BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)
+            result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)
+            result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)
+            result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)
             
             bin_statistic = [result1, result2, result3, result4, result5]    
             
@@ -1599,14 +1600,14 @@ class Pitch(object):
             yedge = np.array([y1, y2, y3, y4, y5, y6])
             statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic=statistic,
                                                                    bins=(xedge, yedge))
-            bin_statistic = [BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
+            bin_statistic = [_BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
             
         elif positional == 'vertical':
             xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
             yedge = np.array([y1, y6])
             statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic=statistic,
                                                                    bins=(xedge, yedge))
-            bin_statistic = [BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
+            bin_statistic = [_BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
         else:
             raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
                   
@@ -1617,7 +1618,7 @@ class Pitch(object):
        
         Parameters
         ----------
-        bin_statistic : A list of BinnedStatisticResult. This should be calculated via Pitch.bin_statistic_positional().
+        bin_statistic : A list of _BinnedStatisticResult. This should be calculated via Pitch.bin_statistic_positional().
             It contains:
               * statistic : (nx, ny) ndarray
                     The values of the selected statistic in each two-dimensional bin.
@@ -1657,7 +1658,7 @@ class Pitch(object):
               
         Parameters
         ----------
-        bin_statistic : A list of BinnedStatisticResult. This should be calculated via Pitch.bin_statistic_positional().
+        bin_statistic : A list of _BinnedStatisticResult. This should be calculated via Pitch.bin_statistic_positional().
             It contains:
               * statistic : (nx, ny) ndarray
                     The values of the selected statistic in each two-dimensional bin.

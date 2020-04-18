@@ -1,4 +1,4 @@
-"""`mplsoccer` is a python library for plotting soccer / football pitches in Matplotlib."""
+"""`mplsoccer.scatterutils` is a python module containing Matplotlib markers and a function to rotate markers."""
 
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
 # License: MIT
