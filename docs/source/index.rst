@@ -34,6 +34,7 @@ Plot a pitch
    
    installation
    basics
+   gallery/index
    api
      
 Indices and tables

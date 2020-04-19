@@ -14,6 +14,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 
+import sphinx_gallery
 
 # -- Project information -----------------------------------------------------
 
@@ -34,13 +35,20 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.imgmath',
               'sphinx.ext.viewcode',
+              'sphinx_gallery.gen_gallery',
               'sphinx.ext.napoleon',
               'numpydoc']
+
+
+# this is needed for some reason...
+# see https://github.com/numpy/numpydoc/issues/69
+numpydoc_class_members_toctree = False
 
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
-autodoc_default_flags = ['members']
+
+# generate autosummary even if no references
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -50,6 +58,11 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build']
+
+# sphinx gallery
+sphinx_gallery_conf = {
+    'examples_dirs': ['../../examples'],
+    'gallery_dirs': ['gallery']}
 
 
 # -- Options for HTML output -------------------------------------------------
