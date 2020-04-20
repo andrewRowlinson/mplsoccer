@@ -3,17 +3,17 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_gallery_plot_arrows.py>`     to download the full example code
+        Click :ref:`here <sphx_glr_download_gallery_plot_lines.py>`     to download the full example code
     .. rst-class:: sphx-glr-example-title
 
-    .. _sphx_glr_gallery_plot_arrows.py:
+    .. _sphx_glr_gallery_plot_lines.py:
 
 
-======================
-Pass plot using quiver
-======================
+=====================
+Pass plot using lines
+=====================
 
-This example shows how to plot all passes from a team in a match as arrows.
+This example shows how to plot all passes from a team in a match as lines.
 
 
 .. code-block:: default
@@ -22,6 +22,7 @@ This example shows how to plot all passes from a team in a match as arrows.
     from mplsoccer.pitch import Pitch
     from mplsoccer.statsbomb import read_event, EVENT_SLUG
     from matplotlib import rcParams
+    from matplotlib.lines import Line2D
     import os
 
     rcParams['text.color'] = '#c7d5cc'  # set the default text color
@@ -171,17 +172,22 @@ Plotting
     fig, ax = pitch.draw()
 
     # Plot the completed passes
-    pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
-                 df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width=2,
-                 headwidth=10, headlength=10, color='#ad993c', ax=ax, label='completed passes')
+    pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
+                df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y,
+                lw=4, transparent=True, comet=True,
+                color='#ad993c', ax=ax)
 
     # Plot the other passes
-    pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
-                 df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width=2,
-                 headwidth=10, headlength=10, color='#ba4f45', ax=ax, label='other passes')
+    pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+                df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y,
+                lw=4, transparent=True, comet=True,
+                color='#ba4f45', ax=ax)
 
     # setup the legend
-    ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left')
+    custom_lines = [Line2D([0], [0], color='#ad993c', lw=4),
+                    Line2D([0], [0], color='#ba4f45', lw=4)]
+    ax.legend(custom_lines, ['completed passes', 'other passes'], 
+              facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left')
 
     # Set the title
     ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
@@ -192,7 +198,7 @@ Plotting
 
 
 
-.. image:: /gallery/images/sphx_glr_plot_arrows_001.png
+.. image:: /gallery/images/sphx_glr_plot_lines_001.png
     :class: sphx-glr-single-img
 
 
@@ -202,10 +208,10 @@ Plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.803 seconds)
+   **Total running time of the script:** ( 0 minutes  7.269 seconds)
 
 
-.. _sphx_glr_download_gallery_plot_arrows.py:
+.. _sphx_glr_download_gallery_plot_lines.py:
 
 
 .. only :: html
@@ -217,13 +223,13 @@ Plotting
 
   .. container:: sphx-glr-download sphx-glr-download-python
 
-     :download:`Download Python source code: plot_arrows.py <plot_arrows.py>`
+     :download:`Download Python source code: plot_lines.py <plot_lines.py>`
 
 
 
   .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-     :download:`Download Jupyter notebook: plot_arrows.ipynb <plot_arrows.ipynb>`
+     :download:`Download Jupyter notebook: plot_lines.ipynb <plot_lines.ipynb>`
 
 
 .. only:: html

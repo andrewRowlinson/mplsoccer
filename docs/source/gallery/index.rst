@@ -7,13 +7,32 @@
 Gallery
 =======
 
-Below is a gallery of examples
+All of the examples can be run from `this Anaconda environment <https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/environment.yml>`_.
+
+--------------------------------
+Creating an Anaconda environment
+--------------------------------
+
+If you use `Anaconda <https://www.anaconda.com/>`_ you can create the mplsoccer environment from the ``environment.yml`` file. Use the terminal or an Anaconda Prompt for the following steps:
+
+#. Create the environment from the ``environment.yml`` file:
+
+   .. code ::
+
+      conda env create -f environment.yml
+
+#. Activate the new environment: ``conda activate mplsoccer``
+
+--------
+Examples
+--------
+
 
 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to plot all passes in a match as arrows.">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to plot all passes from a team in a match as arrows.">
 
 .. only:: html
 
@@ -30,6 +49,46 @@ Below is a gallery of examples
    :hidden:
 
    /gallery/plot_arrows
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to plot all passes from a team in a match as lines.">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_plot_lines_thumb.png
+
+     :ref:`sphx_glr_gallery_plot_lines.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/plot_lines
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to plot the location of events occurring in a match  using kernel densit...">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_plot_kde_thumb.png
+
+     :ref:`sphx_glr_gallery_plot_kde.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/plot_kde
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

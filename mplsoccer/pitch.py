@@ -80,9 +80,9 @@ class Pitch(object):
         Whether to include the axis labels.
     tick : bool, default False
         Whether to include the axis ticks.
-    tight_layout : bool, default False
+    tight_layout : bool, default True
         Whether to use Matplotlib's tight layout.
-    constrained_layout : bool, default True
+    constrained_layout : bool, default False
         Whether to use Matplotlib's constrained layout.
     """
 
@@ -154,7 +154,7 @@ class Pitch(object):
                  pitch_color='#aabb97', line_color='white', line_zorder=1, linewidth=2, stripe=False,
                  stripe_color='#c2d59d', pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
-                 tight_layout=False, constrained_layout=True):
+                 tight_layout=True, constrained_layout=False):
 
         # set figure and axes attributes
         self.axes = None
@@ -1072,7 +1072,8 @@ class Pitch(object):
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         return cmap
 
-    def lines(self, xstart, ystart, xend, yend, n_segments=100, comet=False, transparent=False, ax=None, **kwargs):
+    def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
+              comet=False, transparent=False, ax=None, **kwargs):
         """ Plots lines using matplotlib.collections.LineCollection.
         This is a fast way to plot multiple lines without loops.
 
@@ -1083,6 +1084,10 @@ class Pitch(object):
         ----------
         xstart, ystart, xend, yend: array-like or scalar.
             Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+            
+        color : A matplotlib color, defaults to None.
+            Defaults to None. In that case the marker color is determined 
+            by the value rcParams['lines.color']
 
         n_segments : int, default 100
             If comet=True or transparent=True this is used to split the line
@@ -1125,7 +1130,11 @@ class Pitch(object):
             raise ValueError("ystart and yend must be the same size")        
             
         lw = kwargs.pop('lw', 5)
-        color = kwargs.pop('color', '#34afed')
+        
+        # set color
+        if color is None:
+            color = rcParams['lines.color']
+            
         color = to_rgb(color)
 
         # set pitch array for line segments
@@ -1167,7 +1176,7 @@ class Pitch(object):
         The function also automatically flips the x and y coordinates if the pitch is vertical.
         
         Plot a 2D field of arrows.
-        see: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.quiver.html
+        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.quiver.html
 
         Parameters
         ----------
@@ -1231,7 +1240,7 @@ class Pitch(object):
         and clips kernel density plots (kind = 'kde') to the pitch boundaries.
         
         Draw a plot of two variables with bivariate and univariate graphs.
-        see: https://seaborn.pydata.org/generated/seaborn.jointplot.html
+        See: https://seaborn.pydata.org/generated/seaborn.jointplot.html
         
         Parameters
         ----------
@@ -1280,7 +1289,7 @@ class Pitch(object):
         which automatically flips the xy and xytext coordinates if the pitch is vertical.
         
         Annotate the point xy with text.
-        see: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.annotate.html
+        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.annotate.html
         
         Parameters
         ----------
@@ -1298,7 +1307,6 @@ class Pitch(object):
         
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
 
-  
         Returns
         -------
         annotation : matplotlib.text.Annotation
@@ -1317,6 +1325,7 @@ class Pitch(object):
     
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4)):
         """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
+        
         This method automatically sets the range, changes some of the scipy defaults,
         and outputs the grids and centers for plotting.
         
@@ -1331,49 +1340,24 @@ class Pitch(object):
         
         statistic : string or callable, optional
             The statistic to compute (default is 'count').
-            The following statistics are available:
-              * 'count' : compute the count of points within each bin.  This is
-                 identical to an unweighted histogram.  `values` array is not
-                 referenced.
-              * 'mean' : compute the mean of values for points within each bin.
-                 Empty bins will be represented by NaN.
-              * 'std' : compute the standard deviation within each bin. This
-                 is implicitly calculated with ddof=0.
-              * 'median' : compute the median of values for points within each
-                 bin. Empty bins will be represented by NaN.
-              * 'sum' : compute the sum of values for points within each bin.
-                 This is identical to a weighted histogram.
-              * 'min' : compute the minimum of values for points within each bin.
-                 Empty bins will be represented by NaN.
-              * 'max' : compute the maximum of values for point within each bin.
-                 Empty bins will be represented by NaN.
-              * function : a user-defined function which takes a 1D array of
-                 values, and outputs a single numerical statistic. This function
-                 will be called on the values in each bin.  Empty bins will be
-                 represented by function([]), or NaN if this returns an error.
+            The following statistics are available: 'count' (default),
+            'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function.
+            See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
         
         bins : int or [int, int] or array_like or [array, array], optional
-            The bin specification:
+            The bin specification.
               * the number of bins for the two dimensions (nx = ny = bins),
               * the number of bins in each dimension (nx, ny = bins),
               * the bin edges for the two dimensions (x_edge = y_edge = bins),
               * the bin edges in each dimension (x_edge, y_edge = bins).
-            If the bin edges are specified, the number of bins will be,
-            (nx = len(x_edge)-1, ny = len(y_edge)-1).
+                If the bin edges are specified, the number of bins will be,
+                (nx = len(x_edge)-1, ny = len(y_edge)-1).
             
         Returns
         ----------
-        namedtuple : _BinnedStatisticResult. Containing:
-            * statistic : (nx, ny) ndarray
-                The values of the selected statistic in each two-dimensional bin.
-            * x_grid : (ny + 1, nx + 1) ndarray
-                The grid edges along the first dimension.
-            * y_grid : (ny + 1, nx + 1) ndarray
-                The grid edges along the second dimension.
-            * cx : (ny, nx) array
-                This contains the bin centers along the first dimension.
-            * cy : (ny, nx) array
-                This contains the bin centers along the second dimension.
+        bin_statistic : dict.
+            The keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
         """
         
         x = np.ravel(x)
@@ -1405,7 +1389,7 @@ class Pitch(object):
         cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
                              result.y_edge[:-1] + 0.5 * np.diff(result.y_edge))
 
-        bin_statistic = _BinnedStatisticResult(result.statistic, x_grid, y_grid, cx, cy)
+        bin_statistic = _BinnedStatisticResult(result.statistic, x_grid, y_grid, cx, cy)._asdict()
         
         return bin_statistic
               
@@ -1413,23 +1397,15 @@ class Pitch(object):
         """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
         which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
         
-        see: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
+        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
        
         Parameters
         ----------
-        bin_statistic : _BinnedStatisticResult. This should be calculated via Pitch.bin_statistic().
-            It contains:
-              * statistic : (nx, ny) ndarray
-                    The values of the selected statistic in each two-dimensional bin.
-              * x_grid : (ny + 1, nx + 1) ndarray
-                    The grid edges along the first dimension.
-              * y_grid : (ny + 1, nx + 1) ndarray
-                    The grid edges along the second dimension.
-              * cx : (ny, nx) array
-                    his contains the bin centers along the first dimension.
-              * cy : (ny, nx) array
-                    This contains the bin centers along the second dimension.
-        
+        bin_statistic : dict.
+            This should be calculated via Pitch.bin_statistic().
+            The keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         
@@ -1469,40 +1445,15 @@ class Pitch(object):
         
         statistic : string or callable, optional
             The statistic to compute (default is 'count').
-            The following statistics are available:
-              * 'count' : compute the count of points within each bin.  This is
-                 identical to an unweighted histogram.  `values` array is not
-                 referenced.
-              * 'mean' : compute the mean of values for points within each bin.
-                 Empty bins will be represented by NaN.
-              * 'std' : compute the standard deviation within each bin. This
-                 is implicitly calculated with ddof=0.
-              * 'median' : compute the median of values for points within each
-                 bin. Empty bins will be represented by NaN.
-              * 'sum' : compute the sum of values for points within each bin.
-                 This is identical to a weighted histogram.
-              * 'min' : compute the minimum of values for points within each bin.
-                 Empty bins will be represented by NaN.
-              * 'max' : compute the maximum of values for point within each bin.
-                 Empty bins will be represented by NaN.
-              * function : a user-defined function which takes a 1D array of
-                 values, and outputs a single numerical statistic. This function
-                 will be called on the values in each bin.  Empty bins will be
-                 represented by function([]), or NaN if this returns an error.
+            The following statistics are available: 'count' (default),
+            'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function.
+            See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html.
             
         Returns
         ----------
-        list of _BinnedStatisticResult : A list of namedtuple. The namedtuples contain:
-            statistic : (nx, ny) ndarray
-                The values of the selected statistic in each two-dimensional bin.
-            x_grid : (ny + 1, nx + 1) ndarray
-                The grid edges along the first dimension.
-            y_grid : (ny + 1, nx + 1) ndarray
-                The grid edges along the second dimension.
-            cx : (ny, nx) array
-                This contains the bin centers along the first dimension.
-            cy : (ny, nx) array
-                This contains the bin centers along the second dimension.
+        bin_statistic : A list of dictionaries.
+            The dictionary keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
         """
         # x positions
         x1 = min(self.left, self.right)
@@ -1587,11 +1538,11 @@ class Pitch(object):
             cx5 = cx5[0].copy()
                         
             # collect stats
-            result1 = _BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)
-            result2 = _BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)
-            result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)
-            result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)
-            result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)
+            result1 = _BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)._asdict()
+            result2 = _BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)._asdict()
+            result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)._asdict()
+            result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)._asdict()
+            result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)._asdict()
             
             bin_statistic = [result1, result2, result3, result4, result5]    
             
@@ -1618,8 +1569,10 @@ class Pitch(object):
        
         Parameters
         ----------
-        bin_statistic : A list of BinnedStatisticResult.
+        bin_statistic : A list of dictionaries.
             This should be calculated via Pitch.bin_statistic_positional().
+            The dictionary keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
@@ -1648,8 +1601,8 @@ class Pitch(object):
               
         Parameters
         ----------
-        bin_statistic : A list of BinnedStatisticResult.
-            This should be calculated via Pitch.bin_statistic_positional().
+        bin_statistic : A dictionary or list of dictionaries.
+            This should be calculated via Pitch.bin_statistic_positional() or Pitch.bin_statistic().
         
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.

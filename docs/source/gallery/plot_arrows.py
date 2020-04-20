@@ -3,7 +3,7 @@
 Pass plot using quiver
 ======================
 
-This example shows how to plot all passes in a match as arrows.
+This example shows how to plot all passes from a team in a match as arrows.
 """
 
 from mplsoccer.pitch import Pitch
@@ -39,21 +39,22 @@ df_pass.head()
 
 # Setup the pitch
 pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
-              pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 9))
+              pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
+              constrained_layout=False, tight_layout=True)
 fig, ax = pitch.draw()
 
 # Plot the completed passes
 pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
-             df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width=1,
+             df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width=2,
              headwidth=10, headlength=10, color='#ad993c', ax=ax, label='completed passes')
 
 # Plot the other passes
 pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
-             df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width=1,
+             df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width=2,
              headwidth=10, headlength=10, color='#ba4f45', ax=ax, label='other passes')
 
 # setup the legend
-ax.legend(facecolor='#22312b', edgecolor='None', fontsize='large')
+ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left')
 
 # Set the title
 ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
@@ -61,5 +62,3 @@ ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
 # Set the figure facecolor
 fig.set_facecolor('#22312b')
 
-# Turn off constrained layout
-fig.set_constrained_layout(False)

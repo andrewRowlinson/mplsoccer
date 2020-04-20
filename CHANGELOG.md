@@ -1,3 +1,19 @@
+Version 0.0.4
+-----------
+
+### Added
+
+
+### Changed
+1) utils module renamed scatterutils
+2) default color of lines changed to rcparams['lines.color']
+3) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
+4) Pitch defaults changed to tight_layout=True and constrained_layout=False.
+
+### Fixed
+
+
+
 Version 0.0.3
 -----------
 

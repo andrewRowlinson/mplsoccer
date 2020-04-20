@@ -1,14 +1,15 @@
 """
-======================
-Pass plot using quiver
-======================
+=====================
+Pass plot using lines
+=====================
 
-This example shows how to plot all passes from a team in a match as arrows.
+This example shows how to plot all passes from a team in a match as lines.
 """
 
 from mplsoccer.pitch import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
+from matplotlib.lines import Line2D
 import os
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
@@ -44,17 +45,22 @@ pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
 fig, ax = pitch.draw()
 
 # Plot the completed passes
-pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
-             df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width=2,
-             headwidth=10, headlength=10, color='#ad993c', ax=ax, label='completed passes')
+pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
+            df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y,
+            lw=4, transparent=True, comet=True,
+            color='#ad993c', ax=ax)
 
 # Plot the other passes
-pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
-             df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width=2,
-             headwidth=10, headlength=10, color='#ba4f45', ax=ax, label='other passes')
+pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+            df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y,
+            lw=4, transparent=True, comet=True,
+            color='#ba4f45', ax=ax)
 
 # setup the legend
-ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left')
+custom_lines = [Line2D([0], [0], color='#ad993c', lw=4),
+                Line2D([0], [0], color='#ba4f45', lw=4)]
+ax.legend(custom_lines, ['completed passes', 'other passes'], 
+          facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left')
 
 # Set the title
 ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
