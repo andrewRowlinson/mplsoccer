@@ -11,6 +11,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap
+from matplotlib.cm import get_cmap
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.colors import to_rgb
 from matplotlib import rcParams
@@ -1058,22 +1059,23 @@ class Pitch(object):
         segments = np.transpose(segments, (0, 2, 1, 3)).reshape(-1, 3, 2)
         return segments
 
-    def _create_transparent_cmap(self, color, n_segments):
+    def _create_transparent_cmap(self, color, n_segments, alpha_start, alpha_end):
         if self.orientation == 'horizontal':
             color = np.tile(np.array(color), (n_segments, 1))
-            color = np.append(color, np.linspace(0.1, 0.5, n_segments).reshape(-1, 1), axis=1)
+            color = np.append(color, np.linspace(alpha_start, alpha_end, n_segments).reshape(-1, 1), axis=1)
             if self.invert_y:
                 color = color[::-1]
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         elif self.orientation == 'vertical':
             color = np.tile(np.array(color), (n_segments, 1))
-            color = np.append(color, np.linspace(0.5, 0.1, n_segments).reshape(-1, 1), axis=1)
+            color = np.append(color, np.linspace(alpha_end, alpha_start, n_segments).reshape(-1, 1), axis=1)
             color = color[::-1]
             cmap = ListedColormap(color, name='line fade', N=n_segments)
         return cmap
 
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
-              comet=False, transparent=False, ax=None, **kwargs):
+              comet=False, transparent=False, alpha_start=0.01,
+              alpha_end=1, cmap=None, ax=None, **kwargs):
         """ Plots lines using matplotlib.collections.LineCollection.
         This is a fast way to plot multiple lines without loops.
 
@@ -1099,6 +1101,19 @@ class Pitch(object):
         transparent : bool, default False
             Whether to plot the lines increasing in opacity.
             
+        alpha_start, optional, default: 0.01
+            The starting alpha value for transparent lines, between 0 (transparent) and 1 (opaque).
+            If transparent = True the line will be drawn to
+            linearly increase in opacity between alpha_start and alpha_end.
+            
+        alpha_end, optional, default: 1
+            The ending alpha value for transparent lines, between 0 (transparent) and 1 (opaque).
+            If transparent = True the line will be drawn to
+            linearly increase in opacity between alpha_start and alpha_end.
+            
+        cmap, Colormap, optional, default: None
+            A Colormap instance or registered colormap name. Cmap is only used if specified else color is used.
+            
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
             
@@ -1116,6 +1131,17 @@ class Pitch(object):
             raise TypeError("Invalid argument: comet should be bool (True or False).")
         if not isinstance(transparent, bool):
             raise TypeError("Invalid argument: transparent should be bool (True or False).")
+        if alpha_start < 0 or alpha_start > 1:
+            raise TypeError("alpha_start values should be within 0-1 range")
+        if alpha_end < 0 or alpha_end > 1:
+            raise TypeError("alpha_end values should be within 0-1 range")  
+        if 'colors' in kwargs.keys():
+            warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
+        if alpha_start > alpha_end:
+            warnings.warn("Alpha start > alpha end. The line will increase in transparency nearer to the end")
+        if color is not None and  cmap is not None:
+            raise ValueError("Only use one of color or cmap arguments not both.")
+        
             
         xstart = np.ravel(xstart)
         ystart = np.ravel(ystart)
@@ -1139,29 +1165,42 @@ class Pitch(object):
 
         # set pitch array for line segments
         pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
-
-        # set color map, lw and segments
-        if transparent and comet:
-            cmap = self._create_transparent_cmap(color, n_segments)
-            lw = np.linspace(1, lw, n_segments)
-            segments = self._create_segments(xstart, ystart, xend, yend, n_segments)
-
-        elif transparent and (comet is False):
-            cmap = self._create_transparent_cmap(color, n_segments)
-            segments = self._create_segments(xstart, ystart, xend, yend, n_segments)
-
-        elif (transparent is False) and comet:
-            lw = np.linspace(1, lw, n_segments)
-            cmap = ListedColormap([color], name='single color', N=n_segments)
-            segments = self._create_segments(xstart, ystart, xend, yend, n_segments)
-
-        elif (transparent is False) and (comet is False):
-            cmap = ListedColormap([color], name='single color', N=n_segments)
+        
+        # create segments
+        if (transparent is False) and (comet is False):
             if self.orientation == 'horizontal':
                 segments = np.transpose(np.array([[xstart, ystart], [xend, yend]]), (2, 0, 1))
             elif self.orientation == 'vertical':
                 segments = np.transpose(np.array([[ystart, xstart], [yend, xend]]), (2, 0, 1))
-
+        
+        else:
+            segments = self._create_segments(xstart, ystart, xend, yend, n_segments)
+            
+        # create linewidth
+        if comet:
+            lw = np.linspace(1, lw, n_segments)
+        
+        # set color map
+        if transparent:
+            if cmap is None:
+                cmap = self._create_transparent_cmap(color, n_segments, alpha_start, alpha_end)
+            else:
+                cmap = get_cmap(cmap)
+                cmap = cmap(np.linspace(0,1,n_segments))
+                
+                # invert colour scheme if needed and add alpha channel
+                if self.invert_y and self.orientation=='horizontal':
+                    cmap = cmap[::-1]
+                    alpha_channel = np.linspace(alpha_end, alpha_start, n_segments)
+                else:
+                    alpha_channel = np.linspace(alpha_start, alpha_end, n_segments)  
+                cmap[:,3] = alpha_channel
+                
+                cmap = ListedColormap(cmap)
+        else:
+            if cmap is None:
+                cmap = ListedColormap([color], name='single color', N=n_segments)
+                              
         # add line collection
         lc = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, **kwargs)
         lc.set_array(pitch_array)

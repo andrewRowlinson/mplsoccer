@@ -2,17 +2,15 @@ Version 0.0.4
 -----------
 
 ### Added
-
+1) Docs and gallery added.
 
 ### Changed
 1) utils module renamed scatterutils
-2) default color of lines changed to rcparams['lines.color']
-3) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
-4) Pitch defaults changed to tight_layout=True and constrained_layout=False.
-
-### Fixed
-
-
+2) default color of Pitch.lines() changed to rcparams['lines.color']
+3) Pitch.lines() now takes alpha_start and alpha_end arguments. The line linearly increases in opacity from alpha_start to alpha_end if transparent=True. Previously these were hard coded as 0.1 and 0.5. The new defaults are 0.01 and 1.
+4) Pitch.lines() not takes cmap as an argument. You can either select cmap or color, but not both.
+5) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
+6) Pitch defaults changed to tight_layout=True and constrained_layout=False.
 
 Version 0.0.3
 -----------
