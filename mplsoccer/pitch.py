@@ -1101,19 +1101,19 @@ class Pitch(object):
         transparent : bool, default False
             Whether to plot the lines increasing in opacity.
             
-        alpha_start, optional, default: 0.01
+        alpha_start: float, default 0.01
             The starting alpha value for transparent lines, between 0 (transparent) and 1 (opaque).
             If transparent = True the line will be drawn to
             linearly increase in opacity between alpha_start and alpha_end.
             
-        alpha_end, optional, default: 1
+        alpha_end : float, default 1
             The ending alpha value for transparent lines, between 0 (transparent) and 1 (opaque).
             If transparent = True the line will be drawn to
             linearly increase in opacity between alpha_start and alpha_end.
-            
-        cmap, Colormap, optional, default: None
-            A Colormap instance or registered colormap name. Cmap is only used if specified else color is used.
-            
+
+        cmap : str, default None
+            A matplotlib cmap (colormap) name
+
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
             
@@ -1122,6 +1122,7 @@ class Pitch(object):
         Returns
         -------
         LineCollection : matplotlib.collections.LineCollection
+
         """
 
         if ax is None:
@@ -1139,10 +1140,9 @@ class Pitch(object):
             warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
         if alpha_start > alpha_end:
             warnings.warn("Alpha start > alpha end. The line will increase in transparency nearer to the end")
-        if color is not None and  cmap is not None:
+        if color is not None and cmap is not None:
             raise ValueError("Only use one of color or cmap arguments not both.")
-        
-            
+
         xstart = np.ravel(xstart)
         ystart = np.ravel(ystart)
         xend = np.ravel(xend)
@@ -1186,15 +1186,15 @@ class Pitch(object):
                 cmap = self._create_transparent_cmap(color, n_segments, alpha_start, alpha_end)
             else:
                 cmap = get_cmap(cmap)
-                cmap = cmap(np.linspace(0,1,n_segments))
+                cmap = cmap(np.linspace(0, 1, n_segments))
                 
                 # invert colour scheme if needed and add alpha channel
-                if self.invert_y and self.orientation=='horizontal':
+                if self.invert_y and self.orientation == 'horizontal':
                     cmap = cmap[::-1]
                     alpha_channel = np.linspace(alpha_end, alpha_start, n_segments)
                 else:
                     alpha_channel = np.linspace(alpha_start, alpha_end, n_segments)  
-                cmap[:,3] = alpha_channel
+                cmap[:, 3] = alpha_channel
                 
                 cmap = ListedColormap(cmap)
         else:

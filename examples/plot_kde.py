@@ -14,7 +14,7 @@ import os
 ##############################################################################
 # load first game that Messi played as a false-9 and the match before as dataframes
 
-kwargs = {'related_event_df': False,'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
+kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
 df_false9 = read_event(os.path.join(EVENT_SLUG,'69249.json'), **kwargs)['event']
 df_before_false9 = read_event(os.path.join(EVENT_SLUG,'69251.json'), **kwargs)['event']
 
