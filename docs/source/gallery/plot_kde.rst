@@ -37,7 +37,7 @@ load first game that Messi played as a false-9 and the match before as dataframe
 .. code-block:: default
 
 
-    kwargs = {'related_event_df': False,'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
+    kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
     df_false9 = read_event(os.path.join(EVENT_SLUG,'69249.json'), **kwargs)['event']
     df_before_false9 = read_event(os.path.join(EVENT_SLUG,'69251.json'), **kwargs)['event']
 
@@ -215,7 +215,7 @@ Plotting both Messi's first game as a False-9 and the game directly before
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  8.977 seconds)
+   **Total running time of the script:** ( 0 minutes  14.798 seconds)
 
 
 .. _sphx_glr_download_gallery_plot_kde.py:
