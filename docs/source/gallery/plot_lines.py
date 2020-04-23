@@ -15,7 +15,7 @@ import os
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
 # get event dataframe for game 7478, create a dataframe of the passes, and a boolean mask for the outcome
-df = read_event(os.path.join(EVENT_SLUG, '7478.json'),
+df = read_event(f'{EVENT_SLUG}/7478.json',
                 related_event_df=False, shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
 
 ##############################################################################

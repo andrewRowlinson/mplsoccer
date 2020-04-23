@@ -5,12 +5,14 @@
 
 Computation times
 =================
-**00:14.798** total execution time for **gallery** files:
+**00:21.484** total execution time for **gallery** files:
 
 +-------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_gallery_plot_kde.py` (``plot_kde.py``)       | 00:14.798 | 0.0 MB |
+| :ref:`sphx_glr_gallery_plot_kde.py` (``plot_kde.py``)       | 00:14.466 | 0.0 MB |
++-------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_gallery_plot_lines.py` (``plot_lines.py``)   | 00:07.018 | 0.0 MB |
 +-------------------------------------------------------------+-----------+--------+
 | :ref:`sphx_glr_gallery_plot_arrows.py` (``plot_arrows.py``) | 00:00.000 | 0.0 MB |
 +-------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_gallery_plot_lines.py` (``plot_lines.py``)   | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_gallery_plot_logo.py` (``plot_logo.py``)     | 00:00.000 | 0.0 MB |
 +-------------------------------------------------------------+-----------+--------+

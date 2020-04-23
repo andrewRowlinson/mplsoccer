@@ -32,6 +32,26 @@ Examples
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot a logo for mplsoccer">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_plot_logo_thumb.png
+
+     :ref:`sphx_glr_gallery_plot_logo.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/plot_logo
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to plot all passes from a team in a match as arrows.">
 
 .. only:: html

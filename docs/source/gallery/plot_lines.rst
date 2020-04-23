@@ -28,12 +28,21 @@ This example shows how to plot all passes from a team in a match as lines.
     rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
     # get event dataframe for game 7478, create a dataframe of the passes, and a boolean mask for the outcome
-    df = read_event(os.path.join(EVENT_SLUG, '7478.json'),
+    df = read_event(f'{EVENT_SLUG}/7478.json',
                     related_event_df=False, shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
 
 
 
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /home/andy/mplsoccer/mplsoccer/statsbomb.py:110: UserWarning: Please be responsible with Statsbomb data.Register your details on https://www.statsbomb.com/resource-centreand read the User Agreement carefully (on the same page).
+      warnings.warn(statsbomb_warning)
 
 
 
@@ -208,7 +217,7 @@ Plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.269 seconds)
+   **Total running time of the script:** ( 0 minutes  7.018 seconds)
 
 
 .. _sphx_glr_download_gallery_plot_lines.py:
