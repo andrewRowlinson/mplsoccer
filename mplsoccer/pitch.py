@@ -10,10 +10,8 @@ import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from matplotlib.collections import LineCollection
-from matplotlib.colors import ListedColormap
 from matplotlib.cm import get_cmap
-from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.colors import to_rgb
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgb
 from matplotlib import rcParams
 from scipy.stats import binned_statistic_2d
 from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
@@ -1187,7 +1185,11 @@ class Pitch(object):
             if cmap is None:
                 cmap = self._create_transparent_cmap(color, n_segments, alpha_start, alpha_end)
             else:
-                cmap = get_cmap(cmap)
+                if isinstance(cmap, str):
+                    cmap = get_cmap(cmap)
+                elif not isinstance(cmap, (ListedColormap, LinearSegmentedColormap)):
+                    raise ValueError("cmap: not a recognised cmap type.")  
+                
                 cmap = cmap(np.linspace(0, 1, n_segments))
                 
                 # invert colour scheme if needed and add alpha channel
