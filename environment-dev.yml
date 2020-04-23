@@ -1,0 +1,16 @@
+name: mplsoccer-dev
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - jupyter
+  - python
+  - matplotlib
+  - pandas
+  - scipy
+  - seaborn
+  - beautifulsoup4
+  - conda-forge::ffmpeg
+  - pip
+  - pip:
+      - -e .

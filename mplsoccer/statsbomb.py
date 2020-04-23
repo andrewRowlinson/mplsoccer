@@ -6,12 +6,16 @@
 import pandas as pd
 import os
 import numpy as np
+import warnings
 
 EVENT_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/events'
 MATCH_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/matches'
 LINEUP_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/lineups'
 COMPETITION_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/competitions.json'
 
+statsbomb_warning = ('Please be responsible with Statsbomb data.'
+                     'Register your details on https://www.statsbomb.com/resource-centre'
+                     'and read the User Agreement carefully (on the same page).')
 
 def _split_location_cols(df, col, new_cols):
     """ Location is stored as a list. split into columns. """
@@ -56,7 +60,7 @@ def _simplify_cols_and_drop(df, col):
     return df
 
 
-def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, tactics_lineup_df=True):
+def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, tactics_lineup_df=True, warn=True):
     """ Extracts individual event json and loads as a dictionary of up to
     four pandas.DataFrame: 'event', 'related event', 'shot_freeze_frame', and 'tactics_lineup'.
     
@@ -102,7 +106,9 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         URL = os.path.join(EVENT_SLUG,'7430.json')
         dict_dfs = read_event(URL)
     """
-    
+    if warn:
+        warnings.warn(statsbomb_warning)
+        
     df_dict = {}
     
     # timestamp defaults to today's date so store as a string - feather can't store time objects
@@ -207,7 +213,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     return df_dict
 
 
-def read_match(path_or_buf):
+def read_match(path_or_buf, warn=True):
     """ Extracts individual match json and loads as a pandas.DataFrame.
     
     Parameters
@@ -241,6 +247,9 @@ def read_match(path_or_buf):
         URL = os.path.join(MATCH_SLUG,'11','1.json')
         df_match = read_match(URL)
     """
+    if warn:
+        warnings.warn(statsbomb_warning)
+        
     df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
     
     # loop through the columns that are still dictionary columns and add them as seperate cols to the datafram
@@ -273,7 +282,7 @@ def read_match(path_or_buf):
     return df_match
 
 
-def read_competition(path_or_buf):
+def read_competition(path_or_buf, warn=True):
     """ Extracts competition json and loads as a pandas.DataFrame.
     
     Parameters
@@ -305,13 +314,16 @@ def read_competition(path_or_buf):
         from mplsoccer.statsbomb import read_competition, COMPETITION_URL
         df_competition = read_competition(COMPETITION_URL)
     """
+    if warn:
+        warnings.warn(statsbomb_warning)
+        
     df_competition = pd.read_json(path_or_buf, convert_dates=['match_updated', 'match_available'])
     df_competition.sort_values(['competition_id', 'season_id'], inplace=True)
     df_competition.reset_index(drop=True, inplace=True)
     return df_competition
 
 
-def read_lineup(path_or_buf):
+def read_lineup(path_or_buf, warn=True):
     """ Extracts individual lineup jsons and loads as a pandas.DataFrame.
     
     Parameters
@@ -345,6 +357,9 @@ def read_lineup(path_or_buf):
         URL = os.path.join(LINEUP_SLUG,'7430.json')
         df_lineup = read_lineup(URL)
     """
+    if warn:
+        warnings.warn(statsbomb_warning)
+        
     df_lineup = pd.read_json(path_or_buf)
     df_lineup['match_id'] = os.path.basename(path_or_buf[:-5])
     # each line has a column named player that contains a list of dictionaries
