@@ -983,6 +983,8 @@ class Pitch(object):
             linewidths = kwargs.pop('linewidths', 0.5)
             hexcolor = kwargs.pop('c', 'white')
             pentcolor = kwargs.pop('edgecolors', 'black')
+            x = np.ma.ravel(x)
+            y = np.ma.ravel(y)
             n = len(x)
             x = np.repeat(x, 2).copy()
             y = np.repeat(y, 2).copy()
