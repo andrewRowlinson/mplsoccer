@@ -9,8 +9,16 @@ dependencies:
   - pandas
   - scipy
   - seaborn
+  - sphinx
   - beautifulsoup4
   - conda-forge::ffmpeg
+  - pillow
   - pip
   - pip:
+      - setuptools
+      - twine
+      - wheel
+      - sphinx-gallery
+      - sphinx_rtd_theme
+      - numpydoc
       - -e .
