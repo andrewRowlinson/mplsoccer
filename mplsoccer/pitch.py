@@ -10,6 +10,7 @@ import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from matplotlib.collections import LineCollection
+from matplotlib.legend_handler import HandlerLineCollection
 from matplotlib.cm import get_cmap
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgb
 from matplotlib import rcParams
@@ -1122,6 +1123,7 @@ class Pitch(object):
         Returns
         -------
         LineCollection : matplotlib.collections.LineCollection
+        HandlerLineCollection : matplotlib.legend_handler.HandlerLineCollection
 
         """
 
@@ -1210,7 +1212,9 @@ class Pitch(object):
         lc.set_array(pitch_array)
         lc = ax.add_collection(lc)
         
-        return lc
+        lc_handler = HandlerLines(numpoints=n_segments)
+        
+        return lc, lc_handler
 
     def quiver(self, xstart, ystart, xend, yend, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
@@ -1674,3 +1678,17 @@ class Pitch(object):
                 annotation_list.append(annotation)
             
         return annotation_list
+
+# Amended from https://stackoverflow.com/questions/49223702/
+# adding-a-legend-to-a-matplotlib-plot-with-a-multicolored-line?rq=1
+class HandlerLines(HandlerLineCollection):
+    def create_artists(self, legend, artist, xdescent, ydescent,
+                       width, height, fontsize, trans):
+        x = np.linspace(0, width, self.get_numpoints(legend)+1)
+        y = np.zeros(self.get_numpoints(legend) +1)+height/2.-ydescent
+        points = np.array([x, y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        lw = np.linspace(1, max(artist.get_linewidth()[-1],10), self.get_numpoints(legend))
+        lc = LineCollection(segments, lw=lw, cmap=artist.cmap, snap=False, transform=trans)
+        lc.set_array(x)
+        return [lc]
