@@ -1169,7 +1169,7 @@ class Pitch(object):
         pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
         
         # create segments
-        if (transparent is False) and (comet is False):
+        if (transparent is False) and (comet is False) and (cmap is None):
             if self.orientation == 'horizontal':
                 segments = np.transpose(np.array([[xstart, ystart], [xend, yend]]), (2, 0, 1))
             elif self.orientation == 'vertical':
@@ -1195,7 +1195,7 @@ class Pitch(object):
                 cmap = cmap(np.linspace(0, 1, n_segments))
                 
                 # invert colour scheme if needed and add alpha channel
-                if self.invert_y and self.orientation == 'horizontal':
+                if self.invert_y and self.orientation=='horizontal':
                     cmap = cmap[::-1]
                     alpha_channel = np.linspace(alpha_end, alpha_start, n_segments)
                 else:
@@ -1204,6 +1204,12 @@ class Pitch(object):
                 
                 cmap = ListedColormap(cmap)
         else:
+            if cmap is not None:
+                if isinstance(cmap, str):
+                    cmap = get_cmap(cmap).reversed()
+                if ((self.invert_y & (self.orientation=='vertical'))|
+                    (self.invert_y is False & (self.orientation=='horizontal'))):
+                    cmap = cmap.reversed()
             if cmap is None:
                 cmap = ListedColormap([color], name='single color', N=n_segments)
                               
