@@ -1694,7 +1694,7 @@ class HandlerLines(HandlerLineCollection):
         y = np.zeros(self.get_numpoints(legend) +1)+height/2.-ydescent
         points = np.array([x, y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        lw = np.linspace(1, max(artist.get_linewidth()[-1],10), self.get_numpoints(legend))
-        lc = LineCollection(segments, lw=lw, cmap=artist.cmap, snap=False, transform=trans)
+        #lw = np.linspace(1, max(artist.get_linewidth()[-1],10), self.get_numpoints(legend))
+        lc = LineCollection(segments, lw=artist.get_linewidth(), cmap=artist.cmap, snap=False, transform=trans)
         lc.set_array(x)
         return [lc]
