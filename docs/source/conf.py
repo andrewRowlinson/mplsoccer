@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import sphinx_gallery
+from sphinx_gallery.sorting import ExplicitOrder
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
@@ -63,7 +64,14 @@ exclude_patterns = ['_build']
 # sphinx gallery
 sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
-    'gallery_dirs': ['gallery']}
+    'gallery_dirs': ['gallery'],
+    'subsection_order': ExplicitOrder(['../../examples/basics',
+                                       '../../examples/statsbomb',
+                                       '../../examples/passes',
+                                       '../../examples/heatmaps',
+                                       '../../examples/shots',
+                                       '../../examples/photos',
+                                       '../../examples/misc'])}
 
 
 # -- Options for HTML output -------------------------------------------------

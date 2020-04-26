@@ -1,13 +1,9 @@
-Gallery
-=======
+Example Gallery
+===============
 
-All of the examples can be run from `this Anaconda environment <https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/environment.yml>`_.
+This gallery contains a selection of examples of the plots mplsoccer can create.
 
---------------------------------
-Creating an Anaconda environment
---------------------------------
-
-If you use `Anaconda <https://www.anaconda.com/>`_ you can create the mplsoccer environment from the ``environment.yml`` file. Use the terminal or an Anaconda Prompt for the following steps:
+All of the examples can be run from `this Anaconda environment <https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/environment.yml>`_. To install the environment yourself use the `Anaconda <https://www.anaconda.com/>`_ Prompt for the following steps:
 
 #. Create the environment from the ``environment.yml`` file:
 
@@ -16,8 +12,3 @@ If you use `Anaconda <https://www.anaconda.com/>`_ you can create the mplsoccer 
       conda env create -f environment.yml
 
 #. Activate the new environment: ``conda activate mplsoccer``
-
---------
-Examples
---------
-
