@@ -17,6 +17,7 @@ statsbomb_warning = ('Please be responsible with Statsbomb data.'
                      'Register your details on https://www.statsbomb.com/resource-centre'
                      'and read the User Agreement carefully (on the same page).')
 
+
 def _split_location_cols(df, col, new_cols):
     """ Location is stored as a list. split into columns. """
     if col in df.columns:
@@ -85,6 +86,9 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         
         tactics_lineup_df : bool, default True
             Whether to return a 'tactics_lineup' Dataframe in the returned dictionary.
+
+        warn : bool, default True
+            Whether to warn about Statsbomb's data license agreement.
             
         Returns
         -------
@@ -228,7 +232,10 @@ def read_match(path_or_buf, warn=True):
             By file-like object, we refer to objects with a ``read()`` method,
             such as a file handler (e.g. via builtin ``open`` function)
             or ``StringIO``.
-            
+
+        warn : bool, default True
+            Whether to warn about Statsbomb's data license agreement.
+
         Returns
         -------
         pandas.DataFrame
@@ -297,7 +304,10 @@ def read_competition(path_or_buf, warn=True):
             By file-like object, we refer to objects with a ``read()`` method,
             such as a file handler (e.g. via builtin ``open`` function)
             or ``StringIO``.
-            
+
+        warn : bool, default True
+            Whether to warn about Statsbomb's data license agreement.
+
         Returns
         -------
         pandas.DataFrame
@@ -338,6 +348,9 @@ def read_lineup(path_or_buf, warn=True):
             By file-like object, we refer to objects with a ``read()`` method,
             such as a file handler (e.g. via builtin ``open`` function)
             or ``StringIO``.
+
+        warn : bool, default True
+            Whether to warn about Statsbomb's data license agreement.
             
         Returns
         -------

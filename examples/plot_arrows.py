@@ -9,7 +9,6 @@ This example shows how to plot all passes from a team in a match as arrows.
 from mplsoccer.pitch import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
-import os
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 

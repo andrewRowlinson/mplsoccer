@@ -9,8 +9,6 @@ This example shows how to plot all passes from a team in a match as lines.
 from mplsoccer.pitch import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
-from matplotlib.lines import Line2D
-import os
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
@@ -57,7 +55,7 @@ lc2, handler2 = pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y
                             color='#ba4f45', ax=ax)
 
 # Plot the legend
-ax.legend([lc1, lc2], ["completed passes","other passes"], handler_map={lc1: handler1, lc2: handler2},
+ax.legend([lc1, lc2], ["completed passes", "other passes"], handler_map={lc1: handler1, lc2: handler2},
           facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left', handlelength=4)
 
 # Set the title
