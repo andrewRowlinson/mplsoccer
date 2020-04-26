@@ -115,8 +115,14 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         
     df_dict = {}
     
-    # timestamp defaults to today's date so store as a string - feather can't store time objects
+    # read as dataframe
     df = pd.read_json(path_or_buf, encoding='utf-8')
+    
+    # timestamp defaults to today's date so store as integers in seperate columns
+    df['timestamp_minute'] = df.timestamp.dt.minute
+    df['timestamp_second'] = df.timestamp.dt.second
+    df['timestamp_millisecond'] = (df.timestamp.dt.microsecond/1000).astype(np.int64)
+    df.drop('timestamp', axis=1, inplace=True)
     
     # get match id and add to the event dataframe
     match_id = int(os.path.basename(path_or_buf)[:-5])
@@ -135,7 +141,8 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
             df = _split_dict_col(df, col)
     
     # sort by time and reset index
-    df.sort_values(['minute', 'second', 'timestamp', 'possession'], inplace=True)
+    df.sort_values(['minute', 'second', 'timestamp_minute',
+                    'timestamp_second', 'timestamp_millisecond', 'possession'], inplace=True)
     df.reset_index(inplace=True, drop=True)
     
     # split location info to x, y and (z for shot) columns and drop old columns
@@ -200,8 +207,9 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df.drop(['related_events', 'shot_freeze_frame', 'tactics_lineup'], axis=1, inplace=True)
            
     # reorder columns so some of the most used ones are first
-    cols = ['match_id', 'id', 'index', 'period', 'timestamp', 'minute',
-            'second', 'type_id', 'type_name', 'outcome_id', 'outcome_name',  'play_pattern_id', 'play_pattern_name',
+    cols = ['match_id', 'id', 'index', 'period', 'timestamp_minute', 'timestamp_second', 
+            'timestamp_millisecond', 'minute', 'second', 'type_id', 'type_name',
+            'outcome_id', 'outcome_name',  'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
             'position_name', 'duration', 'x', 'y', 'pass_end_x', 'pass_end_y', 'carry_end_x',
