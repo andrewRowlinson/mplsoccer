@@ -49,6 +49,8 @@ napoleon_use_ivar = True
 
 # generate autosummary even if no references
 autosummary_generate = True
+# order api docs by order they appear in the code
+autodoc_member_order = 'bysource'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
