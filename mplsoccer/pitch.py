@@ -1218,7 +1218,10 @@ class Pitch(object):
         lc.set_array(pitch_array)
         lc = ax.add_collection(lc)
         
-        lc_handler = HandlerLines(numpoints=n_segments)
+        if self.orientation == 'horizontal' and self.invert_y:
+            lc_handler = HandlerLines(numpoints=n_segments, invert_y=True)
+        else:
+            lc_handler = HandlerLines(numpoints=n_segments)
         
         return lc, lc_handler
 
@@ -1685,16 +1688,24 @@ class Pitch(object):
             
         return annotation_list
 
-# Amended from https://stackoverflow.com/questions/49223702/
-# adding-a-legend-to-a-matplotlib-plot-with-a-multicolored-line?rq=1
+# Amended from
+# https://stackoverflow.com/questions/49223702/adding-a-legend-to-a-matplotlib-plot-with-a-multicolored-line?rq=1
 class HandlerLines(HandlerLineCollection):
+    
+    def __init__(self, invert_y=False, marker_pad=0.3, numpoints=None, **kw):
+        HandlerLineCollection.__init__(self, marker_pad=marker_pad, numpoints=numpoints, **kw)
+        self.invert_y = invert_y
+    
     def create_artists(self, legend, artist, xdescent, ydescent,
                        width, height, fontsize, trans):
         x = np.linspace(0, width, self.get_numpoints(legend)+1)
         y = np.zeros(self.get_numpoints(legend) +1)+height/2.-ydescent
         points = np.array([x, y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        #lw = np.linspace(1, max(artist.get_linewidth()[-1],10), self.get_numpoints(legend))
-        lc = LineCollection(segments, lw=artist.get_linewidth(), cmap=artist.cmap, snap=False, transform=trans)
+        if self.invert_y:
+            cmap = artist.cmap.reversed()
+        else:
+            cmap = artist.cmap
+        lc = LineCollection(segments, lw=artist.get_linewidth(), cmap=cmap, snap=False, transform=trans)
         lc.set_array(x)
         return [lc]
