@@ -185,6 +185,10 @@ class Pitch(object):
         self.stripe_color = stripe_color
         self.goal_type = goal_type
         
+        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform', 'metricasports']
+        if self.pitch_type not in valid_pitch:
+            raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
+        
         # set padding  
         if self.pad_left is None:
             if pitch_type != 'metricasports':
@@ -352,10 +356,6 @@ class Pitch(object):
         if not isinstance(self.tight_layout, bool):
             raise TypeError("Invalid argument: tight_layout should be bool (True or False).")
 
-        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform', 'metricasports']
-        if self.pitch_type not in valid_pitch:
-            raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
-
         if (self.axis is False) and self.label:
             warnings.warn("Labels will not be shown unless axis=True")
 
@@ -395,7 +395,15 @@ class Pitch(object):
                 raise ValueError("pad_top/pad_bottom too negative for pitch length")
             if self.view == 'half':
                 if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.length/2:
-                    raise ValueError("pad_top/pad_bottom too negative for pitch length")   
+                    raise ValueError("pad_top/pad_bottom too negative for pitch length")
+                    
+        self.goal_right = np.array([[self.right, self.center_width - self.goal_width/2],
+                                    [self.right, self.center_width + self.goal_width/2]])
+        
+        self.goal_left = np.array([[self.left, self.center_width - self.goal_width/2],
+                                   [self.left, self.center_width + self.goal_width/2]])
+        
+        self.ax_aspect = abs(self.extent[0] - self.extent[1])/abs(self.extent[2]-self.extent[3])*self.aspect
 
     def _setup_subplots(self):
 
