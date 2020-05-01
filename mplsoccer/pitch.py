@@ -969,7 +969,7 @@ class Pitch(object):
             
         Returns
         -------
-        paths : matplotlib.collections.PathCollection
+        paths : matplotlib.collections.PathCollection or a tuple of (paths, paths) if marker='football'
         
         """
         if ax is None:
@@ -992,17 +992,12 @@ class Pitch(object):
             pentcolor = kwargs.pop('edgecolors', 'black')
             x = np.ma.ravel(x)
             y = np.ma.ravel(y)
-            n = len(x)
-            x = np.repeat(x, 2).copy()
-            y = np.repeat(y, 2).copy()
-            paths = np.tile([football_hexagon_marker, football_pentagon_marker], n)
-            c = np.tile([hexcolor, pentcolor], n)
-            # to make the football the same size as the circle marker we need to expand it
-            # the markers are a different shape and this is the easiest way to make them similar
-            expansion_factor = 0.249
-            s = kwargs.pop('s', 400)
-            s = s * expansion_factor
-        
+            if 'label' in kwargs.keys():
+                warnings.warn(("The football marker is implemented as two seperate scatter markers."
+                               "The label is ignored as otherwise it would appear as two markers in the legend."))
+                del kwargs['label']
+            s = kwargs.pop('s', 500)
+
         if rotation_degrees is not None:
             x = np.ma.ravel(x)
             y = np.ma.ravel(y)
@@ -1034,9 +1029,11 @@ class Pitch(object):
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation == 'horizontal':
             if plot_football:
-                sc = ax.scatter(x, y, c=c, edgecolors=pentcolor, s=s,
-                                linewidths=linewidths, zorder=zorder, **kwargs)
-                sc.set_paths(paths)
+                sc_hex = ax.scatter(x, y, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
+                                     marker=football_hexagon_marker, s=s, zorder=zorder, **kwargs)
+                sc_pent = ax.scatter(x, y, edgecolors=pentcolor,c=pentcolor, linewidths=linewidths,
+                                     marker=football_pentagon_marker, s=s, zorder=zorder, **kwargs)           
+                sc = (sc_hex, sc_pent)
             elif rotation_degrees is not None:
                 sc = _mscatter(x, y, zorder=zorder, markers=markers, ax=ax, **kwargs)
             else:
@@ -1044,9 +1041,11 @@ class Pitch(object):
 
         elif self.orientation == 'vertical':
             if plot_football:
-                sc = ax.scatter(y, x, c=c, edgecolors=pentcolor, s=s,
-                                linewidths=linewidths, zorder=zorder, **kwargs)
-                sc.set_paths(paths)
+                sc_hex = ax.scatter(y, x, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
+                                     marker=football_hexagon_marker, s=s, zorder=zorder, **kwargs)
+                sc_pent = ax.scatter(y, x, edgecolors=pentcolor, c=pentcolor, linewidths=linewidths,
+                                     marker=football_pentagon_marker, s=s, zorder=zorder, **kwargs)
+                sc = (sc_hex, sc_pent)
             elif rotation_degrees is not None:
                 sc = _mscatter(y, x, zorder=zorder, markers=markers, ax=ax, **kwargs)
             else:
