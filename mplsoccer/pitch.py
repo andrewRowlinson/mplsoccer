@@ -1745,6 +1745,6 @@ class HandlerFootball(HandlerPathCollection):
     
     def create_artists(self, legend, artist, xdescent, ydescent, width, height, fontsize, trans):
         football = PathCollection([football_hexagon_marker, football_pentagon_marker],
-                                  sizes=self.sizes, edgecolors=self.edgecolors,
+                                  sizes=[size * legend.markerscale for size in self.sizes], edgecolors=self.edgecolors,
                                   linewidths=self.linewidths, facecolors=self.facecolors)
         return [football]   
