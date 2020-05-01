@@ -14,6 +14,7 @@ from matplotlib.legend_handler import HandlerLineCollection
 from matplotlib.cm import get_cmap
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgb
 from matplotlib import rcParams
+from matplotlib.legend import Legend
 from scipy.stats import binned_statistic_2d
 from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
 from collections import Sequence, namedtuple
@@ -1130,8 +1131,6 @@ class Pitch(object):
         Returns
         -------
         LineCollection : matplotlib.collections.LineCollection
-        HandlerLineCollection : matplotlib.legend_handler.HandlerLineCollection
-
         """
 
         if ax is None:
@@ -1229,8 +1228,10 @@ class Pitch(object):
             lc_handler = HandlerLines(numpoints=n_segments, invert_y=True)
         else:
             lc_handler = HandlerLines(numpoints=n_segments)
+            
+        Legend.update_default_handler_map({lc: lc_handler})
         
-        return lc, lc_handler
+        return lc
 
     def quiver(self, xstart, ystart, xend, yend, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
