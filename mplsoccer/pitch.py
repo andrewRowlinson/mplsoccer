@@ -50,6 +50,8 @@ class Pitch(object):
         Set the zorder for the pitch lines (a matplotlib artist). Artists with lower zorder values are drawn first.
     linewidth : float, default 2
         The line width for the pitch markings.
+    spot_scale : float, default 0.002
+        The size of the penalty spots (pitch_length * spot_scale) for the pitch markings.
     stripe : bool, default False
         Whether to show pitch stripes.    
     stripe_color : any Matplotlib color, default '#c2d59d'
@@ -156,7 +158,7 @@ class Pitch(object):
                  pitch_color='#aabb97', line_color='white', line_zorder=1, linewidth=2, stripe=False,
                  stripe_color='#c2d59d', pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
-                 tight_layout=True, constrained_layout=False):
+                 tight_layout=True, constrained_layout=False, spot_scale=0.002):
 
         # set figure and axes attributes
         self.axes = None
@@ -186,6 +188,7 @@ class Pitch(object):
         self.stripe = stripe
         self.stripe_color = stripe_color
         self.goal_type = goal_type
+        self.spot_scale = spot_scale
         
         valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform', 'metricasports']
         if self.pitch_type not in valid_pitch:
@@ -647,7 +650,7 @@ class Pitch(object):
         self._boxes(self.penalty_area_from_side, self.penalty_area_length, self.penalty_area_width, ax)
 
     def _draw_circles_and_arcs(self, ax):
-        size_spot = 0.005 * self.length
+        size_spot = self.spot_scale * self.length
         if self.orientation == 'vertical':
             xy = (self.center_width, self.center_length)
             center = (self.center_width, self.center_length)
@@ -689,8 +692,9 @@ class Pitch(object):
     def _draw_scaled_circles_and_arcs(self, ax):
         r1 = self.circle_size * self.width / self.pitch_width
         r2 = self.circle_size * self.length / self.pitch_length
-        scaled_spot1 = self.length / (2 * self.pitch_width)
-        scaled_spot2 = self.length / (2 * self.pitch_length)
+        size_spot = self.spot_scale * self.pitch_length
+        scaled_spot1 = (size_spot) * self.width / self.pitch_width
+        scaled_spot2 = (size_spot) * self.length / self.pitch_length
         xy = (self.center_width, self.center_length)
         intersection = self.center_width - (
                     r1 * r2 * (r2 ** 2 - (self.penalty_area_length - self.left_penalty) ** 2) ** 0.5) / (r2 ** 2)
