@@ -51,7 +51,7 @@ class Pitch(object):
     linewidth : float, default 2
         The line width for the pitch markings.
     spot_scale : float, default 0.002
-        The size of the penalty spots (pitch_length * spot_scale) for the pitch markings.
+        The size of the penalty and center spots relative to the pitch length.
     stripe : bool, default False
         Whether to show pitch stripes.    
     stripe_color : any Matplotlib color, default '#c2d59d'

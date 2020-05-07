@@ -3,6 +3,7 @@ Version 0.0.4
 
 ### Added
 1) Docs and gallery added.
+2) Added option to change penalty and center spot size.
 
 ### Changed
 1) utils module renamed scatterutils
@@ -11,6 +12,7 @@ Version 0.0.4
 4) Pitch.lines() not takes cmap as an argument. You can either select cmap or color, but not both.
 5) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
 6) Pitch defaults changed to tight_layout=True and constrained_layout=False.
+7) Default penalty and center spot size smaller.
 
 Version 0.0.3
 -----------
