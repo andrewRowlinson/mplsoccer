@@ -11,4 +11,9 @@ All of the examples can be run from `this Anaconda environment <https://github.c
 
       conda env create -f environment.yml
 
-#. Activate the new environment: ``conda activate mplsoccer``
+#. Activate the new environment:
+
+   .. code ::
+
+      conda activate mplsoccer
+      
