@@ -4,6 +4,7 @@ Version 0.0.4
 ### Added
 1) Docs and gallery added.
 2) Added option to change penalty and center spot size.
+3) Added legend handlers for plotting footballs in Pitch's scatter method, arrows in the quiver method, and lines in the lines method.
 
 ### Changed
 1) utils module renamed scatterutils
