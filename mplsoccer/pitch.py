@@ -686,9 +686,10 @@ class Pitch(object):
                                  theta1=arc2_theta1, theta2=arc2_theta2,
                                  linewidth=self.linewidth, color=self.line_color, fill=False, zorder=self.line_zorder)
         ax.add_patch(circle)
-        ax.add_patch(center_spot)
-        ax.add_patch(penalty1_spot)
-        ax.add_patch(penalty2_spot)
+        if self.spot_scale>0:
+            ax.add_patch(center_spot)
+            ax.add_patch(penalty1_spot)
+            ax.add_patch(penalty2_spot)
         ax.add_patch(arc1_patch)
         ax.add_patch(arc2_patch)
 
@@ -774,9 +775,10 @@ class Pitch(object):
                                  theta1=arc2_left, theta2=arc2_right,
                                  linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
 
-        ax.add_patch(penalty_spot1)
-        ax.add_patch(penalty_spot2)
-        ax.add_patch(kick_off_spot)
+        if self.spot_scale>0:
+            ax.add_patch(penalty_spot1)
+            ax.add_patch(penalty_spot2)
+            ax.add_patch(kick_off_spot)
         ax.add_patch(circle)
         ax.add_patch(arc1_patch)
         ax.add_patch(arc2_patch)
