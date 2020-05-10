@@ -3,17 +3,19 @@ Version 0.0.4
 
 ### Added
 1) Docs and gallery added.
-2) Added option to change penalty and center spot size.
-3) Added legend handlers for plotting footballs in Pitch's scatter method, arrows in the quiver method, and lines in the lines method.
+2) Added option to change the penalty and center spot size via spot_scale.
+3) Added legend handlers for plotting footballs in the scatter method, arrows in the arrows method, and lines in the lines method of the Pitch class.
 
 ### Changed
 1) utils module renamed scatterutils
-2) default color of Pitch.lines() changed to rcparams['lines.color']
-3) Pitch.lines() now takes alpha_start and alpha_end arguments. The line linearly increases in opacity from alpha_start to alpha_end if transparent=True. Previously these were hard coded as 0.1 and 0.5. The new defaults are 0.01 and 1.
-4) Pitch.lines() not takes cmap as an argument. You can either select cmap or color, but not both.
-5) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
-6) Pitch defaults changed to tight_layout=True and constrained_layout=False.
-7) Default penalty and center spot size smaller.
+2) Pitch.quiver() renamed Pitch.arrows()
+3) Default color of Pitch.lines() changed to rcparams['lines.color']
+4) Default hexbin cmap changed to viridis
+5) Pitch.lines() now takes alpha_start and alpha_end arguments. The line linearly increases in opacity from alpha_start to alpha_end if transparent=True. Previously these were hard coded as 0.1 and 0.5. The new defaults are 0.01 and 1.
+6) Pitch.lines() not takes cmap as an argument. You can either select cmap or color, but not both.
+7) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
+8) Pitch defaults changed to tight_layout=True and constrained_layout=False.
+9) Default penalty and center spot size now smaller and can be adjusted.
 
 Version 0.0.3
 -----------
