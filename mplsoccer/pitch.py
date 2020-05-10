@@ -1153,22 +1153,32 @@ class Pitch(object):
         if ax is None:
             raise TypeError(
                 "lines() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            
         if not isinstance(comet, bool):
             raise TypeError("Invalid argument: comet should be bool (True or False).")
+            
         if not isinstance(transparent, bool):
             raise TypeError("Invalid argument: transparent should be bool (True or False).")
+            
         if alpha_start < 0 or alpha_start > 1:
             raise TypeError("alpha_start values should be within 0-1 range")
+            
         if alpha_end < 0 or alpha_end > 1:
             raise TypeError("alpha_end values should be within 0-1 range")  
+            
         if 'colors' in kwargs.keys():
             warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
+            
         if alpha_start > alpha_end:
             warnings.warn("Alpha start > alpha end. The line will increase in transparency nearer to the end")
+            
         if color is not None and cmap is not None:
             raise ValueError("Only use one of color or cmap arguments not both.")
+            
         if 'lw' in kwargs.keys() and 'linewidth' in kwargs.keys():
-            raise TypeError("lines got multiple values for 'linewidth' argument (linewidth and lw).")           
+            raise TypeError("lines got multiple values for 'linewidth' argument (linewidth and lw).")
+            
+        # set linewidth
         if 'lw' in kwargs.keys():
             lw = kwargs.pop('lw', 5)
         elif 'linewidth' in kwargs.keys():
@@ -1176,6 +1186,7 @@ class Pitch(object):
         else:
             lw = 5
         
+        # to arrays
         xstart = np.ravel(xstart)
         ystart = np.ravel(ystart)
         xend = np.ravel(xend)
@@ -1184,20 +1195,28 @@ class Pitch(object):
         
         if (comet or transparent) and (lw.size>1):
             raise NotImplementedError("Multiple linewidths with a comet or transparent line is not implemented.")
-        if lw.size==1:
-            lw = lw[0]
-        if xstart.size != ystart.size:
-            raise ValueError("xstart and ystart must be the same size")
-        if xstart.size != xend.size:
-            raise ValueError("xstart and xend must be the same size")
-        if ystart.size != yend.size:
-            raise ValueError("ystart and yend must be the same size")        
-        if (lw.size>1) and (lw.size!=xstart.size):
-            raise ValueError("lw and xstart must be the same size")
             
         # set color
         if color is None:
             color = rcParams['lines.color']
+            
+        if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0]>1):
+            raise NotImplementedError("Multiple colors with a comet or transparent line is not implemented.")          
+            
+        if lw.size==1:
+            lw = lw[0]
+            
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+            
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+            
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")     
+            
+        if (lw.size>1) and (lw.size!=xstart.size):
+            raise ValueError("lw and xstart must be the same size")
 
         # set pitch array for line segments
         pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
@@ -1215,7 +1234,7 @@ class Pitch(object):
         if comet:
             lw = np.linspace(1, lw, n_segments)
         
-        # set color map
+        # set color map or color for transparent lines
         if transparent:
             handler_cmap=True
             if cmap is None:
@@ -1238,6 +1257,8 @@ class Pitch(object):
                 cmap[:, 3] = alpha_channel
                 
                 cmap = ListedColormap(cmap)
+        
+        # set color map or color for solid lines
         else:
             if cmap is not None:
                 handler_cmap = True
@@ -1252,24 +1273,25 @@ class Pitch(object):
                 if (color.shape[0]>1) and (color.shape[0] != xstart.size):
                     raise ValueError("xstart and color must be the same size")
                               
-        # add line collection
+        # add line collection using cmap
         if cmap is not None:
             lc = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, **kwargs)
             lc.set_array(pitch_array)
+        # add line collection using color (the set_array is not needed for colors)
         else:
             lc = LineCollection(segments, color=color, linewidth=lw, snap=False, **kwargs)
+            
         lc = ax.add_collection(lc)
         
+        # setup legend handler
         if self.orientation == 'horizontal' and self.invert_y:
             handler_invert_y = True
         else:
             handler_invert_y = False
-        
         if comet:
             handler_first_lw = False
         else:
             handler_first_lw = True
-            
         lc_handler = HandlerLines(numpoints=n_segments, invert_y=handler_invert_y, first_lw=handler_first_lw,
                                   use_cmap=handler_cmap)           
         Legend.update_default_handler_map({lc: lc_handler})
