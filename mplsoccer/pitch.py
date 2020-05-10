@@ -46,8 +46,10 @@ class Pitch(object):
         The background color for each Matplotlib axis.
     line_color : any Matplotlib color, default 'white'
         The line color for the pitch markings.
-    line_zorder : float, default 1
+    line_zorder : float, default 0.9
         Set the zorder for the pitch lines (a matplotlib artist). Artists with lower zorder values are drawn first.
+    background_zorder : float, default 0.8
+        Set the zorder for the pitch background (a matplotlib artist). Artists with lower zorder values are drawn first.
     linewidth : float, default 2
         The line width for the pitch markings.
     spot_scale : float, default 0.002
@@ -155,7 +157,7 @@ class Pitch(object):
                                 'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
       
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
-                 pitch_color='#aabb97', line_color='white', line_zorder=1, linewidth=2, stripe=False,
+                 pitch_color='#aabb97', line_color='white', linewidth=2, line_zorder=0.9, background_zorder=0.8, stripe=False,
                  stripe_color='#c2d59d', pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
                  tight_layout=True, constrained_layout=False, spot_scale=0.002):
@@ -174,6 +176,7 @@ class Pitch(object):
         # set attributes
         self.line_color = line_color
         self.line_zorder = line_zorder
+        self.background_zorder = background_zorder
         self.pitch_color = pitch_color
         self.pitch_length = pitch_length
         self.pitch_width = pitch_width
@@ -449,7 +452,7 @@ class Pitch(object):
              
     def _set_background(self, ax):
         if self.pitch_color != 'grass':
-            ax.axhspan(self.extent[2], self.extent[3], 0, 1, facecolor=self.pitch_color)
+            ax.axhspan(self.extent[2], self.extent[3], 0, 1, facecolor=self.pitch_color, zorder=self.background_zorder)
             
         if (self.stripe is False) & (self.pitch_color == 'grass'):
             pitch_color = np.random.normal(size=(1000, 1000))
@@ -548,14 +551,14 @@ class Pitch(object):
                     end = round(start + stripe3_length, 4)
                 if (stripe % 2 == 1) & (self.orientation == 'vertical'):
                     if self.pitch_color != 'grass':
-                        ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
+                        ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color, zorder=self.background_zorder)
                     else:
                         pitch_color[start:end, pitch_start:pitch_end] = \
                             pitch_color[start:end, pitch_start:pitch_end] + 2
                         
                 elif (stripe % 2 == 1) & (self.orientation == 'horizontal'):
                     if self.pitch_color != 'grass':
-                        ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color)
+                        ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color, zorder=self.background_zorder)
                     else:
                         pitch_color[pitch_start:pitch_end, start:end] = \
                             pitch_color[pitch_start:pitch_end:, start:end] + 2
@@ -882,16 +885,13 @@ class Pitch(object):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
 
-        # rise kdeplot above background/ stripes (the axhspan/axvspan have the same zorder as the kdeplot)
-        zorder = kwargs.pop('zorder', 2)
-
         # plot kde plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
             clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
-            kde = sns.kdeplot(x, y, ax=ax, clip=clip, zorder=zorder, **kwargs)
+            kde = sns.kdeplot(x, y, ax=ax, clip=clip, **kwargs)
         elif self.orientation == 'vertical':
             clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
-            kde = sns.kdeplot(y, x, ax=ax, clip=clip, zorder=zorder, **kwargs)
+            kde = sns.kdeplot(y, x, ax=ax, clip=clip, **kwargs)
             
         return kde
 
@@ -932,8 +932,6 @@ class Pitch(object):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
 
-        # rise hexbin above background/ stripes (the axhspan/axvspan have the same zorder as the hexbin)
-        zorder = kwargs.pop('zorder', 2)
         mincnt = kwargs.pop('mincnt', 1)
         cmap = kwargs.pop('cmap', 'rainbow')
         gridsize = kwargs.pop('gridsize', 20)
@@ -941,11 +939,11 @@ class Pitch(object):
         # plot hexbin plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
             extent = kwargs.pop('extent', (self.left, self.right, self.bottom, self.top))
-            hexb = ax.hexbin(x, y, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, **kwargs)
+            hexb = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, **kwargs)
 
         elif self.orientation == 'vertical':
             extent = kwargs.pop('extent', (self.top, self.bottom, self.left, self.right))
-            hexb = ax.hexbin(y, x, zorder=zorder, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, **kwargs)
+            hexb = ax.hexbin(y, x, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, **kwargs)
             
         return hexb
         
@@ -983,9 +981,6 @@ class Pitch(object):
         
         if marker is None:
             marker = rcParams['scatter.marker']
-
-        # rise scatter above background/ stripes (the axhspan/axvspan have the same zorder as the scatter)
-        zorder = kwargs.pop('zorder', 2)
 
         # if using the football marker set the colors and lines, delete from kwargs so not used twice
         plot_football = False
@@ -1032,33 +1027,33 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             if plot_football:
                 sc_hex = ax.scatter(x, y, edgecolors=pentcolor, facecolors=hexcolor, linewidths=linewidths,
-                                     marker=football_hexagon_marker, s=s, zorder=zorder, **kwargs)
+                                     marker=football_hexagon_marker, s=s, **kwargs)
                 if 'label' in kwargs.keys():
                     Legend.update_default_handler_map({sc_hex: HandlerFootball()})
                     del kwargs['label']
                 sc_pent = ax.scatter(x, y, edgecolors=pentcolor,c=pentcolor, linewidths=linewidths,
-                                     marker=football_pentagon_marker, s=s, zorder=zorder, **kwargs)
+                                     marker=football_pentagon_marker, s=s, **kwargs)
                        
                 sc = (sc_hex, sc_pent)
             elif rotation_degrees is not None:
-                sc = _mscatter(x, y, zorder=zorder, markers=markers, ax=ax, **kwargs)
+                sc = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
             else:
-                sc = ax.scatter(x, y, zorder=zorder, **kwargs)
+                sc = ax.scatter(x, y, **kwargs)
 
         elif self.orientation == 'vertical':
             if plot_football:
                 sc_hex = ax.scatter(y, x, edgecolors=pentcolor, facecolors=hexcolor, linewidths=linewidths,
-                                     marker=football_hexagon_marker, s=s, zorder=zorder, **kwargs)
+                                     marker=football_hexagon_marker, s=s, **kwargs)
                 if 'label' in kwargs.keys():
                     Legend.update_default_handler_map({sc_hex: HandlerFootball()})
                     del kwargs['label']
                 sc_pent = ax.scatter(y, x, edgecolors=pentcolor, c=pentcolor, linewidths=linewidths,
-                                     marker=football_pentagon_marker, s=s, zorder=zorder, **kwargs)
+                                     marker=football_pentagon_marker, s=s, **kwargs)
                 sc = (sc_hex, sc_pent)
             elif rotation_degrees is not None:
-                sc = _mscatter(y, x, zorder=zorder, markers=markers, ax=ax, **kwargs)
+                sc = _mscatter(y, x, markers=markers, ax=ax, **kwargs)
             else:
-                sc = ax.scatter(y, x, zorder=zorder, **kwargs)
+                sc = ax.scatter(y, x, **kwargs)
 
         return sc
 
@@ -1178,6 +1173,8 @@ class Pitch(object):
         
         if (comet or transparent) and (lw.size>1):
             raise NotImplementedError("Multiple linewidths with a comet or transparent line is not implemented.")
+        if lw.size==1:
+            lw = lw[0]
         if xstart.size != ystart.size:
             raise ValueError("xstart and ystart must be the same size")
         if xstart.size != xend.size:
@@ -1313,10 +1310,7 @@ class Pitch(object):
         if ax is None:
             raise TypeError("quiver() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
-        # rise quiver above background/ stripes (the axhspan/axvspan have the same zorder as the quiver)
-        zorder = kwargs.pop('zorder', 2)
-
-        # set so plots in data units
+            # set so plots in data units
         units = kwargs.pop('units', 'dots')
         scale_units = kwargs.pop('scale_units', 'xy')
         angles = kwargs.pop('angles', 'xy')
@@ -1343,12 +1337,12 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             q = ax.quiver(xstart, ystart, u, v,
                           units=units, scale_units=scale_units, angles=angles, scale=scale,
-                          zorder=zorder, width=width, **kwargs)
+                          width=width, **kwargs)
 
         elif self.orientation == 'vertical':
             q = ax.quiver(ystart, xstart, v, u,
                           units=units, scale_units=scale_units, angles=angles, scale=scale,
-                          zorder=zorder, width=width, **kwargs)
+                          width=width, **kwargs)
             
         quiver_handler = HandlerQuiver()
         Legend.update_default_handler_map({q: quiver_handler})
@@ -1378,7 +1372,6 @@ class Pitch(object):
         y = np.ravel(y)
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
-        zorder = kwargs.pop('zorder', 2)
         if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
             if self.orientation == 'horizontal':
                 clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
@@ -1389,16 +1382,16 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
                 clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
-                joint_plot = sns.jointplot(x, y, zorder=zorder, clip=clip, **kwargs)
+                joint_plot = sns.jointplot(x, y, clip=clip, **kwargs)
             else:
-                joint_plot = sns.jointplot(x, y, zorder=zorder, **kwargs)
+                joint_plot = sns.jointplot(x, y, **kwargs)
             
         elif self.orientation == 'vertical':
             if ('kind' in kwargs) and (kwargs['kind'] == 'kde'):
                 clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
-                joint_plot = sns.jointplot(y, x, zorder=zorder, clip=clip, **kwargs)
+                joint_plot = sns.jointplot(y, x, clip=clip, **kwargs)
             else:
-                joint_plot = sns.jointplot(y, x, zorder=zorder, **kwargs)
+                joint_plot = sns.jointplot(y, x, **kwargs)
                 
         joint_plot_ax = joint_plot.ax_joint
         self.draw(ax=joint_plot_ax)
@@ -1538,16 +1531,14 @@ class Pitch(object):
         """
         if ax is None:
             raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-            
-        zorder = kwargs.pop('zorder', 2)
                
         if self.orientation == 'horizontal':
-            mesh = ax.pcolormesh(bin_statistic.x_grid.T, bin_statistic.y_grid.T,
-                                 bin_statistic.statistic, zorder=zorder, **kwargs)
+            mesh = ax.pcolormesh(bin_statistic['x_grid'].T, bin_statistic['y_grid'].T,
+                                 bin_statistic['statistic'], **kwargs)
             
         elif self.orientation == 'vertical':
-            mesh = ax.pcolormesh(bin_statistic.y_grid.T, bin_statistic.x_grid.T, 
-                                 bin_statistic.statistic, zorder=zorder, **kwargs)
+            mesh = ax.pcolormesh(bin_statistic['y_grid'].T, bin_statistic['x_grid'].T, 
+                                 bin_statistic['statistic'], **kwargs)
             
             return mesh
             
@@ -1609,10 +1600,14 @@ class Pitch(object):
             # top and bottom of pitch - we create a grid with three rows and then ignore the middle row when slicing
             xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
             yedge = np.array([y1, y2, y5, y6])
-            stat1, x_grid1, y_grid1, cx1, cy1 = self.bin_statistic(x, y, values, statistic=statistic,
-                                                                   bins=(xedge, yedge))
+            bin_statistic1 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat1 = bin_statistic1['statistic']
+            x_grid1 = bin_statistic1['x_grid']
+            y_grid1 = bin_statistic1['y_grid']
+            cx1 = bin_statistic1['cx']
+            cy1 = bin_statistic1['cy']
 
-            # slicing second row
+            # slicing second row            
             stat2 = stat1[:, 2].reshape(-1, 1).copy()
             x_grid2 = x_grid1[2:, :].copy()
             y_grid2 = y_grid1[2:, :].copy()
@@ -1628,8 +1623,12 @@ class Pitch(object):
             # middle of pitch
             xedge = np.array([x1, x2, x4, x6, x7])
             yedge = np.array([y1, y2, y3, y4, y5, y6])
-            stat3, x_grid3, y_grid3, cx3, cy3 = self.bin_statistic(x, y, values, statistic=statistic,
-                                                                   bins=(xedge, yedge))
+            bin_statistic3 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat3 = bin_statistic3['statistic']
+            x_grid3 = bin_statistic3['x_grid']
+            y_grid3 = bin_statistic3['y_grid']
+            cx3 = bin_statistic3['cx']
+            cy3 = bin_statistic3['cy']
             stat3 = stat3[1:-1, 1:-1]
             x_grid3 = x_grid3[1:-1:, 1:-1].copy()
             y_grid3 = y_grid3[1:-1, 1:-1].copy()
@@ -1639,8 +1638,12 @@ class Pitch(object):
             # penalty area 1
             xedge = np.array([x1, x2, x3]).astype(np.float64)
             yedge = np.array([y2, y5, y6]).astype(np.float64)
-            stat4, x_grid4, y_grid4, cx4, cy4 = self.bin_statistic(x, y, values, statistic=statistic,
-                                                                   bins=(xedge, yedge))
+            bin_statistic4 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat4 = bin_statistic4['statistic']
+            x_grid4 = bin_statistic4['x_grid']
+            y_grid4 = bin_statistic4['y_grid']
+            cx4 = bin_statistic4['cx']
+            cy4 = bin_statistic4['cy']
             stat4 = stat4[:-1, :-1]
             x_grid4 = x_grid4[:-1, :-1].copy()
             y_grid4 = y_grid4[:-1, :-1].copy()
@@ -1650,8 +1653,12 @@ class Pitch(object):
             # penalty area 2
             xedge = np.array([x6, x7]).astype(np.float64)
             yedge = np.array([y2, y5, y6]).astype(np.float64)
-            stat5, x_grid5, y_grid5, cx5, cy5 = self.bin_statistic(x, y, values, statistic=statistic,
-                                                                   bins=(xedge, yedge))
+            bin_statistic5 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat5 = bin_statistic5['statistic']
+            x_grid5 = bin_statistic5['x_grid']
+            y_grid5 = bin_statistic5['y_grid']
+            cx5 = bin_statistic5['cx']
+            cy5 = bin_statistic5['cy']
             stat5 = stat5[:, :-1]
             x_grid5 = x_grid5[:-1, :].copy()
             y_grid5 = y_grid5[:-1, :].copy()
@@ -1670,16 +1677,14 @@ class Pitch(object):
         elif positional == 'horizontal':
             xedge = np.array([x1, x7])
             yedge = np.array([y1, y2, y3, y4, y5, y6])
-            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic=statistic,
-                                                                   bins=(xedge, yedge))
-            bin_statistic = [_BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
+            bin_horizontal = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            bin_statistic = [bin_horizontal]
             
         elif positional == 'vertical':
             xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
             yedge = np.array([y1, y6])
-            statistic, x_grid, y_grid, cx, cy = self.bin_statistic(x, y, values, statistic=statistic,
-                                                                   bins=(xedge, yedge))
-            bin_statistic = [_BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)]
+            bin_vertical = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            bin_statistic = [bin_vertical]
         else:
             raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
                   
@@ -1707,8 +1712,8 @@ class Pitch(object):
         if ax is None:
             raise TypeError("label_heatmap() missing 1 required argument:"
                             " ax. A Matplotlib axis is required for plotting.")
-        vmax = kwargs.pop('vmax', np.array([stat.statistic.max() for stat in bin_statistic]).max())
-        vmin = kwargs.pop('vmin', np.array([stat.statistic.min() for stat in bin_statistic]).min())
+        vmax = kwargs.pop('vmax', np.array([stat['statistic'].max() for stat in bin_statistic]).max())
+        vmin = kwargs.pop('vmin', np.array([stat['statistic'].min() for stat in bin_statistic]).min())
         
         mesh_list = []
         for bin_stat in bin_statistic:
@@ -1744,9 +1749,9 @@ class Pitch(object):
     
         annotation_list = []
         for stat in bin_statistic:
-            text = stat.statistic.T.ravel()
-            cx = np.ravel(stat.cx)
-            cy = np.ravel(stat.cy)
+            text = stat['statistic'].T.ravel()
+            cx = np.ravel(stat['cx'])
+            cy = np.ravel(stat['cy'])
             for i in range(len(text)):
                 annotation = self.annotate(text[i], (cx[i], cy[i]), ax=ax, **kwargs)
                 annotation_list.append(annotation)
