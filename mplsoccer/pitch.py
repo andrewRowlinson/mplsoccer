@@ -899,7 +899,7 @@ class Pitch(object):
 
     def hexbin(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
-        which automatically flips the x and y coordinates if the pitch is vertical.
+        which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
 
         Parameters
         ----------
@@ -908,6 +908,14 @@ class Pitch(object):
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+            
+        mincnt : int > 0, default: 1
+            If not None, only display cells with more than mincnt number of points in the cell.
+
+        gridsize : int or (int, int), default: 20
+            If a single int, the number of hexagons in the x-direction. The number of hexagons in the y-direction
+            is chosen such that the hexagons are approximately regular.
+            Alternatively, if a tuple (nx, ny), the number of hexagons in the x-direction and the y-direction.
             
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.hexbin.
             
@@ -935,17 +943,16 @@ class Pitch(object):
             raise ValueError("x and y must be the same size")
 
         mincnt = kwargs.pop('mincnt', 1)
-        cmap = kwargs.pop('cmap', 'viridis')
         gridsize = kwargs.pop('gridsize', 20)
 
         # plot hexbin plot. reverse x and y if vertical
         if self.orientation == 'horizontal':
             extent = kwargs.pop('extent', (self.left, self.right, self.bottom, self.top))
-            hexb = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, **kwargs)
+            hexb = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
 
         elif self.orientation == 'vertical':
             extent = kwargs.pop('extent', (self.top, self.bottom, self.left, self.right))
-            hexb = ax.hexbin(y, x, mincnt=mincnt, gridsize=gridsize, extent=extent, cmap=cmap, **kwargs)
+            hexb = ax.hexbin(y, x, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
             
         return hexb
         
@@ -967,6 +974,8 @@ class Pitch(object):
             The marker style. marker can be either an instance of the class or the text shorthand for a
             particular marker. Defaults to None, in which case it takes the value of rcParams["scatter.marker"]
             (default: 'o') = 'o'.
+            If marker='football' plots a football shape with the pentagons the color of the edgecolors
+            and hexagons the color of the 'c' argument.
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
