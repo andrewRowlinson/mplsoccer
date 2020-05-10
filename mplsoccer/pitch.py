@@ -935,7 +935,7 @@ class Pitch(object):
             raise ValueError("x and y must be the same size")
 
         mincnt = kwargs.pop('mincnt', 1)
-        cmap = kwargs.pop('cmap', 'rainbow')
+        cmap = kwargs.pop('cmap', 'viridis')
         gridsize = kwargs.pop('gridsize', 20)
 
         # plot hexbin plot. reverse x and y if vertical
@@ -1260,9 +1260,9 @@ class Pitch(object):
         
         return lc
 
-    def quiver(self, xstart, ystart, xend, yend, ax=None, **kwargs):
+    def arrows(self, xstart, ystart, xend, yend, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
-        Quiver uses locations and directions usually. Here these are instead calculated automatically
+        Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
         from the start and end points of the arrow.
         The function also automatically flips the x and y coordinates if the pitch is vertical.
         
