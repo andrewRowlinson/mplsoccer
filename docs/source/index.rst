@@ -33,7 +33,7 @@ Plot a pitch
    :caption: Contents:
    
    installation
-   basics
+   gallery/pitch_setup/plot_pitches
    gallery/index
    api
      

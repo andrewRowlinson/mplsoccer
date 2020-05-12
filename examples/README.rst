@@ -1,5 +1,5 @@
-Example Gallery
-===============
+Examples
+========
 
 This gallery contains a selection of examples of the plots mplsoccer can create.
 
