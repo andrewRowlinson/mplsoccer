@@ -33,7 +33,7 @@ class Pitch(object):
     figsize : tuple of float, default Matplotlib figure size
         The figure size in inches by default.
     layout : tuple of int, default (1,1)
-        Tuple of (rows, columns) for the layout of the plot.
+        Tuple of (columns, rows) for the layout of the plot.
     pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats',
@@ -42,8 +42,9 @@ class Pitch(object):
         The pitch orientation: 'horizontal' or 'vertical'.
     view : str, default 'full'
         The pitch view: 'full' or 'half'.
-    pitch_color : any Matplotlib color, default 'None'
-        The background color for each Matplotlib axis.
+    pitch_color : any Matplotlib color, default None
+        The background color for each Matplotlib axis. If None, defaults to rcParams["axes.facecolor"].
+        To remove the background set to "None" or 'None'.
     line_color : any Matplotlib color, default None
         The line color for the pitch markings. If None, defaults to rcParams["grid.color"].       
     line_zorder : float, default 0.9
@@ -157,7 +158,7 @@ class Pitch(object):
                                 'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
       
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
-                 pitch_color='None', line_color=None, linewidth=2, line_zorder=0.9, background_zorder=0.8, stripe=False,
+                 pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9, background_zorder=0.8, stripe=False,
                  stripe_color='#c2d59d', pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
                  tight_layout=True, constrained_layout=False, spot_scale=0.002):
@@ -180,6 +181,8 @@ class Pitch(object):
         self.line_zorder = line_zorder
         self.background_zorder = background_zorder
         self.pitch_color = pitch_color
+        if self.pitch_color is None:
+            self.pitch_color = rcParams['axes.facecolor']
         self.pitch_length = pitch_length
         self.pitch_width = pitch_width
         self.linewidth = linewidth
