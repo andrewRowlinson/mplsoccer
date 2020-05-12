@@ -989,10 +989,10 @@ class Pitch(object):
         """
         if ax is None:
             raise TypeError("scatter() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
-        
+                   
         if marker is None:
             marker = rcParams['scatter.marker']
-
+            
         # if using the football marker set the colors and lines, delete from kwargs so not used twice
         plot_football = False
         if marker == 'football':
@@ -1037,7 +1037,7 @@ class Pitch(object):
         # plot scatter. Reverse coordinates if vertical plot
         if self.orientation == 'horizontal':
             if plot_football:
-                sc_hex = ax.scatter(x, y, edgecolors=pentcolor, facecolors=hexcolor, linewidths=linewidths,
+                sc_hex = ax.scatter(x, y, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
                                      marker=football_hexagon_marker, s=s, **kwargs)
                 if 'label' in kwargs.keys():
                     Legend.update_default_handler_map({sc_hex: HandlerFootball()})
@@ -1049,11 +1049,11 @@ class Pitch(object):
             elif rotation_degrees is not None:
                 sc = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
             else:
-                sc = ax.scatter(x, y, **kwargs)
+                sc = ax.scatter(x, y, marker=marker, **kwargs)
 
         elif self.orientation == 'vertical':
             if plot_football:
-                sc_hex = ax.scatter(y, x, edgecolors=pentcolor, facecolors=hexcolor, linewidths=linewidths,
+                sc_hex = ax.scatter(y, x, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
                                      marker=football_hexagon_marker, s=s, **kwargs)
                 if 'label' in kwargs.keys():
                     Legend.update_default_handler_map({sc_hex: HandlerFootball()})
@@ -1064,7 +1064,7 @@ class Pitch(object):
             elif rotation_degrees is not None:
                 sc = _mscatter(y, x, markers=markers, ax=ax, **kwargs)
             else:
-                sc = ax.scatter(y, x, **kwargs)
+                sc = ax.scatter(y, x, marker=marker, **kwargs)
 
         return sc
 
