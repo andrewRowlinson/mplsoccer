@@ -16,13 +16,7 @@ Version 0.0.4
 7) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
 8) Pitch defaults changed to tight_layout=True and constrained_layout=False.
 9) Default penalty and center spot size now smaller and can be adjusted.
-10) Pitch default colors now taken from rcParams axes.facecolor (pitch_color) and grid.color so works better with matplotlib style sheets.
-
-
-ms["axes.facecolor"].
-        For no background set to 'None' or "None".
-    line_color : any Matplotlib color, default None
-        The line color for the pitch markings. If None, defaults to rcParams["grid.color"].    
+10) Pitch default colors changed, pitch_color is now not plotted by default ('None') and pitch lines are taken from the rcParams 'grid.color'.  
 
 Version 0.0.3
 -----------
