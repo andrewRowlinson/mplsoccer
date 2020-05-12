@@ -147,4 +147,4 @@ fig, ax = pitch.draw()
 plt.xkcd()
 pitch = Pitch(pitch_color='grass', stripe=True, figsize=(8, 4))
 fig, ax = pitch.draw()
-ax.annotate('Who can resist this?', (60, 10), fontsize=30, ha='center');
+annotation = ax.annotate('Who can resist this?', (60, 10), fontsize=30, ha='center');
