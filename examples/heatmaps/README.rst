@@ -1,5 +1,0 @@
---------
-Heatmaps
---------
-
-Just the basics

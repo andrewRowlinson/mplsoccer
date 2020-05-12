@@ -65,12 +65,9 @@ exclude_patterns = ['_build']
 sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
-    'subsection_order': ExplicitOrder(['../../examples/basics',
+    'subsection_order': ExplicitOrder(['../../examples/plots',
                                        '../../examples/statsbomb',
-                                       '../../examples/passes',
-                                       '../../examples/heatmaps',
-                                       '../../examples/shots',
-                                       '../../examples/photos',
+                                       '../../examples/pitch_setup',
                                        '../../examples/misc'])}
 
 

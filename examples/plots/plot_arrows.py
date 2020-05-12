@@ -43,12 +43,12 @@ pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
 fig, ax = pitch.draw()
 
 # Plot the completed passes
-pitch.quiver(df_pass[mask_complete].x, df_pass[mask_complete].y,
+pitch.arrows(df_pass[mask_complete].x, df_pass[mask_complete].y,
              df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y, width=2,
              headwidth=10, headlength=10, color='#ad993c', ax=ax, label='completed passes')
 
 # Plot the other passes
-pitch.quiver(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+pitch.arrows(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
              df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width=2,
              headwidth=10, headlength=10, color='#ba4f45', ax=ax, label='other passes')
 

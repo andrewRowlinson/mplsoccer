@@ -43,20 +43,19 @@ pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
 fig, ax = pitch.draw()
 
 # Plot the completed passes
-lc1, handler1 = pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
-                            df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y,
-                            lw=5, transparent=True, comet=True,
-                            color='#ad993c', ax=ax)
+lc1 = pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
+                  df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y,
+                  lw=5, transparent=True, comet=True,
+                  color='#ad993c', ax=ax)
 
 # Plot the other passes
-lc2, handler2 = pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
-                            df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y,
-                            lw=5, transparent=True, comet=True,
-                            color='#ba4f45', ax=ax)
+lc2 = pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+                  df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y,
+                  lw=5, transparent=True, comet=True,
+                  color='#ba4f45', ax=ax)
 
 # Plot the legend
-ax.legend([lc1, lc2], ["completed passes", "other passes"], handler_map={lc1: handler1, lc2: handler2},
-          facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left', handlelength=4)
+ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left', handlelength=4)
 
 # Set the title
 ax.set_title(f'{team1} passes vs {team2}', fontsize=30)

@@ -1,5 +1,0 @@
-------
-Basics
-------
-
-Just the basics

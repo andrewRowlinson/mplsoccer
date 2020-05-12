@@ -2,4 +2,4 @@
 Misc
 ----
 
-Assortments
+Assorted examples.
