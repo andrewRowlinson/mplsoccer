@@ -1,7 +1,7 @@
 mplsoccer
 =========
 
-`mplsoccer` is a Python plotting library for drawing soccer/football pitches in Matplotlib and loading StatsBomb open-data.
+`mplsoccer` is a Python library for drawing soccer/football pitches in Matplotlib and loading StatsBomb open-data.
 
 -----------
 Quick start
@@ -27,11 +27,11 @@ Plot a pitch
 Why mplsoccer exists?
 ---------------------
 
-I started mplsoccer because I wanted to share some of the tools I had built for the OptaPro Analytics Forum.
-At the time there weren't many open-sourced python tools.
+I started mplsoccer to share some of the tools I had built for the OptaPro Analytics Forum.
+At the time there weren't any open-sourced python tools.
 Now alternatives exist, such as `matplotsoccer <https://pypi.org/project/matplotsoccer/>`_
 
-I hope that you can spend more time building insightful graphics with mplsoccer rather than having to learn to draw pitches from scratch.
+By using mplsoccer, I hope that you can spend more time building insightful graphics rather than having to learn to draw pitches from scratch.
 
 -----------------------
 Advantages of mplsoccer
@@ -39,10 +39,10 @@ Advantages of mplsoccer
 
 mplsoccer:
 
-1) draws 7 different pitches by changing a single argument because data providers haven't standardised on a single format
-2) extends matplotlib to plot heatmaps, lines, footballs and rotated markers
-3) looks the same in different orientations because a common problem is forgetting to flip the data coordinates when plotting on vertically orientated soccer pitches
-4) creates tidy dataframes for StatsBomb data, as most of the alternatives produce nested dataframes
+1) draws 7 different pitch types by changing a single argument, which is useful as there isn't a standardised data format
+2) extends matplotlib to plot heatmaps, (comet) lines, footballs and rotated markers
+3) flips the data coordinates in vertical format so you don't need to remember to do it
+4) creates tidy dataframes for StatsBomb data, which is useful as most of the alternatives produce nested dataframes - ugh!
  
 -------
 License

@@ -4,8 +4,6 @@ channels:
   - conda-forge
 dependencies:
   - jupyter
-  - python
-  - matplotlib
   - pandas
   - scipy
   - seaborn
@@ -14,3 +12,4 @@ dependencies:
   - pip
   - pip:
       - mplsoccer
+
