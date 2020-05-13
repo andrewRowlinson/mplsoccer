@@ -8,6 +8,7 @@ dependencies:
   - scipy
   - seaborn
   - beautifulsoup4
+  - pyarrow
   - conda-forge::ffmpeg
   - pip
   - pip:

@@ -4,12 +4,11 @@ channels:
   - conda-forge
 dependencies:
   - jupyter
-  - python
-  - matplotlib
   - pandas
   - scipy
   - seaborn
   - sphinx
+  - pyarrow
   - beautifulsoup4
   - conda-forge::ffmpeg
   - pillow
