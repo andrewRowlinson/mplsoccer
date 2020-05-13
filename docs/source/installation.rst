@@ -2,11 +2,10 @@
 Installation
 ============
 
-The library uses python. Python 3.6 onwards are supported.
+The library uses Python 3.6 onwards.
 
-To install the library via ``pip`` ::
+To install the latest version via ``pip`` ::
 
     pip install mplsoccer
 
-This installs the latest version from pypi.
 
