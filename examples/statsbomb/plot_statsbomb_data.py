@@ -31,14 +31,14 @@ pd.set_option("display.max_columns", 6)
 # ------------------------
 # I have deliberately made functions to scrape links for the open-data, so it is easy. 
 # However, it is better to clone the StatsBomb data to store the data locally.
-# This manages all the data updates for you.
+# This will manage all the data updates for you.
 # First download git (if you are using Windows: https://gitforwindows.org/).
-# Then navigate in the git terminal to a directory where you to store the data.
-# Use cd [directory name], for example, cd Documents/Data.
+# Then navigate in the git terminal to a directory where you want to store the data.
+# Use cd [directory name], for example, cd ~/documents/data.
 # Then run: git clone https://github.com/statsbomb/open-data.git
 #
 # From time-to-time, the open-data gets updated, to get the latest files run the command: git pull 
-# from the directory where the data is stored, e.g. cd Documents/Data/open-data
+# from the directory where the data is stored, e.g. cd ~/documents/data/open-data
 # and it will download all the latest files
 #
 # Here's how to get the links to the data without using git:
@@ -58,7 +58,8 @@ print(lineup_links[0])
 print(match_links[0])
 
 ##############################################################################
-# Using the clone open-data
+# Using the cloned open-data
+# --------------------------
 # Assuming you have cloned the open-data using git you can also get a list of files with glob.
 # If you are not using git, comment this out
 
@@ -72,6 +73,10 @@ competition_path = os.path.join(STATSBOMB_DATA, 'competitions.json')
 print('Number of event files:',len(event_links))
 print('Number of lineup files:', len(lineup_links))
 print('Number of match files:', len(match_links))
+
+##############################################################################
+# Setup some destination folders
+# ------------------------------
 
 ##############################################################################
 # Competition data
