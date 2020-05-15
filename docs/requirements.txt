@@ -6,11 +6,11 @@ beautifulsoup4
 pandas
 scipy
 seaborn
-sphinx=3.0.3
+sphinx==3.0.3
 pyarrow
 beautifulsoup4
 ffmpeg
 pillow
-sphinx-gallery=0.6.2
+sphinx-gallery==0.6.2
 sphinx_rtd_theme
 numpydoc
