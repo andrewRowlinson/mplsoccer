@@ -11,8 +11,10 @@ This example shows how to plot rotated markers.
 """
 
 from mplsoccer.pitch import Pitch
+import matplotlib.pyplot as plt
 from mplsoccer.scatterutils import arrowhead_marker
 import numpy as np
+plt.style.use('ggplot')
 
 pitch = Pitch(figsize=(10,8), axis=True, label=True)
 fig, ax = pitch.draw()

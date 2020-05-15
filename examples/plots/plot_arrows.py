@@ -1,7 +1,7 @@
 """
-======================
-Pass plot using quiver
-======================
+=======================
+Pass plot using arrrows
+=======================
 
 This example shows how to plot all passes from a team in a match as arrows.
 """
@@ -50,10 +50,10 @@ pitch.arrows(df_pass[mask_complete].x, df_pass[mask_complete].y,
 # Plot the other passes
 pitch.arrows(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
              df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y, width=2,
-             headwidth=10, headlength=10, color='#ba4f45', ax=ax, label='other passes')
+             headwidth=6, headlength=5, headaxislength=12, color='#ba4f45', ax=ax, label='other passes')
 
 # setup the legend
-ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left')
+ax.legend(facecolor='#22312b', handlelength=5, edgecolor='None', fontsize=20, loc='upper left')
 
 # Set the title
 ax.set_title(f'{team1} passes vs {team2}', fontsize=30)

@@ -45,13 +45,13 @@ fig, ax = pitch.draw()
 # Plot the completed passes
 lc1 = pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
                   df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y,
-                  lw=5, transparent=True, comet=True,
+                  lw=5, transparent=True, comet=True, label='completed passes',
                   color='#ad993c', ax=ax)
 
 # Plot the other passes
 lc2 = pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
                   df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y,
-                  lw=5, transparent=True, comet=True,
+                  lw=5, transparent=True, comet=True, label='other passes',
                   color='#ba4f45', ax=ax)
 
 # Plot the legend

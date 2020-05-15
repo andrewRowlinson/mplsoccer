@@ -46,15 +46,21 @@ fig, ax = pitch.draw()
 
 # Plot the completed passes
 pitch.lines(df_pass.x, df_pass.y, df_pass.pass_end_x, df_pass.pass_end_y,
-            lw=10, transparent=True, comet=True, cmap='jet', ax=ax)
+            lw=10, transparent=True, comet=True, cmap='jet', 
+			label='pass leading to shot', ax=ax)
 
 # Plot the goals
 pitch.scatter(df_pass[mask_goal].pass_end_x, df_pass[mask_goal].pass_end_y, s=700,
-              marker='football', edgecolors='black', c='white', ax=ax)
+              marker='football', edgecolors='black', c='white', zorder=2,
+			  label='goal', ax=ax)
 pitch.scatter(df_pass[~mask_goal].pass_end_x, df_pass[~mask_goal].pass_end_y,
-              edgecolors='white', c='#22312b', s=700, ax=ax)
+              edgecolors='white', c='#22312b', s=700, zorder=2,
+			  label='shot', ax=ax)
 # Set the title
 ax.set_title(f'{team1} passes leading to shots \n vs {team2}', fontsize=30)
+
+# set legend
+ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='lower center', handlelength=4)
 
 # Set the figure facecolor
 fig.set_facecolor('#22312b')

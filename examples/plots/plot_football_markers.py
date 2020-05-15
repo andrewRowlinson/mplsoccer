@@ -7,6 +7,8 @@ This example shows how to plot football markers.
 """
 
 from mplsoccer.pitch import Pitch
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 
 pitch = Pitch(figsize=(10,8))
 fig, ax = pitch.draw()

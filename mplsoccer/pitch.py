@@ -1333,8 +1333,8 @@ class Pitch(object):
         headaxislength : float, default: 4.5
             Head length at the shaft intersection.
             If this is equal to the headlength then the arrow will be a triangular shape.
-            If greater than the headlength then the arrow will be swept back.
-            If less than the headlength the arrow will be wedge shaped.
+            If greater than the headlength then the arrow will be wedge shaped.
+            If less than the headlength the arrow will be swept back.
 
         color : color or color sequence, optional
             Explicit color(s) for the arrows. If C has been set, color has no effect.
