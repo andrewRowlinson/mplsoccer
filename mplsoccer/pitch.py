@@ -15,7 +15,6 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgb, to_rgba_array
 from matplotlib import rcParams
 from matplotlib.legend import Legend
-from matplotlib.collections import PathCollection
 from scipy.stats import binned_statistic_2d
 from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
 from collections import Sequence, namedtuple
