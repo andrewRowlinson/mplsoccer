@@ -1,0 +1,17 @@
+matplotlib
+numpy
+seaborn
+scipy
+beautifulsoup4
+pandas
+scipy
+seaborn
+sphinx
+pyarrow
+beautifulsoup4
+ffmpeg
+pillow
+sphinx-gallery
+sphinx_rtd_theme
+numpydoc
+mplsoccer
