@@ -30,15 +30,16 @@ pd.set_option("display.max_columns", 6)
 # Scraping StatsBomb links
 # ------------------------
 # I have deliberately made functions to scrape links for the open-data, so it is easy. 
-# However, it is better to clone the StatsBomb data to store the data locally.
+# However, it is better to clone the StatsBomb data, which stores the data locally.
 # This will manage all the data updates for you.
+# 
 # First download git (if you are using Windows: https://gitforwindows.org/).
 # Then navigate in the git terminal to a directory where you want to store the data.
-# Use cd [directory name], for example, cd ~/documents/data.
-# Then run: git clone https://github.com/statsbomb/open-data.git
+# Use cd [directory name], for example: cd ~/documents/data.
+# Then run the command: git clone https://github.com/statsbomb/open-data.git
 #
 # From time-to-time, the open-data gets updated, to get the latest files run the command: git pull 
-# from the directory where the data is stored, e.g. cd ~/documents/data/open-data
+# from the directory where the data is stored, e.g. cd ~/documents/data/open-data then git pull
 # and it will download all the latest files
 #
 # Here's how to get the links to the data without using git:
@@ -77,129 +78,124 @@ print('Number of match files:', len(match_links))
 ##############################################################################
 # Setup some destination folders
 # ------------------------------
+# Now we need to setup some folders to store the dataframes.
+# We are going to setup the following directory structure
+# 
+# | data <- top level directory to store the combined dataframes
+# | ├── event_raw <- Folder for event data
+# | ├── related_event_raw <- Folder for info on how events are connected
+# | ├── freeze_frame_raw <- Folder for the individual shot freeze frames 
+# | ├── tactic_raw <-Folder for the lineup tactics
+# | ├── lineup_raw <- Folder for the lineup info
+# 
+# I am saving the dataframes as parquet files as they are small and load rapidly 
+# (see here for more info https://ursalabs.org/blog/2019-10-columnar-perf/).
+
+# Amend this path to where you want to store the data
+DATA_FOLDER = os.path.join('..','..','data')
+
+# make the directory structure
+for folder in ['event_raw', 'related_event_raw', 'freeze_frame_raw', 'tactic_raw', 'lineup_raw']:
+    path = os.path.join(DATA_FOLDER, folder)
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 ##############################################################################
 # Competition data
 # ----------------
-# Get the competition data as a dataframe
+# Get the competition data as a dataframe and save to parquet.
 
-df_competition = sbapi.read_competition(competition_path)
-##############################################################################
-df_competition.head()
-##############################################################################
+df_competition = sbapi.read_competition(competition_path, warn=False)
+# note there is a slight loss of data quality with timestamps, but these aren't relevant for analysis
+# pandas has nanoseconds, which aren't supported in parquet (supports milliseconds)
+df_competition.to_parquet(os.path.join(DATA_FOLDER, 'competition'), allow_truncated_timestamps=True)
 df_competition.info()
+
+##############################################################################
+
+
 
 ##############################################################################
 #  Match data
 # -----------
-# Get the match data as a dataframe.
+# Get the match data as a dataframe and save to parquet.
 # Note there is a mismatch between the length of this file
-# and the number of event files since some event files don't have match data.
+# and the number of event files because some event files don't have match data.
 
-match_dfs = [sbapi.read_match(file) for file in match_links]
+match_dfs = [sbapi.read_match(file, warn=False) for file in match_links]
 df_match = pd.concat(match_dfs)
-##############################################################################
-df_match.head()
-##############################################################################
+# again there is a slight loss of quality when saving timestamps, but only relevant for last_updated
+df_match.to_parquet(os.path.join(DATA_FOLDER, 'match'), allow_truncated_timestamps=True)
 df_match.info()
 
 ##############################################################################
 # Lineup data
 # -----------
 # There are hundreds of event files.
-# For this demo, we will loop through the first five files and save them to the local disc.
-# I have saved the dataframes as parquet files as they are small and load rapidly 
-# (see here for more info https://ursalabs.org/blog/2019-10-columnar-perf/).
+# For this demo, we will loop through the first five files and save them as parquet files.
 
 # Amend this path to where you want to store the data
-LINEUP_FOLDER = os.path.join('..','..','data','lineup')
+LINEUP_FOLDER = os.path.join(DATA_FOLDER, 'lineup_raw')
 # get the first five files - comment out this if you want all of them
 lineup_links = lineup_links[:5]
 # loop through the links and store as parquet files - small and fast files
 for file in lineup_links:
-    df_lineup = sbapi.read_lineup(file)
+    df_lineup = sbapi.read_lineup(file, warn=False)
     df_lineup.to_parquet(os.path.join(LINEUP_FOLDER,f'{os.path.basename(file)[:-4]}parquet'))
 
 ##############################################################################
-# Get the lineup files as a single dataframe
+# Get the lineup files as a single dataframe and save to parquet
 lineup_files = glob.glob(os.path.join(LINEUP_FOLDER,'*.parquet'))
 df_lineup = pd.concat([pd.read_parquet(file) for file in lineup_files])
-
-##############################################################################
-df_lineup.head()
-##############################################################################
+df_lineup.to_parquet(os.path.join(DATA_FOLDER, 'lineup'))
 df_lineup.info()
 
 ##############################################################################
 # Event data
 # ----------
-# This is also possible for event files.
-# However, the read_event function returns a dictionary of four dataframes: 'event', 'related_event',
-# 'shot_freeze_frame' and 'tactics_lineup'. You can alter this to return fewer dataframes (see the API docs).
+# We will also loop through the first five event files.
+# However, the ``read_event`` function returns a dictionary of four dataframes: 'event', 'related_event',
+# 'shot_freeze_frame' and 'tactics_lineup'.
+# It's possible to alter ``read_event`` to return fewer dataframes (see the API docs).
 
-# Amend this path to where you want to store the data
-DATA_FOLDER = os.path.join('..','..','data')
 # get the first five files - comment out this if you want all of them
 event_links = event_links[:5]
 # loop through the links and store as parquet files - small and fast files
 for file in event_links:
-    dict_event = sbapi.read_event(file)
     save_path = f'{os.path.basename(file)[:-4]}parquet'
-    # save to parquet files
-    # using the dictionary key to access the dataframes from the dictionary
-    dict_event['event'].to_parquet(os.path.join(DATA_FOLDER, 'event', save_path))
-    dict_event['related_event'].to_parquet(os.path.join(DATA_FOLDER, 'related_event', save_path))
-    dict_event['shot_freeze_frame'].to_parquet(os.path.join(DATA_FOLDER, 'freeze_frame', save_path))
-    dict_event['tactics_lineup'].to_parquet(os.path.join(DATA_FOLDER, 'tactic', save_path))
-
+    if not os.path.isfile(save_path):
+        dict_event = sbapi.read_event(file, warn=False)
+        # save to parquet files
+        # using the dictionary key to access the dataframes from the dictionary
+        dict_event['event'].to_parquet(os.path.join(DATA_FOLDER, 'event_raw', save_path))
+        dict_event['related_event'].to_parquet(os.path.join(DATA_FOLDER, 'related_event_raw', save_path))
+        dict_event['shot_freeze_frame'].to_parquet(os.path.join(DATA_FOLDER, 'freeze_frame_raw', save_path))
+        dict_event['tactics_lineup'].to_parquet(os.path.join(DATA_FOLDER, 'tactic_raw', save_path))
+        
 ##############################################################################
-# Get event files as a single dataframe
-event_files = glob.glob(os.path.join(DATA_FOLDER,'event','*.parquet'))
+# Get event files as a single dataframe and save to parquet.
+event_files = glob.glob(os.path.join(DATA_FOLDER,'event_raw','*.parquet'))
 df_event = pd.concat([pd.read_parquet(file) for file in event_files])
-
-##############################################################################
-# Show the first five rows
-df_event.head()
-
-##############################################################################
-# Show the info
+df_event.to_parquet(os.path.join(DATA_FOLDER, 'event'))
 df_event.info(verbose=True, null_counts=True)
 
 ##############################################################################
-# Get shot freeze frames as a single dataframe
-freeze_files = glob.glob(os.path.join(DATA_FOLDER,'freeze_frame','*.parquet'))
+# Get shot freeze frames files as a single dataframe and save to parquet.
+freeze_files = glob.glob(os.path.join(DATA_FOLDER,'freeze_frame_raw','*.parquet'))
 df_freeze = pd.concat([pd.read_parquet(file) for file in freeze_files])
-
-##############################################################################
-# Show the first five rows
-df_freeze.head()
-
-##############################################################################
-# Show the info
+df_freeze.to_parquet(os.path.join(DATA_FOLDER, 'freeze'))
 df_freeze.info()
 
 ##############################################################################
-# Get tactic files as a single dataframe
-tactic_files = glob.glob(os.path.join(DATA_FOLDER,'tactic','*.parquet'))
+# Get tactics files as a single dataframe and save to parquet.
+tactic_files = glob.glob(os.path.join(DATA_FOLDER,'tactic_raw','*.parquet'))
 df_tactic = pd.concat([pd.read_parquet(file) for file in tactic_files])
-
-##############################################################################
-# Show the first five rows
-df_tactic.head()
-
-##############################################################################
-# Show the info
+df_tactic.to_parquet(os.path.join(DATA_FOLDER, 'tactic'))
 df_tactic.info()
 
 ##############################################################################
-# Get related events as a single dataframe
-related_files = glob.glob(os.path.join(DATA_FOLDER,'related_event','*.parquet'))
+# Get related events files as a single dataframe and save to parquet.
+related_files = glob.glob(os.path.join(DATA_FOLDER,'related_event_raw','*.parquet'))
 df_related = pd.concat([pd.read_parquet(file) for file in related_files])
-
-##############################################################################
-# Show the first five rows
-df_related.head()
-
-##############################################################################
-# Show the info
+df_related.to_parquet(os.path.join(DATA_FOLDER, 'related'))
 df_related.info()

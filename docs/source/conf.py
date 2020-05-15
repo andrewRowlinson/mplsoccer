@@ -67,8 +67,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': ['gallery'],
     'subsection_order': ExplicitOrder(['../../examples/plots',
                                        '../../examples/statsbomb',
-                                       '../../examples/pitch_setup',
-                                       '../../examples/misc'])}
+                                       '../../examples/pitch_setup',])}
 
 
 # -- Options for HTML output -------------------------------------------------

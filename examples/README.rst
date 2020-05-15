@@ -25,7 +25,7 @@ All of the examples can be run from the following Anaconda environment:
 
 To install the environment yourself use the `Anaconda <https://www.anaconda.com/>`_ Prompt:
 
-#. Create an environment from an ``environment.yml`` file. Copy the code above into a blank file called environment.yml, then run the following command from the directory containing the file.
+#. Copy the code above into a blank file called ``environment.yml``, then run the following command from the directory containing the file.
 
    .. code ::
 
