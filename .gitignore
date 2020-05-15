@@ -3,6 +3,7 @@
 *.dll
 *.so
 *.dylib
+*.parquet
 
 # ignore desktop.ini
 desktop.ini

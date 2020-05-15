@@ -92,7 +92,7 @@ print('Number of match files:', len(match_links))
 # (see here for more info https://ursalabs.org/blog/2019-10-columnar-perf/).
 
 # Amend this path to where you want to store the data
-DATA_FOLDER = os.path.join('..','..','data')
+DATA_FOLDER = os.path.join('')
 
 # make the directory structure
 for folder in ['event_raw', 'related_event_raw', 'freeze_frame_raw', 'tactic_raw', 'lineup_raw']:
