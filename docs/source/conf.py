@@ -39,6 +39,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'numpydoc']
 
+# https://github.com/readthedocs/readthedocs.org/issues/2569
+master_doc = 'index'
 
 # this is needed for some reason...
 # see https://github.com/numpy/numpydoc/issues/69
