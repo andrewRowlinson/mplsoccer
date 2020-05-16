@@ -41,7 +41,7 @@ mplsoccer:
 
 1) draws 7 different pitch types by changing a single argument, which is useful as there isn't a standardised data format
 2) extends matplotlib to plot heatmaps, (comet) lines, footballs and rotated markers
-3) flips the data coordinates in vertical format so you don't need to remember to flip them
+3) flips the data coordinates when in a vertical orientation so you don’t need to remember to flip them
 4) creates tidy dataframes for StatsBomb data, which is useful as most of the alternatives produce nested dataframes
  
 -------
