@@ -95,8 +95,8 @@ fig, ax = pitch.draw()
 pitch = Pitch(orientation='vertical', view='half',
               pad_left=-10,  # bring the left axis in 10 data units (reduce the size)
               pad_right=-10,  # bring the right axis in 10 data units (reduce the size)
-              pad_top=10, # extend the top axis 10 data units
-              pad_bottom=20) # extend the bottom axis 20 data units
+              pad_top=10,  # extend the top axis 10 data units
+              pad_bottom=20)  # extend the bottom axis 20 data units
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -133,7 +133,7 @@ fig, ax = pitch.draw()
 # If you need to lift the pitch markings above other elements of the chart.
 # You can do this via ``line_zorder`` and ``background_zorder``.
 
-pitch = Pitch(line_zorder = 2, background_zorder = 1)  # e.g. useful if you want to plot pitch lines over heatmaps
+pitch = Pitch(line_zorder=2, background_zorder=1)  # e.g. useful if you want to plot pitch lines over heatmaps
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -153,4 +153,4 @@ fig, ax = pitch.draw()
 plt.xkcd()
 pitch = Pitch(pitch_color='grass', stripe=True, figsize=(8, 4))
 fig, ax = pitch.draw()
-annotation = ax.annotate('Who can resist this?', (60, 10), fontsize=30, ha='center');
+annotation = ax.annotate('Who can resist this?', (60, 10), fontsize=30, ha='center')

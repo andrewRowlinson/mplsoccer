@@ -556,14 +556,16 @@ class Pitch(object):
                     end = round(start + stripe3_length, 4)
                 if (stripe % 2 == 1) & (self.orientation == 'vertical'):
                     if self.pitch_color != 'grass':
-                        ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color, zorder=self.background_zorder)
+                        ax.axhspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color,
+                                   zorder=self.background_zorder)
                     else:
                         pitch_color[start:end, pitch_start:pitch_end] = \
                             pitch_color[start:end, pitch_start:pitch_end] + 2
                         
                 elif (stripe % 2 == 1) & (self.orientation == 'horizontal'):
                     if self.pitch_color != 'grass':
-                        ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color, zorder=self.background_zorder)
+                        ax.axvspan(start, end, stripe_start, stripe_end, facecolor=self.stripe_color,
+                                   zorder=self.background_zorder)
                     else:
                         pitch_color[pitch_start:pitch_end, start:end] = \
                             pitch_color[pitch_start:pitch_end:, start:end] + 2
@@ -691,7 +693,7 @@ class Pitch(object):
                                  theta1=arc2_theta1, theta2=arc2_theta2,
                                  linewidth=self.linewidth, color=self.line_color, fill=False, zorder=self.line_zorder)
         ax.add_patch(circle)
-        if self.spot_scale>0:
+        if self.spot_scale > 0:
             ax.add_patch(center_spot)
             ax.add_patch(penalty1_spot)
             ax.add_patch(penalty2_spot)
@@ -702,8 +704,8 @@ class Pitch(object):
         r1 = self.circle_size * self.width / self.pitch_width
         r2 = self.circle_size * self.length / self.pitch_length
         size_spot = self.spot_scale * self.pitch_length
-        scaled_spot1 = (size_spot) * self.width / self.pitch_width
-        scaled_spot2 = (size_spot) * self.length / self.pitch_length
+        scaled_spot1 = size_spot * self.width / self.pitch_width
+        scaled_spot2 = size_spot * self.length / self.pitch_length
         xy = (self.center_width, self.center_length)
         intersection = self.center_width - (
                     r1 * r2 * (r2 ** 2 - (self.penalty_area_length - self.left_penalty) ** 2) ** 0.5) / (r2 ** 2)
@@ -780,7 +782,7 @@ class Pitch(object):
                                  theta1=arc2_left, theta2=arc2_right,
                                  linewidth=self.linewidth, color=self.line_color, zorder=self.line_zorder)
 
-        if self.spot_scale>0:
+        if self.spot_scale > 0:
             ax.add_patch(penalty_spot1)
             ax.add_patch(penalty_spot2)
             ax.add_patch(kick_off_spot)
@@ -1043,11 +1045,11 @@ class Pitch(object):
         if self.orientation == 'horizontal':
             if plot_football:
                 sc_hex = ax.scatter(x, y, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
-                                     marker=football_hexagon_marker, s=s, **kwargs)
+                                    marker=football_hexagon_marker, s=s, **kwargs)
                 if 'label' in kwargs.keys():
                     Legend.update_default_handler_map({sc_hex: HandlerFootball()})
                     del kwargs['label']
-                sc_pent = ax.scatter(x, y, edgecolors=pentcolor,c=pentcolor, linewidths=linewidths,
+                sc_pent = ax.scatter(x, y, edgecolors=pentcolor, c=pentcolor, linewidths=linewidths,
                                      marker=football_pentagon_marker, s=s, **kwargs)
                        
                 sc = (sc_hex, sc_pent)
@@ -1059,7 +1061,7 @@ class Pitch(object):
         elif self.orientation == 'vertical':
             if plot_football:
                 sc_hex = ax.scatter(y, x, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
-                                     marker=football_hexagon_marker, s=s, **kwargs)
+                                    marker=football_hexagon_marker, s=s, **kwargs)
                 if 'label' in kwargs.keys():
                     Legend.update_default_handler_map({sc_hex: HandlerFootball()})
                     del kwargs['label']
@@ -1198,17 +1200,17 @@ class Pitch(object):
         yend = np.ravel(yend)
         lw = np.ravel(lw)
         
-        if (comet or transparent) and (lw.size>1):
+        if (comet or transparent) and (lw.size > 1):
             raise NotImplementedError("Multiple linewidths with a comet or transparent line is not implemented.")
             
         # set color
         if color is None:
             color = rcParams['lines.color']
             
-        if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0]>1):
+        if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0] > 1):
             raise NotImplementedError("Multiple colors with a comet or transparent line is not implemented.")          
             
-        if lw.size==1:
+        if lw.size == 1:
             lw = lw[0]
             
         if xstart.size != ystart.size:
@@ -1220,7 +1222,7 @@ class Pitch(object):
         if ystart.size != yend.size:
             raise ValueError("ystart and yend must be the same size")     
             
-        if (lw.size>1) and (lw.size!=xstart.size):
+        if (lw.size > 1) and (lw.size != xstart.size):
             raise ValueError("lw and xstart must be the same size")
 
         # set pitch array for line segments
@@ -1241,7 +1243,7 @@ class Pitch(object):
         
         # set color map or color for transparent lines
         if transparent:
-            handler_cmap=True
+            handler_cmap = True
             if cmap is None:
                 color = to_rgb(color)
                 cmap = self._create_transparent_cmap(color, n_segments, alpha_start, alpha_end)
@@ -1275,7 +1277,7 @@ class Pitch(object):
             else:
                 color = to_rgba_array(color)
                 handler_cmap = False
-                if (color.shape[0]>1) and (color.shape[0] != xstart.size):
+                if (color.shape[0] > 1) and (color.shape[0] != xstart.size):
                     raise ValueError("xstart and color must be the same size")
                               
         # add line collection using cmap

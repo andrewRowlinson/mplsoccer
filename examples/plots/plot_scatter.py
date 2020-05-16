@@ -10,7 +10,7 @@ from mplsoccer.pitch import Pitch
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-pitch = Pitch(figsize=(10,8))
+pitch = Pitch(figsize=(10, 8))
 fig, ax = pitch.draw()
 sc = pitch.scatter([70, 50, 20, 60, 90], [60, 50, 20, 10, 30],
                    c=['red', 'blue', 'green', 'yellow', 'orange'],

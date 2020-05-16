@@ -10,7 +10,7 @@ from mplsoccer.pitch import Pitch
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-pitch = Pitch(figsize=(10,8))
+pitch = Pitch(figsize=(10, 8))
 fig, ax = pitch.draw()
 # 'edgecolors' sets the color of the pentagons and edges, 'c' sets the color of the hexagons
 sc = pitch.scatter([70, 50], [60, 50],
