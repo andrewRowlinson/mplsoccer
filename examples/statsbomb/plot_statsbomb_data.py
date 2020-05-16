@@ -42,7 +42,7 @@ pd.set_option("display.max_columns", 6)
 # from the directory where the data is stored, e.g. cd ~/documents/data/open-data then git pull
 # and it will download all the latest files
 #
-# Here's how to get the links to the data without using git:
+# Here's how to get the links to the data without using git (if you are using git comment this out):
 
 # scrape the links for all the open-data files, which returns a list of links to the files
 event_links = sbapi.get_event_links()
@@ -65,15 +65,15 @@ print(match_links[0])
 # If you are not using git, comment this out
 
 # change the path of STATSBOMB_DATA to the location of you open-data
-STATSBOMB_DATA = os.path.join('..', '..', '..', 'open-data','data')  
-event_links = glob.glob(os.path.join(STATSBOMB_DATA, 'events', '**', '*.json'),recursive=True)
-lineup_links = glob.glob(os.path.join(STATSBOMB_DATA, 'lineups', '**', '*.json'),recursive=True)
-match_links = glob.glob(os.path.join(STATSBOMB_DATA, 'matches', '**', '*.json'),recursive=True)
-competition_path = os.path.join(STATSBOMB_DATA, 'competitions.json')
+# STATSBOMB_DATA = os.path.join('..', '..', '..', 'open-data','data')  
+# event_links = glob.glob(os.path.join(STATSBOMB_DATA, 'events', '**', '*.json'),recursive=True)
+# lineup_links = glob.glob(os.path.join(STATSBOMB_DATA, 'lineups', '**', '*.json'),recursive=True)
+# match_links = glob.glob(os.path.join(STATSBOMB_DATA, 'matches', '**', '*.json'),recursive=True)
+# competition_path = os.path.join(STATSBOMB_DATA, 'competitions.json')
 
-print('Number of event files:',len(event_links))
-print('Number of lineup files:', len(lineup_links))
-print('Number of match files:', len(match_links))
+# print('Number of event files:',len(event_links))
+# print('Number of lineup files:', len(lineup_links))
+# print('Number of match files:', len(match_links))
 
 ##############################################################################
 # Setup some destination folders
@@ -103,13 +103,12 @@ for folder in ['event_raw', 'related_event_raw', 'freeze_frame_raw', 'tactic_raw
 ##############################################################################
 # Competition data
 # ----------------
-# Get the competition data as a dataframe.
-# To save to parquet uncomment the relevant line.
+# Get the competition data as a dataframe as save as parquet file
 
 df_competition = sbapi.read_competition(competition_path, warn=False)
 # note there is a slight loss of data quality with timestamps, but these aren't relevant for analysis
 # pandas has nanoseconds, which aren't supported in parquet (supports milliseconds)
-# df_competition.to_parquet(os.path.join(DATA_FOLDER, 'competition'), allow_truncated_timestamps=True)
+df_competition.to_parquet(os.path.join(DATA_FOLDER, 'competition'), allow_truncated_timestamps=True)
 df_competition.info()
 
 ##############################################################################
