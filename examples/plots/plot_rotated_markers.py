@@ -5,9 +5,10 @@ Plot rotated markers
 
 This example shows how to plot rotated markers.
 
-> ! Warning: The rotation angle is in degrees and assumes the original marker is pointing upwards ↑.
-> Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play (left to right).
-> In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
+Warning: The rotation angle is in degrees and assumes the original marker is pointing upwards ↑.
+If it's not you will have to modify the rotation degrees.
+Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play (left to right).
+In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
 """
 
 from mplsoccer.pitch import Pitch
