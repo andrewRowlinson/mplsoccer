@@ -14,11 +14,16 @@ pip install mplsoccer
 
 Plot a StatsBomb pitch
 
+```python
 from mplsoccer.pitch import Pitch
 pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
 fig, ax = pitch.draw()
-
+```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/quick_start.png?raw=true "statsbomb pitch")
+
+## Docs
+
+Here are the [docs](https://mplsoccer.readthedocs.io/) for mplsoccer.
 
 ## Why mplsoccer exists
 
