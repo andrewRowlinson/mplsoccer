@@ -1,0 +1,19 @@
+name: mplsoccer-docs
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - pandas
+  - scipy
+  - seaborn
+  - sphinx
+  - pyarrow
+  - beautifulsoup4
+  - conda-forge::ffmpeg
+  - pillow
+  - pip
+  - pip:
+      - sphinx-gallery
+      - sphinx_rtd_theme
+      - numpydoc
+      - -e .

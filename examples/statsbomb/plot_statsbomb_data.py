@@ -24,7 +24,6 @@ import mplsoccer.statsbomb as sbapi
 import pandas as pd
 import os
 import glob
-pd.set_option("display.max_columns", 6)
 
 ##############################################################################
 # Scraping StatsBomb links
@@ -118,15 +117,14 @@ df_competition.info()
 ##############################################################################
 #  Match data
 # -----------
-# Get the match data as a dataframe.
+# Get the match data as a dataframe and save as parquet.
 # Note there is a mismatch between the length of this file
 # and the number of event files because some event files don't have match data.
-# To save to parquet uncomment the relevant line.
 
 match_dfs = [sbapi.read_match(file, warn=False) for file in match_links]
 df_match = pd.concat(match_dfs)
 # again there is a slight loss of quality when saving timestamps, but only relevant for last_updated
-# df_match.to_parquet(os.path.join(DATA_FOLDER, 'match'), allow_truncated_timestamps=True)
+df_match.to_parquet(os.path.join(DATA_FOLDER, 'match'), allow_truncated_timestamps=True)
 df_match.info()
 
 ##############################################################################
@@ -134,7 +132,6 @@ df_match.info()
 # -----------
 # There are hundreds of event files.
 # For this demo, we will loop through the first five files.
-# To save them as parquet files uncomment the relevant line.
 
 # Amend this path to where you want to store the data
 LINEUP_FOLDER = os.path.join(DATA_FOLDER, 'lineup_raw')
@@ -143,15 +140,14 @@ lineup_links = lineup_links[:5]
 # loop through the links and store as parquet files - small and fast files
 for file in lineup_links:
     df_lineup = sbapi.read_lineup(file, warn=False)
-    # df_lineup.to_parquet(os.path.join(LINEUP_FOLDER,f'{os.path.basename(file)[:-4]}parquet'))
+    df_lineup.to_parquet(os.path.join(LINEUP_FOLDER,f'{os.path.basename(file)[:-4]}parquet'))
 
 ##############################################################################
 # Get the lineup files as a single dataframe
-# Commented out as relies on saving the data above - not possible in readthedocs
-# lineup_files = glob.glob(os.path.join(LINEUP_FOLDER,'*.parquet'))
-# df_lineup = pd.concat([pd.read_parquet(file) for file in lineup_files])
-# df_lineup.to_parquet(os.path.join(DATA_FOLDER, 'lineup'))
-# df_lineup.info()
+lineup_files = glob.glob(os.path.join(LINEUP_FOLDER,'*.parquet'))
+df_lineup = pd.concat([pd.read_parquet(file) for file in lineup_files])
+df_lineup.to_parquet(os.path.join(DATA_FOLDER, 'lineup'))
+df_lineup.info()
 
 ##############################################################################
 # Event data
@@ -160,7 +156,6 @@ for file in lineup_links:
 # However, the ``read_event`` function returns a dictionary of four dataframes: 'event', 'related_event',
 # 'shot_freeze_frame' and 'tactics_lineup'.
 # It's possible to alter ``read_event`` to return fewer dataframes (see the API docs).
-# To save them as parquet files uncomment the relevant lines.
 
 # get the first five files - comment out this if you want all of them
 event_links = event_links[:5]
@@ -171,43 +166,39 @@ for file in event_links:
         dict_event = sbapi.read_event(file, warn=False)
         # save to parquet files
         # using the dictionary key to access the dataframes from the dictionary
-        # dict_event['event'].to_parquet(os.path.join(DATA_FOLDER, 'event_raw', save_path))
-        # dict_event['related_event'].to_parquet(os.path.join(DATA_FOLDER, 'related_event_raw', save_path))
-        # dict_event['shot_freeze_frame'].to_parquet(os.path.join(DATA_FOLDER, 'freeze_frame_raw', save_path))
-        # dict_event['tactics_lineup'].to_parquet(os.path.join(DATA_FOLDER, 'tactic_raw', save_path))
+        dict_event['event'].to_parquet(os.path.join(DATA_FOLDER, 'event_raw', save_path))
+        dict_event['related_event'].to_parquet(os.path.join(DATA_FOLDER, 'related_event_raw', save_path))
+        dict_event['shot_freeze_frame'].to_parquet(os.path.join(DATA_FOLDER, 'freeze_frame_raw', save_path))
+        dict_event['tactics_lineup'].to_parquet(os.path.join(DATA_FOLDER, 'tactic_raw', save_path))
         
 ##############################################################################
-# Get event files as a single dataframe.
-# Commented out as relies on saving the data above - not possible in readthedocs
+# Get event files as a single dataframe.cs
 
-# event_files = glob.glob(os.path.join(DATA_FOLDER,'event_raw','*.parquet'))
-# df_event = pd.concat([pd.read_parquet(file) for file in event_files])
-# df_event.to_parquet(os.path.join(DATA_FOLDER, 'event'))
-# df_event.info(verbose=True, null_counts=True)
+event_files = glob.glob(os.path.join(DATA_FOLDER,'event_raw','*.parquet'))
+df_event = pd.concat([pd.read_parquet(file) for file in event_files])
+df_event.to_parquet(os.path.join(DATA_FOLDER, 'event'))
+df_event.info(verbose=True, null_counts=True)
 
 ##############################################################################
 # Get shot freeze frames files as a single dataframe and save to parquet.
-# Commented out as relies on saving the data above - not possible in readthedocs
 
-# freeze_files = glob.glob(os.path.join(DATA_FOLDER,'freeze_frame_raw','*.parquet'))
-# df_freeze = pd.concat([pd.read_parquet(file) for file in freeze_files])
-# df_freeze.to_parquet(os.path.join(DATA_FOLDER, 'freeze'))
-# df_freeze.info()
+freeze_files = glob.glob(os.path.join(DATA_FOLDER,'freeze_frame_raw','*.parquet'))
+df_freeze = pd.concat([pd.read_parquet(file) for file in freeze_files])
+df_freeze.to_parquet(os.path.join(DATA_FOLDER, 'freeze'))
+df_freeze.info()
 
 ##############################################################################
 # Get tactics files as a single dataframe and save to parquet.
-# Commented out as relies on saving the data above - not possible in readthedocs
 
-# tactic_files = glob.glob(os.path.join(DATA_FOLDER,'tactic_raw','*.parquet'))
-# df_tactic = pd.concat([pd.read_parquet(file) for file in tactic_files])
-# df_tactic.to_parquet(os.path.join(DATA_FOLDER, 'tactic'))
-# df_tactic.info()
+tactic_files = glob.glob(os.path.join(DATA_FOLDER,'tactic_raw','*.parquet'))
+df_tactic = pd.concat([pd.read_parquet(file) for file in tactic_files])
+df_tactic.to_parquet(os.path.join(DATA_FOLDER, 'tactic'))
+df_tactic.info()
 
 ##############################################################################
 # Get related events files as a single dataframe and save to parquet.
-# Commented out as relies on saving the data above - not possible in readthedocs
 
-# related_files = glob.glob(os.path.join(DATA_FOLDER,'related_event_raw','*.parquet'))
-# df_related = pd.concat([pd.read_parquet(file) for file in related_files])
-# df_related.to_parquet(os.path.join(DATA_FOLDER, 'related'))
-# df_related.info()
+related_files = glob.glob(os.path.join(DATA_FOLDER,'related_event_raw','*.parquet'))
+df_related = pd.concat([pd.read_parquet(file) for file in related_files])
+df_related.to_parquet(os.path.join(DATA_FOLDER, 'related'))
+df_related.info()
