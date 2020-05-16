@@ -13,7 +13,7 @@ Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install mplso
 
     pip install mplsoccer
 
-Plot a pitch
+Plot a StatsBomb pitch:
 
 .. code-block:: python
 
@@ -76,7 +76,7 @@ mplsoccer was inspired by other people's work:
 - `fcpython <https://fcpython.com/>`_ also has some great tutorials in Python
 - `Karun Singh <https://twitter.com/karun1710>`_ tweets some interesting football analytics and visuals
 - `StatsBomb <https://statsbomb.com/>`_ has great visual designs and free open-data
-- John Burn-Murdoch's `tweet <https://twitter.com/jburnmurdoch/status/1057907312030085120>`_ got me interested in football analytics.
+- John Burn-Murdoch's `tweet <https://twitter.com/jburnmurdoch/status/1057907312030085120>`_ got me interested in football analytics
 
 
 
