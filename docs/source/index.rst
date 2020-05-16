@@ -27,7 +27,7 @@ Plot a pitch
 Why mplsoccer exists?
 ---------------------
 
-I started mplsoccer to share some of the tools I had built for the OptaPro Analytics Forum.
+mplsoccer shares some of the tools I built for the OptaPro Analytics Forum.
 At the time there weren't any open-sourced python tools.
 Now alternatives exist, such as `matplotsoccer <https://pypi.org/project/matplotsoccer/>`_
 
@@ -41,8 +41,8 @@ mplsoccer:
 
 1) draws 7 different pitch types by changing a single argument, which is useful as there isn't a standardised data format
 2) extends matplotlib to plot heatmaps, (comet) lines, footballs and rotated markers
-3) flips the data coordinates in vertical format so you don't need to remember to do it
-4) creates tidy dataframes for StatsBomb data, which is useful as most of the alternatives produce nested dataframes - ugh!
+3) flips the data coordinates in vertical format so you don't need to remember to do flip them
+4) creates tidy dataframes for StatsBomb data, which is useful as most of the alternatives produce nested dataframes
  
 -------
 License

@@ -17,7 +17,7 @@ Here are some alternatives
 
 I hope to inspire others to make a better one, so this one can become obsolete.
 
-Please be responsible with Statsbomb data. Register your details on https://www.statsbomb.com/resource-centreand read the User Agreement carefully (on the same page).
+Please be responsible with Statsbomb data. Register your details on https://www.statsbomb.com/resource-centreand read the user agreement carefully (on the same page).
 """
 
 import mplsoccer.statsbomb as sbapi
@@ -144,6 +144,7 @@ for file in lineup_links:
 
 ##############################################################################
 # Get the lineup files as a single dataframe
+
 lineup_files = glob.glob(os.path.join(LINEUP_FOLDER,'*.parquet'))
 df_lineup = pd.concat([pd.read_parquet(file) for file in lineup_files])
 df_lineup.to_parquet(os.path.join(DATA_FOLDER, 'lineup'))
