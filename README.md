@@ -10,6 +10,10 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install mplsocc
 pip install mplsoccer
 ```
 
+## Docs
+
+Here are the [docs](https://mplsoccer.readthedocs.io/) for mplsoccer.
+
 ## Quick start
 
 Plot a StatsBomb pitch
@@ -20,10 +24,6 @@ pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
 fig, ax = pitch.draw()
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/quick_start.png?raw=true "statsbomb pitch")
-
-## Docs
-
-Here are the [docs](https://mplsoccer.readthedocs.io/) for mplsoccer.
 
 ## Why mplsoccer exists
 
