@@ -1,3 +1,10 @@
+Version 0.0.5
+-----------
+
+### Fixed
+1) fixed Pitch.heatmap() bug. Now returns a mesh in horizontal orientation.
+
+
 Version 0.0.4
 -----------
 

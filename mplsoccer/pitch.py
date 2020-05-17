@@ -1587,7 +1587,7 @@ class Pitch(object):
             mesh = ax.pcolormesh(bin_statistic['y_grid'].T, bin_statistic['x_grid'].T, 
                                  bin_statistic['statistic'], **kwargs)
             
-            return mesh
+        return mesh
             
     def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
         """ Calculates binned statistics for the Juegos de posición (position game) concept.

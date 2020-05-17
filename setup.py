@@ -4,7 +4,7 @@ with open('README.md') as readme_file:
     README = readme_file.read()
 
 setup(name='mplsoccer',
-      version='0.0.3',
+      version='0.0.5',
       description='mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.',
       long_description_content_type="text/markdown",
       long_description=README,
@@ -26,4 +26,7 @@ setup(name='mplsoccer',
 
 install_requires = ['matplotlib',
                     'seaborn',
+                    'scipy',
+                    'pandas',
+                    'beautifulsoup4',
                     'numpy']
