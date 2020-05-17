@@ -1,10 +1,10 @@
 """
-=======
-Heatmap
-=======
+================
+Heatmap smoothed
+================
 
-Tom Decroos author of matplotsoccer (https://github.com/TomDecroos/matplotsoccer)
-asked whether it was possible to plot a gaussian smoothed heatmaps, which are available in matplotsoccer.
+Tom Decroos, author of matplotsoccer (https://github.com/TomDecroos/matplotsoccer),
+asked whether it was possible to plot a Gaussian smoothed heatmaps, which are available in matplotsoccer.
 Here is an example demonstrating this.
 """
 
