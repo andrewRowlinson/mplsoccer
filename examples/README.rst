@@ -18,6 +18,7 @@ All of the examples can be run from the following Anaconda environment:
         - seaborn
         - beautifulsoup4
         - pyarrow
+        - pillow
         - conda-forge::ffmpeg
         - pip
         - pip:
