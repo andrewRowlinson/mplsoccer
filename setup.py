@@ -1,10 +1,13 @@
 from setuptools import setup
 
+import mplsoccer
+VERSION = mplsoccer.__version__
+
 with open('README.md') as readme_file:
     README = readme_file.read()
 
 setup(name='mplsoccer',
-      version='0.0.5',
+      version=VERSION,
       description='mplsoccer is a Python plotting library for drawing soccer / football pitches quickly in Matplotlib.',
       long_description_content_type="text/markdown",
       long_description=README,

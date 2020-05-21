@@ -1,3 +1,10 @@
+Version 0.0.6
+-----------
+
+### Fixed
+1) fixed Pitch.bin_statistic(). Now works for ``statistic`` arguments other than 'count'.
+
+
 Version 0.0.5
 -----------
 

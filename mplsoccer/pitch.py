@@ -1544,7 +1544,7 @@ class Pitch(object):
         else:
             pitch_range = [[self.left, self.right], [self.bottom, self.top]]
             
-        result = binned_statistic_2d(x, y, values, statistic='count', bins=bins, range=pitch_range)
+        result = binned_statistic_2d(x, y, values, statistic=statistic, bins=bins, range=pitch_range)
         
         x_grid, y_grid = np.meshgrid(result.x_edge, result.y_edge)
         cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
