@@ -9,6 +9,7 @@ dependencies:
   - seaborn
   - beautifulsoup4
   - pyarrow
+  - pillow
   - conda-forge::ffmpeg
   - pip
   - pip:
