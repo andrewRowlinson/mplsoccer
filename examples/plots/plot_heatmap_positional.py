@@ -34,9 +34,10 @@ for i, pos in enumerate(positions):
     bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count', positional=pos)
     pitch.heatmap_positional(bin_statistic, ax=ax[i], cmap='coolwarm', edgecolors='#22312b')
     pitch.scatter(df.x, df.y, c='white', s=2, ax=ax[i])
+	total = np.array([bs['statistic'].sum() for bs in bin_statistic]).sum()
     # replace raw counts with percentages and add percentage sign (note immutable named tuple so used _replace)
     for bs in bin_statistic:
-        bs['statistic'] = (pd.DataFrame((bs['statistic'] / bs['statistic'].sum()))
+        bs['statistic'] = (pd.DataFrame(bs['statistic'] / total)
                            .applymap(lambda x: '{:.0%}'.format(x))
                            .values)
     pitch.label_heatmap(bin_statistic, color='white', fontsize=18, ax=ax[i], ha='center', va='bottom')
