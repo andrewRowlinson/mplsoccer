@@ -1,3 +1,10 @@
+Version 0.0.7
+-----------
+
+### Fixed
+1) fixed Pitch.label_heatmap(). Now filters out labels outside of the pitch extent.
+
+
 Version 0.0.6
 -----------
 

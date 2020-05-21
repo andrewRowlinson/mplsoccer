@@ -1795,10 +1795,24 @@ class Pitch(object):
             bin_statistic = [bin_statistic]
     
         annotation_list = []
-        for stat in bin_statistic:
-            text = stat['statistic'].T.ravel()
-            cx = np.ravel(stat['cx'])
-            cy = np.ravel(stat['cy'])
+        for bs in bin_statistic:
+            # remove labels outside the plot extents
+            if self.orientation == 'horizontal':
+                mask_x_outside = (bs['cx'] < min(self.extent[0], self.extent[1])) |\
+                                 (bs['cx'] > max(self.extent[0], self.extent[1]))
+                mask_y_outside = (bs['cy'] < min(self.extent[2], self.extent[3])) |\
+                                 (bs['cy'] > max(self.extent[2], self.extent[3]))
+            else:
+                mask_x_outside = (bs['cx'] < min(self.extent[2], self.extent[3])) |\
+                                 (bs['cx'] > max(self.extent[2], self.extent[3]))
+                mask_y_outside = (bs['cy'] < min(self.extent[0], self.extent[1])) |\
+                                 (bs['cy'] > max(self.extent[0], self.extent[1]))
+            mask_clip = mask_x_outside | mask_y_outside
+            mask_clip = np.ravel(mask_clip)
+            
+            text = np.ravel(bs['statistic'].T)[~mask_clip]
+            cx = np.ravel(bs['cx'])[~mask_clip]
+            cy = np.ravel(bs['cy'])[~mask_clip]
             for i in range(len(text)):
                 annotation = self.annotate(text[i], (cx[i], cy[i]), ax=ax, **kwargs)
                 annotation_list.append(annotation)

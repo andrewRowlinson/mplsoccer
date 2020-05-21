@@ -67,3 +67,10 @@ mplsoccer was inspired by other people's work:
 - [Karun Singh](https://twitter.com/karun1710) - tweets some interesting football analytics and visuals
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
 - John Burn-Murdoch's [tweet](https://twitter.com/jburnmurdoch/status/1057907312030085120) got me interested in football analytics
+
+## Recent changes
+
+mplsoccer's recent changes fixed several issues with the heatmap functionality
+- Pitch.label_heatmap(), now filters out labels outside of the pitch.
+- Pitch.bin_statistic(), now works for a statistic argument other than 'count'.
+- Pitch.heatmap(), now returns a mesh in horizontal orientation.

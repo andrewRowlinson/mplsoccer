@@ -14,6 +14,7 @@ import sphinx_gallery
 from sphinx_gallery.sorting import ExplicitOrder
 import os
 import sys
+import mplsoccer
 sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
@@ -23,7 +24,8 @@ copyright = '2020, Andrew Rowlinson'
 author = 'Andrew Rowlinson'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.4'
+VERSION = mplsoccer.__version__
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
