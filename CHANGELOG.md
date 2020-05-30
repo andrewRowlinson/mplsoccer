@@ -1,3 +1,9 @@
+Version 0.0.8
+-----------
+
+### Fixed
+1) Made the statsbomb module clean the data faster.
+
 Version 0.0.7
 -----------
 

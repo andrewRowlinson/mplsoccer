@@ -74,3 +74,6 @@ mplsoccer's recent changes fixed several issues with the heatmap functionality
 - Pitch.label_heatmap(), now filters out labels outside of the pitch.
 - Pitch.bin_statistic(), now works for a statistic argument other than 'count'.
 - Pitch.heatmap(), now returns a mesh in horizontal orientation.
+
+The statsbomb module now cleans the data faster.
+

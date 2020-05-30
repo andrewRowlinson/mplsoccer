@@ -29,6 +29,6 @@ setup(name='mplsoccer',
 
 install_requires = ['matplotlib',
                     'seaborn',
-					'scipy',
-					'pandas',
+                    'scipy',
+                    'pandas',
                     'numpy']

@@ -314,8 +314,12 @@ class Pitch(object):
             grass = np.concatenate((grass[::-1], grass))
             grass = grass[40:-20]
             self.grass_cmap = ListedColormap(grass)
+            
+        # pitch extent
+        self.pitch_extent = [min(self.left, self.right), max(self.left, self.right),
+                             min(self.bottom, self.top), max(self.bottom, self.top)]
         
-        # set pitch extents: [xmin, xmax, ymin, ymax]
+        # set ax extents: [xmin, xmax, ymin, ymax]
         if self.invert_y:
             
             if self.orientation == 'horizontal':

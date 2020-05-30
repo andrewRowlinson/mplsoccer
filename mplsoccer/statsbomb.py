@@ -20,11 +20,16 @@ statsbomb_warning = ('Please be responsible with Statsbomb data.'
 
 def _split_location_cols(df, col, new_cols):
     """ Location is stored as a list. split into columns. """
+    for new_col in new_cols:
+        df[new_col] = np.nan
     if col in df.columns:
-        df[new_cols] = df[col].apply(pd.Series)
+        mask_not_null = df[col].notnull()
+        df_not_null = df.loc[mask_not_null, col]
+        df_new = pd.DataFrame(df_not_null.tolist(), index=df_not_null.index, columns=new_cols)
+        df.loc[mask_not_null, new_cols] = df_new
         df.drop(col, axis=1, inplace=True)
 
-
+        
 def _list_dictionary_to_df(df, col, value_name, var_name):
     """ Some columns are a list of dictionaries. This turns them into a new dataframe of rows."""
     df = df.loc[df[col].notnull(), ['id', col]]
