@@ -57,7 +57,6 @@ Contributions are welcome. It would be great to add the following functionality 
 
 - pass maps
 - pass sonars
-- Voronoi diagrams
 
 I would also welcome more examples in the gallery to help others.
 

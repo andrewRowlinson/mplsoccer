@@ -9,13 +9,14 @@ import matplotlib.pyplot as plt
 import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PatchCollection
 from matplotlib.legend_handler import HandlerLineCollection, HandlerPathCollection, HandlerLine2D
 from matplotlib.cm import get_cmap
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgb, to_rgba_array
 from matplotlib import rcParams
 from matplotlib.legend import Legend
 from scipy.stats import binned_statistic_2d
+from scipy.spatial import Voronoi
 from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
 from collections import Sequence, namedtuple
 import warnings
@@ -1309,6 +1310,191 @@ class Pitch(object):
         
         return lc
 
+    def polygon(self, verts, ax=None, **kwargs):
+        """ Plot polygons using a PathCollection.
+        See: https://matplotlib.org/3.1.1/api/collections_api.html
+        
+        Valid Collection keyword arguments:
+            edgecolors: None
+            facecolors: None
+            linewidths: None
+            antialiaseds: None
+            offsets: None
+            transOffset: transforms.IdentityTransform()
+            norm: None (optional for matplotlib.cm.ScalarMappable)
+            cmap: None (optional for matplotlib.cm.ScalarMappable)
+            
+        Parameters
+        ----------
+        verts: verts is a sequence of (verts0, verts1, ...) 
+            where verts_i is a numpy array of shape (number of vertices, 2).
+            
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+                       
+        **kwargs : All other keyword arguments are passed on to matplotlib.collections.PatchCollection.
+            
+        Returns
+        -------
+        PathCollection : matplotlib.collections.PatchCollection
+        """
+        if ax is None:
+            raise TypeError("polygon() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+            
+        verts = np.asarray(verts)
+        patch_list = []
+                
+        for vert in verts:
+            if self.orientation == 'vertical':
+                vert = vert[:, [1, 0]].copy()
+            polygon = patches.Polygon(vert, closed=True)
+            patch_list.append(polygon)
+        p = PatchCollection(patch_list, **kwargs)
+        p = ax.add_collection(p)
+        
+        return p
+
+    def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
+        """ Plot a polygon with the angle to the goal using PathCollection.
+        See: https://matplotlib.org/3.1.1/api/collections_api.html
+        
+        Valid Collection keyword arguments:
+            edgecolors: None
+            facecolors: None
+            linewidths: None
+            antialiaseds: None
+            offsets: None
+            transOffset: transforms.IdentityTransform()
+            norm: None (optional for matplotlib.cm.ScalarMappable)
+            cmap: None (optional for matplotlib.cm.ScalarMappable)
+            
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+        
+        goal: str default 'right'.
+            The goal to plot, either 'left' or 'right'.
+            
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+                       
+        **kwargs : All other keyword arguments are passed on to matplotlib.collections.PathCollection.
+            
+        Returns
+        -------
+        PathCollection : matplotlib.collections.PathCollection  
+        """
+        if ax is None:
+            raise TypeError("goal_angle() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        
+        valid_goal = ['left', 'right']
+        if goal not in valid_goal:
+            raise TypeError(f'Invalid argument: goal should be in {valid_goal}')
+            
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        
+        if goal == 'right':
+            goal_coordinates = self.goal_right
+        else:
+            goal_coordinates = self.goal_left
+            
+        verts = np.zeros((x.size, 3, 2))
+        verts[:, 0, 0] = x
+        verts[:, 0, 1] = y
+        verts[:, 1:, :] = np.expand_dims(goal_coordinates, 0)
+        
+        p = self.polygon(verts, ax=ax, **kwargs)
+        
+        return p
+
+    def voronoi(self, x, y, teams):
+        """ Get Voronoi vertices for a set of coordinates.
+        Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
+        before calculating the Voronoi. This means that the Vornoi extends to the edges of the pitch
+        see: https://github.com/ProformAnalytics/tutorial_nbs/blob/master/notebooks/Voronoi%20Reflection%20Trick.ipynb
+        
+        Players outside of the pitch dimensions are assumed to be standing on the pitch edge.
+        This means that their coordinates are clipped to the pitch edges before calculating the Voronoi.        
+            
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+        
+        team: array-like or scalar.
+            This splits the results into the Voronoi vertices for each team.
+            This can either have integer (1/0) values or boolean (True/False) values.
+            team1 is where team==1 or team==True
+            team2 is where team==0 or team==False
+            
+        Returns
+        -------
+        team1 : a 1d numpy array (length number of players in team 1) of 2d arrays
+            Where the individual 2d arrays are coodinates of the Voronoi vertices.
+            
+        team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
+            Where the individual 2d arrays are coodinates of the Voronoi vertices.
+        """
+        x = np.ravel(x)
+        y = np.ravel(y)
+        teams = np.ravel(teams)
+        
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+            
+        if teams.size != x.size:
+            raise ValueError("x and team must be the same size")
+        
+        # clip outside to pitch extents
+        x = x.clip(min=self.pitch_extent[0], max=self.pitch_extent[1]).reshape(-1, 1)
+        y = y.clip(min=self.pitch_extent[2], max=self.pitch_extent[3]).reshape(-1, 1)
+        
+        # reflect in pitch lines
+        left = x.copy()
+        right = x.copy()
+        bottom = y.copy()
+        top = y.copy()
+        
+        left = self.left - abs(left - self.left)
+        right = self.right + abs(right - self.right)
+        
+        if self.invert_y:
+            top = self.top - abs(top - self.top)
+            bottom = self.bottom + abs(bottom - self.bottom)
+        else:
+            top = self.top + abs(top - self.top)
+            bottom = self.bottom - abs(bottom - self.bottom)
+        
+        reflect = np.concatenate([np.concatenate([x, y], axis=1),
+                                  np.concatenate([x, bottom], axis=1),
+                                  np.concatenate([x, top], axis=1),
+                                  np.concatenate([left, y], axis=1),
+                                  np.concatenate([right, y], axis=1)])
+        
+        # create Voronoi
+        vor = Voronoi(reflect)
+        
+        # get region vertices
+        regions = vor.point_region[:x.size]
+        regions = np.array(vor.regions)[regions]
+        region_vertices = []
+        for region in regions:
+            verts = vor.vertices[region]
+            verts[:, 0] = np.clip(verts[:, 0], a_min=self.pitch_extent[0], a_max=self.pitch_extent[1])
+            verts[:, 1] = np.clip(verts[:, 1], a_min=self.pitch_extent[2], a_max=self.pitch_extent[3])
+            region_vertices.append(verts)
+        region_vertices = np.array(region_vertices)
+        
+        # seperate team1/ team2 vertices
+        team1 = region_vertices[teams==1]
+        team2 = region_vertices[teams==0]
+        
+        return team1, team2
+        
     def arrows(self, xstart, ystart, xend, yend, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
         Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
@@ -1361,7 +1547,7 @@ class Pitch(object):
         if ax is None:
             raise TypeError("quiver() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
-            # set so plots in data units
+        # set so plots in data units
         units = kwargs.pop('units', 'dots')
         scale_units = kwargs.pop('scale_units', 'xy')
         angles = kwargs.pop('angles', 'xy')
@@ -1909,3 +2095,56 @@ class HandlerQuiver(HandlerLine2D):
                                      facecolor=facecolor)
         legline.set_transform(trans)
         return [legline]
+
+    
+def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
+    """ Adds an image to a figure using fig.add_axes and ax.imshow
+    
+    Recommended additional keyword arguments for imshow
+        interpolation str, optional
+            'hamming' is recommended for images that are reduced in size
+                    
+        alpha scalar or array-like, optional
+            The alpha blending value, between 0 (transparent) and 1 (opaque).
+            
+    Parameters
+    ----------
+    image: array-like or PIL image
+        The image data.
+        
+    fig: matplotlib.
+        A matplotlib.figure.Figure
+        
+    left, bottom: float
+        The dimensions left, bottom of the new axes. All quantities are in fractions of figure width and height.
+        This positions the image axis in the figure left% in from the figure side 
+        and bottom% in from the figure bottom.
+        
+    width, height: float
+        The width, height of the new axes. All quantities are in fractions of figure width and height.
+        For best results use only one of these so the image is scaled appropriately.
+        
+    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
+    
+    Returns
+    -------            
+    ax : matplotlib.axes        
+    """
+    image_height, image_width, _ = np.array(image).shape       
+    image_aspect = image_width / image_height
+    
+    figsize = fig.get_size_inches()
+    fig_aspect = figsize[0] / figsize[1]
+    
+    if height is None:
+        height = width / image_aspect * fig_aspect
+    
+    if width is None:
+        width = height*image_aspect/fig_aspect
+        
+    ax_image = fig.add_axes((left, bottom, width, height))
+    ax_image.axis('off')  # axis off so no labels/ ticks
+    
+    img = ax_image.imshow(image, **kwargs)
+    
+    return ax_image

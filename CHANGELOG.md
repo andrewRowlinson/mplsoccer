@@ -1,3 +1,12 @@
+Version 0.0.9
+-----------
+
+### Added
+1) Added Pitch.voronoi() for calculating Voronoi vertices.
+2) Added Pitch.goal_angle() for plotting the angle to the goal.
+3) Added Pitch.polygon() for plotting polygons on the pitch (e.g. goal angle and Voronoi)
+4) Added add_image for adding images to matplotlib figures.
+
 Version 0.0.8
 -----------
 

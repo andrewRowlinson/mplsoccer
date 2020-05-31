@@ -50,7 +50,6 @@ mplsoccer:
 Contributions are welcome. It would be great to add the following functionality to mplsoccer:
 - pass maps
 - pass sonars
-- Voronoi diagrams
 
 Examples to help others are also welcome for a gallery.
 
@@ -74,6 +73,9 @@ mplsoccer's recent changes fixed several issues with the heatmap functionality
 - Pitch.label_heatmap(), now filters out labels outside of the pitch.
 - Pitch.bin_statistic(), now works for a statistic argument other than 'count'.
 - Pitch.heatmap(), now returns a mesh in horizontal orientation.
+- Pitch.voronoi() calculates Voronoi vertices.
+- Pitch.goal_angle(), plots the angle to the goal.
+- Pitch.polygon(), plots polygons on the pitch (e.g. goal angle and Voronoi)
+- add_image adds images as a new axis to matplotlib figures.
 
-The statsbomb module now cleans the data faster.
-
+The statsbomb module also now cleans the data faster.

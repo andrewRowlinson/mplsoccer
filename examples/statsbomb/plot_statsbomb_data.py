@@ -109,7 +109,7 @@ for folder in ['event_raw', 'related_event_raw', 'freeze_frame_raw', 'tactic_raw
 df_competition = sbapi.read_competition(competition_path, warn=False)
 # note there is a slight loss of data quality with timestamps, but these aren't relevant for analysis
 # pandas has nanoseconds, which aren't supported in parquet (supports milliseconds)
-df_competition.to_parquet(os.path.join(DATA_FOLDER, 'competition'), allow_truncated_timestamps=True)
+df_competition.to_parquet(os.path.join(DATA_FOLDER, 'competition.parquet'), allow_truncated_timestamps=True)
 df_competition.info()
 
 ##############################################################################
@@ -122,7 +122,7 @@ df_competition.info()
 match_dfs = [sbapi.read_match(file, warn=False) for file in match_links]
 df_match = pd.concat(match_dfs)
 # again there is a slight loss of quality when saving timestamps, but only relevant for last_updated
-df_match.to_parquet(os.path.join(DATA_FOLDER, 'match'), allow_truncated_timestamps=True)
+df_match.to_parquet(os.path.join(DATA_FOLDER, 'match.parquet'), allow_truncated_timestamps=True)
 df_match.info()
 
 ##############################################################################
@@ -145,7 +145,7 @@ for file in lineup_links:
 
 lineup_files = glob.glob(os.path.join(LINEUP_FOLDER, '*.parquet'))
 df_lineup = pd.concat([pd.read_parquet(file) for file in lineup_files])
-df_lineup.to_parquet(os.path.join(DATA_FOLDER, 'lineup'))
+df_lineup.to_parquet(os.path.join(DATA_FOLDER, 'lineup.parquet'))
 df_lineup.info()
 
 ##############################################################################
@@ -161,7 +161,7 @@ event_links = event_links[:5]
 # loop through the links and store as parquet files - small and fast files
 for file in event_links:
     save_path = f'{os.path.basename(file)[:-4]}parquet'
-    if not os.path.isfile(save_path):
+    if not os.path.isfile(os.path.join(DATA_FOLDER, 'event_raw', save_path)):
         dict_event = sbapi.read_event(file, warn=False)
         # save to parquet files
         # using the dictionary key to access the dataframes from the dictionary
@@ -175,7 +175,7 @@ for file in event_links:
 
 event_files = glob.glob(os.path.join(DATA_FOLDER, 'event_raw', '*.parquet'))
 df_event = pd.concat([pd.read_parquet(file) for file in event_files])
-df_event.to_parquet(os.path.join(DATA_FOLDER, 'event'))
+df_event.to_parquet(os.path.join(DATA_FOLDER, 'event.parquet'))
 df_event.info(verbose=True, null_counts=True)
 
 ##############################################################################
@@ -183,7 +183,7 @@ df_event.info(verbose=True, null_counts=True)
 
 freeze_files = glob.glob(os.path.join(DATA_FOLDER, 'freeze_frame_raw', '*.parquet'))
 df_freeze = pd.concat([pd.read_parquet(file) for file in freeze_files])
-df_freeze.to_parquet(os.path.join(DATA_FOLDER, 'freeze'))
+df_freeze.to_parquet(os.path.join(DATA_FOLDER, 'freeze.parquet'))
 df_freeze.info()
 
 ##############################################################################
@@ -191,7 +191,7 @@ df_freeze.info()
 
 tactic_files = glob.glob(os.path.join(DATA_FOLDER, 'tactic_raw', '*.parquet'))
 df_tactic = pd.concat([pd.read_parquet(file) for file in tactic_files])
-df_tactic.to_parquet(os.path.join(DATA_FOLDER, 'tactic'))
+df_tactic.to_parquet(os.path.join(DATA_FOLDER, 'tactic.parquet'))
 df_tactic.info()
 
 ##############################################################################
@@ -199,5 +199,5 @@ df_tactic.info()
 
 related_files = glob.glob(os.path.join(DATA_FOLDER, 'related_event_raw', '*.parquet'))
 df_related = pd.concat([pd.read_parquet(file) for file in related_files])
-df_related.to_parquet(os.path.join(DATA_FOLDER, 'related'))
+df_related.to_parquet(os.path.join(DATA_FOLDER, 'related.parquet'))
 df_related.info()
