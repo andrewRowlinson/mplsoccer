@@ -122,6 +122,9 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     
     # read as dataframe
     df = pd.read_json(path_or_buf, encoding='utf-8')
+    if df.empty:
+        print(f'Skipping {path_or_buf}: empty json')
+        return
     
     # timestamp defaults to today's date so store as integers in seperate columns
     df['timestamp_minute'] = df.timestamp.dt.minute
@@ -271,12 +274,16 @@ def read_match(path_or_buf, warn=True):
         warnings.warn(statsbomb_warning)
         
     df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
+    if df_match.empty:
+        print(f'Skipping {path_or_buf}: empty json')
+        return
     
     # loop through the columns that are still dictionary columns and add them as seperate cols to the datafram
     dictionary_columns = ['competition', 'season', 'home_team', 'away_team', 'metadata', 'competition_stage',
                           'stadium', 'referee']
     for col in dictionary_columns:
-        df_match = _split_dict_col(df_match, col)
+        if col in df_match.columns:
+            df_match = _split_dict_col(df_match, col)
         
     # convert kickoff to datetime - date + kickoff time
     df_match['kick_off'] = pd.to_datetime(df_match.match_date.astype(str) + ' ' + df_match.kick_off)
@@ -341,6 +348,9 @@ def read_competition(path_or_buf, warn=True):
         warnings.warn(statsbomb_warning)
         
     df_competition = pd.read_json(path_or_buf, convert_dates=['match_updated', 'match_available'])
+    if df_competition.empty:
+        print(f'Skipping {path_or_buf}: empty json')
+        return
     df_competition.sort_values(['competition_id', 'season_id'], inplace=True)
     df_competition.reset_index(drop=True, inplace=True)
     return df_competition
@@ -387,6 +397,9 @@ def read_lineup(path_or_buf, warn=True):
         warnings.warn(statsbomb_warning)
         
     df_lineup = pd.read_json(path_or_buf)
+    if df_lineup.empty:
+        print(f'Skipping {path_or_buf}: empty json')
+        return
     df_lineup['match_id'] = os.path.basename(path_or_buf[:-5])
     # each line has a column named player that contains a list of dictionaries
     # we split into seperate columns and then create a new row for each player using melt

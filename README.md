@@ -77,5 +77,6 @@ mplsoccer's recent changes fixed several issues with the heatmap functionality
 - Pitch.goal_angle(), plots the angle to the goal.
 - Pitch.polygon(), plots polygons on the pitch (e.g. goal angle and Voronoi)
 - add_image adds images as a new axis to matplotlib figures.
+- fixed the statsbomb module so works when the json file is empty.
 
 The statsbomb module also now cleans the data faster.

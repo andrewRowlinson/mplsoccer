@@ -1,3 +1,10 @@
+Version 0.0.10
+-----------
+
+### Fixed
+1) fixed the statsbomb module so it works when the json is empty.
+
+
 Version 0.0.9
 -----------
 
