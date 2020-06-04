@@ -22,7 +22,7 @@ df = read_event(f'{EVENT_SLUG}/7478.json',
 team1 = 'Seattle Reign'
 team2 = 'Houston Dash'
 df_pass = df.loc[(df.pass_assisted_shot_id.notnull()) & (df.team_name == team1),
-                 ['x', 'y', 'pass_end_x', 'pass_end_y', 'pass_assisted_shot_id']]
+                 ['x', 'y', 'end_x', 'end_y', 'pass_assisted_shot_id']]
 
 df_shot = df.loc[(df.type_name == 'Shot') & (df.team_name == team1),
                  ['id', 'outcome_name', 'shot_statsbomb_xg']].rename({'id': 'pass_assisted_shot_id'}, axis=1)
@@ -45,15 +45,15 @@ pitch = Pitch(pitch_type='statsbomb', orientation='vertical', pitch_color='#2231
 fig, ax = pitch.draw()
 
 # Plot the completed passes
-pitch.lines(df_pass.x, df_pass.y, df_pass.pass_end_x, df_pass.pass_end_y,
+pitch.lines(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y,
             lw=10, transparent=True, comet=True, cmap='jet',
             label='pass leading to shot', ax=ax)
 
 # Plot the goals
-pitch.scatter(df_pass[mask_goal].pass_end_x, df_pass[mask_goal].pass_end_y, s=700,
+pitch.scatter(df_pass[mask_goal].end_x, df_pass[mask_goal].end_y, s=700,
               marker='football', edgecolors='black', c='white', zorder=2,
               label='goal', ax=ax)
-pitch.scatter(df_pass[~mask_goal].pass_end_x, df_pass[~mask_goal].pass_end_y,
+pitch.scatter(df_pass[~mask_goal].end_x, df_pass[~mask_goal].end_y,
               edgecolors='white', c='#22312b', s=700, zorder=2,
               label='shot', ax=ax)
 # Set the title

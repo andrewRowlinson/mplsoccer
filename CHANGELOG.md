@@ -1,9 +1,14 @@
+Version 0.0.11
+-----------
+
+### Changed
+1) fixed the statsbomb module so the event dataset has simplified names for the end coordinates. Previously they were shot_end_x, pass_end_x etc. Now they are under three columns: end_x, end_y, end_z.
+
 Version 0.0.10
 -----------
 
 ### Fixed
 1) fixed the statsbomb module so it works when the json is empty.
-
 
 Version 0.0.9
 -----------

@@ -25,7 +25,7 @@ mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1)
 ##############################################################################
 # Filter dataset to only include one teams passes and get boolean mask for the completed passes
 
-df_pass = df.loc[mask_team1, ['x', 'y', 'pass_end_x', 'pass_end_y', 'outcome_name']]
+df_pass = df.loc[mask_team1, ['x', 'y', 'end_x', 'end_y', 'outcome_name']]
 mask_complete = df_pass.outcome_name.isnull()
 
 ##############################################################################
@@ -44,13 +44,13 @@ fig, ax = pitch.draw()
 
 # Plot the completed passes
 lc1 = pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
-                  df_pass[mask_complete].pass_end_x, df_pass[mask_complete].pass_end_y,
+                  df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
                   lw=5, transparent=True, comet=True, label='completed passes',
                   color='#ad993c', ax=ax)
 
 # Plot the other passes
 lc2 = pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
-                  df_pass[~mask_complete].pass_end_x, df_pass[~mask_complete].pass_end_y,
+                  df_pass[~mask_complete].end_x, df_pass[~mask_complete].end_y,
                   lw=5, transparent=True, comet=True, label='other passes',
                   color='#ba4f45', ax=ax)
 

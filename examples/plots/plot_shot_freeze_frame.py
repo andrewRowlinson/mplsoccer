@@ -62,7 +62,7 @@ sc4 = pitch.scatter(df_team2_goal.x, df_team2_goal.y, s=600, ax=ax, c='#c15ca5',
 # plot the shot
 sc3 = pitch.scatter(df_shot_event.x, df_shot_event.y, marker='football', s=600, ax=ax, label='Shooter', zorder=1.2)
 line = pitch.lines(df_shot_event.x, df_shot_event.y, 
-                   df_shot_event.shot_end_x, df_shot_event.shot_end_y, comet=True, label='shot', color='#cb5a4c', ax=ax)
+                   df_shot_event.end_x, df_shot_event.end_y, comet=True, label='shot', color='#cb5a4c', ax=ax)
 
 # plot the angle to the goal
 pitch.goal_angle(df_shot_event.x, df_shot_event.y, ax=ax, alpha=0.2, zorder=1.1, color='#cb5a4c', goal='right')

@@ -13,7 +13,7 @@ dependencies:
   - pillow
   - pip
   - pip:
-      - sphinx-gallery
+      - sphinx-gallery >= 0.7
       - sphinx_rtd_theme
       - numpydoc
       - -e .

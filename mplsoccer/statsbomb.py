@@ -58,9 +58,10 @@ def _split_dict_col(df, col):
     return df
 
 
-def _simplify_cols_and_drop(df, col):
+def _simplify_cols_and_drop(df, col, cols=None):
     """ Function to merge similar columns together and drop original columns. """
-    cols = df.columns[df.columns.str.contains(col)]
+    if cols is None:
+        cols = df.columns[df.columns.str.contains(col)]
     df[col] = df.lookup(df.index, df[cols].notnull().idxmax(axis=1))
     df.drop(cols, axis=1, inplace=True)
     return df
@@ -171,7 +172,9 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df = _simplify_cols_and_drop(df, 'body_part_id')
     df = _simplify_cols_and_drop(df, 'body_part_name')
     df = _simplify_cols_and_drop(df, 'aerial_won')
-
+    df = _simplify_cols_and_drop(df, 'end_x', ['pass_end_x', 'carry_end_x', 'shot_end_x', 'goalkeeper_end_x'])    
+    df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y', 'shot_end_y', 'goalkeeper_end_y'])    
+    
     # create a related events dataframe
     if related_event_df:
         df_related_event = _list_dictionary_to_df(df, col='related_events',
@@ -213,6 +216,9 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     
     # drop columns stored as a separate table
     df.drop(['related_events', 'shot_freeze_frame', 'tactics_lineup'], axis=1, inplace=True)
+    
+    # rename end location
+    df.rename({'shot_end_z': 'end_z'}, axis=1, inplace=True)
            
     # reorder columns so some of the most used ones are first
     cols = ['match_id', 'id', 'index', 'period', 'timestamp_minute', 'timestamp_second', 
@@ -220,9 +226,8 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
             'outcome_id', 'outcome_name',  'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
-            'position_name', 'duration', 'x', 'y', 'pass_end_x', 'pass_end_y', 'carry_end_x',
-            'carry_end_y', 'shot_end_x', 'shot_end_y', 'shot_end_z',
-            'goalkeeper_end_x', 'goalkeeper_end_y', 'body_part_id', 'body_part_name']
+            'position_name', 'duration', 'x', 'y', 'end_x', 'end_y', 'end_z',
+            'body_part_id', 'body_part_name']
     other_cols = df.columns[~df.columns.isin(cols)]
     cols.extend(other_cols)
     df = df[cols].copy()

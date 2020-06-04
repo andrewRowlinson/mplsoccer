@@ -15,6 +15,7 @@ from sphinx_gallery.sorting import ExplicitOrder
 import os
 import sys
 import mplsoccer
+import warnings
 sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
@@ -69,10 +70,16 @@ exclude_patterns = ['_build']
 sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
+	'matplotlib_animations': True,
     'subsection_order': ExplicitOrder(['../../examples/plots',
                                        '../../examples/statsbomb',
                                        '../../examples/pitch_setup', ])}
 
+
+# filter warning messages
+warnings.filterwarnings("ignore", category=UserWarning,
+                        message='Matplotlib is currently using agg, which is a'
+                                ' non-GUI backend, so cannot show the figure.')
 
 # -- Options for HTML output -------------------------------------------------
 

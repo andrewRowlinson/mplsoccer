@@ -4,7 +4,6 @@ Animation
 =========
 
 This example shows how to animate tracking data from metricasports (https://github.com/metrica-sports/sample-data).
-Unfortunately, sphinx-gallery doesn't currently render gifs or videos, but I think the next version will.
 """
 
 from mplsoccer.pitch import Pitch
@@ -48,8 +47,8 @@ set_col_names(df_home)
 # Subset 2 seconds of data
 
 # get a subset of the data (10 seconds)
-df_away = df_away[(df_away['Time [s]'] >= 815) & (df_away['Time [s]'] < 817)].copy()
-df_home = df_home[(df_home['Time [s]'] >= 815) & (df_home['Time [s]'] < 817)].copy()
+df_away = df_away[(df_away['Time [s]'] >= 815) & (df_away['Time [s]'] < 825)].copy()
+df_home = df_home[(df_home['Time [s]'] >= 815) & (df_home['Time [s]'] < 825)].copy()
 
 ##############################################################################
 # Split off the ball data, and drop the ball columns from the df_away/ df_home dataframes
@@ -97,8 +96,8 @@ df_ball.head()
 # Plot the animation
 
 # First set up the figure, the axis
-pitch = Pitch(pitch_type='metricasports', figsize=(16, 10.4), pitch_color='grass',
-              pitch_width=68, pitch_length=105, goal_type='line', stripe=True)
+pitch = Pitch(pitch_type='metricasports', figsize=(16, 10.4),
+              pitch_width=68, pitch_length=105, goal_type='line')
 fig, ax = pitch.draw()
 
 # then setup the pitch plot markers we want to animate
@@ -106,15 +105,6 @@ marker_kwargs = {'marker': 'o', 'markeredgecolor': 'black', 'linestyle': 'None'}
 ball, = ax.plot([], [], ms=6, markerfacecolor='w', zorder=3, **marker_kwargs)
 away, = ax.plot([], [], ms=10, markerfacecolor='#b94b75', **marker_kwargs)  # red/maroon
 home, = ax.plot([], [], ms=10, markerfacecolor='#7f63b8', **marker_kwargs)  # purple
-
-
-# initialization function: plot on the background for each frame
-def init():
-    ball.set_data([], [])
-    away.set_data([], [])
-    home.set_data([], [])
-    return ball, away, home
-
 
 # animation function
 def animate(i):
@@ -131,11 +121,11 @@ def animate(i):
 
 
 # call the animator, animate so 25 frames per second
+anim = animation.FuncAnimation(fig, animate, frames=len(df_ball), interval=50, blit=True)
+plt.show()
+
 # note that its hard to get the ffmpeg requirements right.
 # I installed from conda-forge: see the environment.yml file in the docs folder
-anim = animation.FuncAnimation(fig, animate, frames=len(df_ball), init_func=init, interval=50,
-                               blit=True, repeat=False)
-
 # how to save animation - commented out for example
 # anim.save('example.mp4', dpi=300, fps=25,
 #          extra_args=['-vcodec', 'libx264'],
