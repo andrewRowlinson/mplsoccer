@@ -79,5 +79,6 @@ mplsoccer's recent changes fixed several issues with the heatmap functionality
 - add_image adds images as a new axis to matplotlib figures.
 - fixed the statsbomb module so works when the json file is empty.
 - changed the statsbomb module so end coordinates are summarised in end_x, end_y, end_z columns.
+- changed the wyscout goal posts y locations to 45/ 55 for consistency with socceraction. 
 
 The statsbomb module also now cleans the data faster.

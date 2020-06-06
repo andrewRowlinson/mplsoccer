@@ -1,3 +1,9 @@
+Version 0.0.12
+-----------
+
+### Changed
+1) changed the wyscout goal posts y locations to 45/ 55 for consistency with [socceraction](https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py). 
+
 Version 0.0.11
 -----------
 

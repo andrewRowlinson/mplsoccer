@@ -104,12 +104,15 @@ class Pitch(object):
                         'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 25}
 
     # wyscout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
+	# according to socceraction https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py
+	# the goal posts go from 45 to 55 so amended here
+	# this is consistent with the statsbomb definition (goals 10% of the pitch [8/80]) and start 45% in from the side (36/80)
     _wyscout_dimensions = {'top': 0, 'bottom': 100, 'left': 0, 'right': 100,
                            'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                            'six_yard_from_side': 37, 'six_yard_width': 26, 'six_yard_length': 6,
                            'penalty_area_from_side': 19, 'penalty_area_width': 62, 'penalty_area_length': 16,
                            'left_penalty': 10, 'right_penalty': 90, 'circle_size': 9.15,
-                           'goal_depth': 1.9, 'goal_width': 12, 'goal_post': 44,
+                           'goal_depth': 1.9, 'goal_width': 10, 'goal_post': 45,
                            'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': True, 'stripe_scale': 5}
 
     _statsbomb_dimensions = {'top': 0, 'bottom': 80, 'left': 0, 'right': 120,
