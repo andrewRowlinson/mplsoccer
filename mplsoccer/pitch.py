@@ -1736,15 +1736,16 @@ class Pitch(object):
             pitch_range = [[self.left, self.right], [self.top, self.bottom]]
         else:
             pitch_range = [[self.left, self.right], [self.bottom, self.top]]
-            
-        result = binned_statistic_2d(x, y, values, statistic=statistic, bins=bins, range=pitch_range)
         
+        result = binned_statistic_2d(x, y, values, statistic=statistic, bins=bins, range=pitch_range)
+                           
         x_grid, y_grid = np.meshgrid(result.x_edge, result.y_edge)
+           
         cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
                              result.y_edge[:-1] + 0.5 * np.diff(result.y_edge))
-
-        bin_statistic = _BinnedStatisticResult(result.statistic, x_grid, y_grid, cx, cy)._asdict()
         
+        bin_statistic = _BinnedStatisticResult(result.statistic.T, x_grid, y_grid, cx, cy)._asdict()
+
         return bin_statistic
               
     def heatmap(self, bin_statistic, ax=None, **kwargs):
@@ -1773,11 +1774,11 @@ class Pitch(object):
             raise TypeError("heatmap() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
                
         if self.orientation == 'horizontal':
-            mesh = ax.pcolormesh(bin_statistic['x_grid'].T, bin_statistic['y_grid'].T,
+            mesh = ax.pcolormesh(bin_statistic['x_grid'], bin_statistic['y_grid'],
                                  bin_statistic['statistic'], **kwargs)
             
         elif self.orientation == 'vertical':
-            mesh = ax.pcolormesh(bin_statistic['y_grid'].T, bin_statistic['x_grid'].T, 
+            mesh = ax.pcolormesh(bin_statistic['y_grid'], bin_statistic['x_grid'], 
                                  bin_statistic['statistic'], **kwargs)
             
         return mesh
@@ -1847,14 +1848,14 @@ class Pitch(object):
             cx1 = bin_statistic1['cx']
             cy1 = bin_statistic1['cy']
 
-            # slicing second row            
-            stat2 = stat1[:, 2].reshape(-1, 1).copy()
+            # slicing second row
+            stat2 = stat1[2, :].reshape(1, -1).copy()
             x_grid2 = x_grid1[2:, :].copy()
             y_grid2 = y_grid1[2:, :].copy()
             cx2 = cx1[2, :].copy()
             cy2 = cy1[2, :].copy()
             # slice first row
-            stat1 = stat1[:, 0].reshape(-1, 1).copy()
+            stat1 = stat1[0, :].reshape(1, -1).copy()
             x_grid1 = x_grid1[:2, :].copy()
             y_grid1 = y_grid1[:2, :].copy()
             cx1 = cx1[0, :].copy()
@@ -1899,7 +1900,7 @@ class Pitch(object):
             y_grid5 = bin_statistic5['y_grid']
             cx5 = bin_statistic5['cx']
             cy5 = bin_statistic5['cy']
-            stat5 = stat5[:, :-1]
+            stat5 = stat5[:-1, :]
             x_grid5 = x_grid5[:-1, :].copy()
             y_grid5 = y_grid5[:-1, :].copy()
             cy5 = cy5[0].copy()
@@ -1911,6 +1912,7 @@ class Pitch(object):
             result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)._asdict()
             result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)._asdict()
             result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)._asdict()
+            print(result5)
             
             bin_statistic = [result1, result2, result3, result4, result5]    
             
@@ -2003,7 +2005,7 @@ class Pitch(object):
             mask_clip = mask_x_outside | mask_y_outside
             mask_clip = np.ravel(mask_clip)
             
-            text = np.ravel(bs['statistic'].T)[~mask_clip]
+            text = np.ravel(bs['statistic'])[~mask_clip]
             cx = np.ravel(bs['cx'])[~mask_clip]
             cy = np.ravel(bs['cy'])[~mask_clip]
             for i in range(len(text)):
