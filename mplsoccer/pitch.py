@@ -1912,7 +1912,6 @@ class Pitch(object):
             result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)._asdict()
             result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)._asdict()
             result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)._asdict()
-            print(result5)
             
             bin_statistic = [result1, result2, result3, result4, result5]    
             

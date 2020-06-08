@@ -1,8 +1,9 @@
-Version 0.0.13
+Version 0.0.14
 -----------
 
 ### Changed
 1) changed the internal workings of bin statistics and heatmaps so the results of bin_statistic can be used for other purposes.
+2) removed print function from Pitch.
 
 Version 0.0.12
 -----------
