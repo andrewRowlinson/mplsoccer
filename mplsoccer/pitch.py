@@ -439,7 +439,6 @@ class Pitch(object):
             if nrows > 1 or ncols > 1:
                 fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize,
                                          constrained_layout=self.constrained_layout)
-                axes = axes.ravel()
             else:
                 fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize,
                                          constrained_layout=self.constrained_layout)
@@ -838,7 +837,7 @@ class Pitch(object):
         if ax is None:
             self._setup_subplots()
             self.fig.set_tight_layout(self.tight_layout)
-            for ax in self.axes:
+            for ax in self.axes.ravel():
                 self._draw_ax(ax)
             if self.axes.size == 1:
                 self.axes = self.axes.item()

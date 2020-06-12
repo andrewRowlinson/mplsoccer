@@ -81,5 +81,6 @@ mplsoccer's recent changes fixed several issues with the heatmap functionality
 - changed the statsbomb module so end coordinates are summarised in end_x, end_y, end_z columns.
 - changed the wyscout goal posts y locations to 45/ 55 for consistency with socceraction.
 - changed the internal workings of the binned_statistics and heatmaps so the results of bin_statistic can be used elsewhere.
+- changed Pitch so axes aren't raveled when using subplots, e.g. layout=(2, 2). So colorbar can be used with subplots.
 
 The statsbomb module also now cleans the data faster.

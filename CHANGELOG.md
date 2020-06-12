@@ -1,3 +1,10 @@
+Version 0.0.15
+-----------
+
+### Changed
+1) changed Pitch so axes aren't raveled when using subplots, e.g. layout=(2, 2). So colorbar can be used with subplots.
+
+
 Version 0.0.14
 -----------
 
