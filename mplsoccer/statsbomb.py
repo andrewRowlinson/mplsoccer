@@ -63,7 +63,7 @@ def _simplify_cols_and_drop(df, col, cols=None):
     if cols is None:
         cols = df.columns[df.columns.str.contains(col)]
     df[col] = df.lookup(df.index, df[cols].notnull().idxmax(axis=1))
-    df.drop(cols, axis=1, inplace=True)
+    df.drop(cols, axis=1, errors='ignore', inplace=True)
     return df
 
 
@@ -173,7 +173,16 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df = _simplify_cols_and_drop(df, 'body_part_name')
     df = _simplify_cols_and_drop(df, 'aerial_won')
     df = _simplify_cols_and_drop(df, 'end_x', ['pass_end_x', 'carry_end_x', 'shot_end_x', 'goalkeeper_end_x'])    
-    df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y', 'shot_end_y', 'goalkeeper_end_y'])    
+    df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y', 'shot_end_y', 'goalkeeper_end_y'])
+    df = _simplify_cols_and_drop(df, 'event_type_id', ['pass_type_id', 'duel_type_id', 'goalkeeper_type_id', 'shot_type_id'])
+    df = _simplify_cols_and_drop(df, 'event_type_name', ['pass_type_name', 'duel_type_name', 'goalkeeper_type_name', 'shot_type_name'])
+    # technique id/names are not always present so have to take this into account
+    technique_id_cols = ['pass_technique_id', 'goalkeeper_technique_id', 'shot_technique_id']
+    technique_id_cols = set(technique_id_cols).intersection(set(df.columns))
+    technique_name_cols = ['pass_technique_name', 'goalkeeper_technique_name', 'shot_technique_name']
+    technique_name_cols = set(technique_name_cols).intersection(set(df.columns))
+    df = _simplify_cols_and_drop(df, 'technique_id', technique_id_cols)
+    df = _simplify_cols_and_drop(df, 'technique_name', technique_name_cols)
     
     # create a related events dataframe
     if related_event_df:
@@ -217,17 +226,30 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     # drop columns stored as a separate table
     df.drop(['related_events', 'shot_freeze_frame', 'tactics_lineup'], axis=1, inplace=True)
     
+    # there are a few errors with through ball not always being marked in the technique name
+    if 'pass_through_ball' in df.columns:
+        df.loc[df.pass_through_ball.notnull(), 'technique_name'] = 'Through Ball'
+    
+    # drop cols that are covered by other columns (e.g. pass technique covers through, ball, inswinging etc.)
+    cols_to_drop = ['pass_through_ball', 'pass_outswinging', 'pass_inswinging',  'clearance_head', 'clearance_left_foot',
+                    'clearance_right_foot', 'pass_straight', 'clearance_other', 'goalkeeper_punched_out', 
+                    'goalkeeper_shot_saved_off_target', 'shot_saved_off_target', 'goalkeeper_shot_saved_to_post',
+                    'shot_saved_to_post', 'goalkeeper_lost_out', 'goalkeeper_lost_in_play', 
+                    'goalkeeper_success_out', 'goalkeeper_success_in_play', 'goalkeeper_saved_to_post',
+                    'shot_kick_off', 'goalkeeper_penalty_saved_to_post']
+    df.drop(cols_to_drop, axis=1, errors='ignore', inplace=True)
+    
     # rename end location
     df.rename({'shot_end_z': 'end_z'}, axis=1, inplace=True)
            
     # reorder columns so some of the most used ones are first
     cols = ['match_id', 'id', 'index', 'period', 'timestamp_minute', 'timestamp_second', 
-            'timestamp_millisecond', 'minute', 'second', 'type_id', 'type_name',
-            'outcome_id', 'outcome_name',  'play_pattern_id', 'play_pattern_name',
+            'timestamp_millisecond', 'minute', 'second', 'type_id', 'type_name', 'event_type_id',
+            'event_type_name',  'outcome_id', 'outcome_name', 'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
             'position_name', 'duration', 'x', 'y', 'end_x', 'end_y', 'end_z',
-            'body_part_id', 'body_part_name']
+            'body_part_id', 'body_part_name', 'technique_id', 'technique_name']  
     other_cols = df.columns[~df.columns.isin(cols)]
     cols.extend(other_cols)
     df = df[cols].copy()

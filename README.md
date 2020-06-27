@@ -82,5 +82,8 @@ mplsoccer's recent changes fixed several issues with the heatmap functionality
 - changed the wyscout goal posts y locations to 45/ 55 for consistency with socceraction.
 - changed the internal workings of the binned_statistics and heatmaps so the results of bin_statistic can be used elsewhere.
 - changed Pitch so axes aren't raveled when using subplots, e.g. layout=(2, 2). So colorbar can be used with subplots.
+- combined the StatsBomb technique columns (pass_technique, goalkeeper_technique, shot_technique) into techique_id and technique_name
+- combined the Statsbomb type columns (pass_type, duel_type_id, goalkeeper_type, shot_type) into event_type_name and event_type_id
+- removed some StatsBomb columns that repeat other columns
 
 The statsbomb module also now cleans the data faster.

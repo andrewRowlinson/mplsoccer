@@ -1,3 +1,15 @@
+Version 0.0.16
+-----------
+
+### Changed
+1) combined the StatsBomb technique columns (pass_technique, goalkeeper_technique, shot_technique) into techique_id and technique_name
+2) combined the Statsbomb type columns (pass_type, duel_type_id, goalkeeper_type, shot_type) into event_type_name and event_type_id
+3) removed StatsBomb columns that repeat other columns: pass_through_ball, pass_outswinging, pass_inswinging, 
+clearance_head, clearance_left_foot, clearance_right_foot, pass_straight, clearance_other, goalkeeper_punched_out, 
+goalkeeper_shot_saved_off_target, shot_saved_off_target, goalkeeper_shot_saved_to_post, shot_saved_to_post, 
+goalkeeper_lost_out, goalkeeper_lost_in_play, goalkeeper_success_out, goalkeeper_success_in_play, goalkeeper_saved_to_post,
+shot_kick_off, goalkeeper_penalty_saved_to_post
+
 Version 0.0.15
 -----------
 
