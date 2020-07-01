@@ -1,3 +1,9 @@
+Version 0.0.19
+-----------
+
+### Fixed
+1) Fixed arrows legend to work in recent versions of matplotlib.
+
 Version 0.0.17 / 0.0.18
 -----------
 

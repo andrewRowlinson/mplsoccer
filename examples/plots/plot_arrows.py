@@ -39,7 +39,7 @@ df_pass.head()
 # Setup the pitch
 pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
               pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
-              constrained_layout=False, tight_layout=True)
+              constrained_layout=True, tight_layout=False)
 fig, ax = pitch.draw()
 
 # Plot the completed passes
