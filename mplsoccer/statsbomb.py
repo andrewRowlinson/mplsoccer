@@ -32,7 +32,7 @@ def _split_location_cols(df, col, new_cols):
         
 def _list_dictionary_to_df(df, col, value_name, var_name, id_col='id'):
     """ Some columns are a list of dictionaries. This turns them into a new dataframe of rows."""
-    df = df.loc[df[col].notnull(), ['id', col]]
+    df = df.loc[df[col].notnull(), [id_col, col]]
     df.set_index(id_col, inplace=True)
     df = df[col].apply(pd.Series).copy()
     df.reset_index(inplace=True)
