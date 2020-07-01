@@ -1,3 +1,10 @@
+Version 0.0.17
+-----------
+
+### Changed
+1) changed the event_type_name/ event_type_id columns in the StatsBomb data to sub_type_name, sub_type_id.
+
+
 Version 0.0.16
 -----------
 

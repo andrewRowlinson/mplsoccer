@@ -30,13 +30,13 @@ def _split_location_cols(df, col, new_cols):
         df.drop(col, axis=1, inplace=True)
 
         
-def _list_dictionary_to_df(df, col, value_name, var_name):
+def _list_dictionary_to_df(df, col, value_name, var_name, id_col='id'):
     """ Some columns are a list of dictionaries. This turns them into a new dataframe of rows."""
     df = df.loc[df[col].notnull(), ['id', col]]
-    df.set_index('id', inplace=True)
+    df.set_index(id_col, inplace=True)
     df = df[col].apply(pd.Series).copy()
     df.reset_index(inplace=True)
-    df = df.melt(id_vars='id', value_name=value_name, var_name=var_name)
+    df = df.melt(id_vars=id_col, value_name=value_name, var_name=var_name)
     df[var_name] = df[var_name] + 1
     df = df[df[value_name].notnull()].copy()
     df.reset_index(inplace=True, drop=True)
@@ -174,8 +174,8 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df = _simplify_cols_and_drop(df, 'aerial_won')
     df = _simplify_cols_and_drop(df, 'end_x', ['pass_end_x', 'carry_end_x', 'shot_end_x', 'goalkeeper_end_x'])    
     df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y', 'shot_end_y', 'goalkeeper_end_y'])
-    df = _simplify_cols_and_drop(df, 'event_type_id', ['pass_type_id', 'duel_type_id', 'goalkeeper_type_id', 'shot_type_id'])
-    df = _simplify_cols_and_drop(df, 'event_type_name', ['pass_type_name', 'duel_type_name', 'goalkeeper_type_name', 'shot_type_name'])
+    df = _simplify_cols_and_drop(df, 'sub_type_id', ['pass_type_id', 'duel_type_id', 'goalkeeper_type_id', 'shot_type_id'])
+    df = _simplify_cols_and_drop(df, 'sub_type_name', ['pass_type_name', 'duel_type_name', 'goalkeeper_type_name', 'shot_type_name'])
     # technique id/names are not always present so have to take this into account
     technique_id_cols = ['pass_technique_id', 'goalkeeper_technique_id', 'shot_technique_id']
     technique_id_cols = set(technique_id_cols).intersection(set(df.columns))
@@ -244,8 +244,8 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
            
     # reorder columns so some of the most used ones are first
     cols = ['match_id', 'id', 'index', 'period', 'timestamp_minute', 'timestamp_second', 
-            'timestamp_millisecond', 'minute', 'second', 'type_id', 'type_name', 'event_type_id',
-            'event_type_name',  'outcome_id', 'outcome_name', 'play_pattern_id', 'play_pattern_name',
+            'timestamp_millisecond', 'minute', 'second', 'type_id', 'type_name', 'sub_type_id',
+            'sub_type_name',  'outcome_id', 'outcome_name', 'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
             'position_name', 'duration', 'x', 'y', 'end_x', 'end_y', 'end_z',
