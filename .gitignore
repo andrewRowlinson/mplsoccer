@@ -4,6 +4,7 @@
 *.so
 *.dylib
 *.parquet
+*.log
 
 # ignore desktop.ini
 desktop.ini

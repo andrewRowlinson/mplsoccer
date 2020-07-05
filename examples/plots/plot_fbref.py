@@ -5,8 +5,7 @@ FBRef Pressure
 
 This example shows how to scrape pressure events from FBRef.com and plot them as a heatmap.
 """
-
-import chromedriver_binary
+# import chromedriver_binary # uncomment if using the Chrome webdriver
 from selenium import webdriver
 from mplsoccer.pitch import Pitch, add_image
 import pandas as pd
@@ -20,11 +19,11 @@ from urllib.request import urlopen
 # Scrape the data via Selenium since the tables are dynamically loaded by the FBRef website
 # you can't use pandas' read_html directly.
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()  # webdrived.Chrome() if using Chrome instead of Firefox
 driver.get("https://fbref.com/en/comps/9/Premier-League-Stats")
 time.sleep(2)
 dfs = pd.read_html(driver.page_source)  # returns a list of dataframes
-df_defence = dfs[9]  # we want the 10th table in the list
+df_defence = dfs[18]  # we want the 19th table in the list (dfs[10] for Chrome due to the different ordering of the tables)
 # and drop the multi-index
 df = df_defence[['Unnamed: 0_level_0', 'Pressures']].copy() # select subset of columns
 df.columns = df.columns.droplevel() # drop the top-level of the multi-index
@@ -104,4 +103,4 @@ axes = axes.reshape(4, 5)
 cbar = fig.colorbar(heatmap, ax=axes[:, 4], shrink=0.85, format='%d')
 cbar.ax.tick_params(labelsize=20)
 add_image(logo, fig, left=0.9, bottom=0.975, width=0.1)
-title = fig.suptitle('Pressure events, percentage point difference from Premier League average 2019/20', fontsize=20)
+title = fig.suptitle('Pressure events, percentage point difference from the Premier League average 2019/20', fontsize=20)

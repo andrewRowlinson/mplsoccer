@@ -12,7 +12,8 @@ dependencies:
   - pillow
   - lxml
   - selenium
-  - python-chromedriver-binary
+  - geckodriver
+  - firefox
   - conda-forge::ffmpeg
   - pip
   - pip:
