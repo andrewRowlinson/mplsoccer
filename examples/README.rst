@@ -3,26 +3,7 @@ Examples
 
 This gallery contains a selection of examples of the plots mplsoccer can create.
 
-All of the examples can be run from the following Anaconda environment:
-
-   .. code :: yaml
-
-      name: mplsoccer
-      channels:
-        - anaconda
-        - conda-forge
-      dependencies:
-        - jupyter
-        - pandas
-        - scipy
-        - seaborn
-        - beautifulsoup4
-        - pyarrow
-        - pillow
-        - conda-forge::ffmpeg
-        - pip
-        - pip:
-            - mplsoccer
+All of the examples can be run from `this Anaconda environment <https://github.com/andrewRowlinson/mplsoccer/blob/master/environment.yml>`_.
 
 To install the environment yourself use the `Anaconda <https://www.anaconda.com/>`_ Prompt:
 

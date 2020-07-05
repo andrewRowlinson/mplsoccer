@@ -10,6 +10,9 @@ dependencies:
   - beautifulsoup4
   - pyarrow
   - pillow
+  - lxml
+  - selenium
+  - python-chromedriver-binary
   - conda-forge::ffmpeg
   - pip
   - pip:
