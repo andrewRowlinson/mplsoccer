@@ -22,8 +22,8 @@ df_freeze = dict_event['shot_freeze_frame']
 # Subset a shot
 
 shot_id = '8bb8bbc2-68a6-4c01-93de-53a194e7a1cf'
-df_freeze_frame = df_freeze[df_freeze.id==shot_id].copy()
-df_shot_event = df_event[df_event.id==shot_id].dropna(axis=1, how='all').copy()
+df_freeze_frame = df_freeze[df_freeze.id == shot_id].copy()
+df_shot_event = df_event[df_event.id == shot_id].dropna(axis=1, how='all').copy()
 
 ##############################################################################
 # Location dataset

@@ -104,9 +104,10 @@ class Pitch(object):
                         'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 25}
 
     # wyscout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
-	# according to socceraction https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py
-	# the goal posts go from 45 to 55 so amended here
-	# this is consistent with the statsbomb definition (goals 10% of the pitch [8/80]) and start 45% in from the side (36/80)
+    # according to socceraction https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py
+    # the goal posts go from 45 to 55 so amended here
+    # this is consistent with the statsbomb definition (goals 10% of the pitch [8/80])
+    # and start 45% in from the side (36/80)
     _wyscout_dimensions = {'top': 0, 'bottom': 100, 'left': 0, 'right': 100,
                            'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                            'six_yard_from_side': 37, 'six_yard_width': 26, 'six_yard_length': 6,
@@ -1427,7 +1428,7 @@ class Pitch(object):
         x, y: array-like or scalar.
             Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
         
-        team: array-like or scalar.
+        teams: array-like or scalar.
             This splits the results into the Voronoi vertices for each team.
             This can either have integer (1/0) values or boolean (True/False) values.
             team1 is where team==1 or team==True
@@ -1492,8 +1493,8 @@ class Pitch(object):
         region_vertices = np.array(region_vertices)
         
         # seperate team1/ team2 vertices
-        team1 = region_vertices[teams==1]
-        team2 = region_vertices[teams==0]
+        team1 = region_vertices[teams == 1]
+        team2 = region_vertices[teams == 0]
         
         return team1, team2
         

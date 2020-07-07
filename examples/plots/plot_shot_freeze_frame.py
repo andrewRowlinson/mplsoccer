@@ -26,8 +26,8 @@ df_lineup = df_lineup[['player_id', 'player_jersey_number', 'team_name']].copy()
 # Subset a shot
 
 shot_id = '8bb8bbc2-68a6-4c01-93de-53a194e7a1cf'
-df_freeze_frame = df_freeze[df_freeze.id==shot_id].copy()
-df_shot_event = df_event[df_event.id==shot_id].dropna(axis=1, how='all').copy()
+df_freeze_frame = df_freeze[df_freeze.id == shot_id].copy()
+df_shot_event = df_event[df_event.id == shot_id].dropna(axis=1, how='all').copy()
 
 # add the jersey number
 df_freeze_frame = df_freeze_frame.merge(df_lineup, how='left', on='player_id')
@@ -41,8 +41,8 @@ team2 = list(set(df_event.team_name.unique()) - set([team1]))[0]
 
 # subset the team shooting, and the opposition (goalkeeper/ other)
 df_team1 = df_freeze_frame[df_freeze_frame.team_name == team1]
-df_team2_goal = df_freeze_frame[(df_freeze_frame.team_name == team2) & 
-                                 (df_freeze_frame.player_position_name == 'Goalkeeper')]
+df_team2_goal = df_freeze_frame[(df_freeze_frame.team_name == team2) &
+                                (df_freeze_frame.player_position_name == 'Goalkeeper')]
 df_team2_other = df_freeze_frame[(df_freeze_frame.team_name == team2) & 
                                  (df_freeze_frame.player_position_name != 'Goalkeeper')]
 

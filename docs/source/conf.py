@@ -70,7 +70,7 @@ exclude_patterns = ['_build']
 sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
-	'matplotlib_animations': True,
+    'matplotlib_animations': True,
     'subsection_order': ExplicitOrder(['../../examples/plots',
                                        '../../examples/statsbomb',
                                        '../../examples/pitch_setup', ])}

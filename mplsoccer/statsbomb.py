@@ -174,8 +174,10 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df = _simplify_cols_and_drop(df, 'aerial_won')
     df = _simplify_cols_and_drop(df, 'end_x', ['pass_end_x', 'carry_end_x', 'shot_end_x', 'goalkeeper_end_x'])    
     df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y', 'shot_end_y', 'goalkeeper_end_y'])
-    df = _simplify_cols_and_drop(df, 'sub_type_id', ['pass_type_id', 'duel_type_id', 'goalkeeper_type_id', 'shot_type_id'])
-    df = _simplify_cols_and_drop(df, 'sub_type_name', ['pass_type_name', 'duel_type_name', 'goalkeeper_type_name', 'shot_type_name'])
+    df = _simplify_cols_and_drop(df, 'sub_type_id', ['pass_type_id', 'duel_type_id',
+                                                     'goalkeeper_type_id', 'shot_type_id'])
+    df = _simplify_cols_and_drop(df, 'sub_type_name', ['pass_type_name', 'duel_type_name',
+                                                       'goalkeeper_type_name', 'shot_type_name'])
     # technique id/names are not always present so have to take this into account
     technique_id_cols = ['pass_technique_id', 'goalkeeper_technique_id', 'shot_technique_id']
     technique_id_cols = set(technique_id_cols).intersection(set(df.columns))
@@ -231,12 +233,12 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         df.loc[df.pass_through_ball.notnull(), 'technique_name'] = 'Through Ball'
     
     # drop cols that are covered by other columns (e.g. pass technique covers through, ball, inswinging etc.)
-    cols_to_drop = ['pass_through_ball', 'pass_outswinging', 'pass_inswinging',  'clearance_head', 'clearance_left_foot',
-                    'clearance_right_foot', 'pass_straight', 'clearance_other', 'goalkeeper_punched_out', 
-                    'goalkeeper_shot_saved_off_target', 'shot_saved_off_target', 'goalkeeper_shot_saved_to_post',
-                    'shot_saved_to_post', 'goalkeeper_lost_out', 'goalkeeper_lost_in_play', 
-                    'goalkeeper_success_out', 'goalkeeper_success_in_play', 'goalkeeper_saved_to_post',
-                    'shot_kick_off', 'goalkeeper_penalty_saved_to_post']
+    cols_to_drop = ['pass_through_ball', 'pass_outswinging', 'pass_inswinging',  'clearance_head',
+                    'clearance_left_foot', 'clearance_right_foot', 'pass_straight', 'clearance_other',
+                    'goalkeeper_punched_out',  'goalkeeper_shot_saved_off_target', 'shot_saved_off_target',
+                    'goalkeeper_shot_saved_to_post', 'shot_saved_to_post', 'goalkeeper_lost_out',
+                    'goalkeeper_lost_in_play',  'goalkeeper_success_out', 'goalkeeper_success_in_play',
+                    'goalkeeper_saved_to_post', 'shot_kick_off', 'goalkeeper_penalty_saved_to_post']
     df.drop(cols_to_drop, axis=1, errors='ignore', inplace=True)
     
     # rename end location

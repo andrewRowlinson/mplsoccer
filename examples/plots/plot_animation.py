@@ -106,6 +106,7 @@ ball, = ax.plot([], [], ms=6, markerfacecolor='w', zorder=3, **marker_kwargs)
 away, = ax.plot([], [], ms=10, markerfacecolor='#b94b75', **marker_kwargs)  # red/maroon
 home, = ax.plot([], [], ms=10, markerfacecolor='#7f63b8', **marker_kwargs)  # purple
 
+
 # animation function
 def animate(i):
     # set the ball data with the x and y positions for the ith frame
