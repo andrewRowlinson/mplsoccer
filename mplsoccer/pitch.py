@@ -2015,7 +2015,52 @@ class Pitch(object):
                 annotation_list.append(annotation)
             
         return annotation_list
-
+    
+    def calculate_angle(self, xstart, ystart, xend, yend):
+        """ Calculates the angle in radians counter-clockwise between a start and end location.
+        Where 0 is this way → (the straight line from left to right) in a horizontally orientated pitch
+        and this way ↑ in a vertically orientated pitch.
+        The angle goes from 0 to 2pi. To convert this to degrees use np.degrees(angle).
+        
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. 
+            These should be the start and end coordinates to calculate the angle between.
+        Returns
+        -------
+        angle: ndarray
+            Array of angles in radians counter-clockwise in the range [0, 2pi].
+            Where 0 is the straight line left to right in a horizontally orientated pitch
+            and the straight line bottom to top in a vertically orientated pitch.
+        
+        """
+        xstart = np.ravel(xstart)
+        ystart = np.ravel(ystart)
+        xend = np.ravel(xend)
+        yend = np.ravel(yend)
+        
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")  
+        
+        x_dist = xend - xstart
+        if self.invert_y:
+            y_dist = ystart - yend
+        else:
+            y_dist = yend - ystart
+        if self.aspect != 1:
+            x_dist = x_dist / max(self.left, self.right) * self.pitch_length
+            y_dist = y_dist / max(self.bottom, self.top) * self.pitch_width
+        pass_radians = np.arctan2(y_dist, x_dist)
+        # if negative angle make positive angle, so goes from 0 to 2 * pi
+        pass_radians[pass_radians < 0] = 2 * np.pi + pass_radians[pass_radians < 0]
+        
+        return pass_radians    
+    
 
 # Amended from
 # https://stackoverflow.com/questions/49223702/adding-a-legend-to-a-matplotlib-plot-with-a-multicolored-line?rq=1
