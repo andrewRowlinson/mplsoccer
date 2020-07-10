@@ -15,6 +15,8 @@ from urllib.request import urlopen
 
 ##############################################################################
 # Scrape the data via a link to a specific table.
+# To get the link for a different league, find the table you want from the website. Then click "Share & more" and copy the link from
+# the option "Embed this table".
 url = ('http://widgets.sports-reference.com/wg.fcgi?css=1&site=fb&url=%2Fen%2Fcomps%2F9%2FPremier-League-Stats'
        '&div=div_stats_defense_squads')
 df = pd.read_html(url)[0]

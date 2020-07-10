@@ -1,3 +1,11 @@
+
+Version 0.0.20
+-----------
+
+### Fixed
+1) Fixed arrows so the arrows scale correctly when the dots per inches (dpi) of the figure is changed. Before the units were in dots so the arrow got smaller as the dots per inches increases. Fixed this so the arrow is in points (1/72th of an inch) so the arrow stays the same size when the dots per inch changes.
+
+
 Version 0.0.19
 -----------
 

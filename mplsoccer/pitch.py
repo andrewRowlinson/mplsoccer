@@ -1551,16 +1551,19 @@ class Pitch(object):
             raise TypeError("quiver() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
         # set so plots in data units
-        units = kwargs.pop('units', 'dots')
+        units = kwargs.pop('units', 'inches')
         scale_units = kwargs.pop('scale_units', 'xy')
         angles = kwargs.pop('angles', 'xy')
         scale = kwargs.pop('scale', 1)
         width = kwargs.pop('width', 4)
+        # fixed a bug here. I changed the units to inches and divided by 72 so the width is in points, i.e. 1/72th of an inch
+        width = width/72.
         
         xstart = np.ravel(xstart)
         ystart = np.ravel(ystart)
         xend = np.ravel(xend)
         yend = np.ravel(yend)
+
         
         if xstart.size != ystart.size:
             raise ValueError("xstart and ystart must be the same size")
@@ -2072,8 +2075,10 @@ class HandlerQuiver(HandlerLine2D):
     def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
         xdata, xdata_marker = self.get_xdata(legend, xdescent, ydescent, width, height, fontsize)
         ydata = ((height - ydescent) / 2.) * np.ones(len(xdata), float)
-        head_width = orig_handle.width * orig_handle.headwidth
-        head_length = orig_handle.width * orig_handle.headlength
+        # I divide by 72 in the quiver plot so have to multiply back here as the legend is in different units
+        width = orig_handle.width * 72.
+        head_width = width * orig_handle.headwidth
+        head_length = width * orig_handle.headlength
         overhang = (orig_handle.headlength - orig_handle.headaxislength)/orig_handle.headlength
         edgecolor = orig_handle.get_edgecolor()
         facecolor = orig_handle.get_facecolor()
@@ -2093,7 +2098,7 @@ class HandlerQuiver(HandlerLine2D):
                                      head_length=head_length,
                                      overhang=overhang,
                                      length_includes_head=True,
-                                     width=orig_handle.width,
+                                     width=width,
                                      lw=orig_handle.get_linewidths()[0],
                                      edgecolor=edgecolor,
                                      facecolor=facecolor)
