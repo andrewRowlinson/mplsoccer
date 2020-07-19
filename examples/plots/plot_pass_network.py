@@ -71,6 +71,7 @@ passes = events.loc[mask_pass, to_keep].copy()
 player_locs =  events.loc[(events.team_name == team) & (events['x'].notnull()), 
                           ['id','match_id', 'player_id', 'player_name', 'x', 'y',
                            'tactics_id', 'tactics_formation', 'position_abbreviation']]
+player_locs['tactics_formation'].unique()
 
 ##############################################################################
 # Filter passes and player locations by chosen formation, then group locations by player position to calculate avg x, avg y, count of events
