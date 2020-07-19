@@ -13,7 +13,7 @@ import numpy as np
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
 ##############################################################################
-# set team and match info, and get event and tactics dataframes for the defined match_id
+# Set team and match info, and get event and tactics dataframes for the defined match_id
 
 match_id = 15946 # (Deportivo (H), 2018/19 La Liga)
 team = 'Barcelona'
@@ -23,13 +23,13 @@ players = event_dict['tactics_lineup']
 events = event_dict['event']
 
 ##############################################################################
-# adding on the last tactics id and formation for the team for each event
+# Adding on the last tactics id and formation for the team for each event
 
 events.loc[events.tactics_formation.notnull(), 'tactics_id'] = events.loc[events.tactics_formation.notnull(), 'id']
 events[['tactics_id', 'tactics_formation']] = events.groupby('team_name')[['tactics_id', 'tactics_formation']].ffill()
 
 ##############################################################################
-# add the abbreviated player position to the players dataframe
+# Add the abbreviated player position to the players dataframe
 
 formation_dict = {1: 'GK', 2: 'RB', 3: 'RCB', 4: 'CB', 5: 'LCB', 6: 'LB', 7: 'RWB', 8: 'LWB', 9: 'RDM',
                   10: 'CDM', 11: 'LDM', 12: 'RM', 13: 'RCM', 14: 'CM', 15: 'LCM', 16: 'LM', 17: 'RW',
@@ -37,7 +37,7 @@ formation_dict = {1: 'GK', 2: 'RB', 3: 'RCB', 4: 'CB', 5: 'LCB', 6: 'LB', 7: 'RW
 players['position_abbreviation'] = players.player_position_id.map(formation_dict)
 
 ##############################################################################
-# add on the subsitutions to the players dataframe, i.e. where players are subbed on but the formation doesn't change
+# Add on the subsitutions to the players dataframe, i.e. where players are subbed on but the formation doesn't change
 
 sub = events.loc[events.type_name == 'Substitution', ['tactics_id', 'player_id', 'substitution_replacement_id',
                                                       'substitution_replacement_name']]
@@ -50,7 +50,7 @@ players.rename({'id': 'tactics_id'}, axis='columns', inplace=True)
 players = players[['tactics_id', 'player_id', 'position_abbreviation']]
 
 ##############################################################################
-# add player position information to the events dataframe
+# Add player position information to the events dataframe
 
 # add on the position the player was playing in the formation to the events dataframe
 events = events.merge(players, on=['tactics_id', 'player_id'], how='left', validate='m:1')
@@ -59,7 +59,7 @@ events = events.merge(players.rename({'player_id': 'pass_recipient_id'}, axis='c
                       on=['tactics_id', 'pass_recipient_id'], how='left', validate='m:1', suffixes=['', '_receipt'])
 
 ##############################################################################
-# create dataframes for passes and player locations
+# Create dataframes for passes and player locations
 
 # get a dataframe with all passes
 mask_pass = (events.team_name == team) & (events.type_name == 'Pass')
@@ -72,15 +72,8 @@ player_locs =  events.loc[(events.team_name == team) & (events['x'].notnull()),
                           ['id','match_id', 'player_id', 'player_name', 'x', 'y',
                            'tactics_id', 'tactics_formation', 'position_abbreviation']]
 
-
-"""
-===================================
-Passing network for a set formation
-===================================
-"""
-
 ##############################################################################
-# filter passes and player locations by chosen formation, then group locations by player position to calculate avg x, avg y, count of events
+# Filter passes and player locations by chosen formation, then group locations by player position to calculate avg x, avg y, count of events
 
 formation = 433
 passes_formation = passes[(passes.tactics_formation == formation) & (passes.position_abbreviation_receipt.notnull())].copy()
@@ -89,7 +82,7 @@ average_locs_and_count = player_locs_formation.groupby('position_abbreviation').
 average_locs_and_count.columns = ['x', 'y', 'count']
 
 ##############################################################################
-# group the passes by unique pairings of players and add the avg player positions to this dataframe
+# Group the passes by unique pairings of players and add the avg player positions to this dataframe
 
 # calculate the number of passes between each position (using min/ max so we get passes both ways)
 passes_formation['pos_max'] = passes_formation[['position_abbreviation', 'position_abbreviation_receipt']].max(axis='columns')
@@ -101,7 +94,7 @@ passes_between = passes_between.merge(average_locs_and_count, left_on='pos_min',
 passes_between = passes_between.merge(average_locs_and_count, left_on='pos_max', right_index=True, suffixes=['', '_end'])
 
 ##############################################################################
-# calculate the line width and marker sizes relative to the largest counts
+# Calculate the line width and marker sizes relative to the largest counts
 
 max_line_width = 18
 max_marker_size = 3000
@@ -110,7 +103,7 @@ average_locs_and_count['marker_size'] = (average_locs_and_count['count'] / avera
                                          max_marker_size)
 
 ##############################################################################
-# set line transparency relative to a minimum transparency
+# Set line transparency relative to a minimum transparency
 
 min_transparency = 0.3
 color = np.array(to_rgba('white'))
