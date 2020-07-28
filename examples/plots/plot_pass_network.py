@@ -65,36 +65,25 @@ events = events.merge(players.rename({'player_id': 'pass_recipient_id'},
                       how='left', validate='m:1', suffixes=['', '_receipt'])
 
 ##############################################################################
-# Create dataframes for passes and player locations
-
-# get a dataframe with all passes
-mask_pass = (events.team_name == team) & (events.type_name == 'Pass')
-to_keep = ['id', 'match_id', 'player_id', 'player_name', 'outcome_name', 'pass_recipient_id',
-           'pass_recipient_name', 'x', 'y', 'end_x', 'end_y', 'tactics_id', 'tactics_formation',
-           'position_abbreviation', 'position_abbreviation_receipt']
-passes = events.loc[mask_pass, to_keep].copy()
-print('Formations used by {} in match: '.format(team), passes['tactics_formation'].unique())
+# Show the formations used in the match
+events.groupby('team_name').tactics_formation.unique()
 
 ##############################################################################
 # Filter passes by chosen formation, then group all passes and receipts to
 # calculate avg x, avg y, count of events for each slot in the formation
 
 formation = 433
-passes_formation = passes[(passes.tactics_formation == formation) &
-                          (passes.position_abbreviation_receipt.notnull())].copy()
-passer_passes = passes_formation[['position_abbreviation', 'x', 'y']].copy()
-recipient_passes = passes_formation[['position_abbreviation_receipt', 'end_x', 'end_y']].copy()
-# rename columns to match those in passer_passes
-recipient_passes.rename({'position_abbreviation_receipt': 'position_abbreviation',
-                         'end_x': 'x', 'end_y': 'y'}, axis='columns', inplace=True)
-# create a new dataframe containing all individual passes and receipts from passes_formation
-appended_passes = pd.concat(objs=[passer_passes, recipient_passes], ignore_index=True)
-average_locs_and_count = appended_passes.groupby('position_abbreviation').agg({
-    'x': ['mean'], 'y': ['mean', 'count']})
-average_locs_and_count.columns = ['x', 'y', 'count']
+passes_formation = events.loc[(events.team_name == team) & (events.type_name == 'Pass') &
+                              (events.tactics_formation == formation) &
+                              (events.position_abbreviation_receipt.notnull()),
+                              ['id', 'position_abbreviation', 'position_abbreviation_receipt']].copy()
+location_formation = events.loc[(events.team_name == team) & (events.type_name.isin(['Pass', 'Ball Receipt'])) &
+                                (events.tactics_formation == formation),
+                                ['position_abbreviation', 'x', 'y']]
 
-##############################################################################
-# Group the passes by unique pairings of players and add the avg player positions to this dataframe
+# average locations
+average_locs_and_count = location_formation.groupby('position_abbreviation').agg({'x': ['mean'], 'y': ['mean', 'count']})
+average_locs_and_count.columns = ['x', 'y', 'count']
 
 # calculate the number of passes between each position (using min/ max so we get passes both ways)
 passes_formation['pos_max'] = passes_formation[['position_abbreviation',
@@ -103,6 +92,7 @@ passes_formation['pos_min'] = passes_formation[['position_abbreviation',
                                                 'position_abbreviation_receipt']].min(axis='columns')
 passes_between = passes_formation.groupby(['pos_min', 'pos_max']).id.count().reset_index()
 passes_between.rename({'id': 'pass_count'}, axis='columns', inplace=True)
+
 # add on the location of each player so we have the start and end positions of the lines
 passes_between = passes_between.merge(average_locs_and_count, left_on='pos_min', right_index=True)
 passes_between = passes_between.merge(average_locs_and_count, left_on='pos_max', right_index=True,
