@@ -17,6 +17,7 @@ from matplotlib import rcParams
 from matplotlib.legend import Legend
 from scipy.stats import binned_statistic_2d
 from scipy.spatial import Voronoi
+from scipy.stats import circmean
 from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
 from collections import Sequence, namedtuple
 import warnings
@@ -37,7 +38,7 @@ class Pitch(object):
     pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats',
-        'wyscout', 'statsperform', 'metricasports'.
+        'wyscout', 'uefa', 'metricasports'.
     orientation : str, default 'horizontal'
         The pitch orientation: 'horizontal' or 'vertical'.
     view : str, default 'full'
@@ -49,7 +50,7 @@ class Pitch(object):
         The line color for the pitch markings. If None, defaults to rcParams["grid.color"].       
     line_zorder : float, default 0.9
         Set the zorder for the pitch lines (a matplotlib artist). Artists with lower zorder values are drawn first.
-    background_zorder : float, default 0.8
+    background_zorder : float, default 0.6
         Set the zorder for the pitch background (a matplotlib artist). Artists with lower zorder values are drawn first.
     linewidth : float, default 2
         The line width for the pitch markings.
@@ -74,7 +75,26 @@ class Pitch(object):
     pad_top : float, default None
         Adjusts the top ylim of the axis. Postive values increase the plot area,
         while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.    
+    positional : bool, default False
+        Whether to draw Juego de Posición lines.        
+    positional_zorder : float, default 0.8
+        Set the zorder for the Juego de Posición lines. Artists with lower zorder values are drawn first.      
+    positional_linewidth : float, default None
+        Linewidth for the Juego de Posición lines.
+        If None then this defaults to the same linewidth as the pitch lines (linewidth).   
+    positional_linestyle : str or tuple
+        Linestyle for the Juego de Posición lines: {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}
+        see: https://matplotlib.org/3.2.1/gallery/lines_bars_and_markers/linestyles.html
+    positional_color : any Matplotlib color, default '#eadddd'
+        The line color for the Juego de Posición lines.    
+    shade_middle : bool, default False
+         Whether to shade the middle third of the pitch.     
+    shade_color : any Matplotlib color, default '#f2f2f2'
+        The fill color for the shading of the middle third of the pitch.
+    shade_zorder : float, default 0.7
+        Set the zorder for the shading of the middle third of the pitch.
+        Artists with lower zorder values are drawn first.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports' pitch_type.
     pitch_width : float, default None
@@ -99,7 +119,7 @@ class Pitch(object):
                         'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                         'six_yard_from_side': 36.8, 'six_yard_width': 26.4, 'six_yard_length': 5.8,
                         'penalty_area_from_side': 21.1, 'penalty_area_width': 57.8, 'penalty_area_length': 17.0,
-                        'left_penalty': 11.5, 'right_penalty': 88.5, 'circle_size': 9.15,
+                        'left_penalty': 11.5, 'right_penalty': 88.5, 'circle_size': 8.84,
                         'goal_depth': 1.9, 'goal_width': 10.76, 'goal_post': 44.62,
                         'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': False, 'stripe_scale': 25}
 
@@ -112,7 +132,7 @@ class Pitch(object):
                            'width': 100, 'center_width': 50, 'length': 100, 'center_length': 50,
                            'six_yard_from_side': 37, 'six_yard_width': 26, 'six_yard_length': 6,
                            'penalty_area_from_side': 19, 'penalty_area_width': 62, 'penalty_area_length': 16,
-                           'left_penalty': 10, 'right_penalty': 90, 'circle_size': 9.15,
+                           'left_penalty': 10, 'right_penalty': 90, 'circle_size': 8.84,
                            'goal_depth': 1.9, 'goal_width': 10, 'goal_post': 45,
                            'arc1_leftV': None, 'arc2_leftH': None, 'invert_y': True, 'stripe_scale': 5}
 
@@ -120,9 +140,9 @@ class Pitch(object):
                              'width': 80, 'center_width': 40, 'length': 120, 'center_length': 60,
                              'six_yard_from_side': 30, 'six_yard_width': 20, 'six_yard_length': 6,
                              'penalty_area_from_side': 18, 'penalty_area_width': 44, 'penalty_area_length': 18,
-                             'left_penalty': 12, 'right_penalty': 108, 'circle_size': 10.46,
+                             'left_penalty': 12, 'right_penalty': 108, 'circle_size': 10.,
                              'goal_depth': 2.4, 'goal_width': 8, 'goal_post': 36,
-                             'arc1_leftV': 35, 'arc2_leftH': 55, 'invert_y': True, 'stripe_scale': 5}
+                             'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': True, 'stripe_scale': 5}
     
     # real-life pitches are in yards and the meter conversions are slightly different
     # but with this size of visualisation the differences will be minimal
@@ -149,21 +169,24 @@ class Pitch(object):
                          'width': 70, 'center_width': 35, 'length': 105, 'center_length': 52.5,
                          'six_yard_from_side': 26, 'six_yard_width': 18, 'six_yard_length': 6,
                          'penalty_area_from_side': 15, 'penalty_area_width': 40, 'penalty_area_length': 16.5,
-                         'left_penalty': 11, 'right_penalty': 94, 'circle_size': 9.15,
+                         'left_penalty': 11, 'right_penalty': 94, 'circle_size': 9,
                          'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 31.34,
                          'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': True, 'stripe_scale': 20}
     
-    _statsperform_dimensions = {'top': 68, 'bottom': 0, 'left': 0, 'right': 105,
-                                'width': 68, 'center_width': 34, 'length': 105, 'center_length': 52.5,
-                                'six_yard_from_side': 24.84, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
-                                'penalty_area_from_side': 13.84, 'penalty_area_width': 40.32,
-                                'penalty_area_length': 16.5, 'left_penalty': 11, 'right_penalty': 94,
-                                'circle_size': 9.15, 'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 30.34,
-                                'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
+    _uefa_dimensions = {'top': 68, 'bottom': 0, 'left': 0, 'right': 105,
+                        'width': 68, 'center_width': 34, 'length': 105, 'center_length': 52.5,
+                        'six_yard_from_side': 24.84, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
+                        'penalty_area_from_side': 13.84, 'penalty_area_width': 40.32,
+                        'penalty_area_length': 16.5, 'left_penalty': 11, 'right_penalty': 94,
+                        'circle_size': 9.15, 'goal_depth': 2, 'goal_width': 7.32, 'goal_post': 30.34,
+                        'arc1_leftV': 36.95, 'arc2_leftH': 53.05, 'invert_y': False, 'stripe_scale': 10}
       
     def __init__(self, figsize=None, layout=None, pitch_type='statsbomb', orientation='horizontal', view='full',
-                 pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9, background_zorder=0.8, stripe=False,
+                 pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9, background_zorder=0.6, stripe=False,
                  stripe_color='#c2d59d', pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
+                 positional=False, positional_zorder=0.8, positional_linewidth=None,
+                 positional_linestyle=None, positional_color='#eadddd',
+                 shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
                  tight_layout=True, constrained_layout=False, spot_scale=0.002):
 
@@ -201,8 +224,18 @@ class Pitch(object):
         self.stripe_color = stripe_color
         self.goal_type = goal_type
         self.spot_scale = spot_scale
-        
-        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'statsperform', 'metricasports']
+        self.positional = positional
+        self.positional_zorder = positional_zorder
+        self.positional_linewidth = positional_linewidth
+        self.positional_linestyle = positional_linestyle
+        self.positional_color = positional_color
+        if self.positional_linewidth is None:
+            self.positional_linewidth = self.linewidth
+        self.shade_middle = shade_middle
+        self.shade_color = shade_color
+        self.shade_zorder = shade_zorder
+            
+        valid_pitch = ['statsbomb', 'stats', 'tracab', 'opta', 'wyscout', 'uefa', 'metricasports']
         if self.pitch_type not in valid_pitch:
             raise TypeError(f'Invalid argument: pitch_type should be in {valid_pitch}')
         
@@ -257,8 +290,8 @@ class Pitch(object):
             self.pitch_width = self.width
             self.aspect = 1
         
-        elif pitch_type == 'statsperform':
-            for k, v in self._statsperform_dimensions.items():
+        elif pitch_type == 'uefa':
+            for k, v in self._uefa_dimensions.items():
                 setattr(self, k, v)
             self.pitch_length = self.length
             self.pitch_width = self.width
@@ -425,7 +458,36 @@ class Pitch(object):
                                    [self.left, self.center_width + self.goal_width/2]])
         
         self.ax_aspect = abs(self.extent[0] - self.extent[1])/abs(self.extent[2]-self.extent[3])*self.aspect
+        
+        # positions of Juego de Posición lines
+        self._juego_de_posicion()
 
+    def _juego_de_posicion(self):
+        """Define pitch positions for Juego de Posición"""
+        # x positions
+        self.x1 = min(self.left, self.right)
+        self.x4 = self.center_length
+        self.x7 = max(self.left, self.right)
+        self.x2 = self.x1 + self.penalty_area_length
+        self.x6 = self.x7 - self.penalty_area_length
+        self.x3 = self.x2 + (self.x4 - self.x2)/2
+        self.x5 = self.x4 + (self.x6 - self.x4)/2
+        
+        # y positions
+        self.y1 = min(self.bottom, self.top)
+        self.y6 = max(self.bottom, self.top)
+        if self.pitch_type == 'tracab':
+            self.y2 = self.penalty_area_from_side
+            self.y3 = self.six_yard_from_side
+            self.y4 = -self.six_yard_from_side
+            self.y5 = -self.penalty_area_from_side
+        else:    
+            self.y3 = self.y1 + self.six_yard_from_side
+            self.y2 = self.y1 + self.penalty_area_from_side
+            self.y4 = self.y6 - self.six_yard_from_side
+            self.y5 = self.y6 - self.penalty_area_from_side
+            self.y4 = self.y6 - self.six_yard_from_side
+            
     def _setup_subplots(self):
 
         if self.layout is None:
@@ -797,7 +859,68 @@ class Pitch(object):
         ax.add_patch(circle)
         ax.add_patch(arc1_patch)
         ax.add_patch(arc2_patch)
+        
+    def _draw_shade_middle(self, ax):
+        shade_prop = {'fill': True, 'facecolor': self.shade_color, 'zorder': self.shade_zorder}
+         
+        if self.orientation == 'vertical':
+            if self.invert_y:
+                middle_shade = patches.Rectangle((self.top, self.x3), self.width, self.x5 - self.x3, **shade_prop)
+            else:
+                middle_shade = patches.Rectangle((self.bottom, self.x3), self.width, self.x5 - self.x3, **shade_prop)
 
+        elif self.orientation == 'horizontal':
+            if self.invert_y:
+                middle_shade = patches.Rectangle((self.x3, self.top), self.x5 - self.x3, self.width, **shade_prop)
+            else:
+                middle_shade = patches.Rectangle((self.x3, self.bottom), self.x5 - self.x3, self.width, **shade_prop)                
+
+        ax.add_patch(middle_shade)
+
+    def _draw_juego_de_posicion(self, ax):
+        """Draw Juego de Posición"""
+        
+        line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
+                     'linestyle': self.positional_linestyle,
+                     'zorder': self.positional_zorder}
+        
+        if self.orientation == 'horizontal':
+            # x lines
+            xline1 = lines.Line2D([self.x2, self.x2], [self.bottom, self.top], **line_prop)
+            xline2 = lines.Line2D([self.x3, self.x3], [self.bottom, self.top], **line_prop)
+            xline3 = lines.Line2D([self.x4, self.x4], [self.bottom, self.top], **line_prop)
+            xline4 = lines.Line2D([self.x5, self.x5], [self.bottom, self.top], **line_prop)
+            xline5 = lines.Line2D([self.x6, self.x6], [self.bottom, self.top], **line_prop)
+            
+            # y lines
+            yline1 = lines.Line2D([self.left, self.right], [self.y2, self.y2], **line_prop)
+            yline2 = lines.Line2D([self.left + self.penalty_area_length, self.right - self.penalty_area_length],
+                                  [self.y3, self.y3], **line_prop)
+            yline3 = lines.Line2D([self.left + self.penalty_area_length, self.right - self.penalty_area_length],
+                                  [self.y4, self.y4], **line_prop)
+            yline4 = lines.Line2D([self.left, self.right], [self.y5, self.y5], **line_prop)
+            
+        elif self.orientation == 'vertical':
+            # x lines
+            xline1 = lines.Line2D([self.bottom, self.top], [self.x2, self.x2], **line_prop)
+            xline2 = lines.Line2D([self.bottom, self.top], [self.x3, self.x3], **line_prop)
+            xline3 = lines.Line2D([self.bottom, self.top], [self.x4, self.x4], **line_prop)
+            xline4 = lines.Line2D([self.bottom, self.top], [self.x5, self.x5], **line_prop)
+            xline5 = lines.Line2D([self.bottom, self.top], [self.x6, self.x6], **line_prop)
+            
+            # y lines
+            yline1 = lines.Line2D([self.y2, self.y2], [self.left, self.right], **line_prop)
+            yline2 = lines.Line2D([self.y3, self.y3],
+                                  [self.left + self.penalty_area_length, self.right - self.penalty_area_length],
+                                  **line_prop)
+            yline3 = lines.Line2D([self.y4, self.y4],
+                                  [self.left + self.penalty_area_length, self.right - self.penalty_area_length],
+                                  **line_prop)
+            yline4 = lines.Line2D([self.y5, self.y5], [self.left, self.right], **line_prop)             
+        
+        for artist in [xline1, xline2, xline3, xline4, xline5, yline1, yline2, yline3, yline4]:
+            ax.add_artist(artist)
+ 
     def _draw_ax(self, ax):
         self._set_axes(ax)
         self._set_background(ax)
@@ -805,10 +928,14 @@ class Pitch(object):
         if self.goal_type is not None:
             self._draw_goals(ax)
         self._draw_boxes(ax)
-        if self.aspect == 1:
+        if (self.aspect == 1) and (self.pitch_type != 'metricasports'):
             self._draw_circles_and_arcs(ax)
         else:
             self._draw_scaled_circles_and_arcs(ax)
+        if self.positional:
+            self._draw_juego_de_posicion(ax)
+        if self.shade_middle:
+            self._draw_shade_middle(ax)
 
     def draw(self, ax=None):
         """ Draws the specified soccer/ football pitch(es).
@@ -1451,26 +1578,54 @@ class Pitch(object):
             
         if teams.size != x.size:
             raise ValueError("x and team must be the same size")
+                      
+        if self.pitch_type in ['wyscout', 'opta']:  # scale to 105 * 68
+            extent = np.array([self.left, self.right * 1.05,
+                               self.pitch_extent[2], self.pitch_extent[3] * 0.68])
+            p_left = self.left
+            p_right = self.right * 1.05
+            p_bottom = self.bottom * 0.68
+            p_top = self.top * 0.68
+            x = x * 1.05
+            y = y * 0.68
+            
+        elif self.pitch_type == 'metricasports':  # scale to pitch_length * pitch_width
+            extent = np.array([self.left, self.right * self.pitch_length,
+                               self.top, self.bottom * self.pitch_width])
+            p_left = self.left
+            p_right = self.right * self.pitch_length
+            p_bottom = self.bottom * self.pitch_width
+            p_top = self.top
+            x = x * self.pitch_length
+            y = y * self.pitch_width
+            
+        else:
+            extent = np.array([self.left, self.right,
+                               self.pitch_extent[2], self.pitch_extent[3]])
+            p_left = self.left
+            p_right = self.right
+            p_bottom = self.bottom
+            p_top = self.top
         
         # clip outside to pitch extents
-        x = x.clip(min=self.pitch_extent[0], max=self.pitch_extent[1]).reshape(-1, 1)
-        y = y.clip(min=self.pitch_extent[2], max=self.pitch_extent[3]).reshape(-1, 1)
-        
+        x = x.clip(min=extent[0], max=extent[1]).reshape(-1, 1)
+        y = y.clip(min=extent[2], max=extent[3]).reshape(-1, 1)
+
         # reflect in pitch lines
         left = x.copy()
         right = x.copy()
         bottom = y.copy()
         top = y.copy()
         
-        left = self.left - abs(left - self.left)
-        right = self.right + abs(right - self.right)
+        left = p_left - abs(left - p_left)
+        right = p_right + abs(right - p_right)
         
         if self.invert_y:
-            top = self.top - abs(top - self.top)
-            bottom = self.bottom + abs(bottom - self.bottom)
+            top = p_top - abs(top - p_top)
+            bottom = p_bottom + abs(bottom - p_bottom)
         else:
-            top = self.top + abs(top - self.top)
-            bottom = self.bottom - abs(bottom - self.bottom)
+            top = p_top + abs(top - p_top)
+            bottom = p_bottom - abs(bottom - p_bottom)
         
         reflect = np.concatenate([np.concatenate([x, y], axis=1),
                                   np.concatenate([x, bottom], axis=1),
@@ -1487,8 +1642,14 @@ class Pitch(object):
         region_vertices = []
         for region in regions:
             verts = vor.vertices[region]
-            verts[:, 0] = np.clip(verts[:, 0], a_min=self.pitch_extent[0], a_max=self.pitch_extent[1])
-            verts[:, 1] = np.clip(verts[:, 1], a_min=self.pitch_extent[2], a_max=self.pitch_extent[3])
+            verts[:, 0] = np.clip(verts[:, 0], a_min=extent[0], a_max=extent[1])
+            verts[:, 1] = np.clip(verts[:, 1], a_min=extent[2], a_max=extent[3])
+            if self.pitch_type in ['wyscout', 'opta']:  # scale back to 100*100
+                verts[:, 0] = verts[:, 0] / 1.05
+                verts[:, 1] = verts[:, 1] / 0.68
+            elif self.pitch_type == 'metricasports':  # scale back to 1*1
+                verts[:, 0] = verts[:, 0] / self.pitch_length
+                verts[:, 1] = verts[:, 1] / self.pitch_width                
             region_vertices.append(verts)
         region_vertices = np.array(region_vertices)
         
@@ -1498,7 +1659,7 @@ class Pitch(object):
         
         return team1, team2
         
-    def arrows(self, xstart, ystart, xend, yend, ax=None, **kwargs):
+    def arrows(self, xstart, ystart, xend, yend, C=None, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
         Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
         from the start and end points of the arrow.
@@ -1511,6 +1672,11 @@ class Pitch(object):
         ----------
         xstart, ystart, xend, yend: array-like or scalar.
             Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+
+        C: 1D or 2D array-like, optional
+            Numeric data that defines the arrow colors by colormapping via norm and cmap.
+            This does not support explicit colors. If you want to set colors directly, use color instead.
+            The size of C must match the number of arrow locations.
 
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
@@ -1556,7 +1722,8 @@ class Pitch(object):
         angles = kwargs.pop('angles', 'xy')
         scale = kwargs.pop('scale', 1)
         width = kwargs.pop('width', 4)
-        # fixed a bug here. I changed the units to inches and divided by 72 so the width is in points, i.e. 1/72th of an inch
+        # fixed a bug here. I changed the units to inches and divided by 72
+        # so the width is in points, i.e. 1/72th of an inch
         width = width/72.
         
         xstart = np.ravel(xstart)
@@ -1564,13 +1731,16 @@ class Pitch(object):
         xend = np.ravel(xend)
         yend = np.ravel(yend)
 
-        
         if xstart.size != ystart.size:
             raise ValueError("xstart and ystart must be the same size")
         if xstart.size != xend.size:
             raise ValueError("xstart and xend must be the same size")
         if ystart.size != yend.size:
             raise ValueError("ystart and yend must be the same size")  
+        if C is not None:
+            C = np.ravel(C)
+            if xstart.size != C.size:
+                raise ValueError("xstart and C must be the same size")  
 
         # vectors for direction
         u = xend - xstart
@@ -1578,12 +1748,12 @@ class Pitch(object):
 
         # plot. Reverse coordinates if vertical plot            
         if self.orientation == 'horizontal':
-            q = ax.quiver(xstart, ystart, u, v,
+            q = ax.quiver(xstart, ystart, u, v, C,
                           units=units, scale_units=scale_units, angles=angles, scale=scale,
                           width=width, **kwargs)
 
         elif self.orientation == 'vertical':
-            q = ax.quiver(ystart, xstart, v, u,
+            q = ax.quiver(ystart, xstart, v, u, C,
                           units=units, scale_units=scale_units, angles=angles, scale=scale,
                           width=width, **kwargs)
             
@@ -1680,7 +1850,7 @@ class Pitch(object):
         
         return annotation
     
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4)):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), invert_y=True):
         """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
         
         This method automatically sets the range, changes some of the scipy defaults,
@@ -1709,6 +1879,15 @@ class Pitch(object):
               * the bin edges in each dimension (x_edge, y_edge = bins).
                 If the bin edges are specified, the number of bins will be,
                 (nx = len(x_edge)-1, ny = len(y_edge)-1).
+        
+        invert_y : bool, default True
+            Whether to consistently create heatmaps from the bottom to the top of the pitch.
+            If true then the data for pitches with an inverted y-axis 
+            (statsbomb, metrica, wyscout, and stats) is first corrected to a normal y-axis
+            before calculating the heatmap. This means the edges are treated consistently
+            so the top edge of a grid cell belongs to the cell above and the right edge of
+            a grid cell belongs to the cell to the right. The bin is half-open. The
+            last bin, however, includes the pitch edge.
             
         Returns
         ----------
@@ -1735,19 +1914,28 @@ class Pitch(object):
         if values.size != x.size:
             raise ValueError("x and values must be the same size")
                       
-        if self.invert_y:
+        if self.invert_y & invert_y:
             pitch_range = [[self.left, self.right], [self.top, self.bottom]]
+            y = self.bottom - y  # for inverted axis flip the coordinates
         else:
             pitch_range = [[self.left, self.right], [self.bottom, self.top]]
         
         result = binned_statistic_2d(x, y, values, statistic=statistic, bins=bins, range=pitch_range)
+        
+        statistic = result.statistic.T
+        # this ensures that all the heatmaps are created consistently at the heatmap edges
+        # i.e. grid cells are created from the bottom to the top of the pitch. where the top edge
+        # always belongs to the cell above. First the raw coordinates have been flipped above
+        # then the statistic is flipped back here
+        if self.invert_y & invert_y:
+            statistic = np.flip(statistic, axis=0)
                            
         x_grid, y_grid = np.meshgrid(result.x_edge, result.y_edge)
            
         cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
                              result.y_edge[:-1] + 0.5 * np.diff(result.y_edge))
         
-        bin_statistic = _BinnedStatisticResult(result.statistic.T, x_grid, y_grid, cx, cy)._asdict()
+        bin_statistic = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)._asdict()
 
         return bin_statistic
               
@@ -1787,7 +1975,7 @@ class Pitch(object):
         return mesh
             
     def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
-        """ Calculates binned statistics for the Juegos de posición (position game) concept.
+        """ Calculates binned statistics for the Juego de posición (position game) concept.
         It uses scipy.stats.binned_statistic_2d.
 
         Parameters
@@ -1811,29 +1999,6 @@ class Pitch(object):
             The dictionary keys are 'statistic' (the calculated statistic),
             'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
         """
-        # x positions
-        x1 = min(self.left, self.right)
-        x4 = self.center_length
-        x7 = max(self.left, self.right)
-        x2 = x1 + self.penalty_area_length
-        x6 = x7 - self.penalty_area_length
-        x3 = x2 + (x4 - x2)/2
-        x5 = x4 + (x6 - x4)/2
-        
-        # y positions
-        y1 = min(self.bottom, self.top)
-        y6 = max(self.bottom, self.top)
-        if self.pitch_type == 'tracab':
-            y2 = self.penalty_area_from_side
-            y3 = self.six_yard_from_side
-            y4 = -self.six_yard_from_side
-            y5 = -self.penalty_area_from_side
-        else:    
-            y3 = y1 + self.six_yard_from_side
-            y2 = y1 + self.penalty_area_from_side
-            y4 = y6 - self.six_yard_from_side
-            y5 = y6 - self.penalty_area_from_side
-            y4 = y6 - self.six_yard_from_side
         
         # I tried several ways of creating positional bins. It's hard to do this because
         # of points on the edges of bins. You have to be sure they are only counted once consistently
@@ -1842,9 +2007,9 @@ class Pitch(object):
         # side (unless the side of the pitch) so that the scipy binned_statistic_2d functions handles the edges
         if positional == 'full':
             # top and bottom of pitch - we create a grid with three rows and then ignore the middle row when slicing
-            xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
-            yedge = np.array([y1, y2, y5, y6])
-            bin_statistic1 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            xedge = np.array([self.x1, self.x2, self.x3, self.x4, self.x5, self.x6, self.x7])
+            yedge = np.array([self.y1, self.y2, self.y5, self.y6])
+            bin_statistic1 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge), invert_y=False)
             stat1 = bin_statistic1['statistic']
             x_grid1 = bin_statistic1['x_grid']
             y_grid1 = bin_statistic1['y_grid']
@@ -1865,9 +2030,9 @@ class Pitch(object):
             cy1 = cy1[0, :].copy()
 
             # middle of pitch
-            xedge = np.array([x1, x2, x4, x6, x7])
-            yedge = np.array([y1, y2, y3, y4, y5, y6])
-            bin_statistic3 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            xedge = np.array([self.x1, self.x2, self.x4, self.x6, self.x7])
+            yedge = np.array([self.y1, self.y2, self.y3, self.y4, self.y5, self.y6])
+            bin_statistic3 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge), invert_y=False)
             stat3 = bin_statistic3['statistic']
             x_grid3 = bin_statistic3['x_grid']
             y_grid3 = bin_statistic3['y_grid']
@@ -1880,9 +2045,9 @@ class Pitch(object):
             cy3 = cy3[1:-1, 1:-1].copy()
             
             # penalty area 1
-            xedge = np.array([x1, x2, x3]).astype(np.float64)
-            yedge = np.array([y2, y5, y6]).astype(np.float64)
-            bin_statistic4 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            xedge = np.array([self.x1, self.x2, self.x3]).astype(np.float64)
+            yedge = np.array([self.y2, self.y5, self.y6]).astype(np.float64)
+            bin_statistic4 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge), invert_y=False)
             stat4 = bin_statistic4['statistic']
             x_grid4 = bin_statistic4['x_grid']
             y_grid4 = bin_statistic4['y_grid']
@@ -1895,9 +2060,9 @@ class Pitch(object):
             cy4 = cy4[:1, :1].copy()
             
             # penalty area 2
-            xedge = np.array([x6, x7]).astype(np.float64)
-            yedge = np.array([y2, y5, y6]).astype(np.float64)
-            bin_statistic5 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            xedge = np.array([self.x6, self.x7]).astype(np.float64)
+            yedge = np.array([self.y2, self.y5, self.y6]).astype(np.float64)
+            bin_statistic5 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge), invert_y=False)
             stat5 = bin_statistic5['statistic']
             x_grid5 = bin_statistic5['x_grid']
             y_grid5 = bin_statistic5['y_grid']
@@ -1908,8 +2073,7 @@ class Pitch(object):
             y_grid5 = y_grid5[:-1, :].copy()
             cy5 = cy5[0].copy()
             cx5 = cx5[0].copy()
-                        
-            # collect stats
+
             result1 = _BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)._asdict()
             result2 = _BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)._asdict()
             result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)._asdict()
@@ -1919,15 +2083,15 @@ class Pitch(object):
             bin_statistic = [result1, result2, result3, result4, result5]    
             
         elif positional == 'horizontal':
-            xedge = np.array([x1, x7])
-            yedge = np.array([y1, y2, y3, y4, y5, y6])
-            bin_horizontal = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            xedge = np.array([self.x1, self.x7])
+            yedge = np.array([self.y1, self.y2, self.y3, self.y4, self.y5, self.y6])
+            bin_horizontal = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge), invert_y=False)
             bin_statistic = [bin_horizontal]
             
         elif positional == 'vertical':
-            xedge = np.array([x1, x2, x3, x4, x5, x6, x7])
-            yedge = np.array([y1, y6])
-            bin_vertical = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            xedge = np.array([self.x1, self.x2, self.x3, self.x4, self.x5, self.x6, self.x7])
+            yedge = np.array([self.y1, self.y6])
+            bin_vertical = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge), invert_y=False)
             bin_statistic = [bin_vertical]
         else:
             raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
@@ -2016,11 +2180,41 @@ class Pitch(object):
             
         return annotation_list
     
-    def calculate_angle(self, xstart, ystart, xend, yend):
-        """ Calculates the angle in radians counter-clockwise between a start and end location.
-        Where 0 is this way → (the straight line from left to right) in a horizontally orientated pitch
+    def to_uefa_coordinates(self, x, y):
+        """ Convert coordinates from the pitch type coordinates to the standard UEFA pitch size (105m by 68m).
+        Naively scales pitch and does not account for fixed box size in some pitches (e.g. Opta/StatsBomb)"""
+        if self.pitch_type == 'uefa':
+            return x, y
+        if self.invert_y:
+            y = self.bottom - y
+        if self.pitch_type == 'tracab':
+            x = (x + self.right) / self.length * 105.
+            y = (y + self.top) / self.width * 68.
+        else:
+            x = x / max(self.left, self.right) * 105.
+            y = y / max(self.bottom, self.top) * 68.
+        return x, y
+    
+    def from_uefa_coordinates(self, x, y):
+        """ Convert coordinates from the standard UEFA pitch size (105m by 68m) to pitch type coordinates.
+        Naively scales pitch and does not account for fixed box size in some pitches (e.g. Opta/StatsBomb)."""
+        if self.pitch_type == 'uefa':
+            return x, y
+        if self.pitch_type == 'tracab':
+            x = (x / 105. * self.length) - self.right
+            y = (y / 68. * self.width) - self.top
+        else:
+            x = x / 105. * max(self.left, self.right)            
+            y = y / 68. * max(self.bottom, self.top)
+        if self.invert_y:
+            y = self.bottom - y
+        return x, y
+    
+    def calculate_angle_and_distance(self, xstart, ystart, xend, yend):
+        """ Calculates the angle in radians counter-clockwise between a start and end location and the distance.
+        Where the angle 0 is this way → (the straight line from left to right) in a horizontally orientated pitch
         and this way ↑ in a vertically orientated pitch.
-        The angle goes from 0 to 2pi. To convert this to degrees use np.degrees(angle).
+        The angle goes from 0 to 2pi. To convert the angle to degrees use np.degrees(angle).
         
         Parameters
         ----------
@@ -2033,7 +2227,8 @@ class Pitch(object):
             Array of angles in radians counter-clockwise in the range [0, 2pi].
             Where 0 is the straight line left to right in a horizontally orientated pitch
             and the straight line bottom to top in a vertically orientated pitch.
-        
+        distance: ndarray
+            Array of distances.
         """
         xstart = np.ravel(xstart)
         ystart = np.ravel(ystart)
@@ -2055,11 +2250,59 @@ class Pitch(object):
         if self.aspect != 1:
             x_dist = x_dist / max(self.left, self.right) * self.pitch_length
             y_dist = y_dist / max(self.bottom, self.top) * self.pitch_width
-        pass_radians = np.arctan2(y_dist, x_dist)
+            
+        if self.pitch_type in ['wyscout', 'opta']:  # scale to 105 * 68
+            x_dist = x_dist * 1.05
+            y_dist = y_dist * 0.68
+            
+        elif self.pitch_type == 'metricasports':  # scale to pitch_length * pitch_width
+            x_dist = x_dist * self.pitch_length
+            y_dist = y_dist * self.pitch_width        
+                   
+        angle = np.arctan2(y_dist, x_dist)
         # if negative angle make positive angle, so goes from 0 to 2 * pi
-        pass_radians[pass_radians < 0] = 2 * np.pi + pass_radians[pass_radians < 0]
+        angle[angle < 0] = 2 * np.pi + angle[angle < 0]
         
-        return pass_radians    
+        distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
+        
+        return angle, distance
+    
+    def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5, ax=None, **kwargs):
+        """ TO DO
+        """       
+        angle, distance = self.calculate_angle_and_distance(xstart, ystart, xend, yend)
+        bs_distance = self.bin_statistic(xstart, ystart, values=distance, statistic='mean', bins=bins)
+        bs_angle = self.bin_statistic(xstart, ystart, values=angle, statistic=circmean, bins=bins)
+        bs_count = self.bin_statistic(xstart, ystart, statistic='count', bins=bins)
+        
+        if self.pitch_type == 'tracab':
+            arrow_length = arrow_length * 100
+        if arrow_type == 'scale':
+            new_d = (bs_distance['statistic'] / np.nan_to_num(bs_distance['statistic']).max()) * arrow_length
+        elif arrow_type == 'same':
+            new_d = arrow_length
+        elif arrow_type == 'original':
+            new_d = bs_distance['statistic']
+            
+        if self.pitch_type == 'opta':  # scale from 105 * 68:
+            endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d / 1.05)
+            endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d / 0.68)
+        elif self.pitch_type == 'wyscout':
+            endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d / 1.05)
+            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d / 0.68) # invert_y
+        elif self.pitch_type == 'metricasports':
+            endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d / self.pitch_length)
+            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d / self.pitch_width) # invert_y    
+        else:
+            endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d) # calculate the endx position of the arrow
+            if self.invert_y:
+                endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d) # invert_y
+            else:
+                endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
+        
+        flow = self.arrows(bs_angle['cx'], bs_angle['cy'], endx, endy, bs_count['statistic'], ax=ax, **kwargs)
+        
+        return flow
     
 
 # Amended from
