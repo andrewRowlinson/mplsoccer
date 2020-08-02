@@ -27,91 +27,6 @@ _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
 
 
 class Pitch(object):
-    """ A class for plotting soccer / football pitches in Matplotlib
-    
-    Parameters
-    ----------
-    figsize : tuple of float, default Matplotlib figure size
-        The figure size in inches by default.
-    layout : tuple of int, default (1,1)
-        Tuple of (columns, rows) for the layout of the plot.
-    pitch_type : str, default 'statsbomb'
-        The pitch type used in the plot.
-        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats',
-        'wyscout', 'uefa', 'metricasports'.
-    orientation : str, default 'horizontal'
-        The pitch orientation: 'horizontal' or 'vertical'.
-    view : str, default 'full'
-        The pitch view: 'full' or 'half'.
-    pitch_color : any Matplotlib color, default None
-        The background color for each Matplotlib axis. If None, defaults to rcParams["axes.facecolor"].
-        To remove the background set to "None" or 'None'.
-    line_color : any Matplotlib color, default None
-        The line color for the pitch markings. If None, defaults to rcParams["grid.color"].       
-    line_zorder : float, default 0.9
-        Set the zorder for the pitch lines (a matplotlib artist). Artists with lower zorder values are drawn first.
-    background_zorder : float, default 0.6
-        Set the zorder for the pitch background (a matplotlib artist). Artists with lower zorder values are drawn first.
-    linewidth : float, default 2
-        The line width for the pitch markings.
-    spot_scale : float, default 0.002
-        The size of the penalty and center spots relative to the pitch length.
-    stripe : bool, default False
-        Whether to show pitch stripes.    
-    stripe_color : any Matplotlib color, default '#c2d59d'
-        The color of the pitch stripes if stripe=True    
-    pad_left : float, default None
-        Adjusts the left xlim of the axis. Postive values increase the plot area,
-        while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
-    pad_right : float, default None
-        Adjusts the right xlim of the axis. Postive values increase the plot area,
-        while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
-    pad_bottom : float, default None
-        Adjusts the bottom ylim of the axis. Postive values increase the plot area,
-        while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
-    pad_top : float, default None
-        Adjusts the top ylim of the axis. Postive values increase the plot area,
-        while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.    
-    positional : bool, default False
-        Whether to draw Juego de Posición lines.        
-    positional_zorder : float, default 0.8
-        Set the zorder for the Juego de Posición lines. Artists with lower zorder values are drawn first.      
-    positional_linewidth : float, default None
-        Linewidth for the Juego de Posición lines.
-        If None then this defaults to the same linewidth as the pitch lines (linewidth).   
-    positional_linestyle : str or tuple
-        Linestyle for the Juego de Posición lines: {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}
-        see: https://matplotlib.org/3.2.1/gallery/lines_bars_and_markers/linestyles.html
-    positional_color : any Matplotlib color, default '#eadddd'
-        The line color for the Juego de Posición lines.    
-    shade_middle : bool, default False
-         Whether to shade the middle third of the pitch.     
-    shade_color : any Matplotlib color, default '#f2f2f2'
-        The fill color for the shading of the middle third of the pitch.
-    shade_zorder : float, default 0.7
-        Set the zorder for the shading of the middle third of the pitch.
-        Artists with lower zorder values are drawn first.
-    pitch_length : float, default None
-        The pitch length in meters. Only used for the 'tracab' and 'metricasports' pitch_type.
-    pitch_width : float, default None
-        The pitch width in meters. Only used for the 'tracab' and 'metricasports' pitch type. 
-    goal_type : str, default 'line'
-        Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
-    axis : bool, default False
-        Whether to include the axis: True means the axis is 'on' and False means the axis is'off'.
-    label : bool, default False
-        Whether to include the axis labels.
-    tick : bool, default False
-        Whether to include the axis ticks.
-    tight_layout : bool, default True
-        Whether to use Matplotlib's tight layout.
-    constrained_layout : bool, default False
-        Whether to use Matplotlib's constrained layout.
-    """
 
     # the stripe_scale has been manually selected so that all stripe widths
     # are integers when multiplied by the stripe_scale
@@ -189,7 +104,92 @@ class Pitch(object):
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
                  tight_layout=True, constrained_layout=False, spot_scale=0.002):
+        """ A class for plotting soccer / football pitches in Matplotlib
 
+        Parameters
+        ----------
+        figsize : tuple of float, default Matplotlib figure size
+            The figure size in inches by default.
+        layout : tuple of int, default (1,1)
+            Tuple of (columns, rows) for the layout of the plot.
+        pitch_type : str, default 'statsbomb'
+            The pitch type used in the plot.
+            The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'stats',
+            'wyscout', 'uefa', 'metricasports'.
+        orientation : str, default 'horizontal'
+            The pitch orientation: 'horizontal' or 'vertical'.
+        view : str, default 'full'
+            The pitch view: 'full' or 'half'.
+        pitch_color : any Matplotlib color, default None
+            The background color for each Matplotlib axis. If None, defaults to rcParams["axes.facecolor"].
+            To remove the background set to "None" or 'None'.
+        line_color : any Matplotlib color, default None
+            The line color for the pitch markings. If None, defaults to rcParams["grid.color"].
+        line_zorder : float, default 0.9
+            Set the zorder for the pitch lines (a matplotlib artist). Artists with lower zorder values are drawn first.
+        background_zorder : float, default 0.6
+            Set the zorder for the pitch background (a matplotlib artist).
+             Artists with lower zorder values are drawn first.
+        linewidth : float, default 2
+            The line width for the pitch markings.
+        spot_scale : float, default 0.002
+            The size of the penalty and center spots relative to the pitch length.
+        stripe : bool, default False
+            Whether to show pitch stripes.
+        stripe_color : any Matplotlib color, default '#c2d59d'
+            The color of the pitch stripes if stripe=True
+        pad_left : float, default None
+            Adjusts the left xlim of the axis. Postive values increase the plot area,
+            while negative values decrease the plot area.
+            If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        pad_right : float, default None
+            Adjusts the right xlim of the axis. Postive values increase the plot area,
+            while negative values decrease the plot area.
+            If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        pad_bottom : float, default None
+            Adjusts the bottom ylim of the axis. Postive values increase the plot area,
+            while negative values decrease the plot area.
+            If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        pad_top : float, default None
+            Adjusts the top ylim of the axis. Postive values increase the plot area,
+            while negative values decrease the plot area.
+            If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        positional : bool, default False
+            Whether to draw Juego de Posición lines.
+        positional_zorder : float, default 0.8
+            Set the zorder for the Juego de Posición lines. Artists with lower zorder values are drawn first.
+        positional_linewidth : float, default None
+            Linewidth for the Juego de Posición lines.
+            If None then this defaults to the same linewidth as the pitch lines (linewidth).
+        positional_linestyle : str or tuple
+            Linestyle for the Juego de Posición lines: {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}
+            see: https://matplotlib.org/3.2.1/gallery/lines_bars_and_markers/linestyles.html
+        positional_color : any Matplotlib color, default '#eadddd'
+            The line color for the Juego de Posición lines.
+        shade_middle : bool, default False
+             Whether to shade the middle third of the pitch.
+        shade_color : any Matplotlib color, default '#f2f2f2'
+            The fill color for the shading of the middle third of the pitch.
+        shade_zorder : float, default 0.7
+            Set the zorder for the shading of the middle third of the pitch.
+            Artists with lower zorder values are drawn first.
+        pitch_length : float, default None
+            The pitch length in meters. Only used for the 'tracab' and 'metricasports' pitch_type.
+        pitch_width : float, default None
+            The pitch width in meters. Only used for the 'tracab' and 'metricasports' pitch type.
+        goal_type : str, default 'line'
+            Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
+        axis : bool, default False
+            Whether to include the axis: True means the axis is 'on' and False means the axis is'off'.
+        label : bool, default False
+            Whether to include the axis labels.
+        tick : bool, default False
+            Whether to include the axis ticks.
+        tight_layout : bool, default True
+            Whether to use Matplotlib's tight layout.
+        constrained_layout : bool, default False
+            Whether to use Matplotlib's constrained layout.
+        """
         # set figure and axes attributes
         self.axes = None
         self.fig = None
@@ -2289,14 +2289,14 @@ class Pitch(object):
             endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d / 0.68)
         elif self.pitch_type == 'wyscout':
             endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d / 1.05)
-            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d / 0.68) # invert_y
+            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d / 0.68)  # invert_y
         elif self.pitch_type == 'metricasports':
             endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d / self.pitch_length)
-            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d / self.pitch_width) # invert_y    
+            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d / self.pitch_width)  # invert_y
         else:
-            endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d) # calculate the endx position of the arrow
+            endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d)  # calculate the endx position of the arrow
             if self.invert_y:
-                endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d) # invert_y
+                endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d)  # invert_y
             else:
                 endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
         
