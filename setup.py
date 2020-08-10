@@ -5,7 +5,7 @@ with open("README.md", "r") as ofile:
 
 setup(
     name='soccerplots',
-    version='0.0.1',
+    version='0.0.2',
     description='A Python package for data visualization for football analytics',
     packages=['soccerplots'],
     long_description=long_description,
