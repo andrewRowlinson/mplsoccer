@@ -62,19 +62,19 @@ class Pitch(object):
     stripe_color : any Matplotlib color, default '#c2d59d'
         The color of the pitch stripes if stripe=True
     pad_left : float, default None
-        Adjusts the left xlim of the axis. Postive values increase the plot area,
+        Adjusts the left xlim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
     pad_right : float, default None
-        Adjusts the right xlim of the axis. Postive values increase the plot area,
+        Adjusts the right xlim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
     pad_bottom : float, default None
-        Adjusts the bottom ylim of the axis. Postive values increase the plot area,
+        Adjusts the bottom ylim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
     pad_top : float, default None
-        Adjusts the top ylim of the axis. Postive values increase the plot area,
+        Adjusts the top ylim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
     positional : bool, default False
@@ -103,7 +103,7 @@ class Pitch(object):
     goal_type : str, default 'line'
         Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
     axis : bool, default False
-        Whether to include the axis: True means the axis is 'on' and False means the axis is'off'.
+        Whether to include the axis: True means the axis is 'on' and False means the axis is 'off'.
     label : bool, default False
         Whether to include the axis labels.
     tick : bool, default False
@@ -1035,11 +1035,11 @@ class Pitch(object):
         Returns
         -------
         polycollection : `~matplotlib.collections.PolyCollection`
-            A `.PolyCollection` defining the hexagonal bins.
+            A `PolyCollection` defining the hexagonal bins.
 
-            - `.PolyCollection.get_offset` contains a Mx2 array containing
+            - `PolyCollection.get_offset` contains a Mx2 array containing
               the x, y positions of the M hexagon centers.
-            - `.PolyCollection.get_array` contains the values of the M
+            - `PolyCollection.get_array` contains the values of the M
               hexagons.
 
             If *marginals* is *True*, horizontal
@@ -1499,7 +1499,7 @@ class Pitch(object):
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
         Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
-        before calculating the Voronoi. This means that the Vornoi extends to the edges of the pitch
+        before calculating the Voronoi. This means that the Voronoi extends to the edges of the pitch
         see: https://github.com/ProformAnalytics/tutorial_nbs/blob/master/notebooks/Voronoi%20Reflection%20Trick.ipynb
         
         Players outside of the pitch dimensions are assumed to be standing on the pitch edge.
@@ -1519,10 +1519,10 @@ class Pitch(object):
         Returns
         -------
         team1 : a 1d numpy array (length number of players in team 1) of 2d arrays
-            Where the individual 2d arrays are coodinates of the Voronoi vertices.
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
             
         team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
-            Where the individual 2d arrays are coodinates of the Voronoi vertices.
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
         """
         x = np.ravel(x)
         y = np.ravel(y)
@@ -1617,7 +1617,7 @@ class Pitch(object):
     def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.quiver,
         Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
-        from the start and end points of the arrow.
+        from the start and endpoints of the arrow.
         The function also automatically flips the x and y coordinates if the pitch is vertical.
         
         Plot a 2D field of arrows.
@@ -1805,7 +1805,7 @@ class Pitch(object):
         and outputs the grids and centers for plotting.
         
         The default statistic has been changed to count instead of mean.
-        The default bins has been set to (5,4).
+        The default bins have been set to (5,4).
         
         Parameters
         ----------
@@ -2180,7 +2180,7 @@ class Pitch(object):
     
     def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5,
              color=None, ax=None, **kwargs):
-        """ Create a flow map by binning  the data into cells and calculating the avergage
+        """ Create a flow map by binning  the data into cells and calculating the average
         angles and distances. The colors of each arrow are        
         
         Parameters
