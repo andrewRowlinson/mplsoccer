@@ -12,7 +12,7 @@ fig, axes = plt.subplots(4, 2, figsize=(12, 14))
 axes = axes.ravel()
 pitch_kwargs = {'line_color': '#94A7AE', 'axis': True, 'label': True, 'pad_left': 0,
                 'pad_right': 0, 'pad_top': 0, 'pad_bottom': 0, 'linewidth': 1} 
-pitch_types = ['statsbomb', 'statsperform', 'tracab', 'wyscout', 'metricasports', 'opta', 'stats']
+pitch_types = ['statsbomb', 'uefa', 'tracab', 'wyscout', 'metricasports', 'opta', 'stats']
 fontcolor = '#b6b9ea'
 arrowprops = {'arrowstyle': '->', 'lw': 4,
               'connectionstyle': 'angle3,angleA=0,angleB=-90', 'color': fontcolor}
@@ -54,14 +54,6 @@ for idx, pt in enumerate(pitch_types):
                            alpha=0, arrowprops=arrowprops, **font_kwargs)
         axes[idx].annotate(text, xy=(xmin, ymax), xytext=(0, -1000),
                            alpha=0, arrowprops=arrowprops, **font_kwargs)
-    if pt in ['opta', 'stats']:
-        if pt == 'opta':
-            xy = (50, 60)
-        else:
-            xy = (50, 25)
-        axes[idx].annotate('old pitch type \n replaced by \n statsperform', c='#b6b9ea',
-                           xy=xy,
-                           fontsize=15, horizontalalignment='center',
-                           fontweight='bold')
+
 axes[-1].remove()
 fig.tight_layout()

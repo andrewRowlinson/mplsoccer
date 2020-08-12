@@ -31,11 +31,11 @@ pitch.draw(ax=ax[1])
 # Supported data providers
 # ------------------------
 # mplsoccer supports 7 pitch types by specifying the ``pitch_type`` argument:
-# 'statsbomb', 'opta', 'tracab', 'stats', 'wyscout', 'statsperform', and 'metricasports'. 
+# 'statsbomb', 'opta', 'tracab', 'stats', 'wyscout', 'uefa', and 'metricasports'. 
 # If you are using tracking data ('metricasports' or 'tracab'), you also need to specify the 
 # ``pitch_length`` and ``pitch_width``, which are typically 105 and 68 respectively.
 
-pitch = Pitch(pitch_type='statsperform')  # example plotting a statsperform pitch
+pitch = Pitch(pitch_type='uefa')  # example plotting a statsperform pitch
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -107,6 +107,14 @@ fig, ax = pitch.draw()
 
 pitch = Pitch(pitch_color='#aabb97', line_color='white',
               stripe_color='#c2d59d', stripe=True)  # optional stripes
+fig, ax = pitch.draw()
+
+##############################################################################
+# Juego de Posición
+# -----------------
+# You can add the Juego de Posición pitch lines and shade the middle third
+
+pitch = Pitch(positional=True, shade_middle=True, positional_color='#9A9A9A')
 fig, ax = pitch.draw()
 
 ##############################################################################

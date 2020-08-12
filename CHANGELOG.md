@@ -1,3 +1,23 @@
+Version 0.0.21
+-----------
+
+### Changed
+1) changed the name of the 'statsperform' pitch_type to 'uefa'
+2) changed the background zorder from 0.8 -> 0.6 so it defaults to below the new Juego de posición pitch markings
+3) changed the center circle size for the opta, wyscout, statsbomb, and stats pitches to align with the edge of the six-yard box
+
+### Fixed
+1) amended the fbref plotting example to work for all five of the leagues.
+2) arrows can now take *args to allow colors to be set using C via a cmap.
+3) fixed a bug for the metricasports pitch so the center circle and arcs plot when the pitch_width and pitch_length are the same size
+4) fixed a bug for the Voronoi plot where the wyscout, opta, and metricasports data wasn't scaled appropriately to a full-sized pitch
+5) fixed bin_statistic so the binning of data is always consistent from the bottom to the top of the pitch. Previously pitches with an inverted axis were binned top to bottom. This does not currently apply to bin_statistic_positional.
+
+### Added
+1) added a method calculate_angles_and_distance to calculate the angle and distance from start and end locations.
+2) added an example for plotting a pass network contributed by DymondFormation.
+3) added parameters to shade the middle section of the pitch and draw Juego de posición pitch markings. 
+4) added a method flow to plot a pass flow map and a new example using this method
 
 Version 0.0.20
 -----------
