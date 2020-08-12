@@ -57,15 +57,15 @@ axes = axes.ravel()
 teams = df['Squad'].values
 vmin = df[pressure_cols].min().min()  # we normalise the heatmaps with the min / max values
 vmax = df[pressure_cols].max().max()
-for i in range(len(teams)):
-    axes[i].set_title(teams[i], fontsize=20)
+for i, ax in enumerate(axes[:len(teams)]):
+    ax.set_title(teams[i], fontsize=20)
     # fill in the bin statistics from df
     bin_statistic['statistic'] = df.loc[df.Squad == teams[i], pressure_cols].values
-    heatmap = pitch.heatmap(bin_statistic, ax=axes[i], cmap='coolwarm', vmin=vmin, vmax=vmax)  # plot the heatmap
+    heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='coolwarm', vmin=vmin, vmax=vmax)  # plot the heatmap
     # format and plot labels
     bin_statistic['statistic'] = (pd.DataFrame(bin_statistic['statistic'])
                                   .round(0).astype(np.int32).applymap(lambda x: '{:d}%'.format(x)).values)
-    annotate = pitch.label_heatmap(bin_statistic, color='white', fontsize=20, ax=axes[i], ha='center', va='center')
+    annotate = pitch.label_heatmap(bin_statistic, color='white', fontsize=20, ax=ax, ha='center', va='center')
     # set a black path effect around the labels
     for label in annotate:
         label.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
@@ -93,12 +93,12 @@ axes = axes.ravel()
 teams = df['Squad'].values
 vmin = df[pressure_cols].min().min()
 vmax = df[pressure_cols].max().max()
-for i in range(len(teams)):
-    axes[i].set_title(teams[i], fontsize=20)
+for i, ax in enumerate(axes[:len(teams)]):
+    ax.set_title(teams[i], fontsize=20)
     bin_statistic['statistic'] = df.loc[df.Squad == teams[i], pressure_cols].values
-    heatmap = pitch.heatmap(bin_statistic, ax=axes[i], cmap='coolwarm', vmin=vmin, vmax=vmax)
+    heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='coolwarm', vmin=vmin, vmax=vmax)
     bin_statistic['statistic'] = (pd.DataFrame(bin_statistic['statistic']).round(0).astype(np.int32))
-    annotate = pitch.label_heatmap(bin_statistic, color='white', fontsize=30, ax=axes[i], ha='center', va='center')
+    annotate = pitch.label_heatmap(bin_statistic, color='white', fontsize=30, ax=ax, ha='center', va='center')
     for label in annotate:
         label.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 axes = axes.reshape(4, 5)
