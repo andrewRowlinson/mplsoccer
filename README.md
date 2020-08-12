@@ -69,21 +69,4 @@ mplsoccer was inspired by other people's work:
 
 ## Recent changes
 
-mplsoccer's recent changes fixed several issues with the heatmap functionality
-- Pitch.label_heatmap(), now filters out labels outside of the pitch.
-- Pitch.bin_statistic(), now works for a statistic argument other than 'count'.
-- Pitch.heatmap(), now returns a mesh in horizontal orientation.
-- Pitch.voronoi() calculates Voronoi vertices.
-- Pitch.goal_angle(), plots the angle to the goal.
-- Pitch.polygon(), plots polygons on the pitch (e.g. goal angle and Voronoi)
-- add_image adds images as a new axis to matplotlib figures.
-- fixed the statsbomb module so works when the json file is empty.
-- changed the statsbomb module so end coordinates are summarised in end_x, end_y, end_z columns.
-- changed the wyscout goal posts y locations to 45/ 55 for consistency with socceraction.
-- changed the internal workings of the binned_statistics and heatmaps so the results of bin_statistic can be used elsewhere.
-- changed Pitch so axes aren't raveled when using subplots, e.g. layout=(2, 2). So colorbar can be used with subplots.
-- combined the StatsBomb technique columns (pass_technique, goalkeeper_technique, shot_technique) into techique_id and technique_name
-- combined the Statsbomb type columns (pass_type, duel_type_id, goalkeeper_type, shot_type) into sub_type_name and sub_type_id
-- removed some StatsBomb columns that repeat other columns
-
-The statsbomb module also now cleans the data faster.
+View the [changelog](https://github.com/andrewRowlinson/mplsoccer/blob/master/CHANGELOG.md) for a full list of the recent changes to mplsoccer.
