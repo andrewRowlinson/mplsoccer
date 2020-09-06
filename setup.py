@@ -4,9 +4,9 @@ with open("README.md", "r") as ofile:
     long_description = ofile.read()
 
 setup(
-    name='soccerplots',
-    version='0.0.2',
-    description='A Python package for data visualization for football analytics',
+    name="soccerplots",
+    version="1.0.0",
+    description="A Python package for data visualization for football analytics",
     packages=['soccerplots'],
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,8 +20,9 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     install_requires=[
-        'numpy',
-        'matplotlib'
+        "numpy",
+        "matplotlib",
+        "pillow"
     ]
 )
 
