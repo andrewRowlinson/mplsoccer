@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
-from KDEpy import FFTKDE
 from matplotlib.collections import LineCollection, PatchCollection
 from matplotlib.legend_handler import HandlerLineCollection, HandlerPathCollection, HandlerLine2D
 from matplotlib.cm import get_cmap
@@ -19,6 +18,8 @@ from matplotlib.legend import Legend
 from scipy.stats import binned_statistic_2d
 from scipy.spatial import Voronoi
 from scipy.stats import circmean
+from KDEpy import FFTKDE
+from scipy.interpolate import RectBivariateSpline
 from .scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter
 from collections import Sequence, namedtuple
 import warnings
