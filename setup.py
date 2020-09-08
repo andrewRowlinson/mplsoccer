@@ -31,4 +31,5 @@ install_requires = ['matplotlib',
                     'seaborn',
                     'scipy',
                     'pandas',
-                    'numpy']
+                    'numpy',
+                    'KDEpy']

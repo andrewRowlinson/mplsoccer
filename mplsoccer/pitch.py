@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
+from KDEpy import FFTKDE
 from matplotlib.collections import LineCollection, PatchCollection
 from matplotlib.legend_handler import HandlerLineCollection, HandlerPathCollection, HandlerLine2D
 from matplotlib.cm import get_cmap
@@ -974,9 +975,11 @@ class Pitch(object):
             
         return plot
 
-    def kdeplot(self, x, y, ax=None, **kwargs):
-        """ Utility wrapper around seaborn.kdeplot,
-        which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
+    def kdeplot(self, x, y, ax=None, filled=False, **kwargs):
+        """ Routine to perform kernel density estimation using KDEpy.FFTKDE and plot the result on the given ax.
+        The method used here includes a simple reflection method for boundary correction, so that probability
+        mass is not assigned to areas outside the pitch.
+        Automatically flips the x and y coordinates if the pitch is vertical.
 
         Parameters
         ----------
@@ -986,7 +989,8 @@ class Pitch(object):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
             
-        **kwargs : All other keyword arguments are passed on to seaborn.kdeplot.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.contour (if filled=False) or
+                   matplotlib.axes.Axes.contourf (if filled=True).
             
         Returns
         -------            
@@ -1000,15 +1004,41 @@ class Pitch(object):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
 
-        # plot kde plot. reverse x and y if vertical
-        if self.orientation == 'horizontal':
-            clip = kwargs.pop('clip', ((self.left, self.right), (self.bottom, self.top)))
-            kde = sns.kdeplot(x, y, ax=ax, clip=clip, **kwargs)
-        elif self.orientation == 'vertical':
-            clip = kwargs.pop('clip', ((self.top, self.bottom), (self.left, self.right)))
-            kde = sns.kdeplot(y, x, ax=ax, clip=clip, **kwargs)
+        x_limits = [self.left, self.right]
+        y_limits = [self.bottom, self.top]
+
+        if self.orientation == 'vertical':
+            x, y = y, x
+            x_limits, y_limits = y_limits, x_limits
+
+        reflected_data_x = np.r_[x, 2 * x_limits[0] - x, 2 * x_limits[1] - x]
+        reflected_data_y = np.r_[y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
+        # use Scott's rule of thumb to select bandwidth
+        n = x.shape[0]
+        scott_bw = [n ** (-1 / 6) * np.std(x), n ** (-1 / 6) * np.std(y)]
+        # estimate KDE (including reflected data)
+        grid, values = FFTKDE(bw=scott_bw).fit(np.c_[reflected_data_x, reflected_data_y]).evaluate(512)
+        x, y = np.unique(grid[:, 0]), np.unique(grid[:, 1])
+        z = values.reshape(512, 512)
+        # set up a bilinear interpolator to estimate density off the FFT grid
+        player_density = RectBivariateSpline(x, y, z, kx=1, ky=1)
+        # define points at which to evaluate the density
+        x_pts = np.linspace(x_limits[0], x_limits[1], 100)
+        y_pts = np.linspace(y_limits[0], y_limits[1], 100)
+        xx, yy = np.meshgrid(x_pts, y_pts)
+        xx, yy = xx.flatten(), yy.flatten()
+        # evaluate density at specified points
+        x_eval = np.tile(np.c_[xx, 2 * x_limits[0] - xx, 2 * x_limits[1] - xx], 3).flatten()
+        y_eval = np.repeat(np.c_[yy, 2 * y_limits[0] - yy, 2 * y_limits[1] - yy], 3)
+        density = np.sum(player_density.ev(x_eval, y_eval).reshape(-1, 9), axis=1)
+        density = density.reshape((100, 100))
+
+        if filled:
+            contour_plot = ax.contourf(x_pts, y_pts, density, **kwargs)
+        if not filled:
+            contour_plot = ax.contour(x_pts, y_pts, density, **kwargs)
             
-        return kde
+        return contour_plot
 
     def hexbin(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
