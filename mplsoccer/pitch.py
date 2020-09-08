@@ -1019,10 +1019,10 @@ class Pitch(object):
         scott_bw = [n ** (-1 / 6) * np.std(x), n ** (-1 / 6) * np.std(y)]
         # estimate KDE (including reflected data)
         grid, values = FFTKDE(bw=scott_bw).fit(np.c_[reflected_data_x, reflected_data_y]).evaluate(512)
-        x, y = np.unique(grid[:, 0]), np.unique(grid[:, 1])
+        x_grid, y_grid = np.unique(grid[:, 0]), np.unique(grid[:, 1])
         z = values.reshape(512, 512)
         # set up a bilinear interpolator to estimate density off the FFT grid
-        player_density = RectBivariateSpline(x, y, z, kx=1, ky=1)
+        player_density = RectBivariateSpline(x_grid, y_grid, z, kx=1, ky=1)
         # define points at which to evaluate the density
         x_pts = np.linspace(x_limits[0], x_limits[1], 100)
         y_pts = np.linspace(y_limits[0], y_limits[1], 100)
