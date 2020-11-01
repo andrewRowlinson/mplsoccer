@@ -280,9 +280,6 @@ class BasePitch(ABC):
         self.pad_left = self.pad_left * self.aspect
         self.pad_right = self.pad_right * self.aspect
 
-    def _flip_aspect(self):
-        self.aspect = 1 / self.aspect  # used for vertical pitches  
-
     def _validation_checks(self):
         for attribute in ['axis', 'stripe', 'tick', 'label', 'shade_middle', 'tight_layout',
                           'half', 'positional', 'constrained_layout']:
@@ -333,6 +330,9 @@ class BasePitch(ABC):
 
     def _stripe_locations(self):
         self.stripe_length = self.pitch_extent[3] - self.pitch_extent[2]
+        total_width = self.stripe_length + self.pad_bottom + self.pad_top
+        self.stripe_start = max(self.pad_bottom, 0) / total_width
+        self.stripe_end = min((self.pad_bottom + self.stripe_length) / total_width, 1)
         stripe_six_yard = self.six_yard_length
         stripe_pen_area = (self.penalty_area_length - self.six_yard_length) / 2
         stripe_other = (self.right - self.left -
@@ -476,21 +476,20 @@ class BasePitch(ABC):
             if self.stripe:
                 self._plain_stripes(ax)
         else:
-            pitch_color = np.random.normal(size=(1000, 690))
+            pitch_color = np.random.normal(size=(690, 1000))
             if self.stripe is False:
                 ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
             else:
-                ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
                 print('Not implemented')
-
+                #stripe_start = int(self.stripe_start * 690)
+                #stripe_end = int(self.stripe_end * 690)
+                #pitch_color[stripe_start: stripe_end, :] = pitch_color[stripe_start: stripe_end, :] + 2
+                ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
+    
     def _plain_stripes(self, ax):
-        total_width = self.stripe_length + self.pad_bottom + self.pad_top
-        stripe_start = max(self.pad_bottom, 0) / total_width
-        stripe_end = min((self.pad_bottom + self.stripe_length) / total_width, 1)
         for i in range(len(self.stripe_locations) - 1):
             if i % 2 == 0:
-                ax.axvspan(self.stripe_locations[i], self.stripe_locations[i + 1],
-                           stripe_start, stripe_end, facecolor=self.stripe_color, zorder=self.stripe_zorder)
+                self._draw_stripe(ax, i)
 
     def _draw_pitch_markings(self, ax):
         rect_prop = {'fill': False, 'linewidth': self.linewidth, 'color': self.line_color, 'zorder': self.line_zorder}
@@ -588,3 +587,8 @@ class BasePitch(ABC):
     @abstractmethod
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
         pass
+    
+    @abstractmethod
+    def _draw_stripe(self, ax):
+        pass
+

@@ -31,6 +31,10 @@ class Pitch(BasePitch):
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
         arc = patches.Arc((x, y), width, height, theta1=theta1, theta2=theta2, **kwargs)
         ax.add_patch(arc)
+                
+    def _draw_stripe(self, ax, i):
+        ax.axvspan(self.stripe_locations[i], self.stripe_locations[i + 1],
+                   self.stripe_start, self.stripe_end, facecolor=self.stripe_color, zorder=self.stripe_zorder)
         
 class VerticalPitch(BasePitch):
     
@@ -43,7 +47,7 @@ class VerticalPitch(BasePitch):
             pad[0:2] = -pad[0:2]  # when inverted the padding is negative
             
         self.extent = extent + pad
-        self._flip_aspect()
+        self.aspect = 1 / self.aspect
 
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         rectangle = patches.Rectangle((y, x), height, width, **kwargs)
@@ -59,4 +63,8 @@ class VerticalPitch(BasePitch):
                
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
         arc = patches.Arc((y, x), height, width, theta1=theta1 + 90, theta2=theta2 + 90, **kwargs)
-        ax.add_patch(arc)  
+        ax.add_patch(arc)
+        
+    def _draw_stripe(self, ax, i):
+        ax.axhspan(self.stripe_locations[i], self.stripe_locations[i + 1],
+                   self.stripe_start, self.stripe_end, facecolor=self.stripe_color, zorder=self.stripe_zorder)
