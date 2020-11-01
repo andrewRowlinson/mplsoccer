@@ -240,6 +240,10 @@ class BasePitch(ABC):
             self.left_penalty = self.left + 11
             self.right_penalty = self.right - 11
 
+        # set the extent (takes into account padding) [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
+        self._set_extent()
+        self.ax_aspect = abs(self.extent[0] - self.extent[1]) / abs(self.extent[2] - self.extent[3]) * self.aspect
+        
         # scale the padding where the aspect is not equal to one
         # this means that you can easily set the padding the same all around the pitch (e.g. when using an Opta pitch)
         if self.aspect != 1:
@@ -248,10 +252,6 @@ class BasePitch(ABC):
         # set the pitch_extent: [xmin, xmax, ymin, ymax]
         self.pitch_extent = np.array([min(self.left, self.right), max(self.left, self.right),
                                       min(self.bottom, self.top), max(self.bottom, self.top)])
-
-        # set the extent (takes into account padding) [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
-        self._set_extent()
-        self.ax_aspect = abs(self.extent[0] - self.extent[1]) / abs(self.extent[2] - self.extent[3]) * self.aspect
 
         # data checks
         self._validation_checks()
@@ -504,13 +504,9 @@ class BasePitch(ABC):
         self._draw_rectangle(ax, self.right - self.penalty_area_length, self.penalty_area_from_side,
                              self.penalty_area_length, self.penalty_area_width, **rect_prop)
         # pitch
-        if self.invert_y:
-            self._draw_rectangle(ax, self.left, self.top, self.length, self.width, **rect_prop)
-        else:
-            self._draw_rectangle(ax, self.left, self.bottom, self.length, self.width, **rect_prop)
+        self._draw_rectangle(ax, self.left, self.pitch_extent[2], self.length, self.width, **rect_prop)
         # mid-line
         self._draw_line(ax, [self.center_length, self.center_length], [self.bottom, self.top], **line_prop)
-
         # circles and arcs
         self._draw_circles_and_arcs(ax)
 
@@ -563,10 +559,7 @@ class BasePitch(ABC):
 
     def _draw_shade_middle(self, ax):
         shade_prop = {'fill': True, 'facecolor': self.shade_color, 'zorder': self.shade_zorder}
-        if self.invert_y:
-            self._draw_rectangle(ax, self.x3, self.top, self.x5 - self.x3, self.width, **shade_prop)
-        else:
-            self._draw_rectangle(ax, self.x3, self.bottom, self.x5 - self.x3, self.width, **shade_prop)
+        self._draw_rectangle(ax, self.x3, self.pitch_extent[2], self.x5 - self.x3, self.width, **shade_prop)
 
     @abstractmethod
     def _set_extent(self):
@@ -589,6 +582,6 @@ class BasePitch(ABC):
         pass
     
     @abstractmethod
-    def _draw_stripe(self, ax):
+    def _draw_stripe(self, ax, i):
         pass
 

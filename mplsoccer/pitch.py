@@ -3,17 +3,16 @@ from mplsoccer._pitch_base import BasePitch
 import matplotlib.patches as patches
 import matplotlib.lines as lines
 
+
 class Pitch(BasePitch):
         
     def _set_extent(self):
         extent = np.array([self.left, self.right, self.bottom, self.top])
         pad = np.array([-self.pad_left, self.pad_right, -self.pad_bottom, self.pad_top])
-        
         if self.half:
             extent[0] = self.center_length  # pitch starts at center line
         if self.invert_y:
-            pad[2:] = -pad[2:]  # when inverted the padding is negative
-            
+            pad[2:] = -pad[2:]  # when inverted the padding is negative  
         self.extent = extent + pad
 
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
@@ -35,7 +34,8 @@ class Pitch(BasePitch):
     def _draw_stripe(self, ax, i):
         ax.axvspan(self.stripe_locations[i], self.stripe_locations[i + 1],
                    self.stripe_start, self.stripe_end, facecolor=self.stripe_color, zorder=self.stripe_zorder)
-        
+
+
 class VerticalPitch(BasePitch):
     
     def _set_extent(self):
@@ -45,7 +45,6 @@ class VerticalPitch(BasePitch):
             extent[2] = self.center_length  # pitch starts at center line
         if self.invert_y:
             pad[0:2] = -pad[0:2]  # when inverted the padding is negative
-            
         self.extent = extent + pad
         self.aspect = 1 / self.aspect
 
