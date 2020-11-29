@@ -239,10 +239,6 @@ class BasePitch(ABC):
             self.length = pitch_length
             self.left_penalty = self.left + 11
             self.right_penalty = self.right - 11
-
-        # set the extent (takes into account padding) [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
-        self._set_extent()
-        self.ax_aspect = abs(self.extent[0] - self.extent[1]) / abs(self.extent[2] - self.extent[3]) * self.aspect
         
         # scale the padding where the aspect is not equal to one
         # this means that you can easily set the padding the same all around the pitch (e.g. when using an Opta pitch)
@@ -252,7 +248,11 @@ class BasePitch(ABC):
         # set the pitch_extent: [xmin, xmax, ymin, ymax]
         self.pitch_extent = np.array([min(self.left, self.right), max(self.left, self.right),
                                       min(self.bottom, self.top), max(self.bottom, self.top)])
-
+        
+        # set the extent (takes into account padding) [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
+        self._set_extent()
+        self.ax_aspect = abs(self.extent[0] - self.extent[1]) / abs(self.extent[2] - self.extent[3]) * self.aspect
+        
         # data checks
         self._validation_checks()
         self._validate_pad()
@@ -329,10 +329,6 @@ class BasePitch(ABC):
             self.y4 = self.y6 - self.six_yard_from_side
 
     def _stripe_locations(self):
-        self.stripe_length = self.pitch_extent[3] - self.pitch_extent[2]
-        total_width = self.stripe_length + self.pad_bottom + self.pad_top
-        self.stripe_start = max(self.pad_bottom, 0) / total_width
-        self.stripe_end = min((self.pad_bottom + self.stripe_length) / total_width, 1)
         stripe_six_yard = self.six_yard_length
         stripe_pen_area = (self.penalty_area_length - self.six_yard_length) / 2
         stripe_other = (self.right - self.left -
@@ -408,7 +404,7 @@ class BasePitch(ABC):
         Returns
         -------
         If ax=None returns a matplotlib Figure and Axes.
-        Else plotted on existing axis and returns None.
+        Else plotted on an existing axis and returns None.
 
         Examples
         --------
@@ -476,15 +472,10 @@ class BasePitch(ABC):
             if self.stripe:
                 self._plain_stripes(ax)
         else:
-            pitch_color = np.random.normal(size=(690, 1000))
-            if self.stripe is False:
-                ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
-            else:
-                print('Not implemented')
-                #stripe_start = int(self.stripe_start * 690)
-                #stripe_end = int(self.stripe_end * 690)
-                #pitch_color[stripe_start: stripe_end, :] = pitch_color[stripe_start: stripe_end, :] + 2
-                ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
+            pitch_color = np.random.normal(size=(1000, 1000))
+            if self.stripe:
+                pitch_color = self._draw_stripe_grass(pitch_color)
+            ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
     
     def _plain_stripes(self, ax):
         for i in range(len(self.stripe_locations) - 1):
