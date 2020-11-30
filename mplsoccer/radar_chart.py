@@ -3,7 +3,7 @@ __author__: Anmol_Durgapal(@slothfulwave612)
 
 A Python module for plotting radar-chart.
 
-The radar-chart theme is inspired from @Statsbomb.
+The radar-chart theme is inspired by @Statsbomb/Rami_Moghadam.
 '''
 
 ## import necessary packages/modules
@@ -42,7 +42,7 @@ class Radar:
         self.label_color = label_color
         self.range_color = range_color
 
-    def plot_radar(self, ranges, params, values, radar_color, filename=None, dpi=300,
+    def plot_radar(self, ranges, params, values, radar_color, plot_range=True, filename=None, dpi=300,
                    title=dict(), alphas=[0.6, 0.6], compare=False, endnote=None, 
                    end_size=9, end_color="#95919B", image=None, image_coord=None, figax=None, **kwargs):
         """
@@ -50,9 +50,10 @@ class Radar:
 
         Args:
             ranges (list): list of tuples containing min and max value for each parameter.
-            params (list): list of string values containing the name of parameters.
+            params (list): list of string values containing the name of parameters. Pass None to plot clean-radar-chart.
             values (list): list of float values for each parameters/ nested list when making comparison charts.
             radar_color (list): list of two color values.
+            plot_range (bool, optional): to plot the range values. Defaults to True.
             filename (str, optional): the name per which the file will be saved added extension. Defaults to None.
             dpi (int, optional): dots per inch value. Defaults to 300.
             title (str, optional): containing information of title and subtitle. Defaults to dict().
@@ -70,17 +71,14 @@ class Radar:
             matplotlib.figure.Figure: figure object.
             axes.Axes: axis object.
         """        
-        
-        ## assert required conditions 
-        assert len(ranges) >= 3, "Length of ranges should be greater than equal to 3"
-        assert len(params) >= 3, "Length of params should be greater than equal to 3"
-
+        ## to plot comparison radar charts
         if compare == True:
-            ## for making comparison radar charts
             assert len(values) == len(radar_color) == len(alphas), "Length for values, radar_color and alpha do not match"
         else:
-            assert len(values) >= 3, "Length of values should be greater than equal to 3"
-            assert len(ranges) == len(params) == len(values), "Length for ranges, params and values not matched"
+            if params == None:
+                assert len(ranges) == len(values), "Length for ranges and values not matched"    
+            else:
+                assert len(ranges) == len(params) == len(values), "Length for ranges, params and values not matched"
 
         if figax:
             fig, ax = figax
@@ -98,10 +96,14 @@ class Radar:
             radar_color.append('#D6D6D6')
 
         ## add labels around the last circles
-        ax = self.__add_labels(params=params, ax=ax)
+        if params != None:
+            ax = self.__add_labels(params=params, ax=ax)
 
         ## add ranges
-        ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax,)
+        if plot_range == False:
+            ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax, plot_range=False)
+        else:
+            ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax, plot_range=True)
 
         if compare == True:
             ## for making comparison radar charts
@@ -260,7 +262,7 @@ class Radar:
         
         return ax
 
-    def __add_labels(self, params, ax, return_list=False, radius=19, range_val=False):
+    def __add_labels(self, params, ax, return_list=False, radius=19, range_val=False, plot_range=True):
         """
         Function to add labels around the last circle.
 
@@ -270,6 +272,7 @@ class Radar:
             return_list (bool, optional): x and y values. Defaults to False.
             radius (int, optional): radius of the circle around which labels are to be align. Defaults to 19.
             range_val (bool, optional): to specify whether to plot range or not. Defaults to False.
+            plot_range (bool, optional): to plot the range values around the circle. Defaults to True.
 
         Returns:
             axes.Axes: axis object.
@@ -308,22 +311,24 @@ class Radar:
             else:
                 size = self.label_fontsize
                 color = self.label_color
-        
-            ax.text(x, y, p, rotation=-np.rad2deg(rot), ha='center', va='center', 
-                    fontsize=size, fontfamily=self.fontfamily, fontdict=dict(color=color))
+
+            if plot_range == True:
+                ax.text(x, y, p, rotation=-np.rad2deg(rot), ha='center', va='center', 
+                        fontsize=size, fontfamily=self.fontfamily, fontdict=dict(color=color))
         
         if return_list == True:
             return ax, x_y
         else:
             return ax
 
-    def __add_ranges(self, ranges, ax):
+    def __add_ranges(self, ranges, ax, plot_range=True):
         """
         Function to add range value around each circle.
 
         Args:
             ranges (list): list of tuples containing min and max value for each parameter.
             ax (axes.Axes): axis object.
+            plot_range (bool, optional): to plot the range values around the circle. Defaults to True.
 
         Returns:
             axes.Axes: axis object.
@@ -351,7 +356,9 @@ class Radar:
             ## parameter list
             params = range_values[:, i]
 
-            ax, xy = self.__add_labels(params=params, ax=ax, return_list=True, radius=radius[i], range_val=True)
+            ax, xy = self.__add_labels(
+                params=params, ax=ax, return_list=True, radius=radius[i], range_val=True, plot_range=plot_range
+            )
             x_y.append(xy)
 
         return ax, np.array(x_y), range_values

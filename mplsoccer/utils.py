@@ -6,7 +6,6 @@ Python module containing helper functions.
 
 ## necessary packages/modules
 import numpy as np
-from matplotlib.offsetbox import AnnotationBbox, TextArea, HPacker, VPacker
 from PIL import Image
 
 def get_coordinates(n):
@@ -153,9 +152,6 @@ def set_labels(ax, label_value, label_axis):
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     """
-    -----> The method is taken from mplsoccer package (from github) <-----
-    -----> Andy Rowlinson(@numberstorm) <-----
-
     Adds an image to a figure using fig.add_axes and ax.imshow
 
     Args:
@@ -196,143 +192,22 @@ def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     
     return fig
 
-def plot_text(x, y, text, text_dict, ax, color_rest='k', align="left", fontsize=None, **kwargs):
+def set_size(w,h, ax=None):
     """
-    Function to plot text.
+    Function to set size of an axes in a subplot.
 
     Args:
-        x (float): x-coodrinate value for text.
-        y (float): y-coodrinate value for text.
-        text (str): the text that will be plotted.
-        text_dict (dict): contains words that the user wants to format.
-        ax (axes.Axes): axis object.
-        color_rest (str, optional): color for the string. Defaults to 'k'.
-        align (str, optional): alignment, can have these values {'top', 'bottom', 'left', 'right', 'center', 'baseline'}. Defaults to "left". 
-        fontsize (float, optional): size of the font. Defaults to None.
-        **kwargs(optional): All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
-
-    Returns:
-        axes.Axes: axis object
+        w (float): width of the axes.
+        h (float): height of the axes.
+        ax (axes.Axes): axes object
     """    
+    ## compute width and height
+    l = ax.figure.subplotpars.left
+    r = ax.figure.subplotpars.right
+    t = ax.figure.subplotpars.top
+    b = ax.figure.subplotpars.bottom
+    figw = float(w)/(r-l)
+    figh = float(h)/(t-b)
 
-    ## init an empty list and a count variable to 0
-    hpacker_list = []
-    count = 0
-    
-    for sentence in text.split('\n'):
-        ## init an empty string and list
-        temp_string = ""
-        temp_hpacker = []
-        
-        for word in sentence.split(' '):
-            present = text_dict.get(word)
-            
-            if present == None:
-                temp_string += (word + " ")
-                
-            elif present and temp_string != "":
-                if type(fontsize) == list:
-                    size = fontsize[count]
-                else:
-                    size = fontsize
-
-                textbox = TextArea(
-                    temp_string.strip(),
-                    textprops = dict(
-                        color = color_rest,  
-                        size = size,
-                        **kwargs
-                    )
-                )
-                temp_hpacker.append(textbox)
-                temp_string = ""
-            
-            if present:
-                if present.get("color") == None:
-                    color = color_rest
-                else:
-                    try:
-                        color = present["color"]
-                    except Exception:
-                        color = present["fontcolor"]
-
-                if present.get("ignore") == True:
-                    word = word.replace('_', ' ')
-                    del present["ignore"]
-
-                if present.get("size") or present.get("fontsize"):
-                    try:
-                        size = present["fontsize"]
-                    except Exception:
-                        size = present["size"]
-                elif type(fontsize) == list:
-                    size = fontsize[count]
-                else:
-                    size = fontsize
-
-                if present.get("ignore_last") == True:
-                    w_1 = word[:-1]
-                    w_2 = word[-1]
-                    del present["ignore_last"]
-
-                    textbox_1 = TextArea(
-                        w_1,
-                        textprops = dict(      
-                            present,
-                            color = color,
-                            size = size,
-                            **kwargs
-                        )
-                    )
-
-                    textbox_2 = TextArea(
-                        w_2,
-                        textprops = dict(      
-                            present,
-                            color = color_rest,
-                            size = size,
-                            **kwargs
-                        )
-                    )    
-
-                    temp_box = HPacker(children=[textbox_1, textbox_2], align=align, pad=0, sep=0)
-                    temp_hpacker.append(temp_box)
-
-                else:
-                    textbox = TextArea(
-                        word,
-                        textprops = dict(      
-                            present,
-                            color = color,
-                            size = size,
-                            **kwargs
-                        )
-                    )
-                    temp_hpacker.append(textbox)
-        
-        if len(temp_string) > 0:
-            if type(fontsize) == list:
-                size = fontsize[count]
-            else:
-                size = fontsize
-
-            textbox = TextArea(
-                temp_string.strip(),
-                textprops = dict(
-                    color = color_rest,    
-                    size = size,
-                    **kwargs
-                )
-            )
-            temp_hpacker.append(textbox)
-        
-        count += 1
-        box_h = HPacker(children=temp_hpacker, align=align, pad=0, sep=4)
-        hpacker_list.append(box_h)
-        
-    final_box = VPacker(children=hpacker_list, pad=0, sep=4)
-
-    text = AnnotationBbox(final_box, (x, y), frameon=False)
-    ax.add_artist(text)
-    
-    return ax    
+    ## set size
+    ax.figure.set_size_inches(figw, figh)

@@ -3,23 +3,23 @@
 ## Content
 
 * [Overview](#overview)
-* [Documentation](#soccerplotsradar_chartradar)
+* [Documentation](#mplsoccerradar_chartradar)
 * [Examples](#examples)
 * [Dark Theme Template](#dark-theme-template)
 * [Some More Templates](#some-more-templates)
 
 ## Overview
 
-* `soccerplots`, `radar_chart` module helps you plot radar charts in a few lines of code.
+* `mplsoccer`, `radar_chart` module helps one to plot radar charts in a few lines of code.
 
-* The radar-chart theme is inspired from [Statsbomb](https://twitter.com/StatsBomb).
+* The radar-chart theme is inspired from [Statsbomb](https://twitter.com/StatsBomb)/Rami Moghadam.
 
-* Here we will look at the documentation and some examples on how to use `soccerplot` to plot radar charts.
+* Here we will look at the documentation and some examples on how to use `mplsoccer` to plot radar charts.
   
-## soccerplots.radar_chart.Radar
+## mplsoccer.radar_chart.Radar
 
 ```python
-soccerplots.radar_chart.Radar(
+mplsoccer.radar_chart.Radar(
     background_color="#FFFFFF", patch_color="#D6D6D6", fontfamily="Liberation Serif", 
     label_fontsize=10, range_fontsize=6.5, label_color="#000000", range_color="#000000"
 )
@@ -35,11 +35,11 @@ soccerplots.radar_chart.Radar(
 |6.|label_color| (str, optional) color value for labels. Defaults to "#000000".|
 |7.|range_color| (str, optional): color value for ranges. Defaults to "#000000".|         
       
-## soccerplots.radar_chart.Radar.plot_radar      
+## mplsoccer.radar_chart.Radar.plot_radar      
       
 ```python
-soccerplots.radar_chart.Radar.plot_radar(
-     ranges, params, values, radar_color, filename=None, dpi=300,
+mplsoccer.radar_chart.Radar.plot_radar(
+     ranges, params, values, radar_color, plot_range=True, filename=None, dpi=300,
      title=dict(), alphas=[0.6, 0.6], compare=False, endnote=None, 
      end_size=9, end_color="#95919B", image=None, image_coord=None, figax=None, **kwargs
 )
@@ -48,21 +48,22 @@ soccerplots.radar_chart.Radar.plot_radar(
 |  No.  |  Parameter  |  About Parameter  |
 |-------|-------------|-------------------|
 |1.|ranges| (list) list of tuples containing min and max value for each parameter.|
-|2.|params| (list) list of string values containing the name of parameters.|
+|2.|params| (list) list of string values containing the name of parameters. Pass None to plot clean-radar-chart|
 |3.|values| (list) list of float values for each parameters/ nested list when making comparison charts.|
 |4.|radar_color| (list) list of two color values.|
-|5.|filename| (str, optional) the name per which the file will be saved added extension. Defaults to None.|
-|6.|dpi| (int, optional) dots per inch value. Defaults to 300.|
-|7.|title| (str, optional) containing information of title and subtitle. Defaults to dict().|
-|8.|alphas| (list, optional) alpha value for color. Defaults to [0.6, 0.6].|
-|9.|compare| (bool, optional) True, if comparison charts are to be made. Defaults to False.|
-|10.|endnote| (str, optional) the endnote of the plot. Defaults to None.|
-|11.|end_size| (int, optional) the font-size for the endnote string. Defaults to 9.|
-|12.|end_color| (str, optional) color of the endnote. Defaults to "#95919B".|
-|13.|image| (str, optional) image name to be added. Defaults to None.|
-|14.|image_coord| (list, optional) containing left, bottom, width, height for image. Defaults to None.|
-|15.|figax| (tuple, optional) figure and axis object. Defaults to None.|
-|16.|\*\*kwargs| All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.|
+|5.|plot_range| (bool, optional) to plot the range values. Defaults to True.|
+|6.|filename| (str, optional) the name per which the file will be saved added extension. Defaults to None.|
+|7.|dpi| (int, optional) dots per inch value. Defaults to 300.|
+|8.|title| (str, optional) containing information of title and subtitle. Defaults to dict().|
+|9.|alphas| (list, optional) alpha value for color. Defaults to [0.6, 0.6].|
+|10.|compare| (bool, optional) True, if comparison charts are to be made. Defaults to False.|
+|11.|endnote| (str, optional) the endnote of the plot. Defaults to None.|
+|12.|end_size| (int, optional) the font-size for the endnote string. Defaults to 9.|
+|13.|end_color| (str, optional) color of the endnote. Defaults to "#95919B".|
+|14.|image| (str, optional) image name to be added. Defaults to None.|
+|15.|image_coord| (list, optional) containing left, bottom, width, height for image. Defaults to None.|
+|16.|figax| (tuple, optional) figure and axis object. Defaults to None.|
+|17.|\*\*kwargs| All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.|
 
 
 |  No.  |  Returns  |  About  |
@@ -73,7 +74,7 @@ soccerplots.radar_chart.Radar.plot_radar(
 
 ## Examples
 
-* Here we will look into some of the examples that can help in making radar-charts using `soccerplots`.
+* Here we will look into some of the examples that can help in making radar-charts using `mplsoccer`.
 
 * **Examples Content:**
   * [Making a simple Radar Chart](#making-a-simple-radar-chart)
@@ -87,20 +88,22 @@ soccerplots.radar_chart.Radar.plot_radar(
   * [Changing dpi](#changing-dpi)
   * [Changing Font](#changing-font)
   * [Adding Image](#adding-image)
-  * [Making comparison radar chart](#Making-comparison-radar-chart)
+  * [Making comparison radar chart](#making-comparison-radar-chart)
   * [Changing alpha values for comparison radar](#changing-alpha-values-for-comparison-radar)
-  * [Passing fig, ax](#passing-fig,-ax)
+  * [Passing fig, ax](#passing-fig-ax)
+  * [Making clean radar charts](#making-clean-radar-charts)
+  * [Multiple Radar Charts in One Figure](#multiple-radar-charts-in-one-figure)
 
 ### Making a simple Radar Chart
 
-* Here we will make a very simple radar chart using `soccerplots` module `radar_chart`. 
+* Here we will make a very simple radar chart using `mplsoccer` module `radar_chart`. 
 
 * We will be making use of `ranges`, `params`, `values` and `radar_color` parameter.
 
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -135,7 +138,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -170,7 +173,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -215,7 +218,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -260,7 +263,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -311,7 +314,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -339,7 +342,7 @@ title = dict(
 )
 
 ## endnote 
-endnote = "viz made by: Anmol Durgapal(@slothfulwave612)\ncreated using soccerplots"
+endnote = "viz made by: Anmol Durgapal(@slothfulwave612)\ncreated using mplsoccer"
 
 ## instantiate object
 radar = Radar()
@@ -352,7 +355,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 
 * *Output:*
 
-![5_endnote](https://user-images.githubusercontent.com/33928040/92325312-23bb5a00-f067-11ea-8ed6-55cfdd6c0af4.jpg)
+![x](https://user-images.githubusercontent.com/33928040/100632816-4b168000-3353-11eb-97e0-dcff41811105.jpg)
 
 
 ## Changing the size of endnote
@@ -362,7 +365,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -413,7 +416,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -464,7 +467,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -518,7 +521,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -569,7 +572,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -621,8 +624,8 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
-from soccerplots.utils import add_image
+from mplsoccer.radar_chart import Radar
+from mplsoccer.utils import add_image
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -674,7 +677,7 @@ fig = add_image(image="ajax.png", fig=fig, left=0.464, bottom=0.81, width=0.1, h
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -721,14 +724,14 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 
 ### Making comparison radar chart
 
-* We can use `soccerplots` to make comparison chart as well.
+* We can use `mplsoccer` to make comparison chart as well.
 
 * Here is how one can do it.
 
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssists', 'Key Passes', 'Crosses Into Box', 'Cross Competion', 'Deep Completions', 
@@ -786,7 +789,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssists', 'Key Passes', 'Crosses Into Box', 'Cross Competion', 'Deep Completions', 
@@ -843,7 +846,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 
 ```python
 import matplotlib.pyplot as plt
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -889,12 +892,261 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 
 ![12_figax](https://user-images.githubusercontent.com/33928040/92325841-59fad880-f06b-11ea-98b8-157401c7e745.jpg)
 
+### Making Clean Radar Charts
+
+* A clean radar chart is one where the final plot does not include the range and param values only showing the shape of the polygon.
+
+* To make a clean radar chart, one can pass one of the following combinations to the `plot_radar` method:
+  
+  1. Pass `params=None`, this will not plot param names in the radar-chart.
+  
+      * *Code Snippet:*
+        ```python
+        from mplsoccer.radar_chart import Radar
+        
+        ## range values
+        ranges = [(0.0, 0.15), (0.0, 0.67), (0.06, 6.3), (19.51, 50.0), (0.35, 1.61),
+                  (6.45, 11.94), (62.9, 79.4), (0.43, 4.08), (0.6, 2.33),
+                  (4.74, 7.2), (8.59, 12.48), (50.66, 66.67)]
+
+        ## parameter value
+        values = [0.11, 0.53, 0.70, 27.66, 1.05, 6.84, 84.62, 4.56, 2.22, 5.93, 8.88, 64.29]
+
+        ## title values
+        title = dict(
+            title_name='Sergiño Dest',
+            subtitle_name='AFC Ajax',
+            subtitle_color='#B6282F',
+            title_name_2='Radar Chart',
+            subtitle_name_2='Fullback',
+            subtitle_color_2='#B6282F',
+            title_fontsize=18,
+            subtitle_fontsize=15,
+        )
+
+        ## endnote 
+        endnote = "Visualization made by: Anmol Durgapal(@slothfulwave612)\nAll units are in per90"
+
+        ## instantiate object
+        radar = Radar()
+
+        ## plot radar
+        fig, ax = radar.plot_radar(ranges=ranges, params=None, values=values,
+                                   radar_color=['#B6282F', '#FFFFFF'], title=title, endnote=endnote
+        )
+        ```
+      * *Output:*
+      ![clean_with_range](https://user-images.githubusercontent.com/33928040/100618949-7d6bb180-3342-11eb-9226-e9cfd7d6d654.jpg)
+  
+  2. Pass `plot_range=False`, this will not plot the range values in the radar-chart.
+      
+      * *Code Snippet:*
+        ```python
+        from mplsoccer.radar_chart import Radar
+        
+        ## parameter names
+        params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
+                  'Progressive Passes', 'Prog. Pass Accuracy', 'Dribbles', 'Progressive Runs',
+                  'PADJ Interceptions', 'Succ. Def. Actions', 'Def Duel Win %']
+
+        ## range values
+        ranges = [(0.0, 0.15), (0.0, 0.67), (0.06, 6.3), (19.51, 50.0), (0.35, 1.61),
+                  (6.45, 11.94), (62.9, 79.4), (0.43, 4.08), (0.6, 2.33),
+                  (4.74, 7.2), (8.59, 12.48), (50.66, 66.67)]
+
+        ## parameter value
+        values = [0.11, 0.53, 0.70, 27.66, 1.05, 6.84, 84.62, 4.56, 2.22, 5.93, 8.88, 64.29]
+
+        ## title values
+        title = dict(
+            title_name='Sergiño Dest',
+            subtitle_name='AFC Ajax',
+            subtitle_color='#B6282F',
+            title_name_2='Radar Chart',
+            subtitle_name_2='Fullback',
+            subtitle_color_2='#B6282F',
+            title_fontsize=18,
+            subtitle_fontsize=15,
+        )
+
+        ## endnote 
+        endnote = "Visualization made by: Anmol Durgapal(@slothfulwave612)\nAll units are in per90"
+
+        ## instantiate object
+        radar = Radar()
+
+        ## plot radar
+        fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values, plot_range=False,
+                                   radar_color=['#B6282F', '#FFFFFF'], title=title, endnote=endnote
+        )
+        ```
+      
+      * *Output:*
+      ![clean_wo_range](https://user-images.githubusercontent.com/33928040/100619683-84df8a80-3343-11eb-8a6d-62d1788221ce.jpg)
+      
+  3. Pass `params=None` and `plot_range=False` to produce super-clean-radar
+     
+     * *Code Snippet:*
+       ```python
+        from mplsoccer.radar_chart import Radar
+        
+        ## range values
+        ranges = [(0.0, 0.15), (0.0, 0.67), (0.06, 6.3), (19.51, 50.0), (0.35, 1.61),
+                  (6.45, 11.94), (62.9, 79.4), (0.43, 4.08), (0.6, 2.33),
+                  (4.74, 7.2), (8.59, 12.48), (50.66, 66.67)]
+
+        ## parameter value
+        values = [0.11, 0.53, 0.70, 27.66, 1.05, 6.84, 84.62, 4.56, 2.22, 5.93, 8.88, 64.29]
+
+        ## title values
+        title = dict(
+            title_name='Sergiño Dest',
+            subtitle_name='AFC Ajax',
+            subtitle_color='#B6282F',
+            title_name_2='Radar Chart',
+            subtitle_name_2='Fullback',
+            subtitle_color_2='#B6282F',
+            title_fontsize=18,
+            subtitle_fontsize=15,
+        )
+
+        ## endnote 
+        endnote = "Visualization made by: Anmol Durgapal(@slothfulwave612)\nAll units are in per90"
+
+        ## instantiate object
+        radar = Radar()
+
+        ## plot radar
+        fig, ax = radar.plot_radar(ranges=ranges, params=None, values=values, plot_range=False,
+                                   radar_color=['#B6282F', '#FFFFFF'], title=title, endnote=endnote
+        )
+       ```
+     
+     * *Output:*
+     ![super_clean](https://user-images.githubusercontent.com/33928040/100620406-675ef080-3344-11eb-87ca-399b344fde57.jpg)
+     
+  4. Make clean-comparison-charts
+      
+      * *Code Snippet:*
+        ```python
+        from mplsoccer.radar_chart import Radar
+        
+        ## range values
+        ranges = [(0.0, 0.15), (0.0, 0.67), (0.06, 0.63), (19.51, 50.0), (0.35, 1.61), (6.45, 11.94), (62.94, 79.46), (0.43, 4.08), (0.6, 2.33), (5.01, 7.2), (9.02, 12.48),
+                  (52.44, 66.67)]
+
+        ## parameter value
+        values = [
+            [0.11, 0.53, 0.70, 27.66, 1.05, 6.84, 84.62, 4.56, 2.22, 5.93, 8.88, 64.29],   ## for Sergino Dest
+            [0.07, 0.36, 0.16, 32.14, 1.04, 7.37, 74.46, 3.68, 2.40, 6.87, 8.97, 61.14]    ## for Nelson Semedo
+        ]
+
+        ## title
+        title = dict(
+            title_name='Sergiño Dest',
+            title_color='#B6282F',
+            subtitle_name='AFC Ajax',
+            subtitle_color='#B6282F',
+            title_name_2='Nelson Semedo',
+            title_color_2='#344D94',
+            subtitle_name_2='Barcelona',
+            subtitle_color_2='#344D94',
+            title_fontsize=18,
+            subtitle_fontsize=15,
+        )
+
+        ## endnote 
+        endnote = "Visualization made by: Anmol Durgapal(@slothfulwave612)\nAll units are in per90"
+
+        ## instantiate object
+        radar = Radar()
+
+        ## plot radar -- compare
+        fig, ax = radar.plot_radar(
+            ranges=ranges, params=None, values=values, plot_range=False,
+            radar_color=['#B6282F', '#344D94'], 
+            title=title, endnote=endnote, compare=True
+        )
+        ```
+      * *Output:*
+      ![clean_compare](https://user-images.githubusercontent.com/33928040/100620912-fc61e980-3344-11eb-962c-13c56eacdd72.jpg)
+      
+### Multiple Radar Charts in One Figure
+
+* Here is a code snippet one can use to plot multiple radar charts in one single figure. (there can be multiple ways of doing this)
+
+* *Code Snippet:*
+```python
+import matplotlib.pyplot as plt
+from mplsoccer.radar_chart import Radar
+from mplsoccer.utils import set_size
+
+## parameter names
+params = [
+    "Param 01", "Param 02", "Param 03", "Param 04", "Param 05", "Param 06"
+]
+
+## range values
+ranges = [
+    (0.25, 0.65), (0.55, 1.0), (0.09, 0.2), (0.2, 2.5), (4.1, 10.5), (0.3, 3.5)
+]
+
+## parameter value
+values = [
+    [0.90, 1.11, 0.175, 1.92, 8.37, 3.26],      ## for player 01
+    [0.64, 1.10, 0.23, 1.69, 5.76, 2.12],       ## for player 02
+    [0.28, 0.9, 0.15, 1.23, 6.26, 3.0],         ## for player 03
+    [0.71, 0.86, 0.03, 1.56, 5.67, 2.2],        ## for player 04
+    [0.55, 0.5, 0.11, 2, 7.7, 2.12],            ## for player 05
+    [0.33, 0.7, 0.18, 1.4, 4.0, 2.12]           ## for player 06
+]
+
+## create subplot
+fig, ax = plt.subplots(
+    nrows=3, ncols=2
+)
+
+## init object of Radar class
+radar = Radar()
+
+## traverse through the axis
+for counter, axes in zip(range(0, len(values)), fig.get_axes()):
+    ## plot radar
+    fig, axes = radar.plot_radar(
+        ranges=ranges, params=params, values=values[counter],
+        radar_color=['#B6282F', '#FFFFFF'], end_color="#FFFFFF", figax=(fig, axes)
+    )
+    
+    ## plot axes title
+    axes.text(
+        0, 22,
+        f"Player {counter+1}", fontsize=20, color="#121212", fontfamily="Liberation Serif", fontweight="bold",
+        ha="center", va="center"
+    )
+    
+    ## set size for axes
+    set_size(20,20,axes)
+
+## plot figure title
+plt.figtext(
+    0.5, 1,
+    f"Multiple Radar Charts in One Figure", fontsize=25, color="#121212", fontfamily="Liberation Serif", fontweight="bold",
+    ha="center", va="center"
+)
+  
+## tight layout    
+plt.tight_layout(pad=3)
+```
+
+* *Output:*
+![final_fig](https://user-images.githubusercontent.com/33928040/100630735-eeb26100-3350-11eb-9382-510f7d5f4215.jpg)
+
 
 ## Dark Theme Template
 
-* With the newest update of `soccerplots` package one can plot radar chart, with his/her own defined theme, i.e. can now change the background, label and range colors as well.
+* Using `mplsoccer` package one can plot radar chart with his/her own defined theme, i.e. can now change the background, label and range colors as well.
 
-* Here I will demonstrate how to make *dark mode radar charts* using `soccerplots`.
+* Here are some examples on how to make *dark mode radar charts* using `mplsoccer`.
 
 * **Contents:**
   * [Dark Theme](#dark-theme)
@@ -909,7 +1161,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -961,7 +1213,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -1016,7 +1268,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssist', 'Key Passes', 'Crosses Into Box', 'Cross Completion %', 'Deep Completions',
@@ -1070,7 +1322,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ['xAssists', 'Key Passes', 'Crosses Into Box', 'Cross Competion', 'Deep Completions', 
@@ -1134,7 +1386,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params, values=values,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ["xG90", "Goals", "xG/Shot", "Shots On Target", "Touches In Box",
@@ -1186,7 +1438,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ["xG90", "Goals", "xG/Shot", "Shots On Target", "Touches In Box",
@@ -1237,7 +1489,7 @@ fig, ax = radar.plot_radar(ranges=ranges, params=params,
 * *Code Snippet:*
 
 ```python
-from soccerplots.radar_chart import Radar
+from mplsoccer.radar_chart import Radar
 
 ## parameter names
 params = ["Pass %", "Prog Passes", "KP", "GCA", "Succ Drib", "Fouls Won",
