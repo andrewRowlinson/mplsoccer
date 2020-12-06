@@ -23,7 +23,9 @@ class Pitch(BasePitch):
         top_side = abs(self.extent[2] - self.top + pad_top)
         bottom_side = abs(self.extent[2] - self.bottom + pad_bottom)
         self.stripe_end = top_side / total_height
-        self.stripe_start = bottom_side / total_height       
+        self.stripe_start = bottom_side / total_height
+        self.grass_stripe_end = int((1 - self.stripe_start) * 1000)
+        self.grass_stripe_start = int((1 - self.stripe_end) * 1000)
 
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         rectangle = patches.Rectangle((x, y), width, height, **kwargs)
@@ -44,33 +46,19 @@ class Pitch(BasePitch):
     def _draw_stripe(self, ax, i):
         ax.axvspan(self.stripe_locations[i], self.stripe_locations[i + 1],  # note axvspan
                    self.stripe_start, self.stripe_end,
-                   #0.05, 1,
                    facecolor=self.stripe_color, zorder=self.stripe_zorder)
         
     def _draw_stripe_grass(self, pitch_color):
+        total_width = self.extent[1] - self.extent[0]
+        for i in range(len(self.stripe_locations) - 1):
+            if i % 2 == 0:
+                if ((self.extent[0] <= self.stripe_locations[i] <=  self.extent[1]) or
+                    (self.extent[0] <= self.stripe_locations[i + 1] <=  self.extent[1])):
+                    start = int((max(self.stripe_locations[i], self.extent[0]) - self.extent[0]) / total_width * 1000)
+                    end = int((min(self.stripe_locations[i+1], self.extent[1]) - self.extent[0]) / total_width * 1000)    
+                    pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] = \
+                    pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
         return pitch_color
-        #total_height = abs(self.extent[3] - self.extent[2])
-        #total_width = self.extent[1] - self.extent[0]    
-        
-        #pad_top, pad_bottom = -min(self.pad_top, 0), min(self.pad_bottom, 0)
-        #if self.invert_y:
-        #    pad_top, pad_bottom = -pad_top, -pad_bottom
-            
-        #top_side = abs(self.extent[3] - self.top + pad_top)
-        #bottom_side = abs(self.extent[3] - self.bottom + pad_bottom)
-        
-        #stripe_start = int(top_side / total_height * 1000)
-        #stripe_end = int(bottom_side / total_height * 1000)
-        
-        #for i in range(len(self.stripe_locations) - 1):
-        #    if i % 2 == 0:
-        #        if ((self.extent[0] <= self.stripe_locations[i] <=  self.extent[1]) or
-        #            (self.extent[0] <= self.stripe_locations[i + 1] <=  self.extent[1])):
-        #            s = int((max(self.stripe_locations[i], self.extent[0]) - self.extent[0]) / total_width * 1000)
-        #            e = int((min(self.stripe_locations[i+1], self.extent[1]) - self.extent[0]) / total_width * 1000)          
-        #            pitch_color[stripe_start: stripe_end, s:e] = \
-        #            pitch_color[stripe_start: stripe_end, s:e] + 2
-        #return pitch_color
     
 
 class VerticalPitch(BasePitch):
@@ -93,6 +81,8 @@ class VerticalPitch(BasePitch):
         bottom_side = abs(self.extent[0] - self.bottom + pad_bottom)
         self.stripe_start = top_side / total_height
         self.stripe_end = bottom_side / total_height
+        self.grass_stripe_end = int(self.stripe_end * 1000)
+        self.grass_stripe_start = int(self.stripe_start * 1000)
        
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         rectangle = patches.Rectangle((y, x), height, width, **kwargs)
@@ -119,32 +109,13 @@ class VerticalPitch(BasePitch):
         return pitch_color
         
     def _draw_stripe_grass(self, pitch_color):
+        total_width = self.extent[3] - self.extent[2] 
+        for i in range(len(self.stripe_locations) - 1):
+            if i % 2 == 0:
+                if ((self.extent[2] <= self.stripe_locations[i] <=  self.extent[3]) or
+                    (self.extent[2] <= self.stripe_locations[i + 1] <=  self.extent[3])):
+                    start = 1000 -int((min(self.stripe_locations[i+1], self.extent[3]) - self.extent[2]) / total_width * 1000) 
+                    end = 1000 - int((max(self.stripe_locations[i], self.extent[2]) - self.extent[2]) / total_width * 1000)
+                    pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
+                    pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2                    
         return pitch_color
-        #total_height = abs(self.extent[1] - self.extent[0])
-        #total_width = self.extent[3] - self.extent[2]   
-        
-        #pad_left, pad_right = -min(self.pad_left, 0), min(self.pad_right, 0)
-        #if self.invert_y:
-        #    pad_left, pad_right = -pad_left, -pad_right
-            
-        #left_side = abs(self.extent[0] - self.top + pad_left)
-        #right_side = abs(self.extent[0] - self.bottom + pad_right)
-                
-        #stripe_start = int(left_side / total_height * 1000)
-        #stripe_end = int(right_side / total_height * 1000)
-                       
-        #for i in range(len(self.stripe_locations) - 1):
-        #    if i % 2 == 0:
-        #        if ((self.extent[2] <= self.stripe_locations[i] <=  self.extent[3]) or
-        #            (self.extent[2] <= self.stripe_locations[i + 1] <=  self.extent[3])):
-        #            print(max(self.stripe_locations[i], self.extent[2]),
-        #                  min(self.stripe_locations[i+1], self.extent[3]))
-                    #print(max(self.stripe_locations[i], self.extent[2]) - self.extent[2])
-                    
-                    #s = int((max(self.stripe_locations[i], self.extent[2]) - self.extent[2]) / total_width * 1000)
-                    #e = int((min(self.stripe_locations[i+1], self.extent[3]) - self.extent[2]) / total_width * 1000) 
-        #            pitch_color[:, stripe_start: stripe_end] = \
-        #            pitch_color[:, stripe_start: stripe_end] + 2       
-
-        #return pitch_color 
-        
