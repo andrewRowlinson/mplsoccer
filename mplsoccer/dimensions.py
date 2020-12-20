@@ -12,8 +12,9 @@ I am not sure which is correct, but I have gone for goal posts from y=45 to y=55
 This is consistent with the statsbomb definition (goals 10% of the pitch [8/80])
 and start 45% in from the side (36/80)."""
 
-valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner']
-size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner']
+valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
+         'metricasports', 'custom', 'skillcorner', 'secondspectrum']
+size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
 statsbomb = {'top': 0, 'bottom': 80, 'left': 0, 'right': 120, 'aspect': 1,
              'width': 80, 'center_width': 40, 'length': 120, 'center_length': 60,
@@ -64,8 +65,10 @@ custom = {'bottom': 0, 'left': 0, 'aspect': 1, 'six_yard_width': 18.32, 'six_yar
           'penalty_area_width': 40.32, 'left_penalty': 11, 'penalty_area_length': 16.5,  'circle_diameter': 18.3,
           'goal_depth': 2, 'goal_width': 7.32, 'arc': 53.05, 'invert_y': False, 'origin_center': False}
 
-skillcorner = {'center_width': 0, 'center_length': 0, 'aspect': 1,
-               'six_yard_from_side': -9.16, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
-               'penalty_area_from_side': -20.16, 'penalty_area_width': 40.32, 'penalty_area_length': 16.5,
-               'circle_diameter': 18.3, 'goal_depth': 2, 'goal_width': 7.32, 'goal_post': -3.66,
-               'arc': 53.05, 'invert_y': False, 'origin_center': True}
+skillcorner_secondspectrum = {'center_width': 0, 'center_length': 0, 'aspect': 1,
+                              'six_yard_from_side': -9.16, 'six_yard_width': 18.32,
+                              'six_yard_length': 5.5, 'penalty_area_from_side': -20.16,
+                              'penalty_area_width': 40.32, 'penalty_area_length': 16.5,
+                              'circle_diameter': 18.3, 'goal_depth': 2, 'goal_width': 7.32,
+                              'goal_post': -3.66, 'arc': 53.05, 'invert_y': False,
+                              'origin_center': True}

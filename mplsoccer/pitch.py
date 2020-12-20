@@ -7,13 +7,27 @@ import matplotlib.lines as lines
 class Pitch(BasePitch):
         
     def _set_extent(self):
-        extent = np.array([self.left, self.right, self.bottom, self.top])
-        pad = np.array([-self.pad_left, self.pad_right, -self.pad_bottom, self.pad_top])
+        extent = np.array([self.left, self.right, self.bottom, self.top], dtype=np.float32)
+        pad = np.array([-self.pad_left, self.pad_right, -self.pad_bottom, self.pad_top], dtype=np.float32)
+        visible_pad = np.clip(np.array([self.pad_left, self.pad_right,
+                                        self.pad_bottom, self.pad_top], dtype=np.float32),
+                              a_min=None, a_max=0.)
+        visible_pad[[0, 2]] = - visible_pad[[0, 2]]
         if self.half:
             extent[0] = self.center_length  # pitch starts at center line
-        if self.invert_y:
-            pad[2:] = -pad[2:]  # when inverted the padding is negative
+            visible_pad[0] = - self.pad_left  # do not want clipped values if half
+        if self.invert_y:  # when inverted the padding is negative
+            pad[2:] = -pad[2:]
+            visible_pad[2:] = - visible_pad[2:]
         self.extent = extent + pad
+        self.visible_pitch = extent + visible_pad
+        if self.half:
+            extent[0] = extent[0] - min(self.pad_left, self.pitch_length/2)
+            
+        # hexbin
+        self.hexbin_gridsize = (17, 8)
+        self.hex_extent = np.array([min(self.left, self.right), max(self.left, self.right),
+                                    min(self.bottom, self.top), max(self.bottom, self.top)], dtype=np.float32)
         
         # stripe
         total_height = abs(self.extent[3] - self.extent[2])
@@ -30,6 +44,7 @@ class Pitch(BasePitch):
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         rectangle = patches.Rectangle((x, y), width, height, **kwargs)
         ax.add_patch(rectangle)
+        return rectangle
         
     def _draw_line(self, ax, x, y, **kwargs):
         line = lines.Line2D(x, y, **kwargs)
@@ -60,18 +75,37 @@ class Pitch(BasePitch):
                     pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
         return pitch_color
     
-
+    @staticmethod
+    def _reverse_if_vertical(x, y):
+        return x, y
+   
+    
 class VerticalPitch(BasePitch):
     
     def _set_extent(self):
-        extent = np.array([self.top, self.bottom, self.left, self.right])
-        pad = np.array([self.pad_left, -self.pad_right, -self.pad_bottom, self.pad_top])
+        extent = np.array([self.top, self.bottom, self.left, self.right], dtype=np.float32)
+        pad = np.array([self.pad_left, -self.pad_right, -self.pad_bottom, self.pad_top], dtype=np.float32)
+        visible_pad = np.clip(np.array([self.pad_left, self.pad_right,
+                                        self.pad_bottom, self.pad_top], dtype=np.float32),
+                              a_min=None, a_max=0.)
+        visible_pad[[1, 2]] = - visible_pad[[1, 2]]
         if self.half:
             extent[2] = self.center_length  # pitch starts at center line
-        if self.invert_y:
-            pad[0:2] = -pad[0:2]  # when inverted the padding is negative
+            visible_pad[2] = - self.pad_bottom  # do not want clipped values if half
+        if self.invert_y:  # when inverted the padding is negative
+            pad[0:2] = -pad[0:2]
+            visible_pad[0:2] = - visible_pad[0:2]
         self.extent = extent + pad
+        self.visible_pitch = extent + visible_pad
+        if self.half:
+            extent[2] = extent[2] - min(self.pad_bottom, self.pitch_length/2)
         self.aspect = 1 / self.aspect
+        
+        # hexbin
+        self.hexbin_gridsize = (17, 17)
+        self.hex_extent = np.array([min(self.bottom, self.top), max(self.bottom, self.top),
+                                    min(self.left, self.right), max(self.left, self.right),], dtype=np.float32)
+
         # stripe
         total_height = abs(self.extent[1] - self.extent[0])
         pad_top, pad_bottom = -min(self.pad_left, 0), min(self.pad_right, 0)
@@ -87,6 +121,7 @@ class VerticalPitch(BasePitch):
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         rectangle = patches.Rectangle((y, x), height, width, **kwargs)
         ax.add_patch(rectangle)
+        return rectangle
         
     def _draw_line(self, ax, x, y, **kwargs):
         line = lines.Line2D(y, x, **kwargs)
@@ -119,3 +154,8 @@ class VerticalPitch(BasePitch):
                     pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
                     pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2                    
         return pitch_color
+    
+    @staticmethod
+    def _reverse_if_vertical(x, y):
+        return y, x
+    

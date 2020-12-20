@@ -2,8 +2,9 @@ import warnings
 from abc import ABC, abstractmethod
 
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib import rcParams
+import matplotlib.patches as patches
+import numpy as np
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
@@ -229,8 +230,8 @@ class BasePitch(ABC):
             self.right_penalty = self.right - self.left_penalty
             self.goal_post = self.center_width - self.goal_width / 2
 
-        elif pitch_type == 'skillcorner':
-            self._set_dimensions(dimensions.skillcorner)
+        elif pitch_type in ['skillcorner', 'secondspectrum']:
+            self._set_dimensions(dimensions.skillcorner_secondspectrum)
             self.top = pitch_width / 2
             self.bottom = -(pitch_width / 2)
             self.left = -(pitch_length / 2)
@@ -302,6 +303,11 @@ class BasePitch(ABC):
         if self.half:
             if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.length / 2:
                 raise ValueError("pad_left/pad_right too negative for pitch length")
+    
+    @staticmethod
+    def _validate_ax(ax):
+        if ax is None:
+            raise TypeError("Missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
     def _juego_de_posicion(self):
         # x positions for Juego de Posición
@@ -575,4 +581,76 @@ class BasePitch(ABC):
     @abstractmethod
     def _draw_stripe(self, ax, i):
         pass
+    
+    @abstractmethod
+    def _reverse_if_vertical(x, y):
+        pass
 
+    def plot(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.plot,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+            
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.plot.
+            
+        Returns
+        -------              
+        lines : A list of Line2D objects representing the plotted data.
+        """
+        self._validate_ax(ax)
+        x, y = self._reverse_if_vertical(x, y)
+        return ax.plot(x, y, **kwargs)
+    
+    def hexbin(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.hexbin,
+        which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+            
+        mincnt : int > 0, default: 1
+            If not None, only display cells with more than mincnt number of points in the cell.
+        gridsize : int or (int, int), default: (17, 8) for Pitch/ (17, 17) for VerticalPitch
+            If a single int, the number of hexagons in the x-direction. The number of hexagons in the y-direction
+            is chosen such that the hexagons are approximately regular.
+            Alternatively, if a tuple (nx, ny), the number of hexagons in the x-direction and the y-direction.
+            
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.hexbin.
+            
+        Returns
+        -------
+        polycollection : `~matplotlib.collections.PolyCollection`
+            A `PolyCollection` defining the hexagonal bins.
+            - `PolyCollection.get_offset` contains a Mx2 array containing
+              the x, y positions of the M hexagon centers.
+            - `PolyCollection.get_array` contains the values of the M
+              hexagons.
+            If *marginals* is *True*, horizontal
+            bar and vertical bar (both PolyCollections) will be attached
+            to the return collection as attributes *hbar* and *vbar*.
+        """
+        self._validate_ax(ax)
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        x, y = self._reverse_if_vertical(x, y)
+        mincnt = kwargs.pop('mincnt', 1)
+        gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
+        extent = kwargs.pop('extent', self.hex_extent)
+        hexbin = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
+        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                 self.visible_pitch[1] - self.visible_pitch[0],
+                                 self.visible_pitch[3] - self.visible_pitch[2], 
+                                 fill=False)
+        ax.add_patch(rect)
+        hexbin.set_clip_path(rect)
+        return hexbin
