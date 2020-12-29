@@ -211,3 +211,7 @@ def set_size(w,h, ax=None):
 
     ## set size
     ax.figure.set_size_inches(figw, figh)
+    
+def validate_ax(ax):
+    if ax is None:
+        raise TypeError("Missing 1 required argument: ax. A Matplotlib axis is required for plotting.")

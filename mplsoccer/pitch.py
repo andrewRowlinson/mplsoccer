@@ -2,6 +2,8 @@ import numpy as np
 from mplsoccer._pitch_base import BasePitch
 import matplotlib.patches as patches
 import matplotlib.lines as lines
+from mplsoccer.utils import validate_ax
+from mplsoccer.quiver import arrows
 
 
 class Pitch(BasePitch):
@@ -28,6 +30,18 @@ class Pitch(BasePitch):
         self.hexbin_gridsize = (17, 8)
         self.hex_extent = np.array([min(self.left, self.right), max(self.left, self.right),
                                     min(self.bottom, self.top), max(self.bottom, self.top)], dtype=np.float32)
+        
+        # kdeplot
+        self.kde_clip = ((self.left, self.right), (self.bottom, self.top))
+        
+        # jointplot
+        #self.jointplot_width = self.figsize[0]
+        #self.jointplot_height = (self.jointplot_width / (abs(self.visible_pitch[1] - self.visible_pitch[0]) /
+        #                                                abs(self.visible_pitch[3] - self.visible_pitch[2]))
+        #                         * self.aspect)
+        
+        # lines
+        self.reverse_cmap = self.invert_y
         
         # stripe
         total_height = abs(self.extent[3] - self.extent[2])
@@ -78,8 +92,31 @@ class Pitch(BasePitch):
     @staticmethod
     def _reverse_if_vertical(x, y):
         return x, y
-   
     
+    @staticmethod
+    def _reverse_vertices_if_vertical(vert):
+        return vert
+    
+    @staticmethod
+    def _rotate_if_horizontal(rotation_degrees):
+        return rotation_degrees - 90       
+    
+    def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
+        validate_ax(ax)        
+        return ax.annotate(text, xy, xytext, **kwargs)
+    
+    def heatmap(self, bin_statistic, ax=None, **kwargs):
+        validate_ax(ax)
+        mesh = ax.pcolormesh(bin_statistic['x_grid'], bin_statistic['y_grid'],
+                             bin_statistic['statistic'], **kwargs)
+        return mesh
+    
+    @staticmethod
+    def arrows(xstart, ystart, xend, yend, *args, ax=None, **kwargs):
+        q = arrows(xstart, ystart, xend, yend, *args, ax=ax, reverse=False, **kwargs)
+        return q
+
+
 class VerticalPitch(BasePitch):
     
     def _set_extent(self):
@@ -105,7 +142,18 @@ class VerticalPitch(BasePitch):
         self.hexbin_gridsize = (17, 17)
         self.hex_extent = np.array([min(self.bottom, self.top), max(self.bottom, self.top),
                                     min(self.left, self.right), max(self.left, self.right),], dtype=np.float32)
-
+        
+        # kdeplot
+        self.kde_clip = ((self.top, self.bottom), (self.left, self.right))
+        
+        # jointplot
+        #self.jointplot_width = self.figsize[0]
+        #self.jointplot_height = self.jointplot_width * (abs(self.visible_pitch[3] - self.visible_pitch[2]) /
+        #                                                abs(self.visible_pitch[3] - self.visible_pitch[2]))
+        
+        # lines
+        self.reverse_cmap = False
+        
         # stripe
         total_height = abs(self.extent[1] - self.extent[0])
         pad_top, pad_bottom = -min(self.pad_left, 0), min(self.pad_right, 0)
@@ -159,3 +207,29 @@ class VerticalPitch(BasePitch):
     def _reverse_if_vertical(x, y):
         return y, x
     
+    @staticmethod
+    def _reverse_vertices_if_vertical(vert):
+        return vert[:, [1, 0]].copy()
+    
+    @staticmethod
+    def _rotate_if_horizontal(rotation_degrees):
+        return rotation_degrees    
+    
+    def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
+        validate_ax(ax)        
+        xy = xy[::-1]
+        if xytext is not None:
+            xytext = xytext[::-1]
+        return ax.annotate(text, xy, xytext, **kwargs)
+    
+    def heatmap(self, bin_statistic, ax=None, **kwargs):
+        validate_ax(ax)
+        mesh = ax.pcolormesh(bin_statistic['y_grid'], bin_statistic['x_grid'], 
+                             bin_statistic['statistic'], **kwargs)
+        return mesh
+    
+    @staticmethod
+    def arrows(xstart, ystart, xend, yend, *args, ax=None, **kwargs):
+        q = arrows(xstart, ystart, xend, yend, *args, ax=ax, reverse=True, **kwargs)
+        return q
+ 

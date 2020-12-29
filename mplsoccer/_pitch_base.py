@@ -4,11 +4,24 @@ from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import matplotlib.patches as patches
+from matplotlib.collections import PatchCollection, LineCollection
+from matplotlib.colors import to_rgba_array, ListedColormap, LinearSegmentedColormap
+from matplotlib.cm import get_cmap
+from matplotlib.legend_handler import HandlerLineCollection
+from matplotlib.legend import Legend
+import matplotlib.markers as mmarkers
 import numpy as np
+import seaborn as sns
+from scipy.stats import binned_statistic_2d
+from collections import Sequence, namedtuple
 
 from mplsoccer import dimensions
-from mplsoccer.cm import grass_cmap
+from mplsoccer.utils import validate_ax
+from mplsoccer.cm import grass_cmap, create_transparent_cmap
+from mplsoccer.scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter, scatter_football
 
+_BinnedStatisticResult = namedtuple('BinnedStatisticResult',
+                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
 class BasePitch(ABC):
     """ A class for plotting soccer / football pitches in Matplotlib
@@ -118,6 +131,8 @@ class BasePitch(ABC):
         self.axes = None
         self.fig = None
         self.figsize = figsize
+        if self.figsize is None:
+            self.figsize = rcParams['figure.figsize']
         self.nrows = nrows
         self.ncols = ncols
         self.pitch_type = pitch_type
@@ -303,11 +318,6 @@ class BasePitch(ABC):
         if self.half:
             if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.length / 2:
                 raise ValueError("pad_left/pad_right too negative for pitch length")
-    
-    @staticmethod
-    def _validate_ax(ax):
-        if ax is None:
-            raise TypeError("Missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
     def _juego_de_posicion(self):
         # x positions for Juego de Posición
@@ -585,6 +595,10 @@ class BasePitch(ABC):
     @abstractmethod
     def _reverse_if_vertical(x, y):
         pass
+    
+    @abstractmethod
+    def _reverse_vertices_if_vertical(vert):
+        pass
 
     def plot(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.plot,
@@ -595,16 +609,112 @@ class BasePitch(ABC):
             Commonly, these parameters are 1D arrays.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-            
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.plot.
             
         Returns
         -------              
         lines : A list of Line2D objects representing the plotted data.
         """
-        self._validate_ax(ax)
+        validate_ax(ax)
         x, y = self._reverse_if_vertical(x, y)
         return ax.plot(x, y, **kwargs)
+    
+    def _scatter_rotation(self, x, y, rotation_degrees, marker=None, ax=None, **kwargs):
+        rotation_degrees = np.ma.ravel(rotation_degrees)
+        if x.size != rotation_degrees.size:
+            raise ValueError("x and rotation_degrees must be the same size")
+        # rotated counter clockwise - this makes it clockwise with zero facing the direction of play
+        rotation_degrees = -rotation_degrees
+        rotation_degrees = self._rotate_if_horizontal(rotation_degrees)              
+        markers = []
+        for i in range(len(rotation_degrees)):
+            t = mmarkers.MarkerStyle(marker=marker)
+            t._transform = t.get_transform().rotate_deg(rotation_degrees[i])
+            markers.append(t)
+                
+        sc = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
+        return sc
+    
+    @abstractmethod
+    def _rotate_if_horizontal(rotation_degrees):
+        pass
+        
+    def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.scatter,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+        Can optionally use a football marker with marker='football'.
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        rotation_degrees: array-like or scalar, default None.
+            Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play.
+            In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
+        marker: MarkerStyle, optional
+            The marker style. marker can be either an instance of the class or the text shorthand for a
+            particular marker. Defaults to None, in which case it takes the value of rcParams["scatter.marker"]
+            (default: 'o') = 'o'.
+            If marker='football' plots a football shape with the pentagons the color of the edgecolors
+            and hexagons the color of the 'c' argument; 'linewidths' also sets the 
+            linewidth of the football marker.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+            
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
+            
+        Returns
+        -------
+        paths : matplotlib.collections.PathCollection or a tuple of (paths, paths) if marker='football'
+        
+        """
+        validate_ax(ax)
+        
+        x = np.ma.ravel(x)
+        y = np.ma.ravel(y)
+        
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+            
+        x, y = self._reverse_if_vertical(x, y)
+        
+        if marker is None:
+            marker = rcParams['scatter.marker']
+        
+        if marker == 'football' and rotation_degrees is not None:
+            raise NotImplementedError("rotated football markers are not implemented.")
+        
+        if marker == 'football':
+            sc = scatter_football(x, y, ax=ax, **kwargs)
+        elif rotation_degrees is not None:
+            sc = self._scatter_rotation(x, y, rotation_degrees, marker=marker, ax=ax, **kwargs)
+        else:
+            sc = ax.scatter(x, y, marker=marker, **kwargs)
+        return sc   
+    
+    def kdeplot(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around seaborn.kdeplot,
+        which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to seaborn.kdeplot.
+            
+        Returns
+        -------            
+        ax : matplotlib.axes
+        """
+        validate_ax(ax)
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        x, y = self._reverse_if_vertical(x, y)
+        clip = kwargs.pop('clip', self.kde_clip)
+        kde = sns.kdeplot(x, y, ax=ax, clip=clip, **kwargs)   
+        return kde
     
     def hexbin(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
@@ -615,14 +725,12 @@ class BasePitch(ABC):
             Commonly, these parameters are 1D arrays.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-            
         mincnt : int > 0, default: 1
             If not None, only display cells with more than mincnt number of points in the cell.
         gridsize : int or (int, int), default: (17, 8) for Pitch/ (17, 17) for VerticalPitch
             If a single int, the number of hexagons in the x-direction. The number of hexagons in the y-direction
             is chosen such that the hexagons are approximately regular.
             Alternatively, if a tuple (nx, ny), the number of hexagons in the x-direction and the y-direction.
-            
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.hexbin.
             
         Returns
@@ -637,7 +745,7 @@ class BasePitch(ABC):
             bar and vertical bar (both PolyCollections) will be attached
             to the return collection as attributes *hbar* and *vbar*.
         """
-        self._validate_ax(ax)
+        validate_ax(ax)
         x = np.ravel(x)
         y = np.ravel(y)
         if x.size != y.size:
@@ -654,3 +762,563 @@ class BasePitch(ABC):
         ax.add_patch(rect)
         hexbin.set_clip_path(rect)
         return hexbin
+    
+    def polygon(self, verts, ax=None, **kwargs):
+        """ Plot polygons using a PathCollection.
+        See: https://matplotlib.org/3.1.1/api/collections_api.html.
+        Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
+        transOffset, norm, cmap
+            
+        Parameters
+        ----------
+        verts: verts is a sequence of (verts0, verts1, ...) 
+            where verts_i is a numpy array of shape (number of vertices, 2).
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.    
+        **kwargs : All other keyword arguments are passed on to matplotlib.collections.PatchCollection.
+            
+        Returns
+        -------
+        PathCollection : matplotlib.collections.PatchCollection
+        """
+        validate_ax(ax)
+        verts = np.asarray(verts)
+        patch_list = []
+        for vert in verts:
+            vert =  self._reverse_vertices_if_vertical(vert)
+            polygon = patches.Polygon(vert, closed=True)
+            patch_list.append(polygon)
+        p = PatchCollection(patch_list, **kwargs)
+        p = ax.add_collection(p)
+        return p
+
+    def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
+        """ Plot a polygon with the angle to the goal using PathCollection.
+        See: https://matplotlib.org/3.1.1/api/collections_api.html.
+        Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
+        transOffset, norm, cmap
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+        goal: str default 'right'.
+            The goal to plot, either 'left' or 'right'.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.         
+        **kwargs : All other keyword arguments are passed on to matplotlib.collections.PathCollection.
+            
+        Returns
+        -------
+        PathCollection : matplotlib.collections.PathCollection  
+        """
+        validate_ax(ax)
+        valid_goal = ['left', 'right']
+        if goal not in valid_goal:
+            raise TypeError(f'Invalid argument: goal should be in {valid_goal}')
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        if goal == 'right':
+            goal_coordinates = self.goal_right
+        else:
+            goal_coordinates = self.goal_left
+        verts = np.zeros((x.size, 3, 2))
+        verts[:, 0, 0] = x
+        verts[:, 0, 1] = y
+        verts[:, 1:, :] = np.expand_dims(goal_coordinates, 0)
+        p = self.polygon(verts, ax=ax, **kwargs)
+        return p
+    
+    @abstractmethod
+    def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
+        """ Utility wrapper around ax.annotate
+        which automatically flips the xy and xytext coordinates if the pitch is vertical.
+        
+        Annotate the point xy with text.
+        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.annotate.html
+        
+        Parameters
+        ----------
+        text : str
+            The text of the annotation.
+        xy : (float, float)
+            The point (x, y) to annotate.
+        xytext : (float, float), optional
+            The position (x, y) to place the text at. If None, defaults to xy.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
+        
+        Returns
+        -------
+        annotation : matplotlib.text.Annotation
+        """
+        pass
+    
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4)):
+        """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
+        
+        This method automatically sets the range, changes some of the scipy defaults,
+        and outputs the grids and centers for plotting.
+        
+        The default statistic has been changed to count instead of mean.
+        The default bins have been set to (5,4).
+        
+        Parameters
+        ----------
+        x, y, values : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+            If the statistic is 'count' then values are ignored.       
+        statistic : string or callable, optional
+            The statistic to compute (default is 'count').
+            The following statistics are available: 'count' (default),
+            'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function.
+            See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification.
+              * the number of bins for the two dimensions (nx = ny = bins),
+              * the number of bins in each dimension (nx, ny = bins),
+              * the bin edges for the two dimensions (x_edge = y_edge = bins),
+              * the bin edges in each dimension (x_edge, y_edge = bins).
+                If the bin edges are specified, the number of bins will be,
+                (nx = len(x_edge)-1, ny = len(y_edge)-1).
+        invert_y : bool, default True
+            Whether to consistently create heatmaps from the bottom to the top of the pitch.
+            If true then the data for pitches with an inverted y-axis 
+            (statsbomb, metrica, wyscout, and stats) is first corrected to a normal y-axis
+            before calculating the heatmap. This means the edges are treated consistently
+            so the top edge of a grid cell belongs to the cell above and the right edge of
+            a grid cell belongs to the cell to the right. The bin is half-open. The
+            last bin, however, includes the pitch edge.
+            
+        Returns
+        ----------
+        bin_statistic : dict.
+            The keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+        """
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+   
+        if values is not None:
+            values = np.ravel(values)
+        if (values is None) & (statistic == 'count'):
+            values = x
+        if (values is None) & (statistic != 'count'):
+            raise ValueError("values on which to calculate the statistic are missing")
+        if values.size != x.size:
+            raise ValueError("x and values must be the same size")
+            
+        if self.invert_y:
+            pitch_range = [[self.left, self.right], [self.top, self.bottom]]
+            y = self.bottom - y  # for inverted axis flip the coordinates
+        else:
+            pitch_range = [[self.left, self.right], [self.bottom, self.top]]
+        
+        result = binned_statistic_2d(x, y, values, statistic=statistic, bins=bins, range=pitch_range)
+        
+        statistic = result.statistic.T
+        # this ensures that all the heatmaps are created consistently at the heatmap edges
+        # i.e. grid cells are created from the bottom to the top of the pitch. where the top edge
+        # always belongs to the cell above. First the raw coordinates have been flipped above
+        # then the statistic is flipped back here
+        if self.invert_y:
+            statistic = np.flip(statistic, axis=0)
+                           
+        x_grid, y_grid = np.meshgrid(result.x_edge, result.y_edge)
+           
+        cx, cy = np.meshgrid(result.x_edge[:-1] + 0.5 * np.diff(result.x_edge),
+                             result.y_edge[:-1] + 0.5 * np.diff(result.y_edge))
+        
+        bin_statistic = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)._asdict()
+
+        return bin_statistic
+    
+    @abstractmethod
+    def heatmap(self, bin_statistic, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
+        which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
+        
+        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
+       
+        Parameters
+        ----------
+        bin_statistic : dict.
+            This should be calculated via Pitch.bin_statistic().
+            The keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.pcolormesh.
+        
+        Returns
+        ----------
+        mesh : matplotlib.collections.QuadMesh
+        """
+        pass
+    
+    def label_heatmap(self, bin_statistic, ax=None, **kwargs):
+        """ Labels the heatmaps and automatically flips the coordinates if the pitch is vertical.
+              
+        Parameters
+        ----------
+        bin_statistic : A dictionary or list of dictionaries.
+            This should be calculated via Pitch.bin_statistic_positional() or Pitch.bin_statistic().
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
+            
+        Returns
+        ----------
+        annotations : A list of matplotlib.text.Annotation.
+        """
+        validate_ax(ax)
+
+        if not isinstance(bin_statistic, list):
+            bin_statistic = [bin_statistic]
+    
+        annotation_list = []
+        for bs in bin_statistic:
+            # remove labels outside the plot extents
+            mask_x_outside1 = bs['cx'] < self.pitch_extent[0]
+            mask_x_outside2 = bs['cx'] > self.pitch_extent[1]
+            mask_y_outside1 = bs['cy'] < self.pitch_extent[2]
+            mask_y_outside2 = bs['cy'] > self.pitch_extent[3]
+            mask_clip = mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
+            mask_clip = np.ravel(mask_clip)
+            
+            text = np.ravel(bs['statistic'])[~mask_clip]
+            cx = np.ravel(bs['cx'])[~mask_clip]
+            cy = np.ravel(bs['cy'])[~mask_clip]
+            for i in range(len(text)):
+                annotation = self.annotate(text[i], (cx[i], cy[i]), ax=ax, **kwargs)
+                annotation_list.append(annotation)
+            
+        return annotation_list
+    
+    @abstractmethod
+    def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.quiver,
+        Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
+        from the start and endpoints of the arrow.
+        The function also automatically flips the x and y coordinates if the pitch is vertical.
+        
+        Plot a 2D field of arrows.
+        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.quiver.html
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+        C: 1D or 2D array-like, optional
+            Numeric data that defines the arrow colors by colormapping via norm and cmap.
+            This does not support explicit colors. If you want to set colors directly, use color instead.
+            The size of C must match the number of arrow locations.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.          
+        width : float, default 4
+            Arrow shaft width in points.     
+        headwidth : float, default 3
+            Head width as a multiple of the arrow shaft width.
+        headlength : float, default 5
+            Head length as a multiple of the arrow shaft width.
+        headaxislength : float, default: 4.5
+            Head length at the shaft intersection.
+            If this is equal to the headlength then the arrow will be a triangular shape.
+            If greater than the headlength then the arrow will be wedge shaped.
+            If less than the headlength the arrow will be swept back.
+        color : color or color sequence, optional
+            Explicit color(s) for the arrows. If C has been set, color has no effect.    
+        linewidth or linewidths or lw : float or sequence of floats
+            Edgewidth of arrow.
+        edgecolor or ec or edgecolors : color or sequence of colors or 'face'
+        alpha : float or None
+            Transparency of arrows.                
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.quiver.
+            
+        Returns
+        -------
+        PolyCollection : matplotlib.quiver.Quiver   
+        """
+        pass
+    
+    def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
+              comet=False, transparent=False, alpha_start=0.01,
+              alpha_end=1, cmap=None, ax=None, **kwargs):
+        """ Plots lines using matplotlib.collections.LineCollection.
+        This is a fast way to plot multiple lines without loops.
+        Also enables lines that increase in width or opacity by splitting the line into n_segments of increasing
+        width or opacity as the line progresses.
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+        color : A matplotlib color or sequence of colors, defaults to None.
+            Defaults to None. In that case the marker color is determined 
+            by the value rcParams['lines.color']
+        n_segments : int, default 100
+            If comet=True or transparent=True this is used to split the line
+            into n_segments of increasing width/opacity.
+        comet : bool default False
+            Whether to plot the lines increasing in width.
+        transparent : bool, default False
+            Whether to plot the lines increasing in opacity.
+        linewidth or lw : array-like or scalar, default 5.
+            Multiple linewidths not supported for the comet or transparent lines.
+        alpha_start: float, default 0.01
+            The starting alpha value for transparent lines, between 0 (transparent) and 1 (opaque).
+            If transparent = True the line will be drawn to
+            linearly increase in opacity between alpha_start and alpha_end.
+        alpha_end : float, default 1
+            The ending alpha value for transparent lines, between 0 (transparent) and 1 (opaque).
+            If transparent = True the line will be drawn to
+            linearly increase in opacity between alpha_start and alpha_end.
+        cmap : str, default None
+            A matplotlib cmap (colormap) name
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.collections.LineCollection.
+            
+        Returns
+        -------
+        LineCollection : matplotlib.collections.LineCollection
+        """
+        validate_ax(ax)
+        if not isinstance(comet, bool):
+            raise TypeError("Invalid argument: comet should be bool (True or False).")
+        if not isinstance(transparent, bool):
+            raise TypeError("Invalid argument: transparent should be bool (True or False).")
+        
+        if alpha_start < 0 or alpha_start > 1:
+            raise TypeError("alpha_start values should be within 0-1 range")
+        if alpha_end < 0 or alpha_end > 1:
+            raise TypeError("alpha_end values should be within 0-1 range")
+        if alpha_start > alpha_end:
+            warnings.warn("Alpha start > alpha end. The line will increase in transparency nearer to the end")
+            
+        if 'colors' in kwargs.keys():
+            warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
+                       
+        if color is not None and cmap is not None:
+            raise ValueError("Only use one of color or cmap arguments not both.")
+            
+        if 'lw' in kwargs.keys() and 'linewidth' in kwargs.keys():
+            raise TypeError("lines got multiple values for 'linewidth' argument (linewidth and lw).")
+            
+        # set linewidth
+        if 'lw' in kwargs.keys():
+            lw = kwargs.pop('lw', 5)
+        elif 'linewidth' in kwargs.keys():
+            lw = kwargs.pop('linewidth', 5)
+        else:
+            lw = 5
+        
+        # to arrays
+        xstart = np.ravel(xstart)
+        ystart = np.ravel(ystart)
+        xend = np.ravel(xend)
+        yend = np.ravel(yend)
+        lw = np.ravel(lw)
+                
+        if (comet or transparent) and (lw.size > 1):
+            raise NotImplementedError("Multiple linewidths with a comet or transparent line is not implemented.")
+            
+        # set color
+        if color is None and cmap is None:
+            color = rcParams['lines.color']
+            
+        if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0] > 1):
+            raise NotImplementedError("Multiple colors with a comet or transparent line is not implemented.")          
+            
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")     
+            
+        if (lw.size > 1) and (lw.size != xstart.size):
+            raise ValueError("lw and xstart must be the same size")
+                
+        if lw.size == 1:
+            lw = lw[0]
+            
+        xstart, ystart = self._reverse_if_vertical(xstart, ystart)
+        xend, yend = self._reverse_if_vertical(xend, yend)
+        
+        # create linewidth
+        if comet:
+            lw = np.linspace(1, lw, n_segments)
+            handler_first_lw = False
+        else:
+            handler_first_lw = True
+            
+        if (transparent is False) and (comet is False) and (cmap is None):
+            multi_segment = False
+        else:
+            multi_segment = True
+            
+        if transparent:
+            cmap = create_transparent_cmap(color, cmap, n_segments, alpha_start, alpha_end)
+            
+        if isinstance(cmap, str):
+            cmap = get_cmap(cmap)
+
+        if cmap is not None:
+            handler_cmap = True
+            lc = self.lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap, 
+                                 ax=ax, n_segments=n_segments, multi_segment=multi_segment, **kwargs)        
+        else:
+            handler_cmap = False
+            lc = self.lines_no_cmap(xstart, ystart, xend, yend, lw=lw, color=color, 
+                                    ax=ax, n_segments=n_segments, multi_segment=multi_segment, **kwargs)
+            
+        lc_handler = HandlerLines(numpoints=n_segments, invert_y=self.reverse_cmap,
+                                  first_lw=handler_first_lw,
+                                  use_cmap=handler_cmap)           
+        Legend.update_default_handler_map({lc: lc_handler})
+            
+        return lc
+    
+    def create_segments(self, xstart, ystart, xend, yend, n_segments=100, multi_segment=False):
+        if multi_segment:
+            x = np.linspace(xstart, xend, n_segments + 1)
+            y = np.linspace(ystart, yend, n_segments + 1)
+            points = np.array([x, y]).T
+            points = np.concatenate([points, np.expand_dims(points[:, -1, :], 1)], axis=1)
+            points = np.expand_dims(points, 1)
+            segments = np.concatenate([points[:, :, :-2, :], points[:, :, 1:-1, :], points[:, :, 2:, :]], axis=1)
+            segments = np.transpose(segments, (0, 2, 1, 3)).reshape(-1, 3, 2)
+        else:
+            segments = np.transpose(np.array([[xstart, ystart], [xend, yend]]), (2, 0, 1))
+        return segments
+        
+    def lines_no_cmap(self, xstart, ystart, xend, yend, lw=None, color=None, ax=None,
+                      n_segments=100, multi_segment=False, **kwargs):
+        segments = self.create_segments(xstart, ystart, xend, yend, n_segments=n_segments, multi_segment=multi_segment)
+        color = to_rgba_array(color)
+        if (color.shape[0] > 1) and (color.shape[0] != xstart.size):
+            raise ValueError("xstart and color must be the same size")
+        lc = LineCollection(segments, color=color, linewidth=lw, snap=False, **kwargs)
+        lc = ax.add_collection(lc)
+        return lc
+    
+    def lines_cmap(self, xstart, ystart, xend, yend, lw=None, cmap=None, ax=None,
+                      n_segments=100, multi_segment=False, **kwargs):
+        segments = self.create_segments(xstart, ystart, xend, yend, n_segments=n_segments, multi_segment=multi_segment)
+        if self.reverse_cmap:
+            cmap = cmap.reversed()
+        lc = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, **kwargs)
+        lc = ax.add_collection(lc)
+        pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
+        lc.set_array(pitch_array)
+        return lc
+              
+#    def jointplot(self, x, y, **kwargs):
+        """ Utility wrapper around seaborn.jointplot
+        which automatically flips the x and y coordinates if the pitch is vertical, sets the height from the figsize,
+        and clips kernel density plots (kind = 'kde') to the pitch boundaries.
+        
+        Draw a plot of two variables with bivariate and univariate graphs.
+        See: https://seaborn.pydata.org/generated/seaborn.jointplot.html
+        
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        
+        kind : str default 'kde'
+            Kind of plot to draw. One of 'scatter', 'kde', 'hist', 'hex', 'reg', or resid'
+
+        **kwargs : All other keyword arguments are passed on to seaborn.jointplot.
+            
+        Returns
+        -------
+        grid : seaborn.axisgrid.JointGrid         
+        """
+#        x = np.ravel(x)
+#        y = np.ravel(y)
+#        if x.size != y.size:
+#            raise ValueError("x and y must be the same size")
+#        x, y = self._reverse_if_vertical(x, y)  
+#        clip = kwargs.pop('clip', self.kde_clip)
+#        kind = kwargs.pop('kind', 'kde')
+#        extent = kwargs.pop('extent', self.hex_extent)
+    
+#        if kind == 'kde':
+#            joint_plot = sns.jointplot(x, y, kind=kind, clip=clip,
+#                                       xlim=self.visible_pitch[:2],
+#                                       ylim=self.visible_pitch[2:],
+#                                       **kwargs)
+#        elif kind == 'hex':
+#            dropna = kwargs.pop('dropna', True)
+#            gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
+#            joint_plot = sns.jointplot(x, y,
+#                                       kind=kind, 
+#                                       extent=extent,
+#                                       gridsize=gridsize,
+#                                       dropna=True, 
+#                                       xlim=self.visible_pitch[:2],
+#                                       ylim=self.visible_pitch[2:],
+#                                       **kwargs)
+#        else:
+#            joint_plot = sns.jointplot(x, y, kind=kind, **kwargs)
+        
+#        joint_plot_ax = joint_plot.ax_joint
+#        self.draw(ax=joint_plot_ax)
+#        joint_plot.fig.set_figwidth(self.jointplot_width)
+#        joint_plot.fig.set_figheight(self.jointplot_height)
+                
+#        if kind == 'hex':
+#            hexbin = joint_plot_ax.__dict__['collections'][0]
+#            rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+#                                     self.visible_pitch[1] - self.visible_pitch[0],
+#                                     self.visible_pitch[3] - self.visible_pitch[2], 
+#                                     fill=False)
+#            joint_plot_ax.add_patch(rect)
+#            hexbin.set_clip_path(rect)
+#        return joint_plot
+
+
+# Amended from
+# https://stackoverflow.com/questions/49223702/adding-a-legend-to-a-matplotlib-plot-with-a-multicolored-line?rq=1
+class HandlerLines(HandlerLineCollection):
+    """Automatically generated by Pitch.lines() to allow use of linecollection in legend."""
+    
+    def __init__(self, invert_y=False, first_lw=False, use_cmap=False, marker_pad=0.3, numpoints=None, **kw):
+        HandlerLineCollection.__init__(self, marker_pad=marker_pad, numpoints=numpoints, **kw)
+        self.invert_y = invert_y
+        self.first_lw = first_lw
+        self.use_cmap = use_cmap
+    
+    def create_artists(self, legend, artist, xdescent, ydescent,
+                       width, height, fontsize, trans):
+        x = np.linspace(0, width, self.get_numpoints(legend)+1)
+        y = np.zeros(self.get_numpoints(legend) + 1)+height/2.-ydescent
+        points = np.array([x, y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        lw = artist.get_linewidth()
+        if self.first_lw:
+            lw = lw[0]
+        if self.use_cmap:
+            cmap = artist.cmap
+            if self.invert_y:
+                cmap = cmap.reversed()
+            lc = LineCollection(segments, lw=lw, cmap=cmap, snap=False, transform=trans)
+            lc.set_array(x)
+        else:
+            lc = LineCollection(segments, lw=lw, colors=artist.get_colors()[0], snap=False, transform=trans)
+        return [lc]
+
+
+# TO DO
+# kdeplot - data instead of x, y due to seaboarn change
+# calculate_angle_and_distance
+# flow
+# voronoi
+# jointplot
+# bin_statistic_positional
+# heatmap_positional
+# peter mckeever arrow lines?
