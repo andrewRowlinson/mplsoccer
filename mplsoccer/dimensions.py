@@ -6,11 +6,9 @@ are slightly different, but for the purposes
 of the visualisations the differences will be minimal.
 
 Wycout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
-However, the goal dimensions in ggsoccer are different from socceraction 
+Note, the goal dimensions in ggsoccer (10 units) are different from socceraction (12 units) 
 (https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py),
-I am not sure which is correct, but I have gone for goal posts from y=45 to y=55 in the Wyscout pitch in mplsoccer.
-This is consistent with the statsbomb definition (goals 10% of the pitch [8/80])
-and start 45% in from the side (36/80)."""
+I am not sure which is correct, but I have gone for the goal width from ggsoccer."""
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum']
@@ -43,7 +41,7 @@ wyscout = {'top': 0, 'bottom': 100, 'left': 0, 'right': 100, 'aspect': 68/105,
            'six_yard_from_side': 37, 'six_yard_width': 26, 'six_yard_length': 6,
            'penalty_area_from_side': 19, 'penalty_area_width': 62, 'penalty_area_length': 16,
            'left_penalty': 10, 'right_penalty': 90, 'circle_diameter': 17.68,
-           'goal_depth': 1.9, 'goal_width': 10, 'goal_post': 45, 'invert_y': True, 'origin_center': False}
+           'goal_depth': 1.9, 'goal_width': 12, 'goal_post': 45, 'invert_y': True, 'origin_center': False}
 
 uefa = {'top': 68, 'bottom': 0, 'left': 0, 'right': 105, 'aspect': 1,
         'width': 68, 'center_width': 34, 'length': 105, 'center_length': 52.5,

@@ -284,6 +284,9 @@ class BasePitch(ABC):
                                     [self.right, self.center_width + self.goal_width / 2]])
         self.goal_left = np.array([[self.left, self.center_width - self.goal_width / 2],
                                    [self.left, self.center_width + self.goal_width / 2]])
+        
+        # set the positions of the pitch markings - used to standardise to common coordinates
+        self._pitch_markings()
 
     def _set_dimensions(self, pitch_dimensions):
         for key, value in pitch_dimensions.items():
@@ -318,9 +321,9 @@ class BasePitch(ABC):
 
     def _juego_de_posicion(self):
         # x positions for Juego de Posición
-        self.x1 = min(self.left, self.right)
+        self.x1 = self.left
         self.x4 = self.center_length
-        self.x7 = max(self.left, self.right)
+        self.x7 = self.right
         self.x2 = self.x1 + self.penalty_area_length
         self.x6 = self.x7 - self.penalty_area_length
         self.x3 = self.x2 + (self.x4 - self.x2) / 2
@@ -340,7 +343,18 @@ class BasePitch(ABC):
             self.y4 = self.y6 - self.six_yard_from_side
             self.y5 = self.y6 - self.penalty_area_from_side
             self.y4 = self.y6 - self.six_yard_from_side
-
+            
+    def _pitch_markings(self):
+        self.x_markings = np.array([self.x1, self.left + self.six_yard_length, 
+                                    self.left_penalty, self.x2, self.x4, 
+                                    self.x6, self.right_penalty, self.right - self.six_yard_length, self.x7])
+        self.y_markings = np.array([self.y1, self.y2, self.y3, 
+                                    self.goal_left[:, 1].min(initial=None),                                     
+                                    self.goal_left[:, 1].max(initial=None),
+                                    self.y4, self.y5, self.y6])
+        self.x_markings_uefa = np.array([0., 5.5, 11., 16.5, 52.5, 88.5, 94., 99.5, 105.])
+        self.y_markings_uefa = np.array([0., 13.84, 24.84, 30.34, 37.66, 43.16, 54.16, 68.])
+        
     def _stripe_locations(self):
         stripe_six_yard = self.six_yard_length
         stripe_pen_area = (self.penalty_area_length - self.six_yard_length) / 2
@@ -1079,29 +1093,69 @@ class BasePitch(ABC):
         LineCollection : matplotlib.collections.LineCollection
         """
         pass
-
-#    def jointplot(self, x, y, **kwargs):
-        """ Utility wrapper around seaborn.jointplot
-        which automatically flips the x and y coordinates if the pitch is vertical, sets the height from the figsize,
-        and clips kernel density plots (kind = 'kde') to the pitch boundaries.
-        
-        Draw a plot of two variables with bivariate and univariate graphs.
-        See: https://seaborn.pydata.org/generated/seaborn.jointplot.html
-        
+    
+    def to_uefa_coordinates(self, x, y):
+        """ Converts from the pitch's coordinates to a standard uefa pitch's coordinates (105m x 68m).
+        Values outside the pitch extents are clipped to the pitch lines.
+        The coordinates are converted using the ggsoccer (https://github.com/Torvaney/ggsoccer)
+        method. Any x or y coordinate is rescaled linearly between the nearest two pitch markings.
+        For example, the edge of the penalty box and the half way-line.
         Parameters
         ----------
-        x, y : array-like or scalar.
-            Commonly, these parameters are 1D arrays.
-        
-        kind : str default 'kde'
-            Kind of plot to draw. One of 'scatter', 'kde', 'hist', 'hex', 'reg', or resid'
-
-        **kwargs : All other keyword arguments are passed on to seaborn.jointplot.
-            
+        x, y: array-like or scalar.
+            The x/y coordinates that you want to convert to uefa coordinates.
         Returns
         -------
-        grid : seaborn.axisgrid.JointGrid         
+        tuple (x_standardised, y_standardised) : A tuple of numpy.arrays        
         """
+        # to numpy arrays
+        x = np.ravel(x)
+        y = np.ravel(y)
+        
+        # clip outside to pitch extents        
+        x = x.clip(min=self.pitch_extent[0], max=self.pitch_extent[1])
+        y = y.clip(min=self.pitch_extent[2], max=self.pitch_extent[3])
+    
+        # for inverted axis flip the coordinates
+        if self.invert_y:
+            y = self.bottom - y
+            
+        def standardise(markings, markings_uefa, coordinate):
+            pos = np.searchsorted(markings, coordinate) - 1
+            low = markings[pos]
+            high = markings[pos + 1]
+            proportion_of_way_between = (coordinate - low) / (high - low)
+            low_uefa = markings_uefa[pos]
+            high_uefa = markings_uefa[pos + 1]
+            return low_uefa + ((high_uefa - low_uefa) * proportion_of_way_between)
+        
+        x_standardised = standardise(self.x_markings, self.x_markings_uefa, x)
+        y_standardised = standardise(self.y_markings, self.y_markings_uefa, y)   
+        return x_standardised, y_standardised
+    
+
+#    def jointplot(self, x, y, **kwargs):
+#        """ Utility wrapper around seaborn.jointplot
+#        which automatically flips the x and y coordinates if the pitch is vertical, sets the height from the figsize,
+#        and clips kernel density plots (kind = 'kde') to the pitch boundaries.
+#
+#        Draw a plot of two variables with bivariate and univariate graphs.
+#        See: https://seaborn.pydata.org/generated/seaborn.jointplot.html
+#
+#        Parameters
+#        ----------
+#        x, y : array-like or scalar.
+#            Commonly, these parameters are 1D arrays.
+#
+#        kind : str default 'kde'
+#            Kind of plot to draw. One of 'scatter', 'kde', 'hist', 'hex', 'reg', or resid'
+#
+#        **kwargs : All other keyword arguments are passed on to seaborn.jointplot.
+#
+#        Returns
+#        -------
+#        grid : seaborn.axisgrid.JointGrid
+#        """
 #        x = np.ravel(x)
 #        y = np.ravel(y)
 #        if x.size != y.size:
@@ -1146,6 +1200,7 @@ class BasePitch(ABC):
 #        return joint_plot
 
 # TO DO
+# from_uefa_coordinates
 # calculate_angle_and_distance
 # flow
 # voronoi
