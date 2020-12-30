@@ -1106,7 +1106,7 @@ class BasePitch(ABC):
             The x/y coordinates that you want to convert to uefa coordinates.
         Returns
         -------
-        tuple (x_standardised, y_standardised) : A tuple of numpy.arrays        
+        tuple (x_standardised, y_standardised) : A tuple of numpy.arrays in uefa coordinates.    
         """
         # to numpy arrays
         x = np.ravel(x)
@@ -1119,19 +1119,51 @@ class BasePitch(ABC):
         # for inverted axis flip the coordinates
         if self.invert_y:
             y = self.bottom - y
-            
-        def standardise(markings, markings_uefa, coordinate):
-            pos = np.searchsorted(markings, coordinate) - 1
-            low = markings[pos]
-            high = markings[pos + 1]
-            proportion_of_way_between = (coordinate - low) / (high - low)
-            low_uefa = markings_uefa[pos]
-            high_uefa = markings_uefa[pos + 1]
-            return low_uefa + ((high_uefa - low_uefa) * proportion_of_way_between)
         
-        x_standardised = standardise(self.x_markings, self.x_markings_uefa, x)
-        y_standardised = standardise(self.y_markings, self.y_markings_uefa, y)   
+        x_standardised = self._standardise(self.x_markings, self.x_markings_uefa, x)
+        y_standardised = self._standardise(self.y_markings, self.y_markings_uefa, y)
         return x_standardised, y_standardised
+    
+    def from_uefa_coordinates(self, x, y):
+        """ Converts from the standard uefa pitch's coordinates (105m x 68m) to the pitch's coordinates.
+        Values outside the pitch extents are clipped to the pitch lines.
+        The coordinates are converted using the ggsoccer (https://github.com/Torvaney/ggsoccer)
+        method. Any x or y coordinate is rescaled linearly between the nearest two pitch markings.
+        For example, the edge of the penalty box and the half way-line.
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            The x/y coordinates that you want to convert from uefa coordinates.
+        Returns
+        -------
+        tuple (x_standardised, y_standardised) : A tuple of numpy.arrays in the pitch's coordinates.        
+        """
+        # to numpy arrays
+        x = np.ravel(x)
+        y = np.ravel(y)
+        
+        # clip outside to pitch extents        
+        x = x.clip(min=0, max=105)
+        y = y.clip(min=0, max=68)
+        
+        x_standardised = self._standardise(self.x_markings_uefa, self.x_markings, x)
+        y_standardised = self._standardise(self.y_markings_uefa, self.y_markings, y)
+        
+        # for inverted axis flip the coordinates
+        if self.invert_y:
+            y_standardised = self.bottom - y_standardised
+        
+        return x_standardised, y_standardised
+    
+    @staticmethod
+    def _standardise(markings_from, markings_to, coordinate):
+        pos = np.searchsorted(markings_from, coordinate) - 1
+        low_from = markings_from[pos]
+        high_from = markings_from[pos + 1]
+        proportion_of_way_between = (coordinate - low_from) / (high_from - low_from)
+        low_to = markings_to[pos]
+        high_to = markings_to[pos + 1]
+        return low_to + ((high_to - low_to) * proportion_of_way_between)
     
 
 #    def jointplot(self, x, y, **kwargs):
@@ -1200,7 +1232,6 @@ class BasePitch(ABC):
 #        return joint_plot
 
 # TO DO
-# from_uefa_coordinates
 # calculate_angle_and_distance
 # flow
 # voronoi
