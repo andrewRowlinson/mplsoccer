@@ -19,6 +19,7 @@ from mplsoccer.scatterutils import _mscatter, scatter_football
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
+
 class BasePitch(ABC):
     """ A class for plotting soccer / football pitches in Matplotlib
 
@@ -587,11 +588,13 @@ class BasePitch(ABC):
     @abstractmethod
     def _draw_stripe(self, ax, i):
         pass
-    
+
+    @staticmethod
     @abstractmethod
     def _reverse_if_vertical(x, y):
         pass
-    
+
+    @staticmethod
     @abstractmethod
     def _reverse_vertices_if_vertical(vert):
         pass
@@ -630,7 +633,8 @@ class BasePitch(ABC):
                 
         sc = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
         return sc
-    
+
+    @staticmethod
     @abstractmethod
     def _rotate_if_horizontal(rotation_degrees):
         pass
@@ -781,7 +785,7 @@ class BasePitch(ABC):
         verts = np.asarray(verts)
         patch_list = []
         for vert in verts:
-            vert =  self._reverse_vertices_if_vertical(vert)
+            vert = self._reverse_vertices_if_vertical(vert)
             polygon = patches.Polygon(vert, closed=True)
             patch_list.append(polygon)
         p = PatchCollection(patch_list, **kwargs)
@@ -879,14 +883,6 @@ class BasePitch(ABC):
               * the bin edges in each dimension (x_edge, y_edge = bins).
                 If the bin edges are specified, the number of bins will be,
                 (nx = len(x_edge)-1, ny = len(y_edge)-1).
-        invert_y : bool, default True
-            Whether to consistently create heatmaps from the bottom to the top of the pitch.
-            If true then the data for pitches with an inverted y-axis 
-            (statsbomb, metrica, wyscout, and stats) is first corrected to a normal y-axis
-            before calculating the heatmap. This means the edges are treated consistently
-            so the top edge of a grid cell belongs to the cell above and the right edge of
-            a grid cell belongs to the cell to the right. The bin is half-open. The
-            last bin, however, includes the pitch edge.
             
         Returns
         ----------
@@ -1083,12 +1079,7 @@ class BasePitch(ABC):
         LineCollection : matplotlib.collections.LineCollection
         """
         pass
-    
-    
-    
-    
-    
-              
+
 #    def jointplot(self, x, y, **kwargs):
         """ Utility wrapper around seaborn.jointplot
         which automatically flips the x and y coordinates if the pitch is vertical, sets the height from the figsize,
@@ -1153,10 +1144,6 @@ class BasePitch(ABC):
 #            joint_plot_ax.add_patch(rect)
 #            hexbin.set_clip_path(rect)
 #        return joint_plot
-
-
-
-
 
 # TO DO
 # kdeplot - data instead of x, y due to seaboarn change

@@ -89,15 +89,15 @@ class Pitch(BasePitch):
                     pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] = \
                         pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
         return pitch_color
-    
+
     @staticmethod
     def _reverse_if_vertical(x, y):
         return x, y
-    
+
     @staticmethod
     def _reverse_vertices_if_vertical(vert):
         return vert
-    
+
     @staticmethod
     def _rotate_if_horizontal(rotation_degrees):
         return rotation_degrees - 90       
@@ -210,15 +210,15 @@ class VerticalPitch(BasePitch):
                     pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
                         pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2
         return pitch_color
-    
+
     @staticmethod
     def _reverse_if_vertical(x, y):
         return y, x
-    
+
     @staticmethod
     def _reverse_vertices_if_vertical(vert):
         return vert[:, [1, 0]].copy()
-    
+
     @staticmethod
     def _rotate_if_horizontal(rotation_degrees):
         return rotation_degrees    
