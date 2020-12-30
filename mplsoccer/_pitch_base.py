@@ -4,21 +4,17 @@ from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import matplotlib.patches as patches
-from matplotlib.collections import PatchCollection, LineCollection
-from matplotlib.colors import to_rgba_array, ListedColormap, LinearSegmentedColormap
-from matplotlib.cm import get_cmap
-from matplotlib.legend_handler import HandlerLineCollection
-from matplotlib.legend import Legend
+from matplotlib.collections import PatchCollection
 import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from scipy.stats import binned_statistic_2d
-from collections import Sequence, namedtuple
+from collections import namedtuple
 
 from mplsoccer import dimensions
 from mplsoccer.utils import validate_ax
-from mplsoccer.cm import grass_cmap, create_transparent_cmap
-from mplsoccer.scatterutils import football_hexagon_marker, football_pentagon_marker, _mscatter, scatter_football
+from mplsoccer.cm import grass_cmap
+from mplsoccer.scatterutils import _mscatter, scatter_football
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -1043,7 +1039,8 @@ class BasePitch(ABC):
         PolyCollection : matplotlib.quiver.Quiver   
         """
         pass
-    
+
+    @abstractmethod
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
               comet=False, transparent=False, alpha_start=0.01,
               alpha_end=1, cmap=None, ax=None, **kwargs):
@@ -1085,136 +1082,12 @@ class BasePitch(ABC):
         -------
         LineCollection : matplotlib.collections.LineCollection
         """
-        validate_ax(ax)
-        if not isinstance(comet, bool):
-            raise TypeError("Invalid argument: comet should be bool (True or False).")
-        if not isinstance(transparent, bool):
-            raise TypeError("Invalid argument: transparent should be bool (True or False).")
-        
-        if alpha_start < 0 or alpha_start > 1:
-            raise TypeError("alpha_start values should be within 0-1 range")
-        if alpha_end < 0 or alpha_end > 1:
-            raise TypeError("alpha_end values should be within 0-1 range")
-        if alpha_start > alpha_end:
-            warnings.warn("Alpha start > alpha end. The line will increase in transparency nearer to the end")
-            
-        if 'colors' in kwargs.keys():
-            warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
-                       
-        if color is not None and cmap is not None:
-            raise ValueError("Only use one of color or cmap arguments not both.")
-            
-        if 'lw' in kwargs.keys() and 'linewidth' in kwargs.keys():
-            raise TypeError("lines got multiple values for 'linewidth' argument (linewidth and lw).")
-            
-        # set linewidth
-        if 'lw' in kwargs.keys():
-            lw = kwargs.pop('lw', 5)
-        elif 'linewidth' in kwargs.keys():
-            lw = kwargs.pop('linewidth', 5)
-        else:
-            lw = 5
-        
-        # to arrays
-        xstart = np.ravel(xstart)
-        ystart = np.ravel(ystart)
-        xend = np.ravel(xend)
-        yend = np.ravel(yend)
-        lw = np.ravel(lw)
-                
-        if (comet or transparent) and (lw.size > 1):
-            raise NotImplementedError("Multiple linewidths with a comet or transparent line is not implemented.")
-            
-        # set color
-        if color is None and cmap is None:
-            color = rcParams['lines.color']
-            
-        if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0] > 1):
-            raise NotImplementedError("Multiple colors with a comet or transparent line is not implemented.")          
-            
-        if xstart.size != ystart.size:
-            raise ValueError("xstart and ystart must be the same size")
-        if xstart.size != xend.size:
-            raise ValueError("xstart and xend must be the same size")
-        if ystart.size != yend.size:
-            raise ValueError("ystart and yend must be the same size")     
-            
-        if (lw.size > 1) and (lw.size != xstart.size):
-            raise ValueError("lw and xstart must be the same size")
-                
-        if lw.size == 1:
-            lw = lw[0]
-            
-        xstart, ystart = self._reverse_if_vertical(xstart, ystart)
-        xend, yend = self._reverse_if_vertical(xend, yend)
-        
-        # create linewidth
-        if comet:
-            lw = np.linspace(1, lw, n_segments)
-            handler_first_lw = False
-        else:
-            handler_first_lw = True
-            
-        if (transparent is False) and (comet is False) and (cmap is None):
-            multi_segment = False
-        else:
-            multi_segment = True
-            
-        if transparent:
-            cmap = create_transparent_cmap(color, cmap, n_segments, alpha_start, alpha_end)
-            
-        if isinstance(cmap, str):
-            cmap = get_cmap(cmap)
-
-        if cmap is not None:
-            handler_cmap = True
-            lc = self.lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap, 
-                                 ax=ax, n_segments=n_segments, multi_segment=multi_segment, **kwargs)        
-        else:
-            handler_cmap = False
-            lc = self.lines_no_cmap(xstart, ystart, xend, yend, lw=lw, color=color, 
-                                    ax=ax, n_segments=n_segments, multi_segment=multi_segment, **kwargs)
-            
-        lc_handler = HandlerLines(numpoints=n_segments, invert_y=self.reverse_cmap,
-                                  first_lw=handler_first_lw,
-                                  use_cmap=handler_cmap)           
-        Legend.update_default_handler_map({lc: lc_handler})
-            
-        return lc
+        pass
     
-    def create_segments(self, xstart, ystart, xend, yend, n_segments=100, multi_segment=False):
-        if multi_segment:
-            x = np.linspace(xstart, xend, n_segments + 1)
-            y = np.linspace(ystart, yend, n_segments + 1)
-            points = np.array([x, y]).T
-            points = np.concatenate([points, np.expand_dims(points[:, -1, :], 1)], axis=1)
-            points = np.expand_dims(points, 1)
-            segments = np.concatenate([points[:, :, :-2, :], points[:, :, 1:-1, :], points[:, :, 2:, :]], axis=1)
-            segments = np.transpose(segments, (0, 2, 1, 3)).reshape(-1, 3, 2)
-        else:
-            segments = np.transpose(np.array([[xstart, ystart], [xend, yend]]), (2, 0, 1))
-        return segments
-        
-    def lines_no_cmap(self, xstart, ystart, xend, yend, lw=None, color=None, ax=None,
-                      n_segments=100, multi_segment=False, **kwargs):
-        segments = self.create_segments(xstart, ystart, xend, yend, n_segments=n_segments, multi_segment=multi_segment)
-        color = to_rgba_array(color)
-        if (color.shape[0] > 1) and (color.shape[0] != xstart.size):
-            raise ValueError("xstart and color must be the same size")
-        lc = LineCollection(segments, color=color, linewidth=lw, snap=False, **kwargs)
-        lc = ax.add_collection(lc)
-        return lc
     
-    def lines_cmap(self, xstart, ystart, xend, yend, lw=None, cmap=None, ax=None,
-                      n_segments=100, multi_segment=False, **kwargs):
-        segments = self.create_segments(xstart, ystart, xend, yend, n_segments=n_segments, multi_segment=multi_segment)
-        if self.reverse_cmap:
-            cmap = cmap.reversed()
-        lc = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, **kwargs)
-        lc = ax.add_collection(lc)
-        pitch_array = np.linspace(self.extent[2], self.extent[3], n_segments)
-        lc.set_array(pitch_array)
-        return lc
+    
+    
+    
               
 #    def jointplot(self, x, y, **kwargs):
         """ Utility wrapper around seaborn.jointplot
@@ -1282,35 +1155,7 @@ class BasePitch(ABC):
 #        return joint_plot
 
 
-# Amended from
-# https://stackoverflow.com/questions/49223702/adding-a-legend-to-a-matplotlib-plot-with-a-multicolored-line?rq=1
-class HandlerLines(HandlerLineCollection):
-    """Automatically generated by Pitch.lines() to allow use of linecollection in legend."""
-    
-    def __init__(self, invert_y=False, first_lw=False, use_cmap=False, marker_pad=0.3, numpoints=None, **kw):
-        HandlerLineCollection.__init__(self, marker_pad=marker_pad, numpoints=numpoints, **kw)
-        self.invert_y = invert_y
-        self.first_lw = first_lw
-        self.use_cmap = use_cmap
-    
-    def create_artists(self, legend, artist, xdescent, ydescent,
-                       width, height, fontsize, trans):
-        x = np.linspace(0, width, self.get_numpoints(legend)+1)
-        y = np.zeros(self.get_numpoints(legend) + 1)+height/2.-ydescent
-        points = np.array([x, y]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        lw = artist.get_linewidth()
-        if self.first_lw:
-            lw = lw[0]
-        if self.use_cmap:
-            cmap = artist.cmap
-            if self.invert_y:
-                cmap = cmap.reversed()
-            lc = LineCollection(segments, lw=lw, cmap=cmap, snap=False, transform=trans)
-            lc.set_array(x)
-        else:
-            lc = LineCollection(segments, lw=lw, colors=artist.get_colors()[0], snap=False, transform=trans)
-        return [lc]
+
 
 
 # TO DO
@@ -1319,6 +1164,7 @@ class HandlerLines(HandlerLineCollection):
 # flow
 # voronoi
 # jointplot
+
 # bin_statistic_positional
 # heatmap_positional
 # peter mckeever arrow lines?

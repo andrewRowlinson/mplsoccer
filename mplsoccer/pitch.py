@@ -1,9 +1,10 @@
 import numpy as np
 from mplsoccer._pitch_base import BasePitch
 import matplotlib.patches as patches
-import matplotlib.lines as lines
+from matplotlib.lines import Line2D
 from mplsoccer.utils import validate_ax
 from mplsoccer.quiver import arrows
+from mplsoccer.linecollection import lines
 
 
 class Pitch(BasePitch):
@@ -35,8 +36,8 @@ class Pitch(BasePitch):
         self.kde_clip = ((self.left, self.right), (self.bottom, self.top))
         
         # jointplot
-        #self.jointplot_width = self.figsize[0]
-        #self.jointplot_height = (self.jointplot_width / (abs(self.visible_pitch[1] - self.visible_pitch[0]) /
+        # self.jointplot_width = self.figsize[0]
+        # self.jointplot_height = (self.jointplot_width / (abs(self.visible_pitch[1] - self.visible_pitch[0]) /
         #                                                abs(self.visible_pitch[3] - self.visible_pitch[2]))
         #                         * self.aspect)
         
@@ -61,7 +62,7 @@ class Pitch(BasePitch):
         return rectangle
         
     def _draw_line(self, ax, x, y, **kwargs):
-        line = lines.Line2D(x, y, **kwargs)
+        line = Line2D(x, y, **kwargs)
         ax.add_artist(line)
         
     def _draw_ellipse(self, ax, x, y, width, height, **kwargs):
@@ -81,12 +82,12 @@ class Pitch(BasePitch):
         total_width = self.extent[1] - self.extent[0]
         for i in range(len(self.stripe_locations) - 1):
             if i % 2 == 0:
-                if ((self.extent[0] <= self.stripe_locations[i] <=  self.extent[1]) or
-                    (self.extent[0] <= self.stripe_locations[i + 1] <=  self.extent[1])):
+                if ((self.extent[0] <= self.stripe_locations[i] <= self.extent[1]) or
+                        (self.extent[0] <= self.stripe_locations[i + 1] <= self.extent[1])):
                     start = int((max(self.stripe_locations[i], self.extent[0]) - self.extent[0]) / total_width * 1000)
                     end = int((min(self.stripe_locations[i+1], self.extent[1]) - self.extent[0]) / total_width * 1000)    
                     pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] = \
-                    pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
+                        pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
         return pitch_color
     
     @staticmethod
@@ -116,6 +117,14 @@ class Pitch(BasePitch):
         q = arrows(xstart, ystart, xend, yend, *args, ax=ax, reverse=False, **kwargs)
         return q
 
+    def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
+              comet=False, transparent=False, alpha_start=0.01,
+              alpha_end=1, cmap=None, ax=None, **kwargs):
+        lc = lines(xstart, ystart, xend, yend, color=color, n_segments=n_segments, comet=comet, transparent=transparent,
+                   alpha_start=alpha_start, alpha_end=alpha_end, cmap=cmap, ax=ax, vertical=False,
+                   reverse_cmap=self.reverse_cmap, **kwargs)
+        return lc
+
 
 class VerticalPitch(BasePitch):
     
@@ -141,14 +150,14 @@ class VerticalPitch(BasePitch):
         # hexbin
         self.hexbin_gridsize = (17, 17)
         self.hex_extent = np.array([min(self.bottom, self.top), max(self.bottom, self.top),
-                                    min(self.left, self.right), max(self.left, self.right),], dtype=np.float32)
+                                    min(self.left, self.right), max(self.left, self.right)], dtype=np.float32)
         
         # kdeplot
         self.kde_clip = ((self.top, self.bottom), (self.left, self.right))
         
         # jointplot
-        #self.jointplot_width = self.figsize[0]
-        #self.jointplot_height = self.jointplot_width * (abs(self.visible_pitch[3] - self.visible_pitch[2]) /
+        # self.jointplot_width = self.figsize[0]
+        # self.jointplot_height = self.jointplot_width * (abs(self.visible_pitch[3] - self.visible_pitch[2]) /
         #                                                abs(self.visible_pitch[3] - self.visible_pitch[2]))
         
         # lines
@@ -172,7 +181,7 @@ class VerticalPitch(BasePitch):
         return rectangle
         
     def _draw_line(self, ax, x, y, **kwargs):
-        line = lines.Line2D(y, x, **kwargs)
+        line = Line2D(y, x, **kwargs)
         ax.add_artist(line)
         
     def _draw_ellipse(self, ax, x, y, width, height, **kwargs):
@@ -187,20 +196,19 @@ class VerticalPitch(BasePitch):
         ax.axhspan(self.stripe_locations[i], self.stripe_locations[i + 1],  # note axhspan
                    self.stripe_start, self.stripe_end,
                    facecolor=self.stripe_color, zorder=self.stripe_zorder)
-        
-    def _draw_stripe_grass(self, pitch_color):
-        return pitch_color
-        
+
     def _draw_stripe_grass(self, pitch_color):
         total_width = self.extent[3] - self.extent[2] 
         for i in range(len(self.stripe_locations) - 1):
             if i % 2 == 0:
-                if ((self.extent[2] <= self.stripe_locations[i] <=  self.extent[3]) or
-                    (self.extent[2] <= self.stripe_locations[i + 1] <=  self.extent[3])):
-                    start = 1000 -int((min(self.stripe_locations[i+1], self.extent[3]) - self.extent[2]) / total_width * 1000) 
-                    end = 1000 - int((max(self.stripe_locations[i], self.extent[2]) - self.extent[2]) / total_width * 1000)
+                if ((self.extent[2] <= self.stripe_locations[i] <= self.extent[3]) or
+                        (self.extent[2] <= self.stripe_locations[i + 1] <= self.extent[3])):
+                    start = (1000 - int((min(self.stripe_locations[i+1], self.extent[3]) - self.extent[2])
+                                        / total_width * 1000))
+                    end = (1000 - int((max(self.stripe_locations[i], self.extent[2]) - self.extent[2])
+                                      / total_width * 1000))
                     pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
-                    pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2                    
+                        pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2
         return pitch_color
     
     @staticmethod
@@ -232,4 +240,11 @@ class VerticalPitch(BasePitch):
     def arrows(xstart, ystart, xend, yend, *args, ax=None, **kwargs):
         q = arrows(xstart, ystart, xend, yend, *args, ax=ax, reverse=True, **kwargs)
         return q
- 
+
+    def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
+              comet=False, transparent=False, alpha_start=0.01,
+              alpha_end=1, cmap=None, ax=None, **kwargs):
+        lc = lines(xstart, ystart, xend, yend, color=color, n_segments=n_segments, comet=comet, transparent=transparent,
+                   alpha_start=alpha_start, alpha_end=alpha_end, cmap=cmap, ax=ax, vertical=True,
+                   reverse_cmap=self.reverse_cmap, **kwargs)
+        return lc
