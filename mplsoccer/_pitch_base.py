@@ -9,6 +9,7 @@ import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from scipy.stats import binned_statistic_2d
+from scipy.spatial import Voronoi
 from collections import namedtuple
 
 from mplsoccer import dimensions
@@ -1165,6 +1166,107 @@ class BasePitch(ABC):
         high_to = markings_to[pos + 1]
         return low_to + ((high_to - low_to) * proportion_of_way_between)
     
+    def voronoi(self, x, y, teams):
+        """ Get Voronoi vertices for a set of coordinates.
+        Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
+        before calculating the Voronoi. This means that the Voronoi extends to the edges of the pitch
+        see: https://github.com/ProformAnalytics/tutorial_nbs/blob/master/notebooks/Voronoi%20Reflection%20Trick.ipynb
+        
+        Players outside of the pitch dimensions are assumed to be standing on the pitch edge.
+        This means that their coordinates are clipped to the pitch edges before calculating the Voronoi.        
+            
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+        
+        teams: array-like or scalar.
+            This splits the results into the Voronoi vertices for each team.
+            This can either have integer (1/0) values or boolean (True/False) values.
+            team1 is where team==1 or team==True
+            team2 is where team==0 or team==False
+            
+        Returns
+        -------
+        team1 : a 1d numpy array (length number of players in team 1) of 2d arrays
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
+            
+        team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
+        """
+        x = np.ravel(x)
+        y = np.ravel(y)
+        teams = np.ravel(teams)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        if teams.size != x.size:
+            raise ValueError("x and team must be the same size")
+            
+        if self.aspect != 1:
+            standardized = True
+            x, y = self.to_uefa_coordinates(x, y)
+            x = x.reshape(-1, 1)
+            y = y.reshape(-1, 1)
+            p_left = 0
+            p_right = 105
+            p_bottom = 0
+            p_top = 68
+            extent = np.array([0, 105, 0, 68])
+        else:
+            standardized = False
+            p_left = self.left
+            p_right = self.right
+            p_bottom = self.bottom
+            p_top = self.top
+            extent = self.pitch_extent
+            # clip outside to pitch extents
+            x = x.clip(min=extent[0], max=extent[1]).reshape(-1, 1)
+            y = y.clip(min=extent[2], max=extent[3]).reshape(-1, 1)
+
+        # reflect in pitch lines
+        left = x.copy()
+        right = x.copy()
+        bottom = y.copy()
+        top = y.copy()
+        left = p_left - abs(left - p_left)
+        right = p_right + abs(right - p_right)
+        if self.invert_y and standardized is False:
+            top = p_top - abs(top - p_top)
+            bottom = p_bottom + abs(bottom - p_bottom)
+        else:
+            top = p_top + abs(top - p_top)
+            bottom = p_bottom - abs(bottom - p_bottom)
+        reflect = np.concatenate([np.concatenate([x, y], axis=1),
+                                  np.concatenate([x, bottom], axis=1),
+                                  np.concatenate([x, top], axis=1),
+                                  np.concatenate([left, y], axis=1),
+                                  np.concatenate([right, y], axis=1)])
+        
+        # create Voronoi
+        vor = Voronoi(reflect)
+        
+        # get region vertices
+        regions = vor.point_region[:x.size]
+        regions = np.array(vor.regions, dtype='object')[regions]
+        region_vertices = []
+        for region in regions:
+            verts = vor.vertices[region]
+            verts[:, 0] = np.clip(verts[:, 0], a_min=extent[0], a_max=extent[1])
+            verts[:, 1] = np.clip(verts[:, 1], a_min=extent[2], a_max=extent[3])
+            # convert back to coordinates if previously standardised
+            if standardized:
+                x_std, y_std = self.from_uefa_coordinates(verts[:, 0], verts[:, 1])
+                verts[:, 0] = x_std
+                verts[:, 1] = y_std     
+            region_vertices.append(verts)
+        region_vertices = np.array(region_vertices, dtype='object')
+        
+        # seperate team1/ team2 vertices
+        team1 = region_vertices[teams == 1]
+        team2 = region_vertices[teams == 0]
+        
+        return team1, team2
+    
 
 #    def jointplot(self, x, y, **kwargs):
 #        """ Utility wrapper around seaborn.jointplot
@@ -1234,9 +1336,7 @@ class BasePitch(ABC):
 # TO DO
 # calculate_angle_and_distance
 # flow
-# voronoi
 # jointplot
-
 # bin_statistic_positional
 # heatmap_positional
 # peter mckeever arrow lines?
