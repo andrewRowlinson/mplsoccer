@@ -713,7 +713,7 @@ class BasePitch(ABC):
             raise ValueError("x and y must be the same size")
         x, y = self._reverse_if_vertical(x, y)
         clip = kwargs.pop('clip', self.kde_clip)
-        kde = sns.kdeplot(x, y, ax=ax, clip=clip, **kwargs)   
+        kde = sns.kdeplot(x=x, y=y, ax=ax, clip=clip, **kwargs)   
         return kde
     
     def hexbin(self, x, y, ax=None, **kwargs):
@@ -1112,14 +1112,14 @@ class BasePitch(ABC):
 #        extent = kwargs.pop('extent', self.hex_extent)
     
 #        if kind == 'kde':
-#            joint_plot = sns.jointplot(x, y, kind=kind, clip=clip,
+#            joint_plot = sns.jointplot(x=x, y=y, kind=kind, clip=clip,
 #                                       xlim=self.visible_pitch[:2],
 #                                       ylim=self.visible_pitch[2:],
 #                                       **kwargs)
 #        elif kind == 'hex':
 #            dropna = kwargs.pop('dropna', True)
 #            gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
-#            joint_plot = sns.jointplot(x, y,
+#            joint_plot = sns.jointplot(x=x, y=y,
 #                                       kind=kind, 
 #                                       extent=extent,
 #                                       gridsize=gridsize,
@@ -1128,7 +1128,7 @@ class BasePitch(ABC):
 #                                       ylim=self.visible_pitch[2:],
 #                                       **kwargs)
 #        else:
-#            joint_plot = sns.jointplot(x, y, kind=kind, **kwargs)
+#            joint_plot = sns.jointplot(x=x, y=y, kind=kind, **kwargs)
         
 #        joint_plot_ax = joint_plot.ax_joint
 #        self.draw(ax=joint_plot_ax)
@@ -1146,7 +1146,6 @@ class BasePitch(ABC):
 #        return joint_plot
 
 # TO DO
-# kdeplot - data instead of x, y due to seaboarn change
 # calculate_angle_and_distance
 # flow
 # voronoi
