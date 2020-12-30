@@ -114,7 +114,7 @@ class Pitch(BasePitch):
     
     @staticmethod
     def arrows(xstart, ystart, xend, yend, *args, ax=None, **kwargs):
-        q = arrows(xstart, ystart, xend, yend, *args, ax=ax, reverse=False, **kwargs)
+        q = arrows(xstart, ystart, xend, yend, *args, ax=ax, vertical=False, **kwargs)
         return q
 
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
@@ -238,7 +238,7 @@ class VerticalPitch(BasePitch):
     
     @staticmethod
     def arrows(xstart, ystart, xend, yend, *args, ax=None, **kwargs):
-        q = arrows(xstart, ystart, xend, yend, *args, ax=ax, reverse=True, **kwargs)
+        q = arrows(xstart, ystart, xend, yend, *args, ax=ax, vertical=True, **kwargs)
         return q
 
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,

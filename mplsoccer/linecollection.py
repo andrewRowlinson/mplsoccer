@@ -46,7 +46,7 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     cmap : str, default None
         A matplotlib cmap (colormap) name
     vertical : bool, default False
-        If the orientation is vertical (True), then switch the x and y coordinates.
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
     reverse_cmap : bool, default False
         Whether to reverse the cmap colors. If the pitch is horizontal and the y-axis is inverted then set this to True.
     ax : matplotlib.axes.Axes, default None

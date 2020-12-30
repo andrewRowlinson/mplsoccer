@@ -5,7 +5,8 @@ import numpy as np
 
 from mplsoccer.utils import validate_ax
 
-def arrows(xstart, ystart, xend, yend, *args, ax=None, reverse=False, **kwargs):
+
+def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs):
     """ Utility wrapper around matplotlib.axes.Axes.quiver,
     Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
     from the start and endpoints of the arrow.
@@ -22,7 +23,9 @@ def arrows(xstart, ystart, xend, yend, *args, ax=None, reverse=False, **kwargs):
         This does not support explicit colors. If you want to set colors directly, use color instead.
         The size of C must match the number of arrow locations.
     ax : matplotlib.axes.Axes, default None
-        The axis to plot on.          
+        The axis to plot on.
+    vertical : bool, default False
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
     width : float, default 4
         Arrow shaft width in points.     
     headwidth : float, default 3
@@ -75,7 +78,7 @@ def arrows(xstart, ystart, xend, yend, *args, ax=None, reverse=False, **kwargs):
     u = xend - xstart
     v = yend - ystart
     
-    if reverse:
+    if vertical:
         ystart, xstart = xstart, ystart
         v, u = u, v
         
@@ -122,4 +125,3 @@ class HandlerQuiver(HandlerLine2D):
                                      facecolor=facecolor)
         legline.set_transform(trans)
         return [legline]
-    
