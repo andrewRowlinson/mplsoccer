@@ -1,3 +1,22 @@
+Version 0.1.0
+-----------
+
+This is a major refactor of mplsoccer and a merger with soccerplots (https://github.com/Slothfulwave612/soccerplots).
+
+The Pitch class has been split into an abstract class BasePitch to simplify the code, with Pitch (horizontal) and VerticalPitch (vertical) 
+inheriting from the BasePitch class.
+
+### Changed
+1) orientation parameter is removed. To get a vertical pitch use the new VerticalPitch class.
+2) layout parameter is removed. Use the matplotlib nrows and ncols
+3) view is removed. Use half=True to get half of a pitch
+4) removed 'stats' pitch type
+
+### Added
+1) merged with soccerplots (https://github.com/Slothfulwave612/soccerplots) for wonderful radar charts.
+2) added pitch_types: skillcorner and a custom pitch type which you can use any width/length
+
+
 Version 0.0.21
 -----------
 
