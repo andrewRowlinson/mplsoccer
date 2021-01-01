@@ -8,7 +8,7 @@ Python module containing helper functions.
 import numpy as np
 from PIL import Image
 
-__all__ = ['add_image', 'validate_ax']
+__all__ = ['add_image', 'validate_ax', 'get_indices_between', 'get_coordinates']
 
 
 def get_coordinates(n):
