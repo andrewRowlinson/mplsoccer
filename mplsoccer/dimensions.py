@@ -2,13 +2,13 @@
 
 Note that for tracab, uefa, metricasports, custom, and skillcorner the dimensions are in meters
 (or centimeters for tracab). Real-life pictures are in actually measured in yards and the meter conversions
-are slightly different, but for the purposes
-of the visualisations the differences will be minimal.
+are slightly different, but for the purposes of the visualisations the differences will be minimal.
 
 Wycout dimensions are sourced from ggsoccer https://github.com/Torvaney/ggsoccer/blob/master/R/dimensions.R
-Note, the goal dimensions in ggsoccer (10 units) are different from socceraction (12 units) 
+Note, the goal width in ggsoccer (12 units) is different from socceraction (10 units)
 (https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py),
-I am not sure which is correct, but I have gone for the goal width from ggsoccer."""
+I am not sure which is correct, but I have gone for the goal width from ggsoccer (12 units).
+In the previous versions of mplsoccer (up to 0.0.21), I used the socceraction goal width (10 units)."""
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum']
@@ -59,9 +59,9 @@ metricasports = {'top': 0., 'bottom': 1., 'left': 0., 'right': 1.,
                  'goal_depth': 2., 'goal_width': 7.32, 'goal_post': 3.6,
                  'invert_y': True, 'origin_center': False}
 
-custom = {'bottom': 0, 'left': 0, 'aspect': 1, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
-          'penalty_area_width': 40.32, 'left_penalty': 11, 'penalty_area_length': 16.5,  'circle_diameter': 18.3,
-          'goal_depth': 2, 'goal_width': 7.32, 'arc': 53.05, 'invert_y': False, 'origin_center': False}
+custom = {'bottom': 0., 'left': 0., 'aspect': 1, 'six_yard_width': 18.32, 'six_yard_length': 5.5,
+          'penalty_area_width': 40.32, 'left_penalty': 11., 'penalty_area_length': 16.5,  'circle_diameter': 18.3,
+          'goal_depth': 2., 'goal_width': 7.32, 'arc': 53.05, 'invert_y': False, 'origin_center': False}
 
 skillcorner_secondspectrum = {'center_width': 0, 'center_length': 0, 'aspect': 1,
                               'six_yard_from_side': -9.16, 'six_yard_width': 18.32,
