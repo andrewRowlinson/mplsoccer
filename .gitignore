@@ -155,3 +155,5 @@ desktop.ini
 
 # ignore data directory
 data/
+
+*idea/

@@ -11,6 +11,8 @@ from matplotlib.legend_handler import HandlerLineCollection
 from mplsoccer.cm import create_transparent_cmap
 from mplsoccer.utils import validate_ax
 
+__all__ = ['lines']
+
 
 def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
           comet=False, transparent=False, alpha_start=0.01,

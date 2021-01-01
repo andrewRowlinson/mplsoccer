@@ -2,6 +2,8 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgba
 from matplotlib.cm import get_cmap
 import numpy as np
 
+__all__ = ['create_transparent_cmap', 'grass_cmap']
+
 
 def grass_cmap():
     cmap = LinearSegmentedColormap.from_list('grass', [(0.25, 0.44, 0.12, 1),

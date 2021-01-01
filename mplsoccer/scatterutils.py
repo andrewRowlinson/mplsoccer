@@ -9,6 +9,9 @@ import matplotlib.markers as mmarkers
 from matplotlib.legend_handler import HandlerPathCollection
 from matplotlib.legend import Legend
 
+__all__ = ['scatter_football', '_mscatter']
+
+
 # Note that the football-marker arrays are based on the code in my other repo, but the arrays are copied here
 # https://github.com/andrewRowlinson/data-science/blob/master/data_visualization/matplotlib_football_marker.ipynb
 

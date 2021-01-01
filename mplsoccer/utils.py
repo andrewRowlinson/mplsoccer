@@ -8,6 +8,9 @@ Python module containing helper functions.
 import numpy as np
 from PIL import Image
 
+__all__ = ['add_image', 'validate_ax']
+
+
 def get_coordinates(n):
     """
     Function for getting coordinates and rotation values for the labels.

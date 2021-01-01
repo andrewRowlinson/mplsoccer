@@ -6,6 +6,8 @@ from mplsoccer.utils import validate_ax
 from mplsoccer.quiver import arrows
 from mplsoccer.linecollection import lines
 
+__all__ = ['Pitch', 'VerticalPitch']
+
 
 class Pitch(BasePitch):
         
