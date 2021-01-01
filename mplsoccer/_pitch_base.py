@@ -733,22 +733,21 @@ class BasePitch(ABC):
         The method used here includes a simple reflection method for boundary correction, so that probability
         mass is not assigned to areas outside the pitch.
         Automatically flips the x and y coordinates if the pitch is vertical.
+		
         Parameters
         ----------
         x, y : array-like or scalar.
             Commonly, these parameters are 1D arrays.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-            
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.contour (if filled=False) or
                    matplotlib.axes.Axes.contourf (if filled=True).
             
         Returns
         -------            
-        ax : matplotlib.axes
+        contour : matplotlib.contour.ContourSet
         """
-        if ax is None:
-            raise TypeError("kdeplot() missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+        validate_ax(ax)
             
         x = np.ravel(x)
         y = np.ravel(y)
@@ -758,9 +757,8 @@ class BasePitch(ABC):
         x_limits = [self.left, self.right]
         y_limits = [self.bottom, self.top]
 
-        if self.orientation == 'vertical':
-            x, y = y, x
-            x_limits, y_limits = y_limits, x_limits
+        x, y = self._reverse_if_vertical(x, y)
+        x_limits, y_limits = self._reverse_if_vertical(x_limits, y_limits)
 
         reflected_data_x = np.r_[x, 2 * x_limits[0] - x, 2 * x_limits[1] - x]
         reflected_data_y = np.r_[y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
@@ -1033,6 +1031,148 @@ class BasePitch(ABC):
         mesh : matplotlib.collections.QuadMesh
         """
         pass
+
+    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
+        """ Calculates binned statistics for the Juego de posición (position game) concept.
+        It uses scipy.stats.binned_statistic_2d.
+        Parameters
+        ----------
+        x, y, values : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+            If the statistic is 'count' then values are ignored.
+        
+        positional : str
+            One of 'full', 'horizontal' or 'vertical' for the respective heatmaps.        
+        
+        statistic : string or callable, optional
+            The statistic to compute (default is 'count').
+            The following statistics are available: 'count' (default),
+            'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function.
+            See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html.
+            
+        Returns
+        ----------
+        bin_statistic : A list of dictionaries.
+            The dictionary keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+        """
+        
+        # I tried several ways of creating positional bins. It's hard to do this because
+        # of points on the edges of bins. You have to be sure they are only counted once consistently
+        # I tried doing this by adding or subtracting a small value near the edges, but it didn't work for all cases
+        # I settled on this idea, which is to create binned statistics with an additional row, column either
+        # side (unless the side of the pitch) so that the scipy binned_statistic_2d functions handles the edges
+        if positional == 'full':
+            # top and bottom row - we create a grid with three rows and then ignore the middle row when slicing
+            xedge = np.array([self.x1, self.x2, self.x3, self.x4, self.x5, self.x6, self.x7])
+            yedge = np.array([self.y1, self.y2, self.y5, self.y6])
+            bin_statistic1 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat1 = bin_statistic1['statistic']
+            x_grid1 = bin_statistic1['x_grid']
+            y_grid1 = bin_statistic1['y_grid']
+            cx1 = bin_statistic1['cx']
+            cy1 = bin_statistic1['cy']
+            # slicing second row
+            stat2 = stat1[2, :].reshape(1, -1).copy()
+            x_grid2 = x_grid1[2:, :].copy()
+            y_grid2 = y_grid1[2:, :].copy()
+            cx2 = cx1[2, :].copy()
+            cy2 = cy1[2, :].copy()
+            # slice first row
+            stat1 = stat1[0, :].reshape(1, -1).copy()
+            x_grid1 = x_grid1[:2, :].copy()
+            y_grid1 = y_grid1[:2, :].copy()
+            cx1 = cx1[0, :].copy()
+            cy1 = cy1[0, :].copy()
+
+            # middle of pitch
+            xedge = np.array([self.x1, self.x2, self.x4, self.x6, self.x7])
+            yedge = np.array([self.y1, self.y2, self.y3, self.y4, self.y5, self.y6])
+            bin_statistic3 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat3 = bin_statistic3['statistic']
+            x_grid3 = bin_statistic3['x_grid']
+            y_grid3 = bin_statistic3['y_grid']
+            cx3 = bin_statistic3['cx']
+            cy3 = bin_statistic3['cy']
+            stat3 = stat3[1:-1, 1:-1]
+            x_grid3 = x_grid3[1:-1:, 1:-1].copy()
+            y_grid3 = y_grid3[1:-1, 1:-1].copy()
+            cx3 = cx3[1:-1, 1:-1].copy()
+            cy3 = cy3[1:-1, 1:-1].copy()
+            
+            # penalty areas
+            xedge = np.array([self.x1, self.x2, self.x3, self.x6, self.x7]).astype(np.float64)
+            yedge = np.array([self.y1, self.y2, self.y5, self.y6]).astype(np.float64)
+            bin_statistic4 = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            stat4 = bin_statistic4['statistic']
+            x_grid4 = bin_statistic4['x_grid']
+            y_grid4 = bin_statistic4['y_grid']
+            cx4 = bin_statistic4['cx']
+            cy4 = bin_statistic4['cy']
+            # slicing each penalty box
+            stat5 = stat4[1:-1, -1:]
+            stat4 = stat4[1:-1, :1]
+            y_grid5 = y_grid4[1:-1, -2:]
+            y_grid4 = y_grid4[1:-1, 0:2]
+            x_grid5 = x_grid4[1:-1, -2:]
+            x_grid4 = x_grid4[1:-1, 0:2]
+            cx5 = cx4[1:-1, -1:]
+            cx4 = cx4[1:-1, :1]
+            cy5 = cy4[1:-1, -1:]
+            cy4 = cy4[1:-1, :1]
+
+            result1 = _BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)._asdict()
+            result2 = _BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)._asdict()
+            result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)._asdict()
+            result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)._asdict()
+            result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)._asdict()
+            
+            bin_statistic = [result1, result2, result3, result4, result5]    
+            
+        elif positional == 'horizontal':
+            xedge = np.array([self.x1, self.x7])
+            yedge = np.array([self.y1, self.y2, self.y3, self.y4, self.y5, self.y6])
+            bin_horizontal = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            bin_statistic = [bin_horizontal]
+            
+        elif positional == 'vertical':
+            xedge = np.array([self.x1, self.x2, self.x3, self.x4, self.x5, self.x6, self.x7])
+            yedge = np.array([self.y1, self.y6])
+            bin_vertical = self.bin_statistic(x, y, values, statistic=statistic, bins=(xedge, yedge))
+            bin_statistic = [bin_vertical]
+        else:
+            raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
+                  
+        return bin_statistic 
+    
+    def heatmap_positional(self, bin_statistic, ax=None, **kwargs):
+        """ Plots several heatmaps for the different Juegos de posición areas.
+       
+        Parameters
+        ----------
+        bin_statistic : A list of dictionaries.
+            This should be calculated via Pitch.bin_statistic_positional().
+            The dictionary keys are 'statistic' (the calculated statistic),
+            'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.pcolormesh.
+        
+        Returns
+        ----------
+        mesh : matplotlib.collections.QuadMesh
+        """
+        validate_ax(ax)
+        vmax = kwargs.pop('vmax', np.array([stat['statistic'].max() for stat in bin_statistic]).max(initial=None))
+        vmin = kwargs.pop('vmin', np.array([stat['statistic'].min() for stat in bin_statistic]).min(initial=None))
+        
+        mesh_list = []
+        for bin_stat in bin_statistic:
+            mesh = self.heatmap(bin_stat, vmin=vmin, vmax=vmax, ax=ax, **kwargs)
+            mesh_list.append(mesh)
+            
+        return mesh_list
     
     def label_heatmap(self, bin_statistic, ax=None, **kwargs):
         """ Labels the heatmaps and automatically flips the coordinates if the pitch is vertical.
@@ -1548,6 +1688,4 @@ class BasePitch(ABC):
 
 # TO DO
 # jointplot
-# bin_statistic_positional
-# heatmap_positional
 # peter mckeever arrow lines?
