@@ -8,7 +8,7 @@ from matplotlib.collections import PatchCollection
 import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
-from scipy.stats import binned_statistic_2d
+from scipy.stats import binned_statistic_2d, circmean
 from scipy.spatial import Voronoi
 from collections import namedtuple
 
@@ -286,7 +286,7 @@ class BasePitch(ABC):
         self.goal_left = np.array([[self.left, self.center_width - self.goal_width / 2],
                                    [self.left, self.center_width + self.goal_width / 2]])
         
-        # set the positions of the pitch markings - used to standardise to common coordinates
+        # set the positions of the pitch markings - used to standardize to common coordinates
         self._pitch_markings()
 
     def _set_dimensions(self, pitch_dimensions):
@@ -346,14 +346,29 @@ class BasePitch(ABC):
             self.y4 = self.y6 - self.six_yard_from_side
             
     def _pitch_markings(self):
+        # the pitch markings are sorted from minimum to maximum so that np.search sorted works
+        # x = [left, six-yard, penalty spot, penalty area, center, penalty area, penalty spot, six-yard, right]
         self.x_markings = np.array([self.x1, self.left + self.six_yard_length, 
                                     self.left_penalty, self.x2, self.x4, 
                                     self.x6, self.right_penalty, self.right - self.six_yard_length, self.x7])
+        # y = [min(top, bottom), penalty area, six-yard, goal-post left, goal_post right,
+        # six-yard, penalty area, max(bottom, top)]
         self.y_markings = np.array([self.y1, self.y2, self.y3, 
                                     self.goal_left[:, 1].min(initial=None),                                     
                                     self.goal_left[:, 1].max(initial=None),
                                     self.y4, self.y5, self.y6])
+        # x_markings_uefa = [0., dimensions.uefa['six_yard_length'], dimensions.uefa['left_penalty'],
+        # dimensions.uefa['penalty_area_length'], 105/2,
+        # 105 - dimensions.uefa['penalty_area_length'],
+        # 105 - dimensions.uefa['left_penalty'],
+        # 105 - dimensions.uefa['six_yard_length'], 105]
         self.x_markings_uefa = np.array([0., 5.5, 11., 16.5, 52.5, 88.5, 94., 99.5, 105.])
+        # y_markings_uefa = [0, 68/2 - dimensions.uefa['penalty_area_width'] / 2,
+        # 68/2 - dimensions.uefa['six_yard_width'] / 2,
+        # 68/2 - dimensions.uefa['goal_width'] / 2,
+        # 68/2 + dimensions.uefa['goal_width'] / 2,
+        # 682 + dimensions.uefa['six_yard_width'] / 2,                
+        # 68/2 + dimensions.uefa['penalty_area_width'] / 2, 68]
         self.y_markings_uefa = np.array([0., 13.84, 24.84, 30.34, 37.66, 43.16, 54.16, 68.])
         
     def _stripe_locations(self):
@@ -604,6 +619,10 @@ class BasePitch(ABC):
     def _draw_stripe(self, ax, i):
         pass
 
+    @abstractmethod
+    def _draw_stripe_grass(self, pitch_color):
+        pass
+
     @staticmethod
     @abstractmethod
     def _reverse_if_vertical(x, y):
@@ -617,6 +636,7 @@ class BasePitch(ABC):
     def plot(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.plot,
         which automatically flips the x and y coordinates if the pitch is vertical.
+        
         Parameters
         ----------
         x, y : array-like or scalar.
@@ -658,6 +678,7 @@ class BasePitch(ABC):
         """ Utility wrapper around matplotlib.axes.Axes.scatter,
         which automatically flips the x and y coordinates if the pitch is vertical.
         Can optionally use a football marker with marker='football'.
+        
         Parameters
         ----------
         x, y : array-like or scalar.
@@ -674,7 +695,6 @@ class BasePitch(ABC):
             linewidth of the football marker.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-            
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
             
         Returns
@@ -709,6 +729,7 @@ class BasePitch(ABC):
     def kdeplot(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around seaborn.kdeplot,
         which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
+        
         Parameters
         ----------
         x, y : array-like or scalar.
@@ -734,6 +755,7 @@ class BasePitch(ABC):
     def hexbin(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
         which automatically flips the x and y coordinates if the pitch is vertical and clips to the pitch boundaries.
+        
         Parameters
         ----------
         x, y : array-like or scalar.
@@ -812,6 +834,7 @@ class BasePitch(ABC):
         See: https://matplotlib.org/3.1.1/api/collections_api.html.
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
+        
         Parameters
         ----------
         x, y: array-like or scalar.
@@ -871,7 +894,7 @@ class BasePitch(ABC):
         """
         pass
     
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4)):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), standardized=False):
         """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
         
         This method automatically sets the range, changes some of the scipy defaults,
@@ -898,6 +921,8 @@ class BasePitch(ABC):
               * the bin edges in each dimension (x_edge, y_edge = bins).
                 If the bin edges are specified, the number of bins will be,
                 (nx = len(x_edge)-1, ny = len(y_edge)-1).
+        standardized : bool, default False
+            Whether the x, y values have been standardized to the 'uefa' pitch coordinates (105m x 68m)
             
         Returns
         ----------
@@ -918,12 +943,15 @@ class BasePitch(ABC):
             raise ValueError("values on which to calculate the statistic are missing")
         if values.size != x.size:
             raise ValueError("x and values must be the same size")
-            
-        if self.invert_y:
-            pitch_range = [[self.left, self.right], [self.top, self.bottom]]
-            y = self.bottom - y  # for inverted axis flip the coordinates
+        
+        if standardized:
+            pitch_range = [[0, 105], [0, 68]]
         else:
-            pitch_range = [[self.left, self.right], [self.bottom, self.top]]
+            if self.invert_y:
+                pitch_range = [[self.left, self.right], [self.top, self.bottom]]
+                y = self.bottom - y  # for inverted axis flip the coordinates
+            else:
+                pitch_range = [[self.left, self.right], [self.bottom, self.top]]
         
         result = binned_statistic_2d(x, y, values, statistic=statistic, bins=bins, range=pitch_range)
         
@@ -932,7 +960,7 @@ class BasePitch(ABC):
         # i.e. grid cells are created from the bottom to the top of the pitch. where the top edge
         # always belongs to the cell above. First the raw coordinates have been flipped above
         # then the statistic is flipped back here
-        if self.invert_y:
+        if self.invert_y and standardized is False:
             statistic = np.flip(statistic, axis=0)
                            
         x_grid, y_grid = np.meshgrid(result.x_edge, result.y_edge)
@@ -1015,6 +1043,7 @@ class BasePitch(ABC):
         
         Plot a 2D field of arrows.
         See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.quiver.html
+        
         Parameters
         ----------
         xstart, ystart, xend, yend: array-like or scalar.
@@ -1059,6 +1088,7 @@ class BasePitch(ABC):
         This is a fast way to plot multiple lines without loops.
         Also enables lines that increase in width or opacity by splitting the line into n_segments of increasing
         width or opacity as the line progresses.
+        
         Parameters
         ----------
         xstart, ystart, xend, yend: array-like or scalar.
@@ -1101,17 +1131,19 @@ class BasePitch(ABC):
         The coordinates are converted using the ggsoccer (https://github.com/Torvaney/ggsoccer)
         method. Any x or y coordinate is rescaled linearly between the nearest two pitch markings.
         For example, the edge of the penalty box and the half way-line.
+        
         Parameters
         ----------
         x, y: array-like or scalar.
             The x/y coordinates that you want to convert to uefa coordinates.
+            
         Returns
         -------
-        tuple (x_standardised, y_standardised) : A tuple of numpy.arrays in uefa coordinates.    
+        tuple (x_standardized, y_standardized) : A tuple of numpy.arrays in uefa coordinates.    
         """
         # to numpy arrays
-        x = np.ravel(x)
-        y = np.ravel(y)
+        x = np.asarray(x)
+        y = np.asarray(y)
         
         # clip outside to pitch extents        
         x = x.clip(min=self.pitch_extent[0], max=self.pitch_extent[1])
@@ -1121,9 +1153,9 @@ class BasePitch(ABC):
         if self.invert_y:
             y = self.bottom - y
         
-        x_standardised = self._standardise(self.x_markings, self.x_markings_uefa, x)
-        y_standardised = self._standardise(self.y_markings, self.y_markings_uefa, y)
-        return x_standardised, y_standardised
+        x_standardized = self._standardize(self.x_markings, self.x_markings_uefa, x)
+        y_standardized = self._standardize(self.y_markings, self.y_markings_uefa, y)
+        return x_standardized, y_standardized
     
     def from_uefa_coordinates(self, x, y):
         """ Converts from the standard uefa pitch's coordinates (105m x 68m) to the pitch's coordinates.
@@ -1131,41 +1163,43 @@ class BasePitch(ABC):
         The coordinates are converted using the ggsoccer (https://github.com/Torvaney/ggsoccer)
         method. Any x or y coordinate is rescaled linearly between the nearest two pitch markings.
         For example, the edge of the penalty box and the half way-line.
+        
         Parameters
         ----------
         x, y: array-like or scalar.
             The x/y coordinates that you want to convert from uefa coordinates.
+            
         Returns
         -------
-        tuple (x_standardised, y_standardised) : A tuple of numpy.arrays in the pitch's coordinates.        
+        tuple (x_standardized, y_standardized) : A tuple of numpy.arrays in the pitch's coordinates.        
         """
         # to numpy arrays
-        x = np.ravel(x)
-        y = np.ravel(y)
+        x = np.asarray(x)
+        y = np.asarray(y)
         
         # clip outside to pitch extents        
         x = x.clip(min=0, max=105)
         y = y.clip(min=0, max=68)
-        
-        x_standardised = self._standardise(self.x_markings_uefa, self.x_markings, x)
-        y_standardised = self._standardise(self.y_markings_uefa, self.y_markings, y)
+                
+        x_standardized = self._standardize(self.x_markings_uefa, self.x_markings, x)
+        y_standardized = self._standardize(self.y_markings_uefa, self.y_markings, y)
         
         # for inverted axis flip the coordinates
         if self.invert_y:
-            y_standardised = self.bottom - y_standardised
+            y_standardized = self.bottom - y_standardized
         
-        return x_standardised, y_standardised
+        return x_standardized, y_standardized
     
     @staticmethod
-    def _standardise(markings_from, markings_to, coordinate):
-        pos = np.searchsorted(markings_from, coordinate) - 1
-        low_from = markings_from[pos]
-        high_from = markings_from[pos + 1]
+    def _standardize(markings_from, markings_to, coordinate):
+        pos = np.searchsorted(markings_from, coordinate)
+        low_from = markings_from[pos - 1]
+        high_from = markings_from[pos]
         proportion_of_way_between = (coordinate - low_from) / (high_from - low_from)
-        low_to = markings_to[pos]
-        high_to = markings_to[pos + 1]
+        low_to = markings_to[pos - 1]
+        high_to = markings_to[pos]
         return low_to + ((high_to - low_to) * proportion_of_way_between)
-    
+              
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
         Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
@@ -1253,7 +1287,7 @@ class BasePitch(ABC):
             verts = vor.vertices[region]
             verts[:, 0] = np.clip(verts[:, 0], a_min=extent[0], a_max=extent[1])
             verts[:, 1] = np.clip(verts[:, 1], a_min=extent[2], a_max=extent[3])
-            # convert back to coordinates if previously standardised
+            # convert back to coordinates if previously standardized
             if standardized:
                 x_std, y_std = self.from_uefa_coordinates(verts[:, 0], verts[:, 1])
                 verts[:, 0] = x_std
@@ -1266,6 +1300,146 @@ class BasePitch(ABC):
         team2 = region_vertices[teams == 0]
         
         return team1, team2
+    
+    def calculate_angle_and_distance(self, xstart, ystart, xend, yend, standardized=False):
+        """ Calculates the angle in radians counter-clockwise between a start and end location and the distance.
+        Where the angle 0 is this way → (the straight line from left to right) in a horizontally orientated pitch
+        and this way ↑ in a vertically orientated pitch.
+        The angle goes from 0 to 2pi. To convert the angle to degrees use np.degrees(angle).
+        
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. 
+            These should be the start and end coordinates to calculate the angle between.
+        standardized : bool, default False
+            Whether the x, y values have been standardized to the 'uefa' pitch coordinates (105m x 68m)
+            
+        Returns
+        -------
+        angle: ndarray
+            Array of angles in radians counter-clockwise in the range [0, 2pi].
+            Where 0 is the straight line left to right in a horizontally orientated pitch
+            and the straight line bottom to top in a vertically orientated pitch.
+        distance: ndarray
+            Array of distances.
+        """
+        xstart = np.ravel(xstart)
+        ystart = np.ravel(ystart)
+        xend = np.ravel(xend)
+        yend = np.ravel(yend)
+        
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")  
+        
+        x_dist = xend - xstart
+        if self.invert_y and standardized is False:
+            y_dist = ystart - yend
+        else:
+            y_dist = yend - ystart
+                   
+        angle = np.arctan2(y_dist, x_dist)
+        # if negative angle make positive angle, so goes from 0 to 2 * pi
+        angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+        
+        distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
+        
+        return angle, distance
+    
+    def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5,
+             color=None, ax=None, **kwargs):
+        """ Create a flow map by binning  the data into cells and calculating the average
+        angles and distances. The colors of each arrow are        
+        
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays. 
+            These should be the start and end coordinates to calculate the angle between.
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification for binning the data to calculate the angles/ distances.
+              * the number of bins for the two dimensions (nx = ny = bins),
+              * the number of bins in each dimension (nx, ny = bins),
+              * the bin edges for the two dimensions (x_edge = y_edge = bins),
+              * the bin edges in each dimension (x_edge, y_edge = bins).
+                If the bin edges are specified, the number of bins will be,
+                (nx = len(x_edge)-1, ny = len(y_edge)-1).
+        arrow_type : str, default 'same'
+            The supported arrow types are: 'same', 'scale', and 'average'.
+            'same' makes the arrows the same size (arrow_length).
+            'scale' scales the arrow length by the average distance in the cell (up to a max of arrow_length).
+            'average' makes the arrow size the average distance in the cell.
+        arrow_length : float, default 5
+            The arrow_length for the flow map. If the arrow_type='same',
+            all the arrows will be arrow_length. If the arrow_type='scale',
+            the arrows will be scaled by the average distance.
+            If the arrow_type='average', the arrows_length is ignored
+            This is automatically multipled by 100 if using a Tracab pitch (i.e. the default is 500).
+        color : A matplotlib color, defaults to None.
+            Defaults to None. In that case the marker color is determined by the cmap (default 'viridis').
+            and the counts of the starting positions in each bin.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.quiver.
+        
+        Returns
+        -------
+        PolyCollection : matplotlib.quiver.Quiver                
+        """
+        validate_ax(ax)
+        if self.aspect != 1:
+            standardized = True
+            xstart, ystart = self.to_uefa_coordinates(xstart, ystart)
+            xend, yend = self.to_uefa_coordinates(xend, yend)
+        else:
+            standardized = False
+
+        # calculate  the binned statistics
+        angle, distance = self.calculate_angle_and_distance(xstart, ystart, xend, yend, standardized=standardized)
+        bs_distance = self.bin_statistic(xstart, ystart, values=distance,
+                                         statistic='mean', bins=bins, standardized=standardized)
+        bs_angle = self.bin_statistic(xstart, ystart, values=angle,
+                                      statistic=circmean, bins=bins, standardized=standardized)
+
+        # calculate the arrow length
+        if self.pitch_type == 'tracab':
+            arrow_length = arrow_length * 100
+        if arrow_type == 'scale':
+            new_d = (bs_distance['statistic'] / np.nan_to_num(bs_distance['statistic']).max(initial=None)) \
+                    * arrow_length
+        elif arrow_type == 'same':
+            new_d = arrow_length
+        elif arrow_type == 'average':
+            new_d = bs_distance['statistic']
+        else:
+            valid_arrows = ['scale', 'same', 'average']
+            raise TypeError(f'Invalid argument: arrow_type should be in {valid_arrows}')
+
+        # calculate the end positions of the arrows
+        endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d)
+        if self.invert_y and standardized is False:
+            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d)  # invert_y
+        else:
+            endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
+                    
+        # get coordinates and convert back to the pitch coordinates if necessary
+        cx, cy = bs_angle['cx'], bs_angle['cy']
+        if standardized:
+            cx, cy = self.from_uefa_coordinates(cx, cy)
+            endx, endy = self.from_uefa_coordinates(endx, endy)
+        
+        # plot arrows
+        if color is None:
+            bs_count = self.bin_statistic(xstart, ystart, statistic='count', bins=bins, standardized=standardized)
+            flow = self.arrows(cx, cy, endx, endy, bs_count['statistic'], ax=ax, **kwargs)
+        else:
+            flow = self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)            
+        
+        return flow
     
 
 #    def jointplot(self, x, y, **kwargs):
@@ -1334,8 +1508,6 @@ class BasePitch(ABC):
 #        return joint_plot
 
 # TO DO
-# calculate_angle_and_distance
-# flow
 # jointplot
 # bin_statistic_positional
 # heatmap_positional
