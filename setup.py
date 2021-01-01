@@ -32,4 +32,5 @@ install_requires = ['matplotlib',
                     'scipy',
                     'pandas',
 					'pillow',
-                    'numpy']
+                    'numpy',
+                    'KDEpy']
