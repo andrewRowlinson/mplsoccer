@@ -837,6 +837,7 @@ class BasePitch(ABC):
         See: https://matplotlib.org/3.1.1/api/collections_api.html.
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
+        Automatically flips the x and y vertices if the pitch is vertical.
             
         Parameters
         ----------
