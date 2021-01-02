@@ -781,7 +781,7 @@ class BasePitch(ABC):
         x, y = self._reflect_2d(x, y)
         x, y = self._reverse_if_vertical(x, y)
 
-        contour_plot = sns.kdeplot(x, y, ax=ax, clip=self.kde_clip, **kwargs)
+        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
         return contour_plot
     
     def hexbin(self, x, y, ax=None, **kwargs):
