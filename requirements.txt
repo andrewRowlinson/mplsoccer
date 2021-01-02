@@ -4,4 +4,4 @@ seaborn
 scipy
 pandas
 beautifulsoup4
-KDEpy
+Pillow
