@@ -9,7 +9,6 @@ import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from scipy.stats import binned_statistic_2d, circmean
-from scipy.interpolate import RectBivariateSpline
 from scipy.spatial import Voronoi
 from collections import namedtuple
 
@@ -741,7 +740,7 @@ class BasePitch(ABC):
             limits = [0, 68]
         else:
             limits = [self.bottom, self.top]
-        return np.r_[y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
+        return np.r_[y, 2 * limits[0] - y, 2 * limits[1] - y]
     
     def _reflect_2d(self, x, y, standardized=False):
         x = np.ravel(x)
@@ -754,8 +753,8 @@ class BasePitch(ABC):
         reflected_data_y = np.r_[y, y, y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]      
         return reflected_data_x, reflected_data_y    
     
-    def kdeplot_kdepy(self, x, y, ax=None, filled=False, **kwargs):
-        """ Routine to perform kernel density estimation using KDEpy.FFTKDE and plot the result on the given ax.
+    def kdeplot(self, x, y, ax=None, **kwargs):
+        """ Routine to perform kernel density estimation using seaborn kdeplot and plot the result on the given ax.
         The method used here includes a simple reflection method for boundary correction, so that probability
         mass is not assigned to areas outside the pitch.
         Automatically flips the x and y coordinates if the pitch is vertical.
@@ -766,54 +765,23 @@ class BasePitch(ABC):
             Commonly, these parameters are 1D arrays.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.contour (if filled=False) or
-                   matplotlib.axes.Axes.contourf (if filled=True).
+        **kwargs : All other keyword arguments are passed on to seaborn.kdeplot.
             
         Returns
         -------            
         contour : matplotlib.contour.ContourSet
         """
-        from KDEpy import FFTKDE
         validate_ax(ax)
         
         x = np.ravel(x)
         y = np.ravel(y)
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
-            
-        # use Scott's rule of thumb to select bandwidth
-        n = x.size
-        scott_bw = [n ** (-1 / 6) * np.std(x), n ** (-1 / 6) * np.std(y)]
-        
+
         x, y = self._reflect_2d(x, y)
         x, y = self._reverse_if_vertical(x, y)
-        
-        x_limits = [self.left, self.right]
-        y_limits = [self.bottom, self.top]
-        x_limits, y_limits = self._reverse_if_vertical(x_limits, y_limits)
 
-        # estimate KDE (including reflected data)
-        grid, values = FFTKDE(bw=scott_bw).fit(np.c_[x, y]).evaluate(512)
-        x_grid, y_grid = np.unique(grid[:, 0]), np.unique(grid[:, 1])
-        z = values.reshape(512, 512)
-        # set up a bilinear interpolator to estimate density off the FFT grid
-        player_density = RectBivariateSpline(x_grid, y_grid, z, kx=1, ky=1)
-        # define points at which to evaluate the density
-        x_pts = np.linspace(x_limits[0], x_limits[1], 100)
-        y_pts = np.linspace(y_limits[0], y_limits[1], 100)
-        xx, yy = np.meshgrid(x_pts, y_pts)
-        xx, yy = xx.flatten(), yy.flatten()
-        # evaluate density at specified points
-        x_eval = np.tile(np.c_[xx, 2 * x_limits[0] - xx, 2 * x_limits[1] - xx], 3).flatten()
-        y_eval = np.repeat(np.c_[yy, 2 * y_limits[0] - yy, 2 * y_limits[1] - yy], 3)
-        density = np.sum(player_density.ev(x_eval, y_eval).reshape(-1, 9), axis=1)
-        density = density.reshape((100, 100))
-
-        if filled:
-            contour_plot = ax.contourf(x_pts, y_pts, density, **kwargs)
-        if not filled:
-            contour_plot = ax.contour(x_pts, y_pts, density, **kwargs)
-            
+        contour_plot = sns.kdeplot(x, y, ax=ax, clip=self.kde_clip, **kwargs)
         return contour_plot
     
     def hexbin(self, x, y, ax=None, **kwargs):
