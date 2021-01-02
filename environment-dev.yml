@@ -11,14 +11,14 @@ dependencies:
   - pyarrow
   - beautifulsoup4
   - lxml
+  - setuptools
+  - twine
   - conda-forge::ffmpeg
   - pillow
+  - sphinx-gallery
+  - sphinx_rtd_theme
+  - numpydoc
+  - wheel
   - pip
   - pip:
-      - setuptools
-      - twine
-      - wheel
-      - sphinx-gallery
-      - sphinx_rtd_theme
-      - numpydoc
       - -e .

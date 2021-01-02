@@ -13,8 +13,8 @@ dependencies:
   - conda-forge::ffmpeg
   - pillow
   - pip
+  - sphinx-gallery
+  - sphinx_rtd_theme
+  - numpydoc
   - pip:
-      - sphinx-gallery >= 0.7
-      - sphinx_rtd_theme
-      - numpydoc
       - -e .
