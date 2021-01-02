@@ -9,7 +9,6 @@ import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
 from scipy.stats import binned_statistic_2d, circmean
-from KDEpy import FFTKDE
 from scipy.interpolate import RectBivariateSpline
 from scipy.spatial import Voronoi
 from collections import namedtuple
@@ -727,13 +726,40 @@ class BasePitch(ABC):
         else:
             sc = ax.scatter(x, y, marker=marker, **kwargs)
         return sc   
+
+    def _reflect_x(self, x, standardized=False):
+        x = np.ravel(x)
+        if standardized:
+            limits = [0, 105]
+        else:
+            limits = [self.left, self.right]
+        return np.r_[x,  2 * limits[0] - x, 2 * limits[1] - x]
     
-    def kdeplot(self, x, y, ax=None, filled=False, **kwargs):
+    def _reflect_y(self, y, standardized=False):
+        y = np.ravel(y)
+        if standardized:
+            limits = [0, 68]
+        else:
+            limits = [self.bottom, self.top]
+        return np.r_[y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
+    
+    def _reflect_2d(self, x, y, standardized=False):
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if standardized:
+            x_limits, y_limits = [0, 105], [0, 68]
+        else:
+            x_limits, y_limits = [self.left, self.right], [self.bottom, self.top]
+        reflected_data_x = np.r_[x,  2 * x_limits[0] - x, 2 * x_limits[1] - x, x, x]
+        reflected_data_y = np.r_[y, y, y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]      
+        return reflected_data_x, reflected_data_y    
+    
+    def kdeplot_kdepy(self, x, y, ax=None, filled=False, **kwargs):
         """ Routine to perform kernel density estimation using KDEpy.FFTKDE and plot the result on the given ax.
         The method used here includes a simple reflection method for boundary correction, so that probability
         mass is not assigned to areas outside the pitch.
         Automatically flips the x and y coordinates if the pitch is vertical.
-		
+        
         Parameters
         ----------
         x, y : array-like or scalar.
@@ -747,26 +773,27 @@ class BasePitch(ABC):
         -------            
         contour : matplotlib.contour.ContourSet
         """
+        from KDEpy import FFTKDE
         validate_ax(ax)
-            
+        
         x = np.ravel(x)
         y = np.ravel(y)
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
-
+            
+        # use Scott's rule of thumb to select bandwidth
+        n = x.size
+        scott_bw = [n ** (-1 / 6) * np.std(x), n ** (-1 / 6) * np.std(y)]
+        
+        x, y = self._reflect_2d(x, y)
+        x, y = self._reverse_if_vertical(x, y)
+        
         x_limits = [self.left, self.right]
         y_limits = [self.bottom, self.top]
-
-        x, y = self._reverse_if_vertical(x, y)
         x_limits, y_limits = self._reverse_if_vertical(x_limits, y_limits)
 
-        reflected_data_x = np.r_[x, 2 * x_limits[0] - x, 2 * x_limits[1] - x]
-        reflected_data_y = np.r_[y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
-        # use Scott's rule of thumb to select bandwidth
-        n = x.shape[0]
-        scott_bw = [n ** (-1 / 6) * np.std(x), n ** (-1 / 6) * np.std(y)]
         # estimate KDE (including reflected data)
-        grid, values = FFTKDE(bw=scott_bw).fit(np.c_[reflected_data_x, reflected_data_y]).evaluate(512)
+        grid, values = FFTKDE(bw=scott_bw).fit(np.c_[x, y]).evaluate(512)
         x_grid, y_grid = np.unique(grid[:, 0]), np.unique(grid[:, 1])
         z = values.reshape(512, 512)
         # set up a bilinear interpolator to estimate density off the FFT grid
@@ -1418,42 +1445,18 @@ class BasePitch(ABC):
         if self.aspect != 1:
             standardized = True
             x, y = self.to_uefa_coordinates(x, y)
-            x = x.reshape(-1, 1)
-            y = y.reshape(-1, 1)
-            p_left = 0
-            p_right = 105
-            p_bottom = 0
-            p_top = 68
             extent = np.array([0, 105, 0, 68])
         else:
             standardized = False
-            p_left = self.left
-            p_right = self.right
-            p_bottom = self.bottom
-            p_top = self.top
             extent = self.pitch_extent
-            # clip outside to pitch extents
-            x = x.clip(min=extent[0], max=extent[1]).reshape(-1, 1)
-            y = y.clip(min=extent[2], max=extent[3]).reshape(-1, 1)
+        
+        # clip outside to pitch extents
+        x = x.clip(min=extent[0], max=extent[1])
+        y = y.clip(min=extent[2], max=extent[3])
 
         # reflect in pitch lines
-        left = x.copy()
-        right = x.copy()
-        bottom = y.copy()
-        top = y.copy()
-        left = p_left - abs(left - p_left)
-        right = p_right + abs(right - p_right)
-        if self.invert_y and standardized is False:
-            top = p_top - abs(top - p_top)
-            bottom = p_bottom + abs(bottom - p_bottom)
-        else:
-            top = p_top + abs(top - p_top)
-            bottom = p_bottom - abs(bottom - p_bottom)
-        reflect = np.concatenate([np.concatenate([x, y], axis=1),
-                                  np.concatenate([x, bottom], axis=1),
-                                  np.concatenate([x, top], axis=1),
-                                  np.concatenate([left, y], axis=1),
-                                  np.concatenate([right, y], axis=1)])
+        reflect_x, reflect_y = self._reflect_2d(x, y, standardized=standardized)
+        reflect = np.vstack([reflect_x, reflect_y]).T
         
         # create Voronoi
         vor = Voronoi(reflect)
