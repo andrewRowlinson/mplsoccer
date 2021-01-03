@@ -4,7 +4,7 @@ __author__: Anmol_Durgapal(@slothfulwave612)
 Python module containing helper functions.
 """
 
-## necessary packages/modules
+# necessary packages/modules
 import numpy as np
 from PIL import Image
 
@@ -20,21 +20,22 @@ def get_coordinates(n):
 
     Returns:
         list: coordinate and rotation values.
-    """    
+    """
 
-    ## calculate alpha
-    alpha = 2 * np.pi/n
+    # calculate alpha
+    alpha = 2 * np.pi / n
 
-    ## rotation values
+    # rotation values
     alphas = alpha * np.arange(n)
 
-    ## x-coordinate value
+    # x-coordinate value
     coord_x = np.cos(alphas)
 
-    ## y-coordinate value
+    # y-coordinate value
     coord_y = np.sin(alphas)
 
     return np.c_[coord_x, coord_y, alphas]
+
 
 def get_vertex_coord(old_value, old_min, old_max, new_min, new_max):
     """
@@ -45,12 +46,13 @@ def get_vertex_coord(old_value, old_min, old_max, new_min, new_max):
 
     Returns:
         float: the coordinate value either x or y.
-    """    
+    """
 
-    ## calculate the value
-    new_value = ( (old_value - old_min) / (old_max - old_min) ) * (new_max - new_min) + new_min
+    # calculate the value
+    new_value = ((old_value - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
 
     return new_value
+
 
 def get_indices_between(range_list, coord_list, value, reverse):
     """
@@ -64,30 +66,31 @@ def get_indices_between(range_list, coord_list, value, reverse):
 
     Returns:
         tuple: x-coordinate and y-coordinate value.
-    """    
+    """
 
-    ## getting index value
+    # getting index value
     idx_1, idx_2 = get_index(array=range_list, value=value, reverse=reverse)
 
-    ## get x coordinate
+    # get x coordinate
     x_coord = get_vertex_coord(
         old_value=value,
         old_min=range_list[idx_1],
         old_max=range_list[idx_2],
-        new_min=coord_list[idx_1, 0],
-        new_max=coord_list[idx_2, 0]
+        new_min=coord_list[idx_1][0],
+        new_max=coord_list[idx_2][0]
     )
 
-    ## get y coordinate
+    # get y coordinate
     y_coord = get_vertex_coord(
         old_value=value,
         old_min=range_list[idx_1],
         old_max=range_list[idx_2],
-        new_min=coord_list[idx_1, 1],
-        new_max=coord_list[idx_2, 1]
+        new_min=coord_list[idx_1][1],
+        new_max=coord_list[idx_2][1]
     )
 
     return x_coord, y_coord
+
 
 def get_index(array, value, reverse):
     """
@@ -100,18 +103,19 @@ def get_index(array, value, reverse):
 
     Returns:
         int: the two indices between which value lies.
-    """    
+    """
 
-    if reverse == True:
-        ## loop over the array/list
+    if reverse:
+        # loop over the array/list
         for i in range(0, len(array) - 1):
-            if array[i] >= value >= array[i+1]:
-                return i, i+1
+            if array[i] >= value >= array[i + 1]:
+                return i, i + 1
 
-    ## loop over the array/list
+    # loop over the array/list
     for i in range(0, len(array) - 1):
-        if array[i] <= value <= array[i+1]:
-            return i, i+1
+        if array[i] <= value <= array[i + 1]:
+            return i, i + 1
+
 
 def set_labels(ax, label_value, label_axis):
     """
@@ -124,7 +128,7 @@ def set_labels(ax, label_value, label_axis):
 
     Returns:
         list: label names
-    """    
+    """
 
     if label_axis == 'x':
         ax.set_xticks(np.arange(len(label_value)))
@@ -132,17 +136,17 @@ def set_labels(ax, label_value, label_axis):
     else:
         ax.set_yticks(np.arange(len(label_value)) + 1)
         axis = ax.get_yticklabels()
-    
-    ## fetch labels
+
+    # fetch labels
     labels = [items.get_text() for items in axis]
 
-    ## init a count variable
+    # init a count variable
     if label_axis == 'x':
         count = 0
     else:
         count = len(label_value) - 1
-    
-    ## iterate through all the labels and change the label name
+
+    # iterate through all the labels and change the label name
     for i in range(len(labels)):
         labels[i] = label_value[count]
 
@@ -150,8 +154,9 @@ def set_labels(ax, label_value, label_axis):
             count += 1
         else:
             count -= 1
-    
-    return labels            
+
+    return labels
+
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     """
@@ -168,34 +173,35 @@ def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
 
     Returns:
         matplotlib.figure.Figure: figure object.
-    """    
-    ## open image
+    """
+    # open image
     image = Image.open(image)
 
-    ## height, width, channel of shape
+    # height, width, channel of shape
     shape = np.array(image).shape
-    
-    image_height, image_width =  shape[0], shape[1]
+
+    image_height, image_width = shape[0], shape[1]
     image_aspect = image_width / image_height
-    
+
     figsize = fig.get_size_inches()
     fig_aspect = figsize[0] / figsize[1]
-    
+
     if height is None:
         height = width / image_aspect * fig_aspect
-    
+
     if width is None:
-        width = height*image_aspect/fig_aspect
-    
-    ## add image
+        width = height * image_aspect / fig_aspect
+
+    # add image
     ax_image = fig.add_axes((left, bottom, width, height))
     ax_image.axis('off')  # axis off so no labels/ ticks
-    
+
     ax_image.imshow(image, **kwargs)
-    
+
     return fig
 
-def set_size(w,h, ax=None):
+
+def set_size(w, h, ax=None):
     """
     Function to set size of an axes in a subplot.
 
@@ -203,18 +209,20 @@ def set_size(w,h, ax=None):
         w (float): width of the axes.
         h (float): height of the axes.
         ax (axes.Axes): axes object
-    """    
-    ## compute width and height
+    """
+    # compute width and height
     l = ax.figure.subplotpars.left
     r = ax.figure.subplotpars.right
     t = ax.figure.subplotpars.top
     b = ax.figure.subplotpars.bottom
-    figw = float(w)/(r-l)
-    figh = float(h)/(t-b)
+    figw = float(w) / (r - l)
+    figh = float(h) / (t - b)
 
-    ## set size
+    # set size
     ax.figure.set_size_inches(figw, figh)
-    
+
+
 def validate_ax(ax):
     if ax is None:
         raise TypeError("Missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
+

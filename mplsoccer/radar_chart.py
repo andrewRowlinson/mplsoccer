@@ -1,17 +1,19 @@
-'''
+"""
 __author__: Anmol_Durgapal(@slothfulwave612)
 
 A Python module for plotting radar-chart.
 
 The radar-chart theme is inspired by @Statsbomb/Rami_Moghadam.
-'''
+"""
 
-## import necessary packages/modules
+# import necessary packages/modules
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
 from . import utils
+
+__all__ = ["Radar"]
 
 class Radar:
     """
@@ -19,9 +21,9 @@ class Radar:
     """
 
     def __init__(
-        self, background_color="#FFFFFF", patch_color="#D6D6D6", fontfamily="Liberation Serif", 
-        label_fontsize=10, range_fontsize=6.5, label_color="#000000", range_color="#000000"
-        ):
+            self, background_color="#FFFFFF", patch_color="#D6D6D6", fontfamily="Liberation Serif",
+            label_fontsize=10, range_fontsize=6.5, label_color="#000000", range_color="#000000"
+    ):
         """
         Function to initialize the object of the class.
 
@@ -33,7 +35,7 @@ class Radar:
             range_fontsize (float, optional): the fontsize for range values. Defaults to 6.5.
             label_color (str, optional): color value for labels. Defaults to "#000000".
             range_color (str, optional): color value for ranges. Defaults to "#000000".
-        """        
+        """
         self.background_color = background_color
         self.patch_color = patch_color
         self.fontfamily = fontfamily
@@ -43,7 +45,7 @@ class Radar:
         self.range_color = range_color
 
     def plot_radar(self, ranges, params, values, radar_color, plot_range=True, filename=None, dpi=300,
-                   title=dict(), alphas=[0.6, 0.6], compare=False, endnote=None, 
+                   title=None, alphas=(0.6, 0.6), compare=False, endnote=None,
                    end_size=9, end_color="#95919B", image=None, image_coord=None, figax=None, **kwargs):
         """
         Function to plot radar-chart.
@@ -56,27 +58,30 @@ class Radar:
             plot_range (bool, optional): to plot the range values. Defaults to True.
             filename (str, optional): the name per which the file will be saved added extension. Defaults to None.
             dpi (int, optional): dots per inch value. Defaults to 300.
-            title (str, optional): containing information of title and subtitle. Defaults to dict().
-            alphas (list, optional): alpha value for color. Defaults to [0.6, 0.6].
+            title (dict, optional): containing information of title and subtitle. Defaults to None.
+            alphas (tuple, optional): alpha value for color. Defaults to (0.6, 0.6).
             compare (bool, optional): True, if comparison charts are to be made. Defaults to False.
             endnote (str, optional): the endnote of the plot. Defaults to None.
             end_size (int, optional): the font-size for the endnote string. Defaults to 9.
             end_color (str, optional): color of the endnote. Defaults to "#95919B".
             image (str, optional): image name to be added. Defaults to None.
             image_coord (list, optional): containing left, bottom, width, height for image. Defaults to None.
-            figax tuple, optional): figure and axis object. Defaults to None.
+            figax (tuple, optional): figure and axis object. Defaults to None.
             **kwargs --  All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
 
         Returns:
             matplotlib.figure.Figure: figure object.
             axes.Axes: axis object.
-        """        
-        ## to plot comparison radar charts
-        if compare == True:
-            assert len(values) == len(radar_color) == len(alphas), "Length for values, radar_color and alpha do not match"
+        """
+        # to plot comparison radar charts
+        if title is None:
+            title = dict()
+        if compare:
+            assert len(values) == len(radar_color) == len(
+                alphas), "Length for values, radar_color and alpha do not match"
         else:
-            if params == None:
-                assert len(ranges) == len(values), "Length for ranges and values not matched"    
+            if params is None:
+                assert len(ranges) == len(values), "Length for ranges and values not matched"
             else:
                 assert len(ranges) == len(params) == len(values), "Length for ranges, params and values not matched"
 
@@ -86,65 +91,65 @@ class Radar:
             fig, ax = plt.subplots(figsize=(20, 10), facecolor=self.background_color)
             ax.set_facecolor(self.background_color)
 
-        ## set axis
+        # set axis
         ax.set_aspect('equal')
         ax.set(xlim=(-22, 22), ylim=(-23, 25))
 
         if type(radar_color) == str:
-            ## make radar_color a list
-            radar_color = [radar_color]
-            radar_color.append('#D6D6D6')
+            # make radar_color a list
+            radar_color = [radar_color, '#D6D6D6']
 
-        ## add labels around the last circles
-        if params != None:
+        # add labels around the last circles
+        if params is not None:
             ax = self.__add_labels(params=params, ax=ax)
 
-        ## add ranges
-        if plot_range == False:
+        # add ranges
+        if not plot_range:
             ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax, plot_range=False)
         else:
             ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax, plot_range=True)
 
-        if compare == True:
-            ## for making comparison radar charts
+        if compare:
+            # for making comparison radar charts
 
             for i in range(len(values)):
-                ## fetch value
+                # fetch value
                 value = values[i]
 
-                ## get vertices
+                # get vertices
                 vertices = self.__get_vertices(value, xy, range_values)
 
-                ## make the radar chart
-                ax = self.__plot_circles(ax=ax, radar_color=radar_color[i], vertices=vertices, alpha=alphas[i], compare=True)
+                # make the radar chart
+                ax = self.__plot_circles(ax=ax, radar_color=radar_color[i], vertices=vertices, alpha=alphas[i],
+                                         compare=True)
 
         else:
-            ## get vertices
+            # get vertices
             vertices = self.__get_vertices(values, xy, range_values)
 
-            ## make the radar chart
+            # make the radar chart
             ax = self.__plot_circles(ax=ax, radar_color=radar_color, vertices=vertices)
-        
-        ## add credits 
+
+        # add credits
         ax.text(22, -21.5, 'Inspired By: Statsbomb / Rami Moghadam', fontfamily=self.fontfamily, ha='right',
                 fontdict={"color": end_color}, fontsize=end_size)
 
-        ## add endnote
-        if endnote != None:
+        # add endnote
+        if endnote is not None:
             y_add = -22.5
             for note in endnote.split('\n'):
                 ax.text(22, y_add, note, fontfamily=self.fontfamily, ha='right',
                         fontdict={"color": end_color}, fontsize=end_size)
                 y_add -= 1
 
-        ## tidy axis
+        # tidy axis
         ax.axis('off')
-        
+
         if len(title) > 0:
             ax = self.__plot_titles(ax, title)
 
-        ## add image
-        if image != None and image_coord != None:
+        # add image
+        if image is not None and image_coord is not None:
             fig = utils.add_image(image, fig, image_coord[0], image_coord[1], image_coord[2], image_coord[3], **kwargs)
 
         if filename:
@@ -162,60 +167,60 @@ class Radar:
 
         Returns:
             axes.Axes: axis object.
-        """        
+        """
 
-        if title.get('title_color') == None:
-            ## add title color
+        if title.get('title_color') is None:
+            # add title color
             title['title_color'] = '#000000'
 
-        if title.get('subtitle_color') == None:
-            ## add a subtitle color
+        if title.get('subtitle_color') is None:
+            # add a subtitle color
             title['subtitle_color'] = '#000000'
 
-        if title.get('title_fontsize') == None:
-            ## add titile fontsize
+        if title.get('title_fontsize') is None:
+            # add titile fontsize
             title['title_fontsize'] = 20
-        
-        if title.get('sub_title_fontsize') == None:
-            ## add subtitle fontsize
+
+        if title.get('sub_title_fontsize') is None:
+            # add subtitle fontsize
             title['subtitle_fontsize'] = 15
 
-        if title.get('title_fontsize_2') == None:
-            ## add title fontsize 2
+        if title.get('title_fontsize_2') is None:
+            # add title fontsize 2
             title['title_fontsize_2'] = title['title_fontsize']
 
-        if title.get('subtitle_fontsize_2') == None:
-            ## add subtitle fontsize 2
-            title['subtitle_fontsize_2'] = title['subtitle_fontsize']   
+        if title.get('subtitle_fontsize_2') is None:
+            # add subtitle fontsize 2
+            title['subtitle_fontsize_2'] = title['subtitle_fontsize']
 
         if title.get('title_name'):
-            ## plot the title name
-            ax.text(-22, 24, title['title_name'], fontsize=title['title_fontsize'], fontweight='bold', 
+            # plot the title name
+            ax.text(-22, 24, title['title_name'], fontsize=title['title_fontsize'], fontweight='bold',
                     fontdict={'color': title['title_color']}, fontfamily=self.fontfamily)
-        
+
         if title.get('subtitle_name'):
-            ## plot the title name
-            ax.text(-22, 22, title['subtitle_name'], fontsize=title['subtitle_fontsize'], 
+            # plot the title name
+            ax.text(-22, 22, title['subtitle_name'], fontsize=title['subtitle_fontsize'],
                     fontdict={'color': title['subtitle_color']}, fontfamily=self.fontfamily)
 
-        if title.get('title_color_2') == None:
-            ## add title color
+        if title.get('title_color_2') is None:
+            # add title color
             title['title_color_2'] = '#000000'
-        
-        if title.get('subtitle_color_2') == None:
-            ## add subtitle color
+
+        if title.get('subtitle_color_2') is None:
+            # add subtitle color
             title['subtitle_color_2'] = '#000000'
-        
+
         if title.get('title_name_2'):
-            ## plot the second title name
-            ax.text(22, 24, title['title_name_2'], fontsize=title['title_fontsize_2'], fontweight='bold', 
+            # plot the second title name
+            ax.text(22, 24, title['title_name_2'], fontsize=title['title_fontsize_2'], fontweight='bold',
                     fontdict={'color': title['title_color_2']}, ha='right', fontfamily=self.fontfamily)
-        
+
         if title.get('subtitle_name_2'):
-            ## plot the second subtitle name
-            ax.text(22, 22, title['subtitle_name_2'], fontsize=title['subtitle_fontsize_2'], 
-                    fontdict={'color': title['subtitle_color_2']}, ha='right', fontfamily=self.fontfamily) 
-        
+            # plot the second subtitle name
+            ax.text(22, 22, title['subtitle_name_2'], fontsize=title['subtitle_fontsize_2'],
+                    fontdict={'color': title['subtitle_color_2']}, ha='right', fontfamily=self.fontfamily)
+
         return ax
 
     def __plot_circles(self, ax, radar_color, vertices, alpha=None, compare=False):
@@ -231,35 +236,38 @@ class Radar:
 
         Returns:
             axes.Axes: axis object.
-        """        
+        """
 
-        ## radius value for each circle
+        # radius value for each circle
         radius = [3.35, 6.7, 10.05, 13.4, 16.75]
 
-        ## linewidth, zorder for circle
-        lw_circle, zorder_circle =  20, 2
+        # linewidth, zorder for circle
+        lw_circle, zorder_circle = 20, 2
 
-        if compare:    ## for making comparison radar charts
-            ## plot a polygon
-            radar_1 = Polygon(vertices, fc=radar_color, zorder=zorder_circle+1, alpha=alpha)
+        if compare:
+            # for making comparison radar charts
+            # plot a polygon
+            radar_1 = Polygon(vertices, fc=radar_color, zorder=zorder_circle + 1, alpha=alpha)
             ax.add_patch(radar_1)
         else:
-            ## plot a polygon
-            radar_1 =  Polygon(vertices, fc=radar_color[0], zorder=zorder_circle-1)
+            # plot a polygon
+            radar_1 = Polygon(vertices, fc=radar_color[0], zorder=zorder_circle - 1)
             ax.add_patch(radar_1)
 
-        ## create concentric circles 
+        # create concentric circles
         for rad in radius:
-            ## create circle
-            circle_1 = plt.Circle(xy=(0, 0), radius=rad, fc='none', ec=self.patch_color, lw=lw_circle, zorder=zorder_circle)
+            # create circle
+            circle_1 = plt.Circle(xy=(0, 0), radius=rad, fc='none', ec=self.patch_color, lw=lw_circle,
+                                  zorder=zorder_circle)
             ax.add_patch(circle_1)
 
-            if compare == False:
-                ## create another circle to fill in second color
-                circle_2 = plt.Circle(xy=(0, 0), radius=rad, fc='none', ec=radar_color[1], lw=lw_circle, zorder=zorder_circle+1)
+            if not compare:
+                # create another circle to fill in second color
+                circle_2 = plt.Circle(xy=(0, 0), radius=rad, fc='none', ec=radar_color[1], lw=lw_circle,
+                                      zorder=zorder_circle + 1)
                 circle_2.set_clip_path(radar_1)
                 ax.add_patch(circle_2)
-        
+
         return ax
 
     def __add_labels(self, params, ax, return_list=False, radius=19, range_val=False, plot_range=True):
@@ -277,23 +285,23 @@ class Radar:
         Returns:
             axes.Axes: axis object.
             list: coordinate values (if return_list == True)
-        """        
-        
-        ## get coordinates and rotation values
+        """
+
+        # get coordinates and rotation values
         coord = utils.get_coordinates(n=len(params))
 
-        if return_list == True:
+        if return_list:
             x_y = []
 
         for i in range(len(params)):
-            ## fetch rotation value
+            # fetch rotation value
             rot = coord[i, 2]
 
-            ## the x and y coordinate for labels
-            x, y = (radius*np.sin(rot), radius*np.cos(rot))
+            # the x and y coordinate for labels
+            x, y = (radius * np.sin(rot), radius * np.cos(rot))
 
-            if return_list == True:
-                ## add x_y cordinates 
+            if return_list:
+                # add x_y coordinates
                 tup_temp = (x, y)
                 x_y.append(tup_temp)
 
@@ -305,18 +313,18 @@ class Radar:
             else:
                 p = params[i]
 
-            if range_val == True:
+            if range_val:
                 size = self.range_fontsize
                 color = self.range_color
             else:
                 size = self.label_fontsize
                 color = self.label_color
 
-            if plot_range == True:
-                ax.text(x, y, p, rotation=-np.rad2deg(rot), ha='center', va='center', 
+            if plot_range:
+                ax.text(x, y, p, rotation=-np.rad2deg(rot), ha='center', va='center',
                         fontsize=size, fontfamily=self.fontfamily, fontdict=dict(color=color))
-        
-        if return_list == True:
+
+        if return_list:
             return ax, x_y
         else:
             return ax
@@ -334,26 +342,25 @@ class Radar:
             axes.Axes: axis object.
             numpy.array: x and y coordinate for each numerical range values.
             numpy.array: range value for each parameter.
-        """        
+        """
 
-        ## radius value for every circle
+        # radius value for every circle
         radius = [2.5, 4.1, 5.8, 7.5, 9.2, 10.9, 12.6, 14.3, 15.9, 17.6]
 
-        ## x and y coordinate values for range numbers
+        # x and y coordinate values for range numbers
         x_y = []
 
-        ## range values for every ranges
+        # range values for every ranges
         range_values = np.array([])
 
         for rng in ranges:
             value = np.linspace(start=rng[0], stop=rng[1], num=10)
             range_values = np.append(range_values, value)
-        
-        range_values = range_values.reshape((len(ranges),10))
+
+        range_values = range_values.reshape((len(ranges), 10))
 
         for i in range(len(radius)):
-
-            ## parameter list
+            # parameter list
             params = range_values[:, i]
 
             ax, xy = self.__add_labels(
@@ -374,49 +381,51 @@ class Radar:
 
         Returns:
             numpy.array: coordinates for each vertex of the polygon.
-        """        
+        """
 
-        ## init an empty list
+        # init an empty list
         vertices = []
 
-        ## calculating coordinate values
+        # calculating coordinate values
         for i in range(len(range_values)):
-            
-            ## list of range value for each parameter
+
+            # list of range value for each parameter
             range_list = range_values[i, :]
             coord_list = xy[:, i]
 
             if range_list[0] > range_list[-1]:
-                ## if range values are in reversed order
+                # if range values are in reversed order
                 if values[i] >= range_list[0]:
-                    ## if value is greater
+                    # if value is greater
                     x_coord, y_coord = coord_list[0, 0], coord_list[0, 1]
 
                 elif values[i] <= range_list[-1]:
-                    ## if value is smaller
+                    # if value is smaller
                     x_coord, y_coord = coord_list[-1, 0], coord_list[-1, 1]
 
                 else:
-                    ## get indices between which the value is present
-                    x_coord, y_coord = utils.get_indices_between(range_list=range_list, coord_list=coord_list, value=values[i], reverse=True)
+                    # get indices between which the value is present
+                    x_coord, y_coord = utils.get_indices_between(range_list=range_list, coord_list=coord_list,
+                                                                 value=values[i], reverse=True)
 
             else:
                 if values[i] >= range_list[-1]:
-                    ## if value is greater
+                    # if value is greater
                     x_coord, y_coord = coord_list[-1, 0], coord_list[-1, 1]
 
                 elif values[i] <= range_list[0]:
-                    ## if value is smaller
+                    # if value is smaller
                     x_coord, y_coord = coord_list[0, 0], coord_list[0, 1]
 
                 else:
-                    ## get indices between which the value is present
-                    x_coord, y_coord = utils.get_indices_between(range_list=range_list, coord_list=coord_list, value=values[i], reverse=False)
+                    # get indices between which the value is present
+                    x_coord, y_coord = utils.get_indices_between(range_list=range_list, coord_list=coord_list,
+                                                                 value=values[i], reverse=False)
 
-            ## add x-y coordinate in vertices as a list
+            # add x-y coordinate in vertices as a list
             vertices.append([x_coord, y_coord])
-        
-        return vertices       
+
+        return vertices
 
     def __repr__(self):
         return f"""{self.__class__.__name__}(
@@ -429,5 +438,6 @@ class Radar:
             range_color={self.range_color}
         )"""
 
-    ## __str__ is the same as __repr__
+    # __str__ is the same as __repr__
     __str__ = __repr__
+
