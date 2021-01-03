@@ -8,7 +8,7 @@ asked whether it was possible to plot a Gaussian smoothed heatmaps, which are av
 Here is an example demonstrating this.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 import os
 import pandas as pd
@@ -29,7 +29,7 @@ df = df.loc[mask_chelsea_pressure, ['x', 'y']]
 # Plot the heatmaps
 
 # setup pitch
-pitch = Pitch(pitch_type='statsbomb', figsize=(16, 9), line_zorder=2, line_color='white', orientation='horizontal')
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 9), line_zorder=2, line_color='white')
 # draw
 fig, ax = pitch.draw()
 bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(25, 25))
@@ -37,3 +37,4 @@ bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], 1)
 pcm = pitch.heatmap(bin_statistic, ax=ax, cmap='hot', edgecolors='#22312b')
 cbar = fig.colorbar(pcm, ax=ax)
 title = fig.suptitle('Location of pressure events - 3 home games for Chelsea FC Women', x=0.4, y=0.98, fontsize=23)
+

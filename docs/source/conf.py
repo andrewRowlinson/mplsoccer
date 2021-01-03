@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'mplsoccer'
-copyright = '2020, Andrew Rowlinson'
-author = 'Andrew Rowlinson'
+copyright = '2021, Anmol Durgapal & Andrew Rowlinson'
+author = 'Anmol Durgapal & Andrew Rowlinson'
 
 # The full version, including alpha/beta/rc tags
 VERSION = mplsoccer.__version__
@@ -71,7 +71,7 @@ sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
     'matplotlib_animations': True,
-    'subsection_order': ExplicitOrder(['../../examples/plots',
+    'subsection_order': ExplicitOrder(['../../examples/pitch_plots',
                                        '../../examples/statsbomb',
                                        '../../examples/pitch_setup', ])}
 

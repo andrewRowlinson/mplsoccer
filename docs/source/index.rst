@@ -1,7 +1,7 @@
 mplsoccer
 =========
 
-`mplsoccer` is a Python library for drawing soccer/football pitches in Matplotlib and loading StatsBomb open-data.
+`mplsoccer` is a Python library for drawing soccer/football pitches and radar charts in Matplotlib and loading StatsBomb open-data.
 
 -----------
 Quick start
@@ -39,9 +39,9 @@ Advantages of mplsoccer
 
 mplsoccer:
 
-1) draws 7 different pitch types by changing a single argument, which is useful as there isn't a standardised data format
+1) draws 9 different pitch types by changing a single argument, which is useful as there isn't a standardised data format
 2) extends matplotlib to plot heatmaps, (comet) lines, footballs and rotated markers
-3) flips the data coordinates when in a vertical orientation so you don’t need to remember to flip them
+3) flips the data coordinates when using VerticalPitch plotting methods so you don’t need to remember to flip them
 4) creates tidy dataframes for StatsBomb data, which is useful as most of the alternatives produce nested dataframes
  
 -------
@@ -68,7 +68,7 @@ Inspiration
 
 mplsoccer was inspired by other people's work:
 
-- `Peter McKeever <http://petermckeever.com/2019/01/plotting-pitches-in-python/>`_ inspired the API design
+- `Peter McKeever <http://petermckeever.com/2020/10/how-to-draw-a-football-pitch/>`_ inspired the API design
 - `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ is a library for plotting pitches in R
 - `lastrow <https://twitter.com/lastrowview>`_ often tweets animations and the accompanying code
 - `fcrstats <http://fcrstats.com/>`_ has some great tutorials for using football data

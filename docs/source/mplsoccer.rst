@@ -7,8 +7,12 @@ Submodules
 .. toctree::
 
    mplsoccer.pitch
-   mplsoccer.scatterutils
+   mplsoccer.radar_chart
    mplsoccer.statsbomb
+   mplsoccer.utils
+   mplsoccer.quiver
+   mplsoccer.linecollection
+   
 
 Module contents
 ---------------

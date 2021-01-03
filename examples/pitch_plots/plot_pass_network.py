@@ -7,7 +7,7 @@ This example shows how to plot passes between players in a set formation.
 """
 
 import pandas as pd
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from matplotlib.colors import to_rgba
 import numpy as np
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
@@ -120,7 +120,7 @@ color[:, 3] = c_transparency
 ##############################################################################
 # Plotting
 
-pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
+pitch = Pitch(pitch_type='statsbomb',
               pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
               constrained_layout=True, tight_layout=False)
 fig, ax = pitch.draw()

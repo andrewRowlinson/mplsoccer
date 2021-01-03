@@ -6,7 +6,7 @@ Basics
 First we import the Pitch class and set the matplotlib style sheet.
 """
 import matplotlib.pyplot as plt
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch, VerticalPitch
 plt.style.use('ggplot')
 
 ##############################################################################
@@ -30,12 +30,14 @@ pitch.draw(ax=ax[1])
 ##############################################################################
 # Supported data providers
 # ------------------------
-# mplsoccer supports 7 pitch types by specifying the ``pitch_type`` argument:
-# 'statsbomb', 'opta', 'tracab', 'stats', 'wyscout', 'uefa', and 'metricasports'. 
-# If you are using tracking data ('metricasports' or 'tracab'), you also need to specify the 
+# mplsoccer supports 9 pitch types by specifying the ``pitch_type`` argument:
+# 'statsbomb', 'opta', 'tracab', 'wyscout', 'uefa', 'metricasports', 'custom',
+# 'skillcorner' and 'secondspectrum'. 
+# If you are using tracking data or the custom pitch ('metricasports', 'tracab',
+# 'skillcorner', 'secondspectrum' or 'custom'), you also need to specify the
 # ``pitch_length`` and ``pitch_width``, which are typically 105 and 68 respectively.
 
-pitch = Pitch(pitch_type='uefa')  # example plotting a statsperform pitch
+pitch = Pitch(pitch_type='opta')  # example plotting an Opta/ Stats Perform pitch
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -47,11 +49,11 @@ fig, ax = pitch.draw()
 ##############################################################################
 # Adjusting the plot layout
 # -------------------------
-# mplsoccer also plots on grids by specifying ``layout``: a tuple of (rows, columns).
+# mplsoccer also plots on grids by specifying nrows and ncols.
 # The default is to use
 # tight_layout. See: https://matplotlib.org/3.2.1/tutorials/intermediate/tight_layout_guide.html.
 
-pitch = Pitch(layout=(2, 3))
+pitch = Pitch(nrows=2, ncols=3)
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -59,44 +61,46 @@ fig, ax = pitch.draw()
 # by setting ``constrained_layout=True`` and ``tight_layout=False``, which may look better.
 # See: https://matplotlib.org/3.2.1/tutorials/intermediate/constrainedlayout_guide.html.
 
-pitch = Pitch(layout=(2, 3), tight_layout=False, constrained_layout=True)
+pitch = Pitch(nrows=2, ncols=3, tight_layout=False, constrained_layout=True)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # Pitch orientation
 # -----------------
-# There are four basic pitch orientations controlled by ``orientation`` and ``view`` arguments.
+# There are four basic pitch orientations.
+# To get vertical pitches use the VerticalPitch class.
+# To get half pitches use the half=True argument.
 # 
 # Horizontal full
 
-pitch = Pitch(orientation='horizontal', view='full')
+pitch = Pitch(half=False)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # Vertical full
 
-pitch = Pitch(orientation='vertical', view='full')
+pitch = VerticalPitch(half=False)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # Horizontal half
-pitch = Pitch(orientation='horizontal', view='half')
+pitch = Pitch(half=True)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # Vertical half
-pitch = Pitch(orientation='vertical', view='half')
+pitch = VerticalPitch(half=True)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # You can also adjust the pitch orientations with the ``pad_left``, ``pad_right``,
 # ``pad_bottom`` and ``pad_top`` arguments to make arbitrary pitch shapes.
 
-pitch = Pitch(orientation='vertical', view='half',
-              pad_left=-10,  # bring the left axis in 10 data units (reduce the size)
-              pad_right=-10,  # bring the right axis in 10 data units (reduce the size)
-              pad_top=10,  # extend the top axis 10 data units
-              pad_bottom=20)  # extend the bottom axis 20 data units
+pitch = VerticalPitch(half=True,
+                      pad_left=-10,  # bring the left axis in 10 data units (reduce the size)
+                      pad_right=-10,  # bring the right axis in 10 data units (reduce the size)
+                      pad_top=10,  # extend the top axis 10 data units
+                      pad_bottom=20)  # extend the bottom axis 20 data units
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -139,9 +143,9 @@ fig, ax = pitch.draw()
 
 ##############################################################################
 # If you need to lift the pitch markings above other elements of the chart.
-# You can do this via ``line_zorder`` and ``background_zorder``.
+# You can do this via ``line_zorder``, ``stripe_zorder`, ``positional_zorder`, and ``shade_zorder`.
 
-pitch = Pitch(line_zorder=2, background_zorder=1)  # e.g. useful if you want to plot pitch lines over heatmaps
+pitch = Pitch(line_zorder=2)  # e.g. useful if you want to plot pitch lines over heatmaps
 fig, ax = pitch.draw()
 
 ##############################################################################

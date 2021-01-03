@@ -6,7 +6,7 @@ Plots a Voronoi diagram
 This example shows how to plot a Voronoi diagram for a shot freeze frame.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import VerticalPitch
 import matplotlib.pyplot as plt
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 import pandas as pd
@@ -38,7 +38,7 @@ teams = np.concatenate([[True], df_freeze_frame.player_teammate.values])
 # Plotting
 
 # draw plot
-pitch = Pitch(view='half', figsize=(8, 6.2), orientation='vertical')
+pitch = VerticalPitch(half=True, figsize=(8, 6.2))
 fig, ax = pitch.draw()
 
 # Plot Voronoi

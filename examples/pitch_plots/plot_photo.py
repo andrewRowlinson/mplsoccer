@@ -6,7 +6,7 @@ Photos
 This example shows how to plot photos in your charts.
 """
 
-from mplsoccer.pitch import Pitch, add_image
+from mplsoccer import Pitch, add_image
 from PIL import Image
 import numpy as np
 from urllib.request import urlopen
@@ -19,7 +19,7 @@ plt.style.use('dark_background')
 
 # load the image
 image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-image = Image.open(urlopen(image_url))
+image = urlopen(image_url)
 
 ##############################################################################
 # Plotting an image over a pitch
@@ -68,10 +68,12 @@ pitch.draw(ax=ax1)
 
 # we are also going to add the Messi image to the top of the figure as a new axis
 # but this time the width will be 8% of the figure
+image = urlopen(image_url)
 ax2 = add_image(image, fig, left=0.054, bottom=0.84, width=0.08, interpolation='hanning')
 
 # and the Messi image to the bottom right of the figure on a new axis
 # but this time the width will be 20% of the figure
+image = urlopen(image_url)
 ax3 = add_image(image, fig, left=0.75, bottom=0.054, width=0.2, interpolation='hanning')
 
 # add a title

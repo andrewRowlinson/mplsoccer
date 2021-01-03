@@ -21,7 +21,7 @@ Here are the [docs](https://mplsoccer.readthedocs.io/) for mplsoccer.
 Plot a StatsBomb pitch
 
 ```python
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
 fig, ax = pitch.draw()
 ```

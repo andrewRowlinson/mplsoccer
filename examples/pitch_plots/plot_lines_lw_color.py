@@ -7,7 +7,7 @@ This example shows how to plot lines with different colors and linewidths.
 This would be useful for pass maps.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 import numpy as np
 from matplotlib.cm import get_cmap
 import matplotlib.pyplot as plt

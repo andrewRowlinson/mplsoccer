@@ -6,7 +6,7 @@ Pass flow plot
 This example shows how to plot the passes from a team as a pass flow plot.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
 from scipy.stats import circmean
@@ -34,7 +34,7 @@ mask_complete = df_pass.outcome_name.isnull()
 
 ##############################################################################
 # Setup the pitch and number of bins
-pitch = Pitch(pitch_type='statsbomb', orientation='horizontal', figsize=(16, 11), line_zorder=2,
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 11), line_zorder=2,
               line_color='#c7d5cc', constrained_layout=True, tight_layout=False, pitch_color='#22312b')
 bins = (6, 4)
 

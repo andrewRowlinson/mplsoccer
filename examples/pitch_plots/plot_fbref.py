@@ -5,7 +5,7 @@ FBRef Pressure
 
 This example shows how to scrape pressure events from FBRef.com and plot them as a heatmap.
 """
-from mplsoccer.pitch import Pitch, add_image
+from mplsoccer import Pitch, add_image
 import pandas as pd
 import numpy as np
 import matplotlib.patheffects as path_effects
@@ -39,17 +39,13 @@ df.sort_values(['Att 3rd', 'Def 3rd'], ascending=[True, False], inplace=True)
 # Plot the percentages
 
 # setup a mplsoccer pitch
-pitch = Pitch(line_zorder=2, line_color='black', figsize=(16, 9), layout=(4, 5),
+pitch = Pitch(line_zorder=2, line_color='black', figsize=(16, 9), ncols=5, nrows=4,
               tight_layout=False, constrained_layout=True)
 
 # mplsoccer calculates the binned statistics usually from raw locations, such as pressure events
 # for this example we will create a binned statistic dividing the pitch into thirds for one point (0, 0)
 # we will fill this in a loop later with each team's statistics from the dataframe
 bin_statistic = pitch.bin_statistic([0], [0], statistic='count', bins=(3, 1))
-
-# load the StatsBomb logo
-sb_logo = Image.open(urlopen(('https://github.com/statsbomb/open-data/blob/fb54bd7fe20dbd5299fafc64f1f6f0d919a5e40d/'
-                              'stats-bomb-logo.png?raw=true')))
 
 # Plot
 fig, axes = pitch.draw()
@@ -76,6 +72,8 @@ cbar.ax.tick_params(labelsize=20)
 if len(teams) == 18:
     for ax in axes[-1, 3:]:
         ax.remove()
+# load the StatsBomb logo and add it to the plot
+sb_logo = urlopen(('https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'))
 add_image(sb_logo, fig, left=0.9, bottom=0.975, width=0.1)
 title = fig.suptitle('Pressure events %, Bundesliga, 2019/20', fontsize=20)
 
@@ -86,7 +84,7 @@ title = fig.suptitle('Pressure events %, Bundesliga, 2019/20', fontsize=20)
 df[pressure_cols] = df[pressure_cols].values - df_total.values
 
 # plot the percentage point difference
-pitch = Pitch(line_zorder=2, line_color='black', figsize=(16, 9), layout=(4, 5),
+pitch = Pitch(line_zorder=2, line_color='black', figsize=(16, 9), nrows=4, ncols=5,
               tight_layout=False, constrained_layout=True)
 fig, axes = pitch.draw()
 axes = axes.ravel()
@@ -108,6 +106,9 @@ cbar.ax.tick_params(labelsize=20)
 if len(teams) == 18:
     for ax in axes[-1, 3:]:
         ax.remove()
+# load the StatsBomb logo and add it to the plot
+sb_logo = urlopen(('https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'))
 add_image(sb_logo, fig, left=0.9, bottom=0.975, width=0.1)
 title = fig.suptitle('Pressure events, percentage point difference from the Bundesliga average 2019/20',
                      fontsize=20)
+

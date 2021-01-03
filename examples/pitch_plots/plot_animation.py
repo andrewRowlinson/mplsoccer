@@ -6,7 +6,7 @@ Animation
 This example shows how to animate tracking data from metricasports (https://github.com/metrica-sports/sample-data).
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
@@ -128,6 +128,6 @@ plt.show()
 # note that its hard to get the ffmpeg requirements right.
 # I installed from conda-forge: see the environment.yml file in the docs folder
 # how to save animation - commented out for example
-# anim.save('example.mp4', dpi=300, fps=25,
+# anim.save('example.mp4', dpi=150, fps=25,
 #          extra_args=['-vcodec', 'libx264'],
 #          savefig_kwargs={'pad_inches':0, 'facecolor':'#457E29'})

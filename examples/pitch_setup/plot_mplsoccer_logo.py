@@ -4,7 +4,7 @@ mplsoccer logo
 ==============
 """
 import matplotlib.pyplot as plt
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from matplotlib import rcParams
 plt.style.use('ggplot')
 plt.xkcd()

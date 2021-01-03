@@ -6,7 +6,7 @@ Plot scatter
 This example shows how to plot a scatter chart.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 

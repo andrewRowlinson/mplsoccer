@@ -6,7 +6,7 @@ Pass plot using lines
 This example shows how to plot all passes from a team in a match as lines.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
 
@@ -37,7 +37,7 @@ df_pass.head()
 # Plotting
 
 # Setup the pitch
-pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
+pitch = Pitch(pitch_type='statsbomb',
               pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
               constrained_layout=False, tight_layout=True)
 fig, ax = pitch.draw()

@@ -6,7 +6,7 @@ Pass plot using lines and cmap
 This example shows how to plot all passes leading to shots from a team using a colormap (cmap).
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
 
@@ -40,8 +40,8 @@ df_pass
 # Plotting
 
 # Setup the pitch
-pitch = Pitch(pitch_type='statsbomb', orientation='vertical', pitch_color='#22312b', line_color='#c7d5cc',
-              figsize=(16, 11), view='half', pad_top=2, tight_layout=True)
+pitch = VerticalPitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc',
+                      figsize=(16, 11), half=True, pad_top=2, tight_layout=True)
 fig, ax = pitch.draw()
 
 # Plot the completed passes

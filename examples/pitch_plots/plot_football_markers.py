@@ -6,7 +6,7 @@ Plot football markers
 This example shows how to plot football markers.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 

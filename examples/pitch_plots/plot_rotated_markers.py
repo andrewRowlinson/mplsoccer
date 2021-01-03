@@ -11,7 +11,7 @@ Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of p
 In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 import matplotlib.pyplot as plt
 from mplsoccer.scatterutils import arrowhead_marker
 import numpy as np

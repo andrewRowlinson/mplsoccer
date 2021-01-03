@@ -7,7 +7,7 @@ This example shows how to plot the location of events occurring in a match
 using kernel density estimation (KDE).
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
 ##############################################################################
@@ -55,7 +55,7 @@ fig.tight_layout()
 # Plotting both Messi's first game as a False-9 and the game directly before
 
 # Setup the pitches
-pitch = Pitch(pitch_type='statsbomb', figsize=(16, 7), layout=(1, 2),
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 7), ncols=2, nrows=1,
               pitch_color='grass', stripe=True, constrained_layout=False)
 fig, ax = pitch.draw()
 
@@ -78,4 +78,3 @@ pitch.annotate('fewer events', (80, 17), (80, 5), ax=ax[0], color='white', ha='c
                fontsize=20, arrowprops=dict(facecolor='white', edgecolor='None'))
 
 fig.tight_layout()
-

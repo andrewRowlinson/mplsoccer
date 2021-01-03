@@ -7,7 +7,7 @@ This example shows how to plot the location of events occurring in a match
 using hexbins.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 import os
 
@@ -22,10 +22,10 @@ df_before_false9 = df_before_false9.loc[df_before_false9.player_id == 5503, ['x'
 
 ##############################################################################
 # plotting
-pitch = Pitch(pitch_type='statsbomb', figsize=(16, 9), layout=(1, 2), pitch_color='#22312b',
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 9), nrows=1, ncols=2, pitch_color='#22312b',
               stripe=False, line_zorder=2)
 fig, ax = pitch.draw()
-pitch.hexbin(df_before_false9.x, df_before_false9.y, gridsize=10, ax=ax[0], cmap='Blues')
-pitch.hexbin(df_false9.x, df_false9.y, gridsize=10, ax=ax[1], cmap='Blues')
+pitch.hexbin(df_before_false9.x, df_before_false9.y, ax=ax[0], cmap='Blues')
+pitch.hexbin(df_false9.x, df_false9.y, ax=ax[1], cmap='Blues')
 title1 = ax[0].set_title('Messi in the game directly before \n playing in the false 9 role', fontsize=25, pad=20)
 title2 = ax[1].set_title('The first Game Messi \nplayed in the false 9 role', fontsize=25, pad=20)

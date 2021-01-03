@@ -6,7 +6,7 @@ Pass plot using arrrows
 This example shows how to plot all passes from a team in a match as arrows.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
 
@@ -37,8 +37,7 @@ df_pass.head()
 # Plotting
 
 # Setup the pitch
-pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
-              pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
+pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
               constrained_layout=True, tight_layout=False)
 fig, ax = pitch.draw()
 

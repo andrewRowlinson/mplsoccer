@@ -7,7 +7,7 @@ from mplsoccer.utils import validate_ax
 
 
 def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs):
-    """ Utility wrapper around matplotlib.axes.Axes.quiver,
+    """ Utility wrapper around matplotlib.axes.Axes.quiver.
     Quiver uses locations and direction vectors usually. Here these are instead calculated automatically
     from the start and endpoints of the arrow.
     The function also automatically flips the x and y coordinates if the pitch is vertical.

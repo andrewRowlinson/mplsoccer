@@ -6,7 +6,7 @@ Shot freeze frame
 This example shows how to plot a shot freeze frame.
 """
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, read_lineup, EVENT_SLUG, LINEUP_SLUG
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
@@ -51,7 +51,7 @@ df_team2_other = df_freeze_frame[(df_freeze_frame.team_name == team2) &
 
 # Setup the pitch
 figsize = (16, 8)
-pitch = Pitch(figsize=figsize, orientation='vertical', view='half', tight_layout=False, goal_type='box', pad_bottom=-20)
+pitch = VerticalPitch(figsize=figsize, half=True, tight_layout=False, goal_type='box', pad_bottom=-20)
 fig, ax = pitch.draw()
 
 # Plot the players
