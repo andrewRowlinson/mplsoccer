@@ -104,6 +104,13 @@ class BasePitch(ABC):
         Whether to use Matplotlib's tight layout.
     constrained_layout : bool, default False
         Whether to use Matplotlib's constrained layout.
+    layout : depreciated, default None
+        Layout is depreciated. Please use nrows and ncols arguments instead.
+    view : depreciated, default None
+        View is depreciated. Please use half=True or half=False arguements instead.
+    orientation : depreciated, default None
+        Orientation is depreciated. Please use the VerticalPitch class instead:
+        from mplsoccer import VerticalPitch.
     """
 
     def __init__(self, figsize=None, nrows=1, ncols=1, pitch_type='statsbomb', half=False,
@@ -114,7 +121,8 @@ class BasePitch(ABC):
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', label=False, tick=False, axis=False,
-                 tight_layout=True, constrained_layout=False, spot_scale=0.002):
+                 tight_layout=True, constrained_layout=False, spot_scale=0.002,
+                 layout=None, view=None, orientation=None):
 
         # validate the pitch_type and for pitches where the size varies check they have a pitch_length/width
         if pitch_type not in dimensions.valid:
@@ -125,6 +133,19 @@ class BasePitch(ABC):
                 ((pitch_length is not None) or (pitch_width is not None))):
             warnings.warn(
                 f"Pitch length and widths are only used for {dimensions.size_varies} pitches and will be ignored")
+            
+        if layout is not None:
+            warn_msg = "layout is depreciated. Please use nrows and ncols arguments instead."
+            warnings.warn(warn_msg)
+            
+        if view is not None:
+            warn_msg = "view is depreciated. Please use half=True or half=False arguements instead."
+            warnings.warn(warn_msg)
+            
+        if orientation is not None:
+            warn_msg = ("orientation is depreciated. Please use the VerticalPitch class instead: "
+                        "from mplsoccer import VerticalPitch.")
+            warnings.warn(warn_msg)          
 
         self.axes = None
         self.fig = None
