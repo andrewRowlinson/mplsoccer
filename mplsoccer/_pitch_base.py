@@ -753,7 +753,7 @@ class BasePitch(ABC):
         reflected_data_y = np.r_[y, y, y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]      
         return reflected_data_x, reflected_data_y    
     
-    def kdeplot(self, x, y, ax=None, **kwargs):
+    def kdeplot(self, x, y, ax=None, reflect=True, **kwargs):
         """ Routine to perform kernel density estimation using seaborn kdeplot and plot the result on the given ax.
         The method used here includes a simple reflection method for boundary correction, so that probability
         mass is not assigned to areas outside the pitch.
@@ -765,6 +765,8 @@ class BasePitch(ABC):
             Commonly, these parameters are 1D arrays.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+        reflect : bool, default True
+            Whether to reflect the coordinates for boundary correction
         **kwargs : All other keyword arguments are passed on to seaborn.kdeplot.
             
         Returns
@@ -777,8 +779,9 @@ class BasePitch(ABC):
         y = np.ravel(y)
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
-
-        x, y = self._reflect_2d(x, y)
+            
+        if reflect:
+            x, y = self._reflect_2d(x, y)
         x, y = self._reverse_if_vertical(x, y)
 
         contour_plot = sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
