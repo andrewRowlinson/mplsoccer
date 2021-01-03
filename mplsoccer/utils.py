@@ -211,12 +211,12 @@ def set_size(w, h, ax=None):
         ax (axes.Axes): axes object
     """
     # compute width and height
-    l = ax.figure.subplotpars.left
-    r = ax.figure.subplotpars.right
-    t = ax.figure.subplotpars.top
-    b = ax.figure.subplotpars.bottom
-    figw = float(w) / (r - l)
-    figh = float(h) / (t - b)
+    left = ax.figure.subplotpars.left
+    right = ax.figure.subplotpars.right
+    top = ax.figure.subplotpars.top
+    bottom = ax.figure.subplotpars.bottom
+    figw = float(w) / (right - left)
+    figh = float(h) / (top - bottom)
 
     # set size
     ax.figure.set_size_inches(figw, figh)

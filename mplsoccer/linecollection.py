@@ -21,6 +21,7 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     This is a fast way to plot multiple lines without loops.
     Also enables lines that increase in width or opacity by splitting the line into n_segments of increasing
     width or opacity as the line progresses.
+
     Parameters
     ----------
     xstart, ystart, xend, yend: array-like or scalar.

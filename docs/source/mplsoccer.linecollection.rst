@@ -1,5 +1,5 @@
 mplsoccer.linecollection module
-==========================
+===============================
 
 .. automodule:: mplsoccer.linecollection
    :members:

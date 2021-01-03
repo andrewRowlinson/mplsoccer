@@ -15,6 +15,7 @@ from . import utils
 
 __all__ = ["Radar"]
 
+
 class Radar:
     """
     class contains methods to make radar-chart.
@@ -292,7 +293,6 @@ class Radar:
 
         if return_list:
             x_y = []
-
         for i in range(len(params)):
             # fetch rotation value
             rot = coord[i, 2]
@@ -370,7 +370,8 @@ class Radar:
 
         return ax, np.array(x_y), range_values
 
-    def __get_vertices(self, values, xy, range_values):
+    @staticmethod
+    def __get_vertices(values, xy, range_values):
         """
         Function to get vertex coordinates(x and y) for the required polygon.
 

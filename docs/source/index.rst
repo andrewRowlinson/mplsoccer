@@ -87,6 +87,7 @@ mplsoccer was inspired by other people's work:
    
    installation
    gallery/pitch_setup/plot_pitches
+   gallery/radar/plot_radar
    gallery/statsbomb/plot_statsbomb_data
    gallery/index
    api

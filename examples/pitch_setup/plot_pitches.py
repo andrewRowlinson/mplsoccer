@@ -143,7 +143,7 @@ fig, ax = pitch.draw()
 
 ##############################################################################
 # If you need to lift the pitch markings above other elements of the chart.
-# You can do this via ``line_zorder``, ``stripe_zorder`, ``positional_zorder`, and ``shade_zorder`.
+# You can do this via ``line_zorder``, ``stripe_zorder``, ``positional_zorder``, and ``shade_zorder``.
 
 pitch = Pitch(line_zorder=2)  # e.g. useful if you want to plot pitch lines over heatmaps
 fig, ax = pitch.draw()

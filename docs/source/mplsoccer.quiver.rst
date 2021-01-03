@@ -1,5 +1,5 @@
 mplsoccer.quiver module
-==========================
+=======================
 
 .. automodule:: mplsoccer.quiver
    :members:

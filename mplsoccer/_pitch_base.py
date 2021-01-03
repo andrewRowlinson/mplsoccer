@@ -828,15 +828,7 @@ class BasePitch(ABC):
             
         Returns
         -------
-        polycollection : `~matplotlib.collections.PolyCollection`
-            A `PolyCollection` defining the hexagonal bins.
-            - `PolyCollection.get_offset` contains a Mx2 array containing
-              the x, y positions of the M hexagon centers.
-            - `PolyCollection.get_array` contains the values of the M
-              hexagons.
-            If *marginals* is *True*, horizontal
-            bar and vertical bar (both PolyCollections) will be attached
-            to the return collection as attributes *hbar* and *vbar*.
+        polycollection : matplotlib.collections.PolyCollection
         """
         validate_ax(ax)
         x = np.ravel(x)
@@ -1055,15 +1047,14 @@ class BasePitch(ABC):
     def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
         """ Calculates binned statistics for the Juego de posición (position game) concept.
         It uses scipy.stats.binned_statistic_2d.
+
         Parameters
         ----------
         x, y, values : array-like or scalar.
             Commonly, these parameters are 1D arrays.
             If the statistic is 'count' then values are ignored.
-        
         positional : str
             One of 'full', 'horizontal' or 'vertical' for the respective heatmaps.        
-        
         statistic : string or callable, optional
             The statistic to compute (default is 'count').
             The following statistics are available: 'count' (default),
@@ -1071,7 +1062,7 @@ class BasePitch(ABC):
             See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html.
             
         Returns
-        ----------
+        -------
         bin_statistic : A list of dictionaries.
             The dictionary keys are 'statistic' (the calculated statistic),
             'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).

@@ -14,6 +14,7 @@ def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs)
         
     Plot a 2D field of arrows.
     See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.quiver.html
+    
     Parameters
     ----------
     xstart, ystart, xend, yend: array-like or scalar.
