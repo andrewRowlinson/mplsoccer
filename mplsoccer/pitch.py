@@ -37,12 +37,6 @@ class Pitch(BasePitch):
         # kdeplot
         self.kde_clip = ((self.left, self.right), (self.bottom, self.top))
         
-        # jointplot
-        # self.jointplot_width = self.figsize[0]
-        # self.jointplot_height = (self.jointplot_width / (abs(self.visible_pitch[1] - self.visible_pitch[0]) /
-        #                                                abs(self.visible_pitch[3] - self.visible_pitch[2]))
-        #                         * self.aspect)
-        
         # lines
         self.reverse_cmap = self.invert_y
         
@@ -156,11 +150,6 @@ class VerticalPitch(BasePitch):
         
         # kdeplot
         self.kde_clip = ((self.top, self.bottom), (self.left, self.right))
-        
-        # jointplot
-        # self.jointplot_width = self.figsize[0]
-        # self.jointplot_height = self.jointplot_width * (abs(self.visible_pitch[3] - self.visible_pitch[2]) /
-        #                                                abs(self.visible_pitch[3] - self.visible_pitch[2]))
         
         # lines
         self.reverse_cmap = False

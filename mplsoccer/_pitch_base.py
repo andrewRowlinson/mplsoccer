@@ -286,8 +286,7 @@ class BasePitch(ABC):
         
         # set the extent (takes into account padding) [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
         self._set_extent()
-        self.ax_aspect = abs(self.extent[0] - self.extent[1]) / abs(self.extent[2] - self.extent[3]) * self.aspect
-        
+        self.ax_aspect = abs(self.extent[1] - self.extent[0]) / (abs(self.extent[3] - self.extent[2]) * self.aspect)
         # data checks
         self._validation_checks()
         self._validate_pad()
@@ -1607,72 +1606,90 @@ class BasePitch(ABC):
         
         return flow
     
-
-#    def jointplot(self, x, y, **kwargs):
-#        """ Utility wrapper around seaborn.jointplot
-#        which automatically flips the x and y coordinates if the pitch is vertical, sets the height from the figsize,
-#        and clips kernel density plots (kind = 'kde') to the pitch boundaries.
-#
-#        Draw a plot of two variables with bivariate and univariate graphs.
-#        See: https://seaborn.pydata.org/generated/seaborn.jointplot.html
-#
-#        Parameters
-#        ----------
-#        x, y : array-like or scalar.
-#            Commonly, these parameters are 1D arrays.
-#
-#        kind : str default 'kde'
-#            Kind of plot to draw. One of 'scatter', 'kde', 'hist', 'hex', 'reg', or resid'
-#
-#        **kwargs : All other keyword arguments are passed on to seaborn.jointplot.
-#
-#        Returns
-#        -------
-#        grid : seaborn.axisgrid.JointGrid
-#        """
-#        x = np.ravel(x)
-#        y = np.ravel(y)
-#        if x.size != y.size:
-#            raise ValueError("x and y must be the same size")
-#        x, y = self._reverse_if_vertical(x, y)  
-#        clip = kwargs.pop('clip', self.kde_clip)
-#        kind = kwargs.pop('kind', 'kde')
-#        extent = kwargs.pop('extent', self.hex_extent)
-    
-#        if kind == 'kde':
-#            joint_plot = sns.jointplot(x=x, y=y, kind=kind, clip=clip,
-#                                       xlim=self.visible_pitch[:2],
-#                                       ylim=self.visible_pitch[2:],
-#                                       **kwargs)
-#        elif kind == 'hex':
-#            dropna = kwargs.pop('dropna', True)
-#            gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
-#            joint_plot = sns.jointplot(x=x, y=y,
-#                                       kind=kind, 
-#                                       extent=extent,
-#                                       gridsize=gridsize,
-#                                       dropna=True, 
-#                                       xlim=self.visible_pitch[:2],
-#                                       ylim=self.visible_pitch[2:],
-#                                       **kwargs)
-#        else:
-#            joint_plot = sns.jointplot(x=x, y=y, kind=kind, **kwargs)
+    def jointgrid(self, pitch_height=0.5, marginal_height=0.1, space_height=0, left=0.1, bottom=0.1):
+        """ Create a grid with a pitch at the center and axes on the top and right handside of the pitch.   
         
-#        joint_plot_ax = joint_plot.ax_joint
-#        self.draw(ax=joint_plot_ax)
-#        joint_plot.fig.set_figwidth(self.jointplot_width)
-#        joint_plot.fig.set_figheight(self.jointplot_height)
+        Parameters
+        ----------
+        pitch_height : float, default 0.5
+            The height of the pitch in fractions of the figure height.
+            The default is 50% of the figure.
+        marginal_height : float, default 0.1
+            The height of the marginal axes (either side of the pitch) in fractions of the figure height.
+            The default is 10% of the figure.
+        space_height : float, default 0
+            The space between the pitch and the other axes in fractions of the figure height.
+            The default is no space (note it will still look like there is space if the pitch has padding).
+        left : float, default 0.1
+            The location of the left hand side of the pitch in fractions of the figure width.
+            The default means that the pitch is located 10% in from the left of the figure.
+        bottom : float, default 0.1
+            The location of the bottom side of the pitch in fractions of the figure height.
+            The default means that the pitch is located 10% in from the bottom of the figure.
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+        ax : a 1d numpy array (length 3) of matplotlib.axes.Axes
+            format = array([pitch, marginal axis to the top, marginal axis to the right])
+        """
+        if bottom + pitch_height + space_height + marginal_height > 1.:
+            error_msg = ('The jointplot axes extends past the figure height. '
+                         'Reduce one of the pitch_height, space_height, marginal_height, '
+                         'or bottom so the total is ≤ 1')
+            raise ValueError(error_msg)
                 
-#        if kind == 'hex':
-#            hexbin = joint_plot_ax.__dict__['collections'][0]
-#            rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
-#                                     self.visible_pitch[1] - self.visible_pitch[0],
-#                                     self.visible_pitch[3] - self.visible_pitch[2], 
-#                                     fill=False)
-#            joint_plot_ax.add_patch(rect)
-#            hexbin.set_clip_path(rect)
-#        return joint_plot
-
-# TO DO
-# jointplot
-# peter mckeever arrow lines?
+        fig_aspect = self.figsize[0] / self.figsize[1]
+        pitch_width = pitch_height * self.ax_aspect / fig_aspect
+        marginal_width = marginal_height / fig_aspect
+        space_width = space_height / fig_aspect
+        if left + pitch_width + space_width + marginal_width > 1.:
+            error_msg = ('The jointplot axes extends past the figure width. '
+                         'Reduce one of the pitch_height, space_height, marginal_height, '
+                         'or left.')
+            raise ValueError(error_msg)
+        
+        left_pad = np.abs(self.visible_pitch - self.extent)[0] / np.abs(self.extent[1] - self.extent[0])
+        right_pad = np.abs(self.visible_pitch - self.extent)[1] / np.abs(self.extent[1] - self.extent[0])
+        bottom_pad = np.abs(self.visible_pitch - self.extent)[2] / np.abs(self.extent[3] - self.extent[2])
+        top_pad = np.abs(self.visible_pitch - self.extent)[3] / np.abs(self.extent[3] - self.extent[2])
+        
+        fig = plt.figure(figsize=self.figsize)
+        ax_pitch = fig.add_axes((left, bottom, pitch_width, pitch_height))
+        self.draw(ax=ax_pitch)
+        
+        ax_x = fig.add_axes((left + (left_pad * pitch_width),
+                             bottom + pitch_height + space_height,
+                             pitch_width - (left_pad + right_pad) * pitch_width,
+                             marginal_height))
+        ax_y = fig.add_axes((left + pitch_width + space_width,
+                             bottom + (bottom_pad * pitch_height),
+                             marginal_width,
+                             pitch_height - (bottom_pad + top_pad) * pitch_height))
+        
+        x0, x1, y0, y1 = self.visible_pitch
+        x0, y0 = self._reverse_if_vertical(x0, y0)
+        x1, y1 = self._reverse_if_vertical(x1, y1)
+        ax_x.set_xlim(x0, x1)
+        ax_y.set_ylim(y0, y1)
+        
+        plt.setp(ax_x.get_xticklabels(), visible=False)
+        plt.setp(ax_x.get_yticklabels(), visible=False)
+        ax_x.set_xticks([])
+        ax_x.set_yticks([])
+        ax_x.spines['bottom'].set_visible(False)
+        ax_x.spines['top'].set_visible(False)
+        ax_x.spines['left'].set_visible(False)
+        ax_x.spines['right'].set_visible(False)
+        
+        plt.setp(ax_y.get_xticklabels(), visible=False)
+        plt.setp(ax_y.get_yticklabels(), visible=False)
+        ax_y.set_xticks([])
+        ax_y.set_yticks([])
+        ax_y.spines['bottom'].set_visible(False)
+        ax_y.spines['top'].set_visible(False)
+        ax_y.spines['left'].set_visible(False)
+        ax_y.spines['right'].set_visible(False)
+        
+        ax = np.array([ax_pitch, ax_x, ax_y])
+        
+        return fig, ax
