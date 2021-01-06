@@ -1653,10 +1653,10 @@ class BasePitch(ABC):
         bottom_pad = np.abs(self.visible_pitch - self.extent)[2] / np.abs(self.extent[3] - self.extent[2])
         top_pad = np.abs(self.visible_pitch - self.extent)[3] / np.abs(self.extent[3] - self.extent[2])
         
+        # add axes and draw pitch
         fig = plt.figure(figsize=self.figsize)
         ax_pitch = fig.add_axes((left, bottom, pitch_width, pitch_height))
         self.draw(ax=ax_pitch)
-        
         ax_x = fig.add_axes((left + (left_pad * pitch_width),
                              bottom + pitch_height + space_height,
                              pitch_width - (left_pad + right_pad) * pitch_width,
@@ -1666,29 +1666,28 @@ class BasePitch(ABC):
                              marginal_width,
                              pitch_height - (bottom_pad + top_pad) * pitch_height))
         
+        # set axes limits
         x0, x1, y0, y1 = self.visible_pitch
         x0, y0 = self._reverse_if_vertical(x0, y0)
         x1, y1 = self._reverse_if_vertical(x1, y1)
         ax_x.set_xlim(x0, x1)
         ax_y.set_ylim(y0, y1)
         
+        # remove spines (border around axes)
+        for spine in ax_x.spines.values():
+            spine.set_visible(False)
+        for spine in ax_y.spines.values():
+            spine.set_visible(False)
+        
+        # remove ticks/ labels)
         plt.setp(ax_x.get_xticklabels(), visible=False)
         plt.setp(ax_x.get_yticklabels(), visible=False)
-        ax_x.set_xticks([])
-        ax_x.set_yticks([])
-        ax_x.spines['bottom'].set_visible(False)
-        ax_x.spines['top'].set_visible(False)
-        ax_x.spines['left'].set_visible(False)
-        ax_x.spines['right'].set_visible(False)
-        
         plt.setp(ax_y.get_xticklabels(), visible=False)
         plt.setp(ax_y.get_yticklabels(), visible=False)
+        ax_x.set_xticks([])
+        ax_x.set_yticks([])
         ax_y.set_xticks([])
         ax_y.set_yticks([])
-        ax_y.spines['bottom'].set_visible(False)
-        ax_y.spines['top'].set_visible(False)
-        ax_y.spines['left'].set_visible(False)
-        ax_y.spines['right'].set_visible(False)
         
         ax = np.array([ax_pitch, ax_x, ax_y])
         
