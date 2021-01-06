@@ -46,7 +46,7 @@ class Radar:
         self.range_color = range_color
 
     def plot_radar(self, ranges, params, values, radar_color, plot_range=True, filename=None, dpi=300,
-                   title=None, alphas=(0.6, 0.6), compare=False, endnote=None,
+                   title=None, alphas=(0.6, 0.6), compare=False, endnote=None, figsize=None,
                    end_size=9, end_color="#95919B", image=None, image_coord=None, figax=None, **kwargs):
         """
         Function to plot radar-chart.
@@ -63,6 +63,7 @@ class Radar:
             alphas (tuple, optional): alpha value for color. Defaults to (0.6, 0.6).
             compare (bool, optional): True, if comparison charts are to be made. Defaults to False.
             endnote (str, optional): the endnote of the plot. Defaults to None.
+            figsize (tuple, optional): the size of the figure. Defaults to None.
             end_size (int, optional): the font-size for the endnote string. Defaults to 9.
             end_color (str, optional): color of the endnote. Defaults to "#95919B".
             image (str, optional): image name to be added. Defaults to None.
@@ -89,7 +90,9 @@ class Radar:
         if figax:
             fig, ax = figax
         else:
-            fig, ax = plt.subplots(figsize=(20, 10), facecolor=self.background_color)
+            if figsize is None:
+                figsize=(20,10)
+            fig, ax = plt.subplots(figsize=figsize, facecolor=self.background_color)
             ax.set_facecolor(self.background_color)
 
         # set axis
