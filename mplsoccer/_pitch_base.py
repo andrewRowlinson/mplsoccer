@@ -8,7 +8,7 @@ from matplotlib.collections import PatchCollection
 import matplotlib.markers as mmarkers
 import numpy as np
 import seaborn as sns
-from scipy.stats import binned_statistic_2d, circmean
+from scipy.stats import binned_statistic_2d, circmean, gaussian_kde
 from scipy.spatial import Voronoi
 from collections import namedtuple
 
@@ -104,13 +104,13 @@ class BasePitch(ABC):
         Whether to use Matplotlib's tight layout.
     constrained_layout : bool, default False
         Whether to use Matplotlib's constrained layout.
-    layout : depreciated, default None
-        Layout is depreciated. Please use nrows and ncols arguments instead.
-    view : depreciated, default None
-        View is depreciated. Please use half=True or half=False arguements instead.
-    orientation : depreciated, default None
-        Orientation is depreciated. Please use the VerticalPitch class instead:
-        from mplsoccer import VerticalPitch.
+    layout : deprecated, default None
+        Layout is deprecated. Please use nrows and ncols arguments instead.
+    view : deprecated, default None
+        View is deprecated. Please use half=True or half=False arguements instead.
+    orientation : deprecated, default None
+        Orientation is deprecated. Please use the VerticalPitch class instead:
+        from mplsoccer import VerticalPitch.        
     """
 
     def __init__(self, figsize=None, nrows=1, ncols=1, pitch_type='statsbomb', half=False,
@@ -135,17 +135,17 @@ class BasePitch(ABC):
                 f"Pitch length and widths are only used for {dimensions.size_varies} pitches and will be ignored")
             
         if layout is not None:
-            warn_msg = "layout is depreciated. Please use nrows and ncols arguments instead."
-            warnings.warn(warn_msg)
+            msg = "layout is deprecated. Please use nrows and ncols arguments instead."
+            warnings.warn(msg)
             
         if view is not None:
-            warn_msg = "view is depreciated. Please use half=True or half=False arguements instead."
-            warnings.warn(warn_msg)
+            msg = "view is deprecated. Please use half=True or half=False arguements instead."
+            warnings.warn(msg)
             
         if orientation is not None:
-            warn_msg = ("orientation is depreciated. Please use the VerticalPitch class instead: "
+            msg = ("orientation is deprecated. Please use the VerticalPitch class instead: "
                         "from mplsoccer import VerticalPitch.")
-            warnings.warn(warn_msg)          
+            warnings.warn(msg)         
 
         self.axes = None
         self.fig = None
@@ -800,11 +800,17 @@ class BasePitch(ABC):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
             
+        weights = kwargs.pop('weights', None)
+        bw_method = kwargs.pop('bw_method', 'scott')
+        
         if reflect:
+            scip_kde = gaussian_kde(np.vstack([x, y]), bw_method='scott', weights=weights)
+            bw_method = scip_kde.scotts_factor() / 4.
             x, y = self._reflect_2d(x, y)
-        x, y = self._reverse_if_vertical(x, y)
 
-        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
+        x, y = self._reverse_if_vertical(x, y)
+        
+        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, weights=weights, bw_method=bw_method, clip=self.kde_clip, **kwargs)
         return contour_plot
     
     def hexbin(self, x, y, ax=None, **kwargs):
