@@ -15,6 +15,7 @@ dependencies:
   - twine
   - conda-forge::ffmpeg
   - pillow
+  - pylint
   - sphinx-gallery
   - sphinx_rtd_theme
   - numpydoc
