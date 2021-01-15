@@ -1,14 +1,16 @@
-"""
-__author__: Anmol_Durgapal(@slothfulwave612)
+""" Python module containing helper functions for mplsoccer."""
+# Authors: Anmol_Durgapal(@slothfulwave612)
+# The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll)
+# ridge_map is available here: https://github.com/ColCarroll/ridge_map 
 
-Python module containing helper functions.
-"""
-
-# necessary packages/modules
 import numpy as np
 from PIL import Image
+from mplsoccer import dimensions
+import matplotlib.font_manager as fm
+from tempfile import NamedTemporaryFile
+from urllib.request import urlopen
 
-__all__ = ['add_image', 'validate_ax', 'get_indices_between', 'get_coordinates']
+__all__ = ['add_image', 'validate_ax', 'get_indices_between', 'get_coordinates', 'Standardizer', 'FontManager']
 
 
 def get_coordinates(n):
@@ -226,3 +228,92 @@ def validate_ax(ax):
     if ax is None:
         raise TypeError("Missing 1 required argument: ax. A Matplotlib axis is required for plotting.")
 
+
+class Standardizer:
+
+    def __init__(self, pitch_from, pitch_to, length_from=None, width_from=None, length_to=None, width_to=None):
+
+        if pitch_from not in dimensions.valid:
+            raise TypeError(f'Invalid argument: pitch_from should be in {dimensions.valid}')
+        if (length_from is None or width_from is None) and pitch_from in dimensions.size_varies:
+            raise TypeError("Invalid argument: width_to and length_to must be specified.")
+
+        if pitch_to not in dimensions.valid:
+            raise TypeError(f'Invalid argument: pitch_to should be in {dimensions.valid}')
+        if (length_to is None or width_to is None) and pitch_to in dimensions.size_varies:
+            raise TypeError("Invalid argument: width_to and length_to must be specified.")
+
+        self.dim_from = dimensions.create_pitch_dims(pitch_type=pitch_from,
+                                                     pitch_length=length_from, pitch_width=width_from)
+        self.dim_to = dimensions.create_pitch_dims(pitch_type=pitch_to,
+                                                   pitch_length=length_to, pitch_width=width_to)
+
+    def transform(self, x, y, reverse=False):
+        # to numpy arrays
+        x = np.asarray(x)
+        y = np.asarray(y)
+
+        if reverse:
+            dim_from, dim_to = self.dim_to, self.dim_from
+        else:
+            dim_from, dim_to = self.dim_from, self.dim_to
+
+        # clip outside to pitch extents
+        x = x.clip(min=dim_from.left, max=dim_from.right)
+        y = y.clip(min=min(dim_from.bottom, dim_from.top),
+                   max=max(dim_from.bottom, dim_from.top))
+
+        # for inverted axis flip the coordinates
+        if dim_from.invert_y:
+            y = dim_from.bottom - y
+
+        x_standardized = self._standardize(dim_from.x_markings, dim_to.x_markings, x)
+        y_standardized = self._standardize(dim_from.y_markings, dim_to.y_markings, y)
+        return x_standardized, y_standardized
+
+    @staticmethod
+    def _standardize(markings_from, markings_to, coordinate):
+        pos = np.searchsorted(markings_from, coordinate)
+        low_from = markings_from[pos - 1]
+        high_from = markings_from[pos]
+        proportion_of_way_between = (coordinate - low_from) / (high_from - low_from)
+        low_to = markings_to[pos - 1]
+        high_to = markings_to[pos]
+        return low_to + ((high_to - low_to) * proportion_of_way_between)
+    
+    
+class FontManager:
+    """Utility to load fun fonts from https://fonts.google.com/ for matplotlib.
+    Find a nice font at https://fonts.google.com/, and then get its corresponding URL
+    from https://github.com/google/fonts/
+    
+    The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll).
+    
+    Use like:
+    fm = FontManager()
+    fig, ax = plt.subplots()
+    ax.text("Good content.", fontproperties=fm.prop, size=60)
+    """
+
+    def __init__(self,
+                 github_url=("https://github.com/google/fonts/blob/master/"
+                             "apache/roboto/static/Roboto-Regular.ttf?raw=true")):
+        
+        """ Lazily download a font.
+        Parameters
+        ----------
+        github_url : str
+            Can really be any .ttf file, but probably looks like
+            "https://github.com/google/fonts/blob/master/ofl/cinzel/Cinzel-Regular.ttf?raw=true"
+        """
+        self.github_url = github_url
+        self._prop = None
+
+    @property
+    def prop(self):
+        """Get matplotlib.font_manager.FontProperties object that sets the custom font."""
+        if self._prop is None:
+            with NamedTemporaryFile(delete=False, suffix=".ttf") as temp_file:
+                temp_file.write(urlopen(self.github_url).read())
+                self._prop = fm.FontProperties(fname=temp_file.name)
+        return self._prop
