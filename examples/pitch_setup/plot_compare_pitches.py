@@ -26,7 +26,7 @@ for idx, pt in enumerate(pitch_types):
         pitch = Pitch(pitch_type=pt, **pitch_kwargs)
     pitch.draw(axes[idx])
     xmin, xmax, ymin, ymax = pitch.extent
-    if pitch.aspect != 1:
+    if pitch.dim.aspect != 1:
         text = 'data coordinates \n are square (1:1) \n scale up to a real-pitch size'
         axes[idx].annotate(text, xy=(xmin, ymin), xytext=(0 + (xmax - xmin)/2, ymin),
                            **font_kwargs)
@@ -37,7 +37,7 @@ for idx, pt in enumerate(pitch_types):
         axes[idx].set_title('skillcorner / secondspectrum', fontsize=20, c='#9749b9', pad=15)
     else:  
         axes[idx].set_title(pt, fontsize=20, c='#9749b9', pad=15)
-    if pitch.invert_y: 
+    if pitch.dim.invert_y: 
         text = 'inverted y axis'
         xytext = (0 + (xmax - xmin)/2, ymin + (ymax - ymin)/2)            
         axes[idx].annotate(text, xy=(xmin, ymin), xytext=xytext,
