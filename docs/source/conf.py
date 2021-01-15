@@ -71,8 +71,8 @@ sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
     'matplotlib_animations': True,
-    'subsection_order': ExplicitOrder(['../../examples/pitch_plots',
-                                       '../../examples/radar',
+    'subsection_order': ExplicitOrder(['../../examples/radar',
+									   '../../examples/pitch_plots',
                                        '../../examples/statsbomb',
                                        '../../examples/pitch_setup', ])}
 
