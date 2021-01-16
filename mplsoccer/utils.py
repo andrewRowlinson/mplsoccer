@@ -1,5 +1,5 @@
 """ Python module containing helper functions for mplsoccer."""
-# Authors: Anmol_Durgapal(@slothfulwave612)
+# Authors: Anmol_Durgapal(@slothfulwave612), Andrew Rowlinson (@numberstorm)
 # The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll)
 # ridge_map is available here: https://github.com/ColCarroll/ridge_map 
 
@@ -267,8 +267,10 @@ class Standardizer:
         if dim_from.invert_y:
             y = dim_from.bottom - y
 
-        x_standardized = self._standardize(dim_from.x_markings, dim_to.x_markings, x)
-        y_standardized = self._standardize(dim_from.y_markings, dim_to.y_markings, y)
+        x_standardized = self._standardize(dim_from.x_markings_sorted,
+                                           dim_to.x_markings_sorted, x)
+        y_standardized = self._standardize(dim_from.y_markings_sorted,
+                                           dim_to.y_markings_sorted, y)
         return x_standardized, y_standardized
 
     @staticmethod
@@ -296,8 +298,8 @@ class FontManager:
     """
 
     def __init__(self,
-                 github_url=("https://github.com/google/fonts/blob/master/"
-                             "apache/roboto/static/Roboto-Regular.ttf?raw=true")):
+                 github_url=('https://github.com/google/fonts/blob/master/'
+                             'apache/roboto/static/Roboto-Regular.ttf?raw=true')):
         
         """ Lazily download a font.
         Parameters
