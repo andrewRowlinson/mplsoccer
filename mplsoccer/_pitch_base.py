@@ -213,11 +213,6 @@ class BasePitch(ABC):
             if pitch_type == 'tracab':
                 setattr(self, pad, getattr(self, pad) * 100)
 
-        # set the pitch_extent: [xmin, xmax, ymin, ymax]
-        self.pitch_extent = np.array([self.dim.left, self.dim.right,
-                                      min(self.dim.bottom, self.dim.top),
-                                      max(self.dim.bottom, self.dim.top)])
-
         # scale the padding where the aspect is not equal to one
         # this means that you can easily set the padding the same
         # all around the pitch (e.g. when using an Opta pitch)
@@ -570,7 +565,7 @@ class BasePitch(ABC):
     def _reverse_annotate_if_vertical(annotate):
         pass
 
-    # The plotting methods below are defined in _pitch_plot_base.py (BasePlotPitch)
+    # The plotting methods below are defined in _pitch_plot.py (BasePlotPitch)
     # This module contains all the plotting methods
     @abstractmethod
     def plot(self, x, y, ax=None, **kwargs):
