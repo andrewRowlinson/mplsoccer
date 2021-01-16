@@ -47,6 +47,7 @@ fig, ax = radar.plot_radar(
   ranges=ranges, params=params, values=values, figsize=(12,12),
   radar_color=['#B6282F', '#FFFFFF']
 )
+fig.tight_layout()
 
 ##############################################################################
 # Label And Range Fontsize
