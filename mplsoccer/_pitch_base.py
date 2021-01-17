@@ -89,9 +89,11 @@ class BasePitch(ABC):
         Set the zorder for the shading of the middle third of the pitch.
         Artists with lower zorder values are drawn first.
     pitch_length : float, default None
-        The pitch length in meters. Only used for the 'tracab' and 'metricasports' pitch_type.
+        The pitch length in meters. Only used for the 'tracab' and 'metricasports',
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type.
     pitch_width : float, default None
-        The pitch width in meters. Only used for the 'tracab' and 'metricasports' pitch type.
+        The pitch width in meters. Only used for the 'tracab' and 'metricasports',
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type
     goal_type : str, default 'line'
         Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
     goal_alpha : float, default 0.7
