@@ -1,3 +1,5 @@
+""" A module with functions for using LineCollection to create lines.´´."""
+
 import warnings
 
 import numpy as np
@@ -19,13 +21,15 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
           alpha_end=1, cmap=None, ax=None, vertical=False, reverse_cmap=False, **kwargs):
     """ Plots lines using matplotlib.collections.LineCollection.
     This is a fast way to plot multiple lines without loops.
-    Also enables lines that increase in width or opacity by splitting the line into n_segments of increasing
+    Also enables lines that increase in width or opacity by splitting
+     the line into n_segments of increasing
     width or opacity as the line progresses.
 
     Parameters
     ----------
     xstart, ystart, xend, yend: array-like or scalar.
-        Commonly, these parameters are 1D arrays. These should be the start and end coordinates of the lines.
+        Commonly, these parameters are 1D arrays.
+         These should be the start and end coordinates of the lines.
     color : A matplotlib color or sequence of colors, defaults to None.
         Defaults to None. In that case the marker color is determined
         by the value rcParams['lines.color']
@@ -51,7 +55,8 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     vertical : bool, default False
         If the orientation is vertical (True), then the code switches the x and y coordinates.
     reverse_cmap : bool, default False
-        Whether to reverse the cmap colors. If the pitch is horizontal and the y-axis is inverted then set this to True.
+        Whether to reverse the cmap colors.
+        If the pitch is horizontal and the y-axis is inverted then set this to True.
     ax : matplotlib.axes.Axes, default None
         The axis to plot on.
     **kwargs : All other keyword arguments are passed on to matplotlib.collections.LineCollection.
@@ -71,7 +76,8 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     if alpha_end < 0 or alpha_end > 1:
         raise TypeError("alpha_end values should be within 0-1 range")
     if alpha_start > alpha_end:
-        warnings.warn("Alpha start > alpha end. The line will increase in transparency nearer to the end")
+        msg = "Alpha start > alpha end. The line will increase in transparency nearer to the end"
+        warnings.warn(msg)
 
     if 'colors' in kwargs.keys():
         warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
@@ -98,14 +104,16 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     lw = np.ravel(lw)
 
     if (comet or transparent) and (lw.size > 1):
-        raise NotImplementedError("Multiple linewidths with a comet or transparent line is not implemented.")
+        msg = "Multiple linewidths with a comet or transparent line is not implemented."
+        raise NotImplementedError(msg)
 
     # set color
     if color is None and cmap is None:
         color = rcParams['lines.color']
 
     if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0] > 1):
-        raise NotImplementedError("Multiple colors with a comet or transparent line is not implemented.")
+        msg = "Multiple colors with a comet or transparent line is not implemented."
+        raise NotImplementedError(msg)
 
     if xstart.size != ystart.size:
         raise ValueError("xstart and ystart must be the same size")
@@ -123,7 +131,7 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     if vertical:
         ystart, xstart = xstart, ystart
         yend, xend = xend, yend
-    
+
     # create linewidth
     if comet:
         lw = np.linspace(1, lw, n_segments)
@@ -144,20 +152,20 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
 
     if cmap is not None:
         handler_cmap = True
-        lc = _lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap, ax=ax, n_segments=n_segments,
-                         multi_segment=multi_segment, reverse_cmap=reverse_cmap, **kwargs)
+        line_collection = _lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap,
+                                      ax=ax, n_segments=n_segments, multi_segment=multi_segment,
+                                      reverse_cmap=reverse_cmap, **kwargs)
     else:
         handler_cmap = False
-        lc = _lines_no_cmap(xstart, ystart, xend, yend, lw=lw, color=color,
-                            ax=ax, n_segments=n_segments, multi_segment=multi_segment, **kwargs)
+        line_collection = _lines_no_cmap(xstart, ystart, xend, yend,
+                                         lw=lw, color=color, ax=ax, n_segments=n_segments,
+                                         multi_segment=multi_segment, **kwargs)
 
-    lc_handler = HandlerLines(numpoints=n_segments,
-                              invert_y=reverse_cmap,
-                              first_lw=handler_first_lw,
-                              use_cmap=handler_cmap)
-    Legend.update_default_handler_map({lc: lc_handler})
+    line_collection_handler = HandlerLines(numpoints=n_segments, invert_y=reverse_cmap,
+                                           first_lw=handler_first_lw, use_cmap=handler_cmap)
+    Legend.update_default_handler_map({line_collection: line_collection_handler})
 
-    return lc
+    return line_collection
 
 
 def _create_segments(xstart, ystart, xend, yend, n_segments=100, multi_segment=False):
@@ -167,7 +175,9 @@ def _create_segments(xstart, ystart, xend, yend, n_segments=100, multi_segment=F
         points = np.array([x, y]).T
         points = np.concatenate([points, np.expand_dims(points[:, -1, :], 1)], axis=1)
         points = np.expand_dims(points, 1)
-        segments = np.concatenate([points[:, :, :-2, :], points[:, :, 1:-1, :], points[:, :, 2:, :]], axis=1)
+        segments = np.concatenate([points[:, :, :-2, :],
+                                   points[:, :, 1:-1, :],
+                                   points[:, :, 2:, :]], axis=1)
         segments = np.transpose(segments, (0, 2, 1, 3)).reshape((-1, 3, 2))
     else:
         segments = np.transpose(np.array([[xstart, ystart], [xend, yend]]), (2, 0, 1))
@@ -176,26 +186,28 @@ def _create_segments(xstart, ystart, xend, yend, n_segments=100, multi_segment=F
 
 def _lines_no_cmap(xstart, ystart, xend, yend, lw=None, color=None, ax=None,
                    n_segments=100, multi_segment=False, **kwargs):
-    segments = _create_segments(xstart, ystart, xend, yend, n_segments=n_segments, multi_segment=multi_segment)
+    segments = _create_segments(xstart, ystart, xend, yend,
+                                n_segments=n_segments, multi_segment=multi_segment)
     color = to_rgba_array(color)
     if (color.shape[0] > 1) and (color.shape[0] != xstart.size):
         raise ValueError("xstart and color must be the same size")
-    lc = LineCollection(segments, color=color, linewidth=lw, snap=False, **kwargs)
-    lc = ax.add_collection(lc)
-    return lc
+    line_collection = LineCollection(segments, color=color, linewidth=lw, snap=False, **kwargs)
+    line_collection = ax.add_collection(line_collection)
+    return line_collection
 
 
 def _lines_cmap(xstart, ystart, xend, yend, lw=None, cmap=None, ax=None,
                 n_segments=100, multi_segment=False, reverse_cmap=False, **kwargs):
-    segments = _create_segments(xstart, ystart, xend, yend, n_segments=n_segments, multi_segment=multi_segment)
+    segments = _create_segments(xstart, ystart, xend, yend,
+                                n_segments=n_segments, multi_segment=multi_segment)
     if reverse_cmap:
         cmap = cmap.reversed()
-    lc = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, **kwargs)
-    lc = ax.add_collection(lc)
+    line_collection = LineCollection(segments, cmap=cmap, linewidth=lw, snap=False, **kwargs)
+    line_collection = ax.add_collection(line_collection)
     extent = ax.get_ylim()
     pitch_array = np.linspace(extent[0], extent[1], n_segments)
-    lc.set_array(pitch_array)
-    return lc
+    line_collection.set_array(pitch_array)
+    return line_collection
 
 
 # Amended from
@@ -203,7 +215,8 @@ def _lines_cmap(xstart, ystart, xend, yend, lw=None, cmap=None, ax=None,
 class HandlerLines(HandlerLineCollection):
     """Automatically generated by Pitch.lines() to allow use of linecollection in legend."""
 
-    def __init__(self, invert_y=False, first_lw=False, use_cmap=False, marker_pad=0.3, numpoints=None, **kw):
+    def __init__(self, invert_y=False, first_lw=False, use_cmap=False,
+                 marker_pad=0.3, numpoints=None, **kw):
         HandlerLineCollection.__init__(self, marker_pad=marker_pad, numpoints=numpoints, **kw)
         self.invert_y = invert_y
         self.first_lw = first_lw
@@ -222,8 +235,10 @@ class HandlerLines(HandlerLineCollection):
             cmap = artist.cmap
             if self.invert_y:
                 cmap = cmap.reversed()
-            lc = LineCollection(segments, lw=lw, cmap=cmap, snap=False, transform=trans)
-            lc.set_array(x)
+            line_collection = LineCollection(segments, lw=lw, cmap=cmap,
+                                             snap=False, transform=trans)
+            line_collection.set_array(x)
         else:
-            lc = LineCollection(segments, lw=lw, colors=artist.get_colors()[0], snap=False, transform=trans)
-        return [lc]
+            line_collection = LineCollection(segments, lw=lw, colors=artist.get_colors()[0],
+                                             snap=False, transform=trans)
+        return [line_collection]

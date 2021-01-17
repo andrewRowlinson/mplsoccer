@@ -12,9 +12,10 @@ import pandas as pd
 EVENT_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/events'
 MATCH_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/matches'
 LINEUP_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/lineups'
-COMPETITION_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/competitions.json'
+COMPETITION_URL = ('https://raw.githubusercontent.com/statsbomb/open-data/'
+                   'master/data/competitions.json')
 
-statsbomb_warning = ('Please be responsible with Statsbomb data.'
+STATSBOMB_WARNING = ('Please be responsible with Statsbomb data.'
                      'Register your details on https://www.statsbomb.com/resource-centre'
                      'and read the User Agreement carefully (on the same page).')
 
@@ -30,7 +31,7 @@ def _split_location_cols(df, col, new_cols):
         df.loc[mask_not_null, new_cols] = df_new
         df.drop(col, axis=1, inplace=True)
 
-        
+
 def _list_dictionary_to_df(df, col, value_name, var_name, id_col='id'):
     """ Some columns are a list of dictionaries. This turns them into a new dataframe of rows."""
     df = df.loc[df[col].notnull(), [id_col, col]]
@@ -52,7 +53,8 @@ def _split_dict_col(df, col):
     df_temp_cols = pd.json_normalize(df[col]).set_index(df.index)
     col_names = df_temp_cols.columns
     # note add column description to column name if doesn't already contain it
-    col_names = [c.replace('.', '_') if c[:len(col)] == col else (col+'_'+c).replace('.', '_') for c in col_names]
+    col_names = [c.replace('.', '_') if c[:len(col)] == col else
+                 (col+'_'+c).replace('.', '_') for c in col_names]
     df[col_names] = df_temp_cols
     # drop old column
     df.drop(col, axis=1, inplace=True)
@@ -68,10 +70,11 @@ def _simplify_cols_and_drop(df, col, cols=None):
     return df
 
 
-def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, tactics_lineup_df=True, warn=True):
+def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
+               tactics_lineup_df=True, warn=True):
     """ Extracts individual event json and loads as a dictionary of up to
     four pandas.DataFrame: 'event', 'related event', 'shot_freeze_frame', and 'tactics_lineup'.
-    
+
     Parameters
         ----------
         path_or_buf : a valid JSON str, path object or file-like object
@@ -84,19 +87,19 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
             By file-like object, we refer to objects with a ``read()`` method,
             such as a file handler (e.g. via builtin ``open`` function)
             or ``StringIO``.
-            
+
         related_event_df : bool, default True
-            Whether to return a 'related_event' Dataframe in the returned dictionary.   
-        
+            Whether to return a 'related_event' Dataframe in the returned dictionary.
+
         shot_freeze_frame_df : bool, default True
-            Whether to return a 'shot_freeze_frame' in the returned dictionary.   
-        
+            Whether to return a 'shot_freeze_frame' in the returned dictionary.
+
         tactics_lineup_df : bool, default True
             Whether to return a 'tactics_lineup' Dataframe in the returned dictionary.
 
         warn : bool, default True
             Whether to warn about Statsbomb's data license agreement.
-            
+
         Returns
         -------
         Dict of up to 4 pandas.DataFrame.
@@ -118,53 +121,56 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         dict_dfs = read_event(URL)
     """
     if warn:
-        warnings.warn(statsbomb_warning)
-        
+        warnings.warn(STATSBOMB_WARNING)
+
     df_dict = {}
-    
+
     # read as dataframe
     df = pd.read_json(path_or_buf, encoding='utf-8')
     if df.empty:
         print(f'Skipping {path_or_buf}: empty json')
-        return
-    
+        return None
+
     # timestamp defaults to today's date so store as integers in seperate columns
     df['timestamp_minute'] = df.timestamp.dt.minute
     df['timestamp_second'] = df.timestamp.dt.second
     df['timestamp_millisecond'] = (df.timestamp.dt.microsecond/1000).astype(np.int64)
     df.drop('timestamp', axis=1, inplace=True)
-    
+
     # get match id and add to the event dataframe
     match_id = int(os.path.basename(path_or_buf)[:-5])
     df['match_id'] = match_id
-    
-    # loop through the columns that are still dictionary columns and add them as separate cols to the dataframe
+
+    # loop through the columns that are still dictionary columns
+    # and add them as separate cols to the dataframe
     # these are nested dataframes in the docs - although dribbled_past/ pressure isn't needed here?
-    # also some others are needed: type, possession_team, play_pattern, team, tactics, player, position
-    dictionary_columns = ['pass', '50_50', 'bad_behaviour', 'ball_receipt', 'ball_recovery', 'block', 'carry',
-                          'clearance', 'dribble', 'duel', 'foul_committed', 'foul_won', 'goalkeeper',
-                          'half_end', 'half_start', 'injury_stoppage', 'interception',
-                          'miscontrol', 'play_pattern', 'player', 'player_off', 'position',
-                          'possession_team', 'shot', 'substitution', 'tactics', 'team', 'type']
+    # also some others are needed: type, possession_team, play_pattern,
+    # team, tactics, player, position
+    dictionary_columns = ['pass', '50_50', 'bad_behaviour', 'ball_receipt', 'ball_recovery',
+                          'block', 'carry', 'clearance', 'dribble', 'duel', 'foul_committed',
+                          'foul_won', 'goalkeeper', 'half_end', 'half_start', 'injury_stoppage',
+                          'interception', 'miscontrol', 'play_pattern', 'player', 'player_off',
+                          'position', 'possession_team', 'shot', 'substitution',
+                          'tactics', 'team', 'type']
     for col in dictionary_columns:
         if col in df.columns:
             df = _split_dict_col(df, col)
-    
+
     # sort by time and reset index
     df.sort_values(['minute', 'second', 'timestamp_minute',
                     'timestamp_second', 'timestamp_millisecond', 'possession'], inplace=True)
     df.reset_index(inplace=True, drop=True)
-    
+
     # split location info to x, y and (z for shot) columns and drop old columns
     _split_location_cols(df, 'location', ['x', 'y'])
     _split_location_cols(df, 'pass_end_location', ['pass_end_x', 'pass_end_y'])
     _split_location_cols(df, 'carry_end_location', ['carry_end_x', 'carry_end_y'])
     _split_location_cols(df, 'shot_end_location', ['shot_end_x', 'shot_end_y', 'shot_end_z'])
     _split_location_cols(df, 'goalkeeper_end_location', ['goalkeeper_end_x', 'goalkeeper_end_y'])
-    
+
     # replace weird * character in the type_name for ball receipt
     df['type_name'] = df['type_name'].replace({'Ball Receipt*': 'Ball Receipt'})
-    
+
     # because some columns were contained in dictionaries they have been split into separate columns
     # with different prefixes, e.g. clearance_aerial_won, pass_aerial_won, shot_aerial_won
     # this combines them into one column and drops the original columns
@@ -173,8 +179,10 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df = _simplify_cols_and_drop(df, 'body_part_id')
     df = _simplify_cols_and_drop(df, 'body_part_name')
     df = _simplify_cols_and_drop(df, 'aerial_won')
-    df = _simplify_cols_and_drop(df, 'end_x', ['pass_end_x', 'carry_end_x', 'shot_end_x', 'goalkeeper_end_x'])    
-    df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y', 'shot_end_y', 'goalkeeper_end_y'])
+    df = _simplify_cols_and_drop(df, 'end_x', ['pass_end_x', 'carry_end_x',
+                                               'shot_end_x', 'goalkeeper_end_x'])
+    df = _simplify_cols_and_drop(df, 'end_y', ['pass_end_y', 'carry_end_y',
+                                               'shot_end_y', 'goalkeeper_end_y'])
     df = _simplify_cols_and_drop(df, 'sub_type_id', ['pass_type_id', 'duel_type_id',
                                                      'goalkeeper_type_id', 'shot_type_id'])
     df = _simplify_cols_and_drop(df, 'sub_type_name', ['pass_type_name', 'duel_type_name',
@@ -182,31 +190,37 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     # technique id/names are not always present so have to take this into account
     technique_id_cols = ['pass_technique_id', 'goalkeeper_technique_id', 'shot_technique_id']
     technique_id_cols = set(technique_id_cols).intersection(set(df.columns))
-    technique_name_cols = ['pass_technique_name', 'goalkeeper_technique_name', 'shot_technique_name']
+    technique_name_cols = ['pass_technique_name', 'goalkeeper_technique_name',
+                           'shot_technique_name']
     technique_name_cols = set(technique_name_cols).intersection(set(df.columns))
     df = _simplify_cols_and_drop(df, 'technique_id', technique_id_cols)
     df = _simplify_cols_and_drop(df, 'technique_name', technique_name_cols)
-    
+
     # create a related events dataframe
     if related_event_df:
         df_related_event = _list_dictionary_to_df(df, col='related_events',
-                                                  value_name='related_event', var_name='event_related_id')
-        # some carries don't have the corresponding events. This makes sure all events are linked both ways
+                                                  value_name='related_event',
+                                                  var_name='event_related_id')
+        # some carries don't have the corresponding events.
+        # This makes sure all events are linked both ways
         df_related_event.drop('event_related_id', axis=1, inplace=True)
-        df_related_event_reverse = df_related_event.rename({'related_event': 'id', 'id': 'related_event'}, axis=1)
+        df_related_event_reverse = df_related_event.rename({'related_event': 'id',
+                                                            'id': 'related_event'}, axis=1)
         df_related_event = pd.concat([df_related_event, df_related_event_reverse], sort=False)
         df_related_event.drop_duplicates(inplace=True)
         # and add on the type_names, index for easier lookups of how the events are related
         df_event_type = df[['id', 'type_name', 'index']].copy()
-        df_related_event = df_related_event.merge(df_event_type, on='id', how='left', validate='m:1')
+        df_related_event = df_related_event.merge(df_event_type, on='id',
+                                                  how='left', validate='m:1')
         df_event_type.rename({'id': 'related_event'}, axis=1, inplace=True)
         df_related_event = df_related_event.merge(df_event_type, on='related_event',
-                                                  how='left', validate='m:1', suffixes=['', '_related'])
+                                                  how='left', validate='m:1',
+                                                  suffixes=['', '_related'])
         df_related_event.rename({'related_event': 'id_related'}, axis=1, inplace=True)
         # add on match_id and add to dictionary
         df_related_event['match_id'] = match_id
         df_dict['related_event'] = df_related_event
-    
+
     # create a shot freeze frame dataframe - also splits dictionary of player details into columns
     if shot_freeze_frame_df:
         df_shot_freeze = _list_dictionary_to_df(df, col='shot_freeze_frame',
@@ -217,7 +231,8 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         df_shot_freeze['match_id'] = match_id
         df_dict['shot_freeze_frame'] = df_shot_freeze
 
-    # create a tactics lineup frame dataframe - also splits dictionary of player details into columns
+    # create a tactics lineup frame dataframe
+    # also splits dictionary of player details into columns
     if tactics_lineup_df:
         df_tactic_lineup = _list_dictionary_to_df(df, col='tactics_lineup',
                                                   value_name='player', var_name='event_tactics_id')
@@ -225,47 +240,50 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
         # add on match_id and add to dictionary
         df_tactic_lineup['match_id'] = match_id
         df_dict['tactics_lineup'] = df_tactic_lineup
-    
+
     # drop columns stored as a separate table
     df.drop(['related_events', 'shot_freeze_frame', 'tactics_lineup'], axis=1, inplace=True)
-    
+
     # there are a few errors with through ball not always being marked in the technique name
     if 'pass_through_ball' in df.columns:
         df.loc[df.pass_through_ball.notnull(), 'technique_name'] = 'Through Ball'
-    
-    # drop cols that are covered by other columns (e.g. pass technique covers through, ball, inswinging etc.)
+
+    # drop cols that are covered by other columns
+    # (e.g. pass technique covers through, ball, inswinging etc.)
     cols_to_drop = ['pass_through_ball', 'pass_outswinging', 'pass_inswinging',  'clearance_head',
-                    'clearance_left_foot', 'clearance_right_foot', 'pass_straight', 'clearance_other',
-                    'goalkeeper_punched_out',  'goalkeeper_shot_saved_off_target', 'shot_saved_off_target',
+                    'clearance_left_foot', 'clearance_right_foot', 'pass_straight',
+                    'clearance_other', 'goalkeeper_punched_out',
+                    'goalkeeper_shot_saved_off_target', 'shot_saved_off_target',
                     'goalkeeper_shot_saved_to_post', 'shot_saved_to_post', 'goalkeeper_lost_out',
-                    'goalkeeper_lost_in_play',  'goalkeeper_success_out', 'goalkeeper_success_in_play',
-                    'goalkeeper_saved_to_post', 'shot_kick_off', 'goalkeeper_penalty_saved_to_post']
+                    'goalkeeper_lost_in_play',  'goalkeeper_success_out',
+                    'goalkeeper_success_in_play', 'goalkeeper_saved_to_post',
+                    'shot_kick_off', 'goalkeeper_penalty_saved_to_post']
     df.drop(cols_to_drop, axis=1, errors='ignore', inplace=True)
-    
+
     # rename end location
     df.rename({'shot_end_z': 'end_z'}, axis=1, inplace=True)
-           
+
     # reorder columns so some of the most used ones are first
-    cols = ['match_id', 'id', 'index', 'period', 'timestamp_minute', 'timestamp_second', 
+    cols = ['match_id', 'id', 'index', 'period', 'timestamp_minute', 'timestamp_second',
             'timestamp_millisecond', 'minute', 'second', 'type_id', 'type_name', 'sub_type_id',
             'sub_type_name',  'outcome_id', 'outcome_name', 'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
             'position_name', 'duration', 'x', 'y', 'end_x', 'end_y', 'end_z',
-            'body_part_id', 'body_part_name', 'technique_id', 'technique_name']  
+            'body_part_id', 'body_part_name', 'technique_id', 'technique_name']
     other_cols = df.columns[~df.columns.isin(cols)]
     cols.extend(other_cols)
     df = df[cols].copy()
-    
+
     # add to dictionary
     df_dict['event'] = df
-    
+
     return df_dict
 
 
 def read_match(path_or_buf, warn=True):
     """ Extracts individual match json and loads as a pandas.DataFrame.
-    
+
     Parameters
         ----------
         path_or_buf : a valid JSON str, path object or file-like object
@@ -301,20 +319,21 @@ def read_match(path_or_buf, warn=True):
         df_match = read_match(URL)
     """
     if warn:
-        warnings.warn(statsbomb_warning)
-        
+        warnings.warn(STATSBOMB_WARNING)
+
     df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
     if df_match.empty:
         print(f'Skipping {path_or_buf}: empty json')
-        return
-    
-    # loop through the columns that are still dictionary columns and add them as seperate cols to the datafram
-    dictionary_columns = ['competition', 'season', 'home_team', 'away_team', 'metadata', 'competition_stage',
-                          'stadium', 'referee']
+        return None
+
+    # loop through the columns that are still dictionary columns
+    # and add them as seperate cols to the datafram
+    dictionary_columns = ['competition', 'season', 'home_team', 'away_team',
+                          'metadata', 'competition_stage', 'stadium', 'referee']
     for col in dictionary_columns:
         if col in df_match.columns:
             df_match = _split_dict_col(df_match, col)
-        
+
     # convert kickoff to datetime - date + kickoff time
     df_match['kick_off'] = pd.to_datetime(df_match.match_date.astype(str) + ' ' + df_match.kick_off)
     # drop one gender column as always equal to the other
@@ -341,7 +360,7 @@ def read_match(path_or_buf, warn=True):
 
 def read_competition(path_or_buf, warn=True):
     """ Extracts competition json and loads as a pandas.DataFrame.
-    
+
     Parameters
         ----------
         path_or_buf : a valid JSON str, path object or file-like object
@@ -375,12 +394,12 @@ def read_competition(path_or_buf, warn=True):
         df_competition = read_competition(COMPETITION_URL)
     """
     if warn:
-        warnings.warn(statsbomb_warning)
-        
+        warnings.warn(STATSBOMB_WARNING)
+
     df_competition = pd.read_json(path_or_buf, convert_dates=['match_updated', 'match_available'])
     if df_competition.empty:
         print(f'Skipping {path_or_buf}: empty json')
-        return
+        return None
     df_competition.sort_values(['competition_id', 'season_id'], inplace=True)
     df_competition.reset_index(drop=True, inplace=True)
     return df_competition
@@ -388,7 +407,7 @@ def read_competition(path_or_buf, warn=True):
 
 def read_lineup(path_or_buf, warn=True):
     """ Extracts individual lineup jsons and loads as a pandas.DataFrame.
-    
+
     Parameters
         ----------
         path_or_buf : a valid JSON str, path object or file-like object
@@ -404,7 +423,7 @@ def read_lineup(path_or_buf, warn=True):
 
         warn : bool, default True
             Whether to warn about Statsbomb's data license agreement.
-            
+
         Returns
         -------
         pandas.DataFrame
@@ -424,12 +443,12 @@ def read_lineup(path_or_buf, warn=True):
         df_lineup = read_lineup(URL)
     """
     if warn:
-        warnings.warn(statsbomb_warning)
-        
+        warnings.warn(STATSBOMB_WARNING)
+
     df_lineup = pd.read_json(path_or_buf)
     if df_lineup.empty:
         print(f'Skipping {path_or_buf}: empty json')
-        return
+        return None
     df_lineup['match_id'] = os.path.basename(path_or_buf[:-5])
     # each line has a column named player that contains a list of dictionaries
     # we split into seperate columns and then create a new row for each player using melt
@@ -454,7 +473,8 @@ def _get_links(url):
     from bs4 import BeautifulSoup
     import urllib.request
     response = urllib.request.urlopen(url)
-    soup = BeautifulSoup(response, 'html.parser', from_encoding=response.info().get_param('charset'))
+    soup = BeautifulSoup(response, 'html.parser',
+                         from_encoding=response.info().get_param('charset'))
     links = soup.find_all('a', href=True)
     return links
 
@@ -464,7 +484,8 @@ def get_match_links():
     match_url = 'https://github.com/statsbomb/open-data/tree/master/data/matches'
     match_folders = _get_links(match_url)
     match_folders = [(f'https://github.com/{link["href"]}',
-                      link['title']) for link in match_folders if '/tree/master/data/matches' in link['href']]
+                      link['title']) for link in match_folders
+                     if '/tree/master/data/matches' in link['href']]
     match_files = []
     for link, folder in match_folders:
         json_links = _get_links(link)
@@ -486,5 +507,6 @@ def get_lineup_links():
     """ Returns a list of links to the StatsBomb open-data lineup jsons."""
     url = 'https://github.com/statsbomb/open-data/tree/master/data/lineups'
     links = _get_links(url)
-    event_files = [f'{LINEUP_SLUG}/{link["title"]}' for link in links if link['href'][-4:] == 'json']
+    event_files = [f'{LINEUP_SLUG}/{link["title"]}' for link in links
+                   if link['href'][-4:] == 'json']
     return event_files

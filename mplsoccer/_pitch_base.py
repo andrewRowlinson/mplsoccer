@@ -559,11 +559,6 @@ class BasePitch(ABC):
 
     @staticmethod
     @abstractmethod
-    def _rotate_if_horizontal(rotation_degrees):
-        pass
-
-    @staticmethod
-    @abstractmethod
     def _reverse_annotate_if_vertical(annotate):
         pass
 
@@ -571,10 +566,6 @@ class BasePitch(ABC):
     # This module contains all the plotting methods
     @abstractmethod
     def plot(self, x, y, ax=None, **kwargs):
-        pass
-
-    @abstractmethod
-    def _scatter_rotation(self, x, y, rotation_degrees, marker=None, ax=None, **kwargs):
         pass
 
     @abstractmethod

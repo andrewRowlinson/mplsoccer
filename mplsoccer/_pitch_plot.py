@@ -1,7 +1,6 @@
 from collections import namedtuple
 
 import matplotlib.docstring as docstring
-import matplotlib.markers as mmarkers
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +14,7 @@ from mplsoccer._pitch_base import BasePitch
 from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
 from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
-from mplsoccer.scatterutils import _mscatter, scatter_football
+from mplsoccer.scatterutils import scatter_football, scatter_rotation
 from mplsoccer.utils import validate_ax
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
@@ -45,22 +44,6 @@ class BasePitchPlot(BasePitch):
         x, y = self._reverse_if_vertical(x, y)
         return ax.plot(x, y, **kwargs)
 
-    def _scatter_rotation(self, x, y, rotation_degrees, marker=None, ax=None, **kwargs):
-        rotation_degrees = np.ma.ravel(rotation_degrees)
-        if x.size != rotation_degrees.size:
-            raise ValueError("x and rotation_degrees must be the same size")
-        # rotated counter clockwise - this makes it clockwise with zero facing the direction of play
-        rotation_degrees = -rotation_degrees
-        rotation_degrees = self._rotate_if_horizontal(rotation_degrees)
-        markers = []
-        for i in range(len(rotation_degrees)):
-            t = mmarkers.MarkerStyle(marker=marker)
-            t._transform = t.get_transform().rotate_deg(rotation_degrees[i])
-            markers.append(t)
-
-        sc = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
-        return sc
-
     def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.scatter,
         which automatically flips the x and y coordinates if the pitch is vertical.
@@ -73,7 +56,7 @@ class BasePitchPlot(BasePitch):
         rotation_degrees: array-like or scalar, default None.
             Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play.
             In a horizontal pitch, 0 degrees is this way →, in a vertical pitch,
-             0 degrees is this way ↑
+            0 degrees is this way ↑
         marker: MarkerStyle, optional
             The marker style. marker can be either an instance of the class or the
             text shorthand for a particular marker. Defaults to None, in which case it takes
@@ -108,12 +91,13 @@ class BasePitchPlot(BasePitch):
             raise NotImplementedError("rotated football markers are not implemented.")
 
         if marker == 'football':
-            sc = scatter_football(x, y, ax=ax, **kwargs)
+            scatter_plot = scatter_football(x, y, ax=ax, **kwargs)
         elif rotation_degrees is not None:
-            sc = self._scatter_rotation(x, y, rotation_degrees, marker=marker, ax=ax, **kwargs)
+            scatter_plot = scatter_rotation(x, y, rotation_degrees, marker=marker,
+                                            vertical=self.vertical, ax=ax, **kwargs)
         else:
-            sc = ax.scatter(x, y, marker=marker, **kwargs)
-        return sc
+            scatter_plot = ax.scatter(x, y, marker=marker, **kwargs)
+        return scatter_plot
 
     def _reflect_2d(self, x, y, standardized=False):
         x = np.ravel(x)
@@ -747,10 +731,6 @@ class BasePitchPlot(BasePitch):
 
     @staticmethod
     def _reverse_vertices_if_vertical(vert):
-        pass
-
-    @staticmethod
-    def _rotate_if_horizontal(rotation_degrees):
         pass
 
     @staticmethod

@@ -111,10 +111,6 @@ class Pitch(BasePitchPlot):
         return vert
 
     @staticmethod
-    def _rotate_if_horizontal(rotation_degrees):
-        return rotation_degrees - 90
-
-    @staticmethod
     def _reverse_annotate_if_vertical(annotate):
         return annotate
 
@@ -222,10 +218,6 @@ class VerticalPitch(BasePitchPlot):
     @staticmethod
     def _reverse_vertices_if_vertical(vert):
         return vert[:, [1, 0]].copy()
-
-    @staticmethod
-    def _rotate_if_horizontal(rotation_degrees):
-        return rotation_degrees
 
     @staticmethod
     def _reverse_annotate_if_vertical(annotate):

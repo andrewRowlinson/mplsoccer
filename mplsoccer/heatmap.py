@@ -271,10 +271,8 @@ def heatmap_positional(stats, ax=None, vertical=False, **kwargs):
     mesh : matplotlib.collections.QuadMesh
     """
     validate_ax(ax)
-    vmax = kwargs.pop('vmax', np.array([stat['statistic'].max() for stat in stats])
-                      .max(initial=None))
-    vmin = kwargs.pop('vmin', np.array([stat['statistic'].min() for stat in stats])
-                      .min(initial=None))
+    vmax = kwargs.pop('vmax', np.array([stat['statistic'].max() for stat in stats]).max())
+    vmin = kwargs.pop('vmin', np.array([stat['statistic'].min() for stat in stats]).min())
 
     mesh_list = []
     for bin_stat in stats:
