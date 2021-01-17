@@ -1,5 +1,8 @@
-import numpy as np
+""" A module with functions for binning data into 2d bins and plotting heatmaps.´´."""
+
 from collections import namedtuple
+
+import numpy as np
 from scipy.stats import binned_statistic_2d
 
 from mplsoccer.utils import validate_ax

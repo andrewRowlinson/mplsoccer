@@ -1,7 +1,7 @@
-from matplotlib.legend_handler import HandlerLine2D
 import matplotlib.patches as patches
-from matplotlib.legend import Legend
 import numpy as np
+from matplotlib.legend import Legend
+from matplotlib.legend_handler import HandlerLine2D
 
 from mplsoccer.utils import validate_ax
 

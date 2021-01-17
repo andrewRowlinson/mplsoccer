@@ -3,11 +3,11 @@
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
 # License: MIT
 
+import matplotlib.markers as mmarkers
 import matplotlib.path as mpath
 import numpy as np
-import matplotlib.markers as mmarkers
-from matplotlib.legend_handler import HandlerPathCollection
 from matplotlib.legend import Legend
+from matplotlib.legend_handler import HandlerPathCollection
 
 __all__ = ['scatter_football', '_mscatter']
 

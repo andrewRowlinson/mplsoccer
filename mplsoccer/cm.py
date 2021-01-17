@@ -1,8 +1,8 @@
 """ Colormap functions."""
 
-from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgba
-from matplotlib.cm import get_cmap
 import numpy as np
+from matplotlib.cm import get_cmap
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgba
 
 __all__ = ['create_transparent_cmap', 'grass_cmap']
 

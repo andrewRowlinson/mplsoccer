@@ -6,9 +6,9 @@ A Python module for plotting radar-chart.
 The radar-chart theme is inspired by @Statsbomb/Rami_Moghadam.
 """
 
+import matplotlib.pyplot as plt
 # import necessary packages/modules
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
 from . import utils

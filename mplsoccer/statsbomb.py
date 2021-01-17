@@ -3,10 +3,11 @@
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
 # License: MIT
 
-import pandas as pd
 import os
-import numpy as np
 import warnings
+
+import numpy as np
+import pandas as pd
 
 EVENT_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/events'
 MATCH_SLUG = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data/matches'

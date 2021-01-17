@@ -1,21 +1,22 @@
-import matplotlib.pyplot as plt
-from matplotlib import rcParams
-import matplotlib.patches as patches
-from matplotlib.collections import PatchCollection
+from collections import namedtuple
+
+import matplotlib.docstring as docstring
 import matplotlib.markers as mmarkers
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from scipy.stats import circmean, gaussian_kde
+from matplotlib import rcParams
+from matplotlib.collections import PatchCollection
 from scipy.spatial import Voronoi
-from collections import namedtuple
-import matplotlib.docstring as docstring
+from scipy.stats import circmean, gaussian_kde
 
 from mplsoccer._pitch_base import BasePitch
 from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
-from mplsoccer.utils import validate_ax
 from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
 from mplsoccer.scatterutils import _mscatter, scatter_football
+from mplsoccer.utils import validate_ax
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
