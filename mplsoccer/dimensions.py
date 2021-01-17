@@ -65,6 +65,7 @@ size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectr
 
 @dataclass
 class BaseDims:
+    """ Base dataclass to hold pitch dimensions."""
     pitch_width: float
     pitch_length: float
     goal_width: float
@@ -110,11 +111,14 @@ class BaseDims:
     stripe_locations: Optional[np.array] = None
 
     def setup_dims(self):
+        """ Run methods for the extra pitch dimensions."""
         self.pitch_markings()
         self.juego_de_posicion()
         self.stripes()
 
     def pitch_markings(self):
+        """ Create sorted pitch dimensions to enable standardization of coordinates.
+        and pitch_extent which contains [xmin, xmax, ymin, ymax]."""
         self.x_markings_sorted = np.array([self.left, self.six_yard_left, self.penalty_left,
                                            self.penalty_area_left, self.center_length,
                                            self.penalty_area_right, self.penalty_right,
@@ -131,6 +135,8 @@ class BaseDims:
             self.pitch_extent = np.array([self.left, self.right, self.bottom, self.top])
 
     def juego_de_posicion(self):
+        """ Create Juego de Posición pitch marking dimensions.
+        See: https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanation/"""
         self.positional_x = np.array([self.left, self.penalty_area_left,
                                       (self.penalty_area_left +
                                        (self.center_length - self.penalty_area_left) / 2.),
@@ -142,6 +148,7 @@ class BaseDims:
         self.positional_y = self.y_markings_sorted[[0, 1, 2, 5, 6, 7]]
 
     def stripes(self):
+        """ Create stripe dimensions."""
         stripe_pen_area = (self.penalty_area_length - self.six_yard_length) / 2.
         stripe_other = (self.length - 2 * self.six_yard_length - 6 * stripe_pen_area) / 10.
         stripe_locations = ([self.left] + [self.six_yard_length] + [stripe_pen_area] * 3 +
@@ -149,11 +156,13 @@ class BaseDims:
         self.stripe_locations = np.array(stripe_locations).cumsum()
 
     def penalty_box_dims(self):
+        """ Create the penalty box dimensions. This is used to calculate the dimensions
+         inside the penalty boxes for pitches with varying dimensions (width and length varies)."""
         self.penalty_right = self.right - self.penalty_left
         self.penalty_area_left = self.penalty_area_length
         self.penalty_area_right = self.right - self.penalty_area_length
         # if inverted then need to go in the other direction for the bottom
-        if self.invert_y: 
+        if self.invert_y:
             neg_if_inverted = - 1 / 2
         else:
             neg_if_inverted = 1 / 2
@@ -169,12 +178,16 @@ class BaseDims:
 
 @dataclass
 class FixedDims(BaseDims):
+    """ Dataclass holding the dimensions for pitches with fixed dimensions:
+     'opta', 'wyscout', 'statsbomb' and 'uefa'."""
     def __post_init__(self):
         self.setup_dims()
 
 
 @dataclass
 class VariableCenterDims(BaseDims):
+    """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
+    'tracab', 'skillcorner', and 'secondspectrum'."""
     penalty_spot_distance: InitVar[float] = None
 
     def __post_init__(self, penalty_spot_distance):
@@ -195,6 +208,8 @@ class VariableCenterDims(BaseDims):
 
 @dataclass
 class CustomDims(BaseDims):
+    """ Dataclass holding the dimension for the custom pitch.
+    This is a pitch where the dimensions (width/length) vary and the origin is (left, bottom)."""
     penalty_spot_distance: InitVar[float] = None
 
     def __post_init__(self, penalty_spot_distance):
@@ -209,6 +224,7 @@ class CustomDims(BaseDims):
 
 @dataclass
 class MetricasportsDims(BaseDims):
+    """ Dataclass holding the dimensions for the 'metricasports' pitch."""
     penalty_spot_distance: InitVar[float] = None
 
     def __post_init__(self, penalty_spot_distance):
@@ -225,6 +241,7 @@ class MetricasportsDims(BaseDims):
 
 
 def opta_dims():
+    """ Create 'opta' dimensions."""
     return FixedDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
                      width=100., length=100., pitch_width=68., pitch_length=105.,
                      goal_width=10.76, goal_length=1.9,  goal_bottom=44.62, goal_top=55.38,
@@ -238,6 +255,7 @@ def opta_dims():
 
 
 def wyscout_dims():
+    """ Create 'wyscout' dimensions."""
     return FixedDims(left=0., right=100., bottom=100., top=0., aspect=68 / 105,
                      width=100., length=100., pitch_width=68., pitch_length=105.,
                      goal_width=12., goal_length=1.9, goal_bottom=56., goal_top=44.,
@@ -251,6 +269,7 @@ def wyscout_dims():
 
 
 def uefa_dims():
+    """ Create 'uefa dimensions."""
     return FixedDims(left=0., right=105., top=68., bottom=0., aspect=1.,
                      width=68., length=105., pitch_width=68., pitch_length=105.,
                      goal_width=7.32, goal_length=2., goal_bottom=30.34, goal_top=37.66,
@@ -264,6 +283,7 @@ def uefa_dims():
 
 
 def statsbomb_dims():
+    """ Create 'statsbomb dimensions."""
     return FixedDims(left=0., right=120., bottom=80., top=0., aspect=1.,
                      width=80., length=120.,  pitch_width=80.,  pitch_length=120.,
                      goal_width=8., goal_length=2.4, goal_bottom=44., goal_top=36.,
@@ -277,6 +297,7 @@ def statsbomb_dims():
 
 
 def metricasports_dims(pitch_width, pitch_length):
+    """ Create 'metricasports' dimensions."""
     return MetricasportsDims(top=0., bottom=1., left=0., right=1.,
                              pitch_width=pitch_width, pitch_length=pitch_length,
                              width=1., center_width=0.5, length=1., center_length=0.5,
@@ -287,6 +308,7 @@ def metricasports_dims(pitch_width, pitch_length):
 
 
 def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
+    """ Create dimensions for 'skillcorner' and 'secondspectrum' pitches."""
     return VariableCenterDims(aspect=1., pitch_width=pitch_width, pitch_length=pitch_length,
                               goal_width=7.32, goal_length=2., goal_bottom=-3.66, goal_top=3.66,
                               six_yard_width=18.32, six_yard_length=5.5, six_yard_bottom=-9.16,
@@ -298,6 +320,7 @@ def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
 
 
 def tracab_dims(pitch_width, pitch_length):
+    """ Create 'tracab' dimensions."""
     return VariableCenterDims(aspect=1., pitch_width=pitch_width, pitch_length=pitch_length,
                               goal_width=732., goal_length=200., goal_bottom=-366., goal_top=366.,
                               six_yard_width=1832., six_yard_length=550., six_yard_bottom=-916.,
@@ -309,6 +332,7 @@ def tracab_dims(pitch_width, pitch_length):
 
 
 def custom_dims(pitch_width, pitch_length):
+    """ Create 'custom' dimensions."""
     return CustomDims(bottom=0., left=0., aspect=1., width=pitch_width, length=pitch_length,
                       pitch_length=pitch_length, pitch_width=pitch_width, six_yard_width=18.32,
                       six_yard_length=5.5, penalty_area_width=40.32, penalty_spot_distance=11.,
@@ -316,7 +340,27 @@ def custom_dims(pitch_width, pitch_length):
                       goal_width=7.32, arc=53.05, invert_y=False, origin_center=False)
 
 
-def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
+def create_pitch_dims(pitch_type, pitch_length=None, pitch_width=None):
+    """ Create pitch dimensions.
+
+    Parameters
+    ----------
+    pitch_type : str
+        The pitch type used in the plot.
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab',
+        'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
+    pitch_length : float, default None
+        The pitch length in meters. Only used for the 'tracab' and 'metricasports',
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type.
+    pitch_width : float, default None
+        The pitch width in meters. Only used for the 'tracab' and 'metricasports',
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type
+
+    Returns
+    -------
+    dataclass
+        A dataclass holding the pitch dimensions.
+    """
     if pitch_type == 'opta':
         spec = opta_dims()
     elif pitch_type == 'wyscout':
