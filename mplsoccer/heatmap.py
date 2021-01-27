@@ -235,14 +235,14 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         xedge = dim.positional_x[[0, 6]]
         yedge = dim.positional_y
         stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
-                                       bins=(xedge, yedge))
+                              bins=(xedge, yedge))
         stats = [stats]
 
     elif positional == 'vertical':
         xedge = dim.positional_x
         yedge = dim.positional_y[[0, 5]]
         stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
-                                     bins=(xedge, yedge))
+                              bins=(xedge, yedge))
         stats = [stats]
     else:
         raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")

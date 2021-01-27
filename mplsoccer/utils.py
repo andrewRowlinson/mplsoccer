@@ -349,13 +349,11 @@ class FontManager:
                  url=('https://github.com/google/fonts/blob/master/'
                       'apache/roboto/static/Roboto-Regular.ttf?raw=true')):
         self.url = url
-        self._prop = None
+        with NamedTemporaryFile(delete=False, suffix=".ttf") as temp_file:
+            temp_file.write(urlopen(self.url).read())
+            self._prop = fm.FontProperties(fname=temp_file.name)
 
     @property
     def prop(self):
         """Get matplotlib.font_manager.FontProperties object that sets the custom font."""
-        if self._prop is None:
-            with NamedTemporaryFile(delete=False, suffix=".ttf") as temp_file:
-                temp_file.write(urlopen(self.url).read())
-                self._prop = fm.FontProperties(fname=temp_file.name)
         return self._prop
