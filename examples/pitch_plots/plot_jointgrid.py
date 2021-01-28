@@ -53,6 +53,7 @@ df_team1['x'] = pitch.dim.right - df_team1.x
 
 ##############################################################################
 # Plotting a standard shot map with step charts
+# ---------------------------------------------
 
 fig, axes = pitch.jointgrid(left=0.15,  # pitch axis starts 15% in from the side of the figure
                             bottom=0.075,  # pitch axis starts 7.5% in from the side of the figure
@@ -81,6 +82,7 @@ _ = axes[3].axis('off')
 
 ##############################################################################
 # Plotting a standard shot map with rug plots
+# -------------------------------------------
 
 # increased the size of the pitch_height and decreased the marginal height
 # as rug plots are only lines, we don't need as much space taken up by the marginal axes
@@ -133,6 +135,7 @@ blue = get_cmap('Blues')(np.linspace(0, 1, 100))[60]
 
 ##############################################################################
 # Hexbin shot map with kdeplot marginal axes
+# ------------------------------------------
 
 fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8)
 # plot the hexbins
@@ -158,7 +161,8 @@ _ = axes[2].axis('off')
 _ = axes[3].axis('off')
 
 ##############################################################################
-# Heatmap shot map with histogram/kdeplot on the marginal axes
+# Heatmap shot map with histogram/ kdeplot on the marginal axes
+# -------------------------------------------------------------
 
 fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8)
 bs1 = pitch.bin_statistic(df_team1.x, df_team1.y, bins=(18, 12))
@@ -188,6 +192,7 @@ _ = axes[3].axis('off')
 
 ##############################################################################
 # Kdeplot shot map with kdeplot on the marginal axes
+# --------------------------------------------------
 
 fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8)
 # increase number of levels for a smoother looking heatmap
@@ -208,6 +213,7 @@ _ = axes[3].axis('off')
 
 ##############################################################################
 # Vertical shot map with kdeplot marginals
+# ----------------------------------------
 # The jointgrid is flexible. You can filter the marginal axes with
 # ax_left, ax_top, ax_left, ax_right. Here we set the bottom and right
 # marginal axes to display for a single team.
