@@ -604,7 +604,7 @@ class BasePitchPlot(BasePitch):
         return flow
 
     def jointgrid(self, pitch_height=0.5, marginal_height=0.1, space_height=0,
-                  left=0.1, bottom=0.1):
+                  left=0.1, bottom=0.1, ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
         """ Create a grid with a pitch at the center and axes on the
          top and right handside of the pitch.
 
@@ -627,27 +627,43 @@ class BasePitchPlot(BasePitch):
         bottom : float, default 0.1
             The location of the bottom side of the pitch in fractions of the figure height.
             The default means that the pitch is located 10% in from the bottom of the figure.
+        ax_left, ax_top, ax_right : bool, default True
+            Whether to include a Matplotlib Axes on the left/top/right side of the pitch.
+        ax_bottom : bool, default False
+            Whether to include a Matplotlib Axes on the bottom side of the pitch.
         Returns
         -------
         fig : matplotlib.figure.Figure
-        ax : a 1d numpy array (length 3) of matplotlib.axes.Axes
-            format = array([pitch, marginal axis to the top, marginal axis to the right])
+        ax : a 1d numpy array (length 5) of matplotlib.axes.Axes
+            format = array([pitch, marginal axes in order left, top, right, bottom])
+            if marginal axes is not present then axes replaced by None
         """
-        if bottom + pitch_height + space_height + marginal_height > 1.:
+        if bottom + pitch_height + ((space_height + marginal_height) * ax_top) > 1.:
             error_msg = ('The jointplot axes extends past the figure height. '
                          'Reduce one of the pitch_height, space_height, marginal_height, '
                          'or bottom so the total is ≤ 1')
             raise ValueError(error_msg)
-
+            
+        if bottom - ((space_height + marginal_height) * ax_bottom) < 0.:
+            error_msg = ('The jointplot axes extends past the figure bottom border. '
+                         'Increase the bottom argument so it is more than the space_height + marginal_height.')
+            raise ValueError(error_msg)
+            
         fig_aspect = self.figsize[0] / self.figsize[1]
         pitch_width = pitch_height * self.ax_aspect / fig_aspect
         marginal_width = marginal_height / fig_aspect
         space_width = space_height / fig_aspect
-        if left + pitch_width + space_width + marginal_width > 1.:
+        if left + pitch_width + ((space_width + marginal_width) * ax_right) > 1.:
             error_msg = ('The jointplot axes extends past the figure width. '
                          'Reduce one of the pitch_height, space_height, marginal_height, '
                          'or left.')
             raise ValueError(error_msg)
+            
+        if left - ((space_width + marginal_width) * ax_left) < 0.:
+            error_msg = ('The jointplot axes extends past the figure left border. '
+                         'Increase the left argument so there is space for the left marginal axis.')
+            raise ValueError(error_msg)
+            
 
         left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
                     np.abs(self.extent[1] - self.extent[0]))
@@ -657,46 +673,79 @@ class BasePitchPlot(BasePitch):
                       np.abs(self.extent[3] - self.extent[2]))
         top_pad = (np.abs(self.visible_pitch - self.extent)[3] /
                    np.abs(self.extent[3] - self.extent[2]))
-
+        
         # add axes and draw pitch
         fig = plt.figure(figsize=self.figsize)
-        ax_pitch = fig.add_axes((left, bottom, pitch_width, pitch_height))
-        self.draw(ax=ax_pitch)
-        ax_x = fig.add_axes((left + (left_pad * pitch_width),
-                             bottom + pitch_height + space_height,
-                             pitch_width - (left_pad + right_pad) * pitch_width,
-                             marginal_height))
-        ax_y = fig.add_axes((left + pitch_width + space_width,
-                             bottom + (bottom_pad * pitch_height),
-                             marginal_width,
-                             pitch_height - (bottom_pad + top_pad) * pitch_height))
-
+        
         # set axes limits
         x0, x1, y0, y1 = self.visible_pitch
-        x0, y0 = self._reverse_if_vertical(x0, y0)
-        x1, y1 = self._reverse_if_vertical(x1, y1)
-        ax_x.set_xlim(x0, x1)
-        ax_y.set_ylim(y0, y1)
+        
+        axes = []
+        
+        if ax_left:
+            ax_0 = fig.add_axes((left - space_width - marginal_width,
+                                 bottom + (bottom_pad * pitch_height),
+                                 marginal_width,
+                                 pitch_height - (bottom_pad + top_pad) * pitch_height))
+            ax_0.set_ylim(y0, y1)
+            ax_0.invert_xaxis()
+            for spine in ['left', 'bottom', 'top']:
+                ax_0.spines[spine].set_visible(False)
+            axes.append(ax_0)
+        else:
+            axes.append(None)
+            
+        if ax_top:
+            ax_1 = fig.add_axes((left + (left_pad * pitch_width),
+                                 bottom + pitch_height + space_height,
+                                 pitch_width - (left_pad + right_pad) * pitch_width,
+                                 marginal_height))
+            for spine in ['left', 'right', 'top']:
+                ax_1.spines[spine].set_visible(False)
+            ax_1.set_xlim(x0, x1)
+            axes.append(ax_1)
+        else:
+            axes.append(None)
+        
+        if ax_right:
+            ax_2 = fig.add_axes((left + pitch_width + space_width,
+                                 bottom + (bottom_pad * pitch_height),
+                                 marginal_width,
+                                 pitch_height - (bottom_pad + top_pad) * pitch_height))
+            ax_2.set_ylim(y0, y1)
+            for spine in ['right', 'bottom', 'top']:
+                ax_2.spines[spine].set_visible(False)
+            axes.append(ax_2)
+        else:
+            axes.append(None)
+            
+        if ax_bottom:
+            ax_3 = fig.add_axes((left + (left_pad * pitch_width),
+                                 bottom - space_height - marginal_height,
+                                 pitch_width - (left_pad + right_pad) * pitch_width,
+                                 marginal_height))
+            for spine in ['left', 'right', 'bottom']:
+                ax_3.spines[spine].set_visible(False)
+            ax_3.set_xlim(x0, x1)
+            ax_3.invert_yaxis()
+            axes.append(ax_3)
+        else:
+            axes.append(None)
+                
+        ax_pitch = fig.add_axes((left, bottom, pitch_width, pitch_height))
+        self.draw(ax=ax_pitch)
+        axes.insert(0, ax_pitch)
+       
+        for ax in axes[1:]:
+            if ax is not None:
+                plt.setp(ax.get_xticklabels(), visible=False)
+                plt.setp(ax.get_yticklabels(), visible=False)
+                ax.set_xticks([])
+                ax.set_yticks([])
+        
+        axes = np.array(axes)
 
-        # remove spines (border around axes)
-        for spine in ax_x.spines.values():
-            spine.set_visible(False)
-        for spine in ax_y.spines.values():
-            spine.set_visible(False)
-
-        # remove ticks/ labels)
-        plt.setp(ax_x.get_xticklabels(), visible=False)
-        plt.setp(ax_x.get_yticklabels(), visible=False)
-        plt.setp(ax_y.get_xticklabels(), visible=False)
-        plt.setp(ax_y.get_yticklabels(), visible=False)
-        ax_x.set_xticks([])
-        ax_x.set_yticks([])
-        ax_y.set_xticks([])
-        ax_y.set_yticks([])
-
-        ax = np.array([ax_pitch, ax_x, ax_y])
-
-        return fig, ax
+        return fig, axes
 
     # The methods below for drawing/ setting attributes for some of the pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
