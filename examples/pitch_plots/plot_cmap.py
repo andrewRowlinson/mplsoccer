@@ -92,6 +92,8 @@ hexmap = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#122c3d', gridsize=(8, 8),
 
 ##############################################################################
 # Cyan colormap kdeplot
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#15242e',
+                      figsize=(4.4, 6.4))
 fig, ax = pitch.draw()
 # note use the colormap with 100 colors for a smoother finish
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_cmap_004.png'
@@ -111,6 +113,7 @@ hexmap = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#f4f4f4', gridsize=(8, 8), 
 
 ##############################################################################
 # Flamingo colormap kdeplot
+pitch = VerticalPitch(line_color='#000009', line_zorder=2, pitch_color='#e3aca7', figsize=(4.4, 6.4))
 fig, ax = pitch.draw()
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=flamingo_cmap_100, shade=True, levels=100)
 
@@ -130,6 +133,8 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#20143f',
 
 ##############################################################################
 # Violet colormap kdeplot
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2,
+                      pitch_color='#332a49', figsize=(4.4, 6.4))
 fig, ax = pitch.draw()
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_violet_cmap_100, shade=True, levels=100)
 
@@ -149,5 +154,7 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#443d07',
 
 ##############################################################################
 # Yellow colormap kdeplot
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2,
+                      pitch_color='#7c2e2a', figsize=(4.4, 6.4))
 fig, ax = pitch.draw()
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_yellow_cmap_100, shade=True, levels=100)
