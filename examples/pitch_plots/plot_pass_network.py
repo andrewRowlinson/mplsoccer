@@ -4,6 +4,7 @@ Pass Network
 ============
 
 This example shows how to plot passes between players in a set formation.
+This is written by `@DymondFormation <https://twitter.com/DymondFormation>`_
 """
 
 import pandas as pd
