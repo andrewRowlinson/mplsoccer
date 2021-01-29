@@ -1,7 +1,7 @@
 """
-======================
-cmap: custom colormaps
-======================
+================
+Custom colormaps
+================
 
 This example shows how to make a custom colormap (cmap) in Matplotlib. Colormaps are used to
 map from a value to a color in a chart.

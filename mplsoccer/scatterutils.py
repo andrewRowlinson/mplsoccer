@@ -10,7 +10,7 @@ import numpy as np
 from matplotlib.legend import Legend
 from matplotlib.legend_handler import HandlerPathCollection
 
-__all__ = ['scatter_football', 'scatter_rotation']
+__all__ = ['scatter_football', 'scatter_rotation', 'arrowhead_marker']
 
 
 # Note that the football-marker arrays are based on the
