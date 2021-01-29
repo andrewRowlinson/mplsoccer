@@ -221,10 +221,10 @@ def scatter_rotation(x, y, rotation_degrees, marker=None, ax=None, vertical=Fals
     if x.size != rotation_degrees.size:
         raise ValueError("x and rotation_degrees must be the same size")
     # rotated counter clockwise - this makes it clockwise with zero facing the direction of play
-    rotation_degrees = -rotation_degrees
+    rotation_degrees = - rotation_degrees
     # if horizontal rotate by 90 degrees so 0 degrees is this way →
     if vertical is False:
-        return rotation_degrees - 90
+        rotation_degrees = rotation_degrees - 90
     markers = []
     for degrees in rotation_degrees:
         marker_style = mmarkers.MarkerStyle(marker=marker)
