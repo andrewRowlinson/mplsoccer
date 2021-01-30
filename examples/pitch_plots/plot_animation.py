@@ -3,28 +3,31 @@
 Animation
 =========
 
-This example shows how to animate tracking data from metricasports (https://github.com/metrica-sports/sample-data).
+This example shows how to animate tracking data from metricasports
+(https://github.com/metrica-sports/sample-data).
 """
 
-from mplsoccer import Pitch
-import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
+import pandas as pd
 from matplotlib import animation
+from matplotlib import pyplot as plt
+
+from mplsoccer import Pitch
+from mplsoccer.utils import Standardizer
 
 ##############################################################################
 # Load the data
 
 # load away data
-link1 = ('https://raw.githubusercontent.com/metrica-sports/sample-data/master/'
+LINK1 = ('https://raw.githubusercontent.com/metrica-sports/sample-data/master/'
          'data/Sample_Game_1/Sample_Game_1_RawTrackingData_Away_Team.csv')
-df_away = pd.read_csv(link1, skiprows=2)
+df_away = pd.read_csv(LINK1, skiprows=2)
 df_away.sort_values('Time [s]', inplace=True)
 
 # load home data
-link2 = ('https://raw.githubusercontent.com/metrica-sports/sample-data/master/'
+LINK2 = ('https://raw.githubusercontent.com/metrica-sports/sample-data/master/'
          'data/Sample_Game_1/Sample_Game_1_RawTrackingData_Home_Team.csv')
-df_home = pd.read_csv(link2, skiprows=2)
+df_home = pd.read_csv(LINK2, skiprows=2)
 df_home.sort_values('Time [s]', inplace=True)
 
 ##############################################################################
@@ -34,6 +37,7 @@ df_home.sort_values('Time [s]', inplace=True)
 
 
 def set_col_names(df):
+    """ Renames the columns to have x and y suffixes."""
     cols = list(np.repeat(df.columns[3::2], 2))
     cols = [col+'_x' if i % 2 == 0 else col+'_y' for i, col in enumerate(cols)]
     cols = np.concatenate([df.columns[:3], cols])
@@ -65,6 +69,7 @@ df_ball.rename({'Ball_x': 'x', 'Ball_y': 'y'}, axis=1, inplace=True)
 
 # convert to long form from wide form
 def to_long_form(df):
+    """ Pivots a dataframe from wide-form (each player as a separate column) to long form (rows)"""
     df = pd.melt(df, id_vars=df.columns[:3], value_vars=df.columns[3:], var_name='player')
     df.loc[df.player.str.contains('_x'), 'coordinate'] = 'x'
     df.loc[df.player.str.contains('_y'), 'coordinate'] = 'y'
@@ -79,6 +84,27 @@ def to_long_form(df):
 
 df_away = to_long_form(df_away)
 df_home = to_long_form(df_home)
+
+##############################################################################
+# Standardize the data
+# We could plot the data on a metricasports pitch, but for this demo we are
+# goint to shift the coordinates to meters (105*68m pitch) rather than
+# metricasports coordinates, which are in the range 0-1
+standard = Standardizer(pitch_from='metricasports', length_from=105, width_from=68,
+                        pitch_to='uefa')
+
+# standardize home coordinates
+home_x, home_y = standard.transform(df_home.x, df_home.y)
+df_home['x'] = home_x
+df_home['y'] = home_y
+# standardize away coordinates
+away_x, away_y = standard.transform(df_away.x, df_away.y)
+df_away['x'] = away_x
+df_away['y'] = away_y
+# standardize the ball coordinates
+ball_x, ball_y = standard.transform(df_ball.x, df_ball.y)
+df_ball['x'] = ball_x
+df_ball['y'] = ball_y
 
 ##############################################################################
 # Show the away data
@@ -96,8 +122,7 @@ df_ball.head()
 # Plot the animation
 
 # First set up the figure, the axis
-pitch = Pitch(pitch_type='metricasports', figsize=(16, 10.4),
-              pitch_width=68, pitch_length=105, goal_type='line')
+pitch = Pitch(pitch_type='uefa', figsize=(16, 10.4), goal_type='line')
 fig, ax = pitch.draw()
 
 # then setup the pitch plot markers we want to animate
@@ -109,6 +134,7 @@ home, = ax.plot([], [], ms=10, markerfacecolor='#7f63b8', **marker_kwargs)  # pu
 
 # animation function
 def animate(i):
+    """ Function to animate the data. Each frame it sets the data for the players and the ball."""
     # set the ball data with the x and y positions for the ith frame
     ball.set_data(df_ball.iloc[i, 3], df_ball.iloc[i, 4])
     # get the frame id for the ith frame

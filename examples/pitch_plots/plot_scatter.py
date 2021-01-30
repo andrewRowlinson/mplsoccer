@@ -247,13 +247,8 @@ pitch = Pitch(figsize=(14, 12))
 fig, ax = pitch.draw()
 angle, distance = pitch.calculate_angle_and_distance(df_pass_barca.x, df_pass_barca.y,
                                                      df_pass_barca.end_x, df_pass_barca.end_y,
-                                                     standardized=False)
-# numpy arctan2 gives anticlockwise angle in radians
-# here we convert to degrees and take the negative for clockwise angles
-# the modulus is not strictly necessary for plotting purposes,
-# but gives the postive angle in degrees
-angle_degrees = np.mod(-np.degrees(angle), 360)
-sc = pitch.scatter(df_pass_barca.x, df_pass_barca.y, rotation_degrees=angle_degrees,
+                                                     standardized=False, degrees=True)
+sc = pitch.scatter(df_pass_barca.x, df_pass_barca.y, rotation_degrees=angle,
                    c='#b94b75',  # color for scatter in hex format
                    edgecolors='#383838', alpha=0.9,
                    s=(distance / distance.max()) * 900, ax=ax, marker=arrowhead_marker)

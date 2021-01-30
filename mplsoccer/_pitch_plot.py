@@ -456,7 +456,7 @@ class BasePitchPlot(BasePitch):
 
         return team1, team2
 
-    def calculate_angle_and_distance(self, xstart, ystart, xend, yend, standardized=False):
+    def calculate_angle_and_distance(self, xstart, ystart, xend, yend, standardized=False, degrees=False):
         """ Calculates the angle in radians counter-clockwise between a start and end
         location and the distance. Where the angle 0 is this way →
         (the straight line from left to right) in a horizontally orientated pitch
@@ -471,13 +471,17 @@ class BasePitchPlot(BasePitch):
         standardized : bool, default False
             Whether the x, y values have been standardized to the 'uefa'
             pitch coordinates (105m x 68m)
+        degrees : bool, default False
+            If False, the angle is returned in radians counter-clockwise in the range [0, 2pi]
+            If True, the angle is returned in degrees clockwise in the range [0, 360].
 
         Returns
         -------
         angle: ndarray
-            Array of angles in radians counter-clockwise in the range [0, 2pi].
+            The default is an array of angles in radians counter-clockwise in the range [0, 2pi].
             Where 0 is the straight line left to right in a horizontally orientated pitch
             and the straight line bottom to top in a vertically orientated pitch.
+            If degrees = True, then the angle is returned  in degrees clockwise in the range [0, 360]
         distance: ndarray
             Array of distances.
         """
@@ -502,6 +506,12 @@ class BasePitchPlot(BasePitch):
         angle = np.arctan2(y_dist, x_dist)
         # if negative angle make positive angle, so goes from 0 to 2 * pi
         angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+        
+        if degrees:
+            # here we convert to degrees and take the negative for clockwise angles
+            # the modulus is not strictly necessary for plotting purposes,
+            # but gives the postive angle in degrees
+            angle = np.mod(-np.degrees(angle), 360)
 
         distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
 
