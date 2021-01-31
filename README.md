@@ -1,6 +1,4 @@
-# branch to merge mplsoccer and soccerplots
-
-# mplsoccer <img src="docs/source/logo-green.png" align="right" />
+# mplsoccer <img src="docs/source/logo-green.png" width="160px" align="right" />
 
 
 
