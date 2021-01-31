@@ -92,7 +92,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 ##############################################################################
 # Shot map Barcelona using cmap for edges
 # ---------------------------------------
-# Its possible to use cmaps for the edgecolors for emphasis by mapping the expected goals
+# It's possible to use cmaps for the edgecolors for emphasis by mapping the expected goals
 # values to colors and using these as edgecolors.
 # You could use the same technique to assign fewer colors to the scatter.
 
@@ -223,6 +223,59 @@ sc2 = pitch.scatter(df_goals_barca.x, df_goals_barca.y,
                     ax=ax)
 
 txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
+              size=30,
+              # here i am using a downloaded font from google fonts instead of passing a fontdict
+              fontproperties=fm_rubik.prop, color=pitch.line_color,
+              va='center', ha='center')
+
+##############################################################################
+# Cropping to important areas
+# ---------------------------
+# One under-used technique is to crop the pitch edges where there is likely
+# to be fewer shots. If you look at the StatsBomb shot maps this is
+# a subtle technique they use. It means you reduce the amount of white space and
+# you zoom into the areas where more shots are taken.
+#
+# The disadvantage of this approach is that sometimes people misinterpret the pitch
+# and think the areas towards the edges are the edges of the pitch. You
+# might also miss some shots near the half-way line.
+pitch = VerticalPitch(figsize=(12, 10),
+                      # make it so the pitch extends slightly below the halfway line
+                      pad_top=0.5,
+                      pad_bottom=-20,  # reduce the area displayed at the bottom of the pitch
+                      pad_left=-15,  # reduce the area displayed on the left of the pitch
+                      pad_right=-15,  # reduce the area displayed on the right of the pitch
+                      half=True,  # half of a pitch
+                      goal_type='line')
+
+# filter goals / non-shot goals
+df_goals_barca = df_shots_barca[df_shots_barca.outcome_name == 'Goal'].copy()
+df_non_goal_shots_barca = df_shots_barca[df_shots_barca.outcome_name != 'Goal'].copy()
+
+fig, ax = pitch.draw()
+
+# plot non-goal shots with hatch
+sc1 = pitch.scatter(df_non_goal_shots_barca.x, df_non_goal_shots_barca.y,
+                    # size varies between 100 and 1900 (points squared)
+                    s=(df_non_goal_shots_barca.shot_statsbomb_xg * 1900) + 100,
+                    edgecolors='#606060',  # give the markers a charcoal border
+                    c='None',  # no facecolor for the markers
+                    hatch='///',  # the all important hatch (triple diagonal lines)
+                    # for other markers types see: https://matplotlib.org/api/markers_api.html
+                    marker='o',
+                    ax=ax)
+
+# plot goal shots with a color
+sc2 = pitch.scatter(df_goals_barca.x, df_goals_barca.y,
+                    # size varies between 100 and 1900 (points squared)
+                    s=(df_goals_barca.shot_statsbomb_xg * 1900) + 100,
+                    edgecolors='#606060',  # give the markers a charcoal border
+                    c='#b94b75',  # color for scatter in hex format
+                    # for other markers types see: https://matplotlib.org/api/markers_api.html
+                    marker='o',
+                    ax=ax)
+
+txt = ax.text(x=40, y=85, s='Barcelona shots\nversus Sevilla',
               size=30,
               # here i am using a downloaded font from google fonts instead of passing a fontdict
               fontproperties=fm_rubik.prop, color=pitch.line_color,
