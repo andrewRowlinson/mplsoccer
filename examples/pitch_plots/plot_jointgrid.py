@@ -235,3 +235,32 @@ txt1 = axes[0].text(x=40, y=80, s=team2, fontproperties=fm_rubik.prop, color=pit
                     ha='center', va='center', fontsize=60)
 _ = axes[3].axis('off')
 _ = axes[4].axis('off')
+
+##############################################################################
+# Crop the pitch
+# --------------
+# The jointgrid also works with arbritary padding.
+# So you can crop the pitc and still have the marginal axes to plot on.
+
+vertical_pitch = VerticalPitch(figsize=(16, 9), half=True,
+                               # here we remove some of the pitch on the left/ right/ bottom
+                               pad_top=0.05, pad_right=-15, pad_bottom=-20, pad_left=-15,
+                               goal_type='line')
+
+# we leave enough room here for the bottom marginal axes
+# the pitch starts at 15% of the figure height. The bottom marginal axes is 10% of the figure height
+# therefore 5% of the figure height is left as a margin at the bottom of the plot
+fig, axes = vertical_pitch.jointgrid(left=0.2, bottom=0.15, pitch_height=0.8, marginal_height=0.1,
+                                     # here we filter out the left and top marginal axes
+                                     ax_top=False, ax_bottom=True, ax_left=False, ax_right=True)
+# typical shot map where the scatter points vary by the expected goals value
+# using alpha for transparency as there are a lot of shots stacked around the six-yard box
+sc_team2 = vertical_pitch.scatter(df_team2.x, df_team2.y, s=df_team2.shot_statsbomb_xg * 700,
+                                  alpha=0.5, ec='black', color='#697cd4', ax=axes[0])
+# kdeplots on the marginals
+team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axes[3], color='#697cd4', shade=True)
+team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axes[4], color='#697cd4', shade=True)
+txt1 = axes[0].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
+                    ha='center', va='center', fontsize=60)
+_ = axes[3].axis('off')
+_ = axes[4].axis('off')
