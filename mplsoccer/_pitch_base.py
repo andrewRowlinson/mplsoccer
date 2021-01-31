@@ -240,6 +240,28 @@ class BasePitch(ABC):
         self.goal_right = np.array([[self.dim.right, self.dim.goal_bottom],
                                     [self.dim.right, self.dim.goal_top]])
 
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'figsize={self.figsize!r}, nrows={self.nrows!r}, ncols={self.ncols!r}, '
+                f'pitch_type={self.pitch_type!r}, half={self.half!r}, '
+                f'pitch_color={self.pitch_color!r}, line_color={self.line_color!r}, '
+                f'linewidth={self.linewidth!r}, line_zorder={self.line_zorder!r}, '
+                f'stripe={self.stripe!r}, stripe_color={self.stripe_color!r}, '
+                f'stripe_zorder={self.stripe_zorder!r}, '
+                f'pad_left={self.pad_left!r}, pad_right={self.pad_right!r}, '
+                f'pad_bottom={self.pad_bottom!r}, pad_top={self.pad_top!r}, '
+                f'positional={self.positional!r}, positional_zorder={self.positional_zorder!r}, '
+                f'positional_linewidth={self.positional_linewidth!r}, '
+                f'positional_linestyle={self.positional_linestyle!r}, '
+                f'positional_color={self.positional_color!r}, shade_middle={self.shade_middle!r}, '
+                f'shade_color={self.shade_color!r}, shade_zorder={self.shade_zorder!r}, '
+                f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
+                f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
+                f'label={self.label!r}, tick={self.tick!r}, axis={self.axis!r}, '
+                f'tight_layout={self.tight_layout!r}, '
+                f'constrained_layout={self.constrained_layout!r}, '
+                f'spot_scale={self.spot_scale!r})')
+
     def _validation_checks(self):
         # pitch validation
         if self.pitch_type not in dimensions.valid:

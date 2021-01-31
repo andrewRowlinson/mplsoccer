@@ -263,6 +263,13 @@ class Standardizer:
         if (length_to is None or width_to is None) and pitch_to in dimensions.size_varies:
             raise TypeError("Invalid argument: width_to and length_to must be specified.")
 
+        self.pitch_from = pitch_from
+        self.pitch_to = pitch_to
+        self.length_from = length_from
+        self.width_from = width_from
+        self.length_to = length_to
+        self.width_to = width_to
+
         self.dim_from = dimensions.create_pitch_dims(pitch_type=pitch_from,
                                                      pitch_length=length_from,
                                                      pitch_width=width_from)
@@ -321,6 +328,12 @@ class Standardizer:
         high_to = markings_to[pos]
         return low_to + ((high_to - low_to) * proportion_of_way_between)
 
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'pitch_from={self.pitch_from}, pitch_to={self.pitch_to}, '
+                f'length_from={self.length_from}, width_from={self.width_from}, '
+                f'length_to={self.length_to}, width_to={self.width_to})')
+
 
 class FontManager:
     """Utility to load fun fonts from https://fonts.google.com/ for matplotlib.
@@ -357,3 +370,6 @@ class FontManager:
     def prop(self):
         """Get matplotlib.font_manager.FontProperties object that sets the custom font."""
         return self._prop
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(font_url={self.url})'
