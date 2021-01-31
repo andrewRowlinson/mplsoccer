@@ -1,4 +1,4 @@
-# mplsoccer <img src="docs/source/logo-green.png" width="160px" align="right" />
+# mplsoccer <img src="docs/source/logo-green.png" width="160px" align="left" />
 
 mplsoccer is a Python library for plotting soccer/football charts in Matplotlib and loading StatsBomb open-data. Read more in the 
 [docs](https://mplsoccer.readthedocs.io/) and look at 
@@ -32,10 +32,6 @@ In mplsoccer, you can
 
 I hope mplsoccer helps you make insightful graphics faster, so you don't have to build from scratch.
 
-#### License
-
-[MIT](https://choosealicense.com/licenses/mit)
-
 #### Want to help?
 I would love the community to get involved in mplsoccer.
 Take a look at our [open-issues](https://github.com/andrewRowlinson/mplsoccer/issues) for inspiration.
@@ -56,3 +52,7 @@ mplsoccer was inspired by:
 - [Karun Singh](https://twitter.com/karun1710) - tweets some interesting football analytics and visuals
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
 - John Burn-Murdoch's [tweet](https://twitter.com/jburnmurdoch/status/1057907312030085120) got me interested in football analytics
+
+#### License
+
+[MIT](https://choosealicense.com/licenses/mit)
