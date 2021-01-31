@@ -1,8 +1,6 @@
 <img src="docs/source/logo-green.png" width="160px" align="left" />
 
-**mplsoccer** is a Python library for plotting soccer/football charts in Matplotlib and loading StatsBomb open-data. Read more in the 
-[docs](https://mplsoccer.readthedocs.io/) and look at 
-examples in our [gallery](https://mplsoccer.readthedocs.io/en/latest/gallery/index.html).
+**mplsoccer** is a Python library for plotting soccer/football charts in Matplotlib and loading StatsBomb open-data. 
 <br/>
 <br/>
 
@@ -12,7 +10,12 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install mplsocc
 
 ```bash
 pip install mplsoccer
-```
+``
+
+## Docs
+
+Read more in the [docs](https://mplsoccer.readthedocs.io/) and look at 
+examples in our [gallery](https://mplsoccer.readthedocs.io/en/latest/gallery/index.html).
 
 ## Quick start
 
@@ -31,6 +34,7 @@ In mplsoccer, you can
 - plot arrows, heatmaps, hexbins, scatter, and (comet) lines
 - plot radar charts
 - load StatsBomb data as a tidy dataframe
+- standardize pitch coordinates into a single format
 
 I hope mplsoccer helps you make insightful graphics faster, so you don't have to build from scratch.
 
