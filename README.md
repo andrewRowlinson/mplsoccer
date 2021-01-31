@@ -6,7 +6,7 @@ examples in our [gallery](https://mplsoccer.readthedocs.io/en/latest/gallery/ind
 <br/>
 <br/>
 
-#### Installation
+## Installation
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install mplsoccer.
 
@@ -14,7 +14,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install mplsocc
 pip install mplsoccer
 ```
 
-#### Quick start
+## Quick start
 
 Plot a StatsBomb pitch
 
@@ -25,7 +25,7 @@ fig, ax = pitch.draw()
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/quick_start.png?raw=true "statsbomb pitch")
 
-#### What can you do in mplsoccer
+## What can you do in mplsoccer?
 In mplsoccer, you can
 - plot football/soccer pitches on nine different pitch types
 - plot arrows, heatmaps, hexbins, scatter, and (comet) lines
@@ -34,16 +34,16 @@ In mplsoccer, you can
 
 I hope mplsoccer helps you make insightful graphics faster, so you don't have to build from scratch.
 
-#### Want to help?
+## Want to help?
 I would love the community to get involved in mplsoccer.
 Take a look at our [open-issues](https://github.com/andrewRowlinson/mplsoccer/issues) for inspiration.
 Please get in touch at rowlinsonandy@gmail.com or [@numberstorm](https://twitter.com/numberstorm) on Twitter to find out more.
 
-#### Recent changes
+## Recent changes
 
 View the [changelog](https://github.com/andrewRowlinson/mplsoccer/blob/master/CHANGELOG.md) for a full list of the recent changes to mplsoccer.
 
-#### Inspiration
+## Inspiration
 
 mplsoccer was inspired by:
 - [Peter McKeever](http://petermckeever.com/2019/01/plotting-pitches-in-python/) inspired the API design
@@ -55,6 +55,6 @@ mplsoccer was inspired by:
 - [StatsBomb](https://statsbomb.com/) - great visual design and free open-data
 - John Burn-Murdoch's [tweet](https://twitter.com/jburnmurdoch/status/1057907312030085120) got me interested in football analytics
 
-#### License
+## License
 
 [MIT](https://choosealicense.com/licenses/mit)
