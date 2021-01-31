@@ -1,6 +1,9 @@
 # branch to merge mplsoccer and soccerplots
 
-# mplsoccer
+# mplsoccer <img src="docs/source/logo-green.png" align="right" />
+
+
+
 
 mplsoccer is a Python library for drawing soccer/football pitches in Matplotlib and loading StatsBomb open-data.
 
