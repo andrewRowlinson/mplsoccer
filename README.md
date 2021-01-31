@@ -1,4 +1,4 @@
-# mplsoccer <img src="docs/source/logo-green.png" width="160px" align="left" />
+<img src="docs/source/logo-green.png" width="160px" align="left" />
 
 mplsoccer is a Python library for plotting soccer/football charts in Matplotlib and loading StatsBomb open-data. Read more in the 
 [docs](https://mplsoccer.readthedocs.io/) and look at 
