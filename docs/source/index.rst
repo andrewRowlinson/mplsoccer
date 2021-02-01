@@ -1,4 +1,4 @@
-.. image:: logo-green.png
+.. image:: logo.png
    :width: 157
    :align: center
 

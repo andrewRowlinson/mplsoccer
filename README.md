@@ -1,5 +1,5 @@
 <p align="center">
-<img src="docs/source/logo-green.png" width="235px" alt="mplsoccer logo"/>
+<img src="docs/source/logo.png" width="235px" alt="mplsoccer logo"/>
 </p>
 
 **mplsoccer is a Python library for plotting soccer/football charts in Matplotlib 
