@@ -1,7 +1,9 @@
-mplsoccer
-=========
+.. image:: logo-green.png
+   :width: 157
+   :align: center
 
-`mplsoccer` is a Python library for drawing soccer/football pitches and radar charts in Matplotlib and loading StatsBomb open-data.
+|
+**mplsoccer is a Python library for plotting soccer/football charts in Matplotlib and loading StatsBomb open-data.**
 
 -----------
 Quick start
@@ -23,66 +25,60 @@ Plot a StatsBomb pitch:
 	
 .. image:: gallery/pitch_setup/images/sphx_glr_plot_quick_start_001.png
 
----------------------
-Why mplsoccer exists?
----------------------
+------------------
+What is mplsoccer?
+------------------
 
-mplsoccer shares some of the tools I built for the OptaPro Analytics Forum.
-At the time there weren't any open-sourced python tools.
-Now alternatives exist, such as `matplotsoccer <https://pypi.org/project/matplotsoccer/>`_
+In mplsoccer, you can:
 
-By using mplsoccer, I hope that you can spend more time building insightful graphics rather than having to learn to draw pitches from scratch.
+- plot football/soccer pitches on nine different pitch types
+- plot arrows, heatmaps, hexbins, scatter, and (comet) lines
+- plot radar charts
+- load StatsBomb data as a tidy dataframe
+- standardize pitch coordinates into a single format
 
------------------------
-Advantages of mplsoccer
------------------------
+I hope mplsoccer helps you make insightful graphics faster, so you don't have to build from scratch.
 
-mplsoccer:
+-------------
+Want to help?
+-------------
 
-1) draws 9 different pitch types by changing a single argument, which is useful as there isn't a standardised data format
-2) extends matplotlib to plot heatmaps, (comet) lines, footballs and rotated markers
-3) flips the data coordinates when using VerticalPitch plotting methods so you don’t need to remember to flip them
-4) creates tidy dataframes for StatsBomb data, which is useful as most of the alternatives produce nested dataframes
- 
+I would love the community to get involved in mplsoccer.
+Take a look at our `open-issues <https://github.com/andrewRowlinson/mplsoccer/issues>`_
+for inspiration. Please get in touch at rowlinsonandy@gmail.com or on Twitter to find out more.
+
+--------------
+Recent changes
+--------------
+
+View the `changelog <https://github.com/andrewRowlinson/mplsoccer/blob/master/CHANGELOG.md>`_
+for a full list of the recent changes to mplsoccer.
+
 -------
 License
 -------
 `MIT <https://choosealicense.com/licenses/mit/>`_
 
--------------
-Contributions
--------------
-
-Contributions are welcome. It would be great to add the following functionality to mplsoccer:
-
-- pass maps
-- pass sonars
-
-I would also welcome more examples in the gallery to help others.
-
-Please get in touch at rowlinsonandy@gmail.com or `@numberstorm <https://twitter.com/numberstorm>`_ on Twitter.
-
 -----------
 Inspiration
 -----------
 
-mplsoccer was inspired by other people's work:
+mplsoccer was inspired by:
 
-- `Peter McKeever <http://petermckeever.com/2020/10/how-to-draw-a-football-pitch/>`_ inspired the API design
-- `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ is a library for plotting pitches in R
-- `lastrow <https://twitter.com/lastrowview>`_ often tweets animations and the accompanying code
-- `fcrstats <http://fcrstats.com/>`_ has some great tutorials for using football data
-- `fcpython <https://fcpython.com/>`_ also has some great tutorials in Python
-- `Karun Singh <https://twitter.com/karun1710>`_ tweets some interesting football analytics and visuals
-- `StatsBomb <https://statsbomb.com/>`_ has great visual designs and free open-data
+- `Peter McKeever <http://petermckeever.com/2019/01/plotting-pitches-in-python/>`_ inspired the API design
+- `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ - a library for plotting pitches in R
+- `lastrow <https://twitter.com/lastrowview>`_ - often tweets animations from matches and the accompanying code
+- `fcrstats <http://fcrstats.com/>`_ - tutorials for using football data
+- `fcpython <https://fcpython.com/>`_ - Python tutorials for using football data
+- `Karun Singh <https://twitter.com/karun1710>`_ - tweets some interesting football analytics and visuals
+- `StatsBomb <https://statsbomb.com/>`_ - great visual design and free open-data
 - John Burn-Murdoch's `tweet <https://twitter.com/jburnmurdoch/status/1057907312030085120>`_ got me interested in football analytics
-
 
 
 .. _Python: http://www.python.org/
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
    
    installation

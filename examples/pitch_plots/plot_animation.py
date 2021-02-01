@@ -13,7 +13,6 @@ from matplotlib import animation
 from matplotlib import pyplot as plt
 
 from mplsoccer import Pitch
-from mplsoccer.utils import Standardizer
 
 ##############################################################################
 # Load the data
@@ -86,27 +85,6 @@ df_away = to_long_form(df_away)
 df_home = to_long_form(df_home)
 
 ##############################################################################
-# Standardize the data
-# We could plot the data on a metricasports pitch, but for this demo we are
-# goint to shift the coordinates to meters (105*68m pitch) rather than
-# metricasports coordinates, which are in the range 0-1
-standard = Standardizer(pitch_from='metricasports', length_from=105, width_from=68,
-                        pitch_to='uefa')
-
-# standardize home coordinates
-home_x, home_y = standard.transform(df_home.x, df_home.y)
-df_home['x'] = home_x
-df_home['y'] = home_y
-# standardize away coordinates
-away_x, away_y = standard.transform(df_away.x, df_away.y)
-df_away['x'] = away_x
-df_away['y'] = away_y
-# standardize the ball coordinates
-ball_x, ball_y = standard.transform(df_ball.x, df_ball.y)
-df_ball['x'] = ball_x
-df_ball['y'] = ball_y
-
-##############################################################################
 # Show the away data
 df_away.head()
 
@@ -122,7 +100,8 @@ df_ball.head()
 # Plot the animation
 
 # First set up the figure, the axis
-pitch = Pitch(pitch_type='uefa', figsize=(16, 10.4), goal_type='line')
+pitch = Pitch(pitch_type='metricasports', figsize=(16, 10.4), goal_type='line',
+              pitch_width=68, pitch_length=105)
 fig, ax = pitch.draw()
 
 # then setup the pitch plot markers we want to animate

@@ -340,7 +340,7 @@ def custom_dims(pitch_width, pitch_length):
                       goal_width=7.32, arc=53.05, invert_y=False, origin_center=False)
 
 
-def create_pitch_dims(pitch_type, pitch_length=None, pitch_width=None):
+def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     """ Create pitch dimensions.
 
     Parameters
