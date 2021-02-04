@@ -314,7 +314,6 @@ class BasePitch(ABC):
     def _init_circles_and_arcs(self):
         self.diameter1 = self.dim.circle_diameter
         self.diameter2 = self.dim.circle_diameter
-        # *2 as elipse uses diameter rather than radius
         self.diameter_spot1 = self.spot_scale * self.dim.length * 2
         self.diameter_spot2 = self.spot_scale * self.dim.length * 2
         self.arc1_theta1 = -self.dim.arc
@@ -322,47 +321,55 @@ class BasePitch(ABC):
         self.arc2_theta1 = 180 - self.dim.arc
         self.arc2_theta2 = 180 + self.dim.arc
 
-    def _init_circles_and_arcs_equal_aspect(self, ax):
+    def _diameter_circle_equal_aspect(self, x, y, ax, radius):
+        # coordinates of center/ perimeter
+        center = (x, y)
+        circle_perimeter_length = (x + radius * self.dim.length / self.dim.pitch_length, y)
+        circle_perimeter_width = (x, y + radius * self.dim.width / self.dim.pitch_width)
+        # to ax coordinates
+        center = self._to_ax_coord(ax, ax.transAxes, center)
+        circle_perimeter_length = self._to_ax_coord(ax, ax.transAxes, circle_perimeter_length)
+        circle_perimeter_width = self._to_ax_coord(ax, ax.transAxes, circle_perimeter_width)
+        # calculate diameter
+        diameter1 = (circle_perimeter_length[0] - center[0]) * 2
+        diameter2 = (circle_perimeter_width[1] - center[1]) * 2
+        return diameter1, diameter2
+
+    def _arc_angles_equal_aspect(self, ax, radius):
         # calculate the point that the arc intersects the penalty area
-        radius1 = self.dim.circle_diameter / 2 * self.dim.length / self.dim.pitch_length
-        radius2 = self.dim.circle_diameter / 2 * self.dim.width / self.dim.pitch_width
-        intersection = self.dim.center_width - (
-                radius1 * radius2 * (radius1 ** 2 -
-                                     (self.dim.penalty_area_length -
-                                      self.dim.penalty_left) ** 2) ** 0.5) / (radius1 ** 2)
+        radius_length = radius * self.dim.length / self.dim.pitch_length
+        radius_width = radius * self.dim.width / self.dim.pitch_width
+        intersection = self.dim.center_width - ((radius_width * radius_length *
+                                                (radius_length ** 2 -
+                                                 (self.dim.penalty_area_length -
+                                                  self.dim.penalty_left) ** 2) ** 0.5) /
+                                                radius_length ** 2)
         arc_pen_top1 = (self.dim.penalty_area_length, intersection)
-        # scale the (center/ penalty) spot sizes
-        size_spot = self.spot_scale * self.dim.pitch_length
-        scaled_spot1 = size_spot * self.dim.length / self.dim.pitch_length
-        scaled_spot2 = size_spot * self.dim.width / self.dim.pitch_width
-        # center points
-        center_xy = (self.dim.center_length, self.dim.center_width)
-        center_xy1 = (self.dim.center_length + radius1, self.dim.center_width)
-        center_xy2 = (self.dim.center_length, self.dim.center_width + radius2)
-        # penalty spot points
         spot_xy = (self.dim.penalty_left, self.dim.center_width)
-        spot_xy1 = (self.dim.penalty_left + scaled_spot1, self.dim.center_width)
-        spot_xy2 = (self.dim.penalty_left, self.dim.center_width + scaled_spot2)
-        # convert points to ax_coordinates
-        coord_name = ['arc_pen_top1', 'center_xy', 'center_xy1', 'center_xy2',
-                      'spot_xy', 'spot_xy1', 'spot_xy2']
-        points = [arc_pen_top1, center_xy, center_xy1, center_xy2,
-                  spot_xy, spot_xy1, spot_xy2]
-        coord_dict = {}
-        for i, coord in enumerate(points):
-            coord_dict[coord_name[i]] = self._to_ax_coord(ax, ax.transAxes, coord)
-        # work out diameter of the circles (multiply radius by 2 to get diameter)
-        self.diameter1 = (coord_dict['center_xy1'][0] - coord_dict['center_xy'][0]) * 2
-        self.diameter2 = (coord_dict['center_xy2'][1] - coord_dict['center_xy'][1]) * 2
-        self.diameter_spot1 = (coord_dict['spot_xy1'][0] - coord_dict['spot_xy'][0]) * 2
-        self.diameter_spot2 = (coord_dict['spot_xy2'][1] - coord_dict['spot_xy'][1]) * 2
+        # to ax coordinates
+        arc_pen_top1 = self._to_ax_coord(ax, ax.transAxes, arc_pen_top1)
+        spot_xy = self._to_ax_coord(ax, ax.transAxes, spot_xy)
         # work out the arc angles
-        a = coord_dict['arc_pen_top1'][0] - coord_dict['spot_xy'][0]
-        o = coord_dict['spot_xy'][1] - coord_dict['arc_pen_top1'][1]
-        self.arc1_theta2 = np.degrees(np.arctan(o / a))
+        adjacent = arc_pen_top1[0] - spot_xy[0]
+        opposite = spot_xy[1] - arc_pen_top1[1]
+        self.arc1_theta2 = np.degrees(np.arctan(opposite / adjacent))
         self.arc1_theta1 = 360 - self.arc1_theta2
         self.arc2_theta1 = 180 - self.arc1_theta2
         self.arc2_theta2 = 180 + self.arc1_theta2
+
+    def _init_circles_and_arcs_equal_aspect(self, ax):
+        radius_center = self.dim.circle_diameter / 2
+        radius_spot = self.spot_scale * self.dim.pitch_length
+
+        (self.diameter1,
+         self.diameter2) = self._diameter_circle_equal_aspect(self.dim.center_length,
+                                                              self.dim.center_width,
+                                                              ax, radius_center)
+        (self.diameter_spot1,
+         self.diameter_spot2) = self._diameter_circle_equal_aspect(self.dim.penalty_left,
+                                                                   self.dim.center_width,
+                                                                   ax, radius_spot)
+        self._arc_angles_equal_aspect(ax, radius_center)
 
     @staticmethod
     def _to_ax_coord(ax, coord_system, point):
