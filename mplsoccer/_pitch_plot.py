@@ -191,9 +191,13 @@ class BasePitchPlot(BasePitch):
     def polygon(self, verts, ax=None, **kwargs):
         """ Plot polygons using a PatchCollection.
         See: https://matplotlib.org/api/collections_api.html.
+        Automatically flips the x and y vertices if the pitch is vertical.
+
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
-        Automatically flips the x and y vertices if the pitch is vertical.
+
+        To use cmap use set_array as per this example:
+        https://matplotlib.org/gallery/shapes_and_collections/patch_collection.html)
 
         Parameters
         ----------
