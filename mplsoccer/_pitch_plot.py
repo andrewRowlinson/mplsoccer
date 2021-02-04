@@ -47,7 +47,8 @@ class BasePitchPlot(BasePitch):
     def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.scatter,
         which automatically flips the x and y coordinates if the pitch is vertical.
-        Can optionally use a football marker with marker='football'.
+        You can optionally use a football marker with marker='football' and rotate markers with
+        rotation_degrees.
 
         Parameters
         ----------
@@ -100,6 +101,7 @@ class BasePitchPlot(BasePitch):
         return scatter_plot
 
     def _reflect_2d(self, x, y, standardized=False):
+        """ Reflect data in the pitch lines."""
         x = np.ravel(x)
         y = np.ravel(y)
         if standardized:
@@ -110,12 +112,10 @@ class BasePitchPlot(BasePitch):
         reflected_data_y = np.r_[y, y, y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
         return reflected_data_x, reflected_data_y
 
-    def kdeplot(self, x, y, ax=None, reflect=True, **kwargs):
-        """ Routine to perform kernel density estimation using seaborn kdeplot and plot
-         the result on the given ax.
-        The method used here includes a simple reflection method for boundary correction,
-         so that probability mass is not assigned to areas outside the pitch.
-        Automatically flips the x and y coordinates if the pitch is vertical.
+    def kdeplot(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around seaborn.kdeplot,
+        which automatically flips the x and y coordinates
+        if the pitch is vertical and clips to the pitch boundaries.
 
         Parameters
         ----------
@@ -123,8 +123,6 @@ class BasePitchPlot(BasePitch):
             Commonly, these parameters are 1D arrays.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-        reflect : bool, default True
-            Whether to reflect the coordinates for boundary correction
         **kwargs : All other keyword arguments are passed on to seaborn.kdeplot.
 
         Returns
@@ -138,24 +136,15 @@ class BasePitchPlot(BasePitch):
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
 
-        weights = kwargs.pop('weights', None)
-        bw_method = kwargs.pop('bw_method', 'scott')
-
-        if reflect:
-            scip_kde = gaussian_kde(np.vstack([x, y]), bw_method='scott', weights=weights)
-            bw_method = scip_kde.scotts_factor() / 4.
-            x, y = self._reflect_2d(x, y)
-
         x, y = self._reverse_if_vertical(x, y)
 
-        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, weights=weights, bw_method=bw_method,
-                                   clip=self.kde_clip, **kwargs)
+        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
         return contour_plot
 
     def hexbin(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
         which automatically flips the x and y coordinates if the pitch is vertical and
-         clips to the pitch boundaries.
+        clips to the pitch boundaries.
 
         Parameters
         ----------
@@ -200,8 +189,8 @@ class BasePitchPlot(BasePitch):
         return hexbin
 
     def polygon(self, verts, ax=None, **kwargs):
-        """ Plot polygons using a PathCollection.
-        See: https://matplotlib.org/3.1.1/api/collections_api.html.
+        """ Plot polygons using a PatchCollection.
+        See: https://matplotlib.org/api/collections_api.html.
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
         Automatically flips the x and y vertices if the pitch is vertical.
@@ -231,8 +220,8 @@ class BasePitchPlot(BasePitch):
         return patch_collection
 
     def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
-        """ Plot a polygon with the angle to the goal using PathCollection.
-        See: https://matplotlib.org/3.1.1/api/collections_api.html.
+        """ Plot a polygon with the angle to the goal using PatchCollection.
+        See: https://matplotlib.org/api/collections_api.html.
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
 
@@ -322,7 +311,7 @@ class BasePitchPlot(BasePitch):
         return mesh
 
     def label_heatmap(self, stats, ax=None, **kwargs):
-        """ Labels the heatmaps and automatically flips the coordinates if the pitch is vertical.
+        """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
         Parameters
         ----------
@@ -458,11 +447,11 @@ class BasePitchPlot(BasePitch):
 
     def calculate_angle_and_distance(self, xstart, ystart, xend, yend,
                                      standardized=False, degrees=False):
-        """ Calculates the angle in radians counter-clockwise between a start and end
-        location and the distance. Where the angle 0 is this way →
+        """ Calculates the angle in radians counter-clockwise and the distance
+        between a start and end location. Where the angle 0 is this way →
         (the straight line from left to right) in a horizontally orientated pitch
         and this way ↑ in a vertically orientated pitch.
-        The angle goes from 0 to 2pi. To convert the angle to degrees use np.degrees(angle).
+        The angle goes from 0 to 2pi. To convert the angle to degrees clockwise use degrees=True.
 
         Parameters
         ----------
@@ -520,8 +509,8 @@ class BasePitchPlot(BasePitch):
 
     def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5,
              color=None, ax=None, **kwargs):
-        """ Create a flow map by binning  the data into cells and calculating the average
-        angles and distances. The colors of each arrow are
+        """ Create a flow map by binning the data into cells and calculating the average
+        angles and distances.
 
         Parameters
         ----------
