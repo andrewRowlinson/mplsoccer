@@ -2,8 +2,8 @@
    :width: 157
    :align: center
 
-|
-**mplsoccer is a Python library for plotting soccer/football charts in Matplotlib and loading StatsBomb open-data.**
+**mplsoccer is a Python library for plotting soccer/football charts in Matplotlib and
+loading StatsBomb open-data.**
 
 -----------
 Quick start
@@ -32,12 +32,13 @@ What is mplsoccer?
 In mplsoccer, you can:
 
 - plot football/soccer pitches on nine different pitch types
-- plot arrows, heatmaps, hexbins, scatter, and (comet) lines
 - plot radar charts
+- plot arrows, heatmaps, hexbins, scatter, and (comet) lines
 - load StatsBomb data as a tidy dataframe
 - standardize pitch coordinates into a single format
 
-I hope mplsoccer helps you make insightful graphics faster, so you don't have to build from scratch.
+I hope mplsoccer helps you make insightful graphics faster,
+so you don't have to build charts from scratch.
 
 -------------
 Want to help?
@@ -45,7 +46,8 @@ Want to help?
 
 I would love the community to get involved in mplsoccer.
 Take a look at our `open-issues <https://github.com/andrewRowlinson/mplsoccer/issues>`_
-for inspiration. Please get in touch at rowlinsonandy@gmail.com or on Twitter to find out more.
+for inspiration. Please get in touch at rowlinsonandy@gmail.com or on
+`Twitter <https://twitter.com/numberstorm>`_ to find out more.
 
 --------------
 Recent changes
@@ -65,14 +67,16 @@ Inspiration
 
 mplsoccer was inspired by:
 
-- `Peter McKeever <http://petermckeever.com/2019/01/plotting-pitches-in-python/>`_ inspired the API design
-- `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ - a library for plotting pitches in R
-- `lastrow <https://twitter.com/lastrowview>`_ - often tweets animations from matches and the accompanying code
-- `fcrstats <http://fcrstats.com/>`_ - tutorials for using football data
-- `fcpython <https://fcpython.com/>`_ - Python tutorials for using football data
-- `Karun Singh <https://twitter.com/karun1710>`_ - tweets some interesting football analytics and visuals
-- `StatsBomb <https://statsbomb.com/>`_ - great visual design and free open-data
-- John Burn-Murdoch's `tweet <https://twitter.com/jburnmurdoch/status/1057907312030085120>`_ got me interested in football analytics
+- `Peter McKeever <http://petermckeever.com/2019/01/plotting-pitches-in-python/>`_
+  heavily inspired the API design
+- `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ influenced the design and Standardizer
+- `lastrow's <https://twitter.com/lastrowview>`_ legendary animations
+- `fcrstats' <http://fcrstats.com/>`_ tutorials for using football data
+- `fcpython's <https://fcpython.com/>`_ Python tutorials for using football data
+- `Karun Singh's <https://twitter.com/karun1710>`_ expected threat (xT) visualizations
+- `StatsBomb's <https://statsbomb.com/>`_ great visual design and free open-data
+- John Burn-Murdoch's `tweet <https://twitter.com/jburnmurdoch/status/1057907312030085120>`_
+  got me interested in football analytics
 
 
 .. _Python: http://www.python.org/

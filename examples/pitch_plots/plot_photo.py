@@ -7,8 +7,6 @@ This example shows how to plot photos in your charts.
 """
 
 from mplsoccer import Pitch, add_image
-from PIL import Image
-import numpy as np
 from urllib.request import urlopen
 import matplotlib.pyplot as plt
 plt.style.use('dark_background')

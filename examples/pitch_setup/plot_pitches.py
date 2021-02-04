@@ -52,7 +52,7 @@ fig, ax = pitch.draw()
 # -------------------------
 # mplsoccer also plots on grids by specifying nrows and ncols.
 # The default is to use
-# tight_layout. See: https://matplotlib.org/3.2.1/tutorials/intermediate/tight_layout_guide.html.
+# tight_layout. See: https://matplotlib.org/tutorials/intermediate/tight_layout_guide.html.
 
 pitch = Pitch(nrows=2, ncols=3)
 fig, axs = pitch.draw()
@@ -60,14 +60,14 @@ fig, axs = pitch.draw()
 ##############################################################################
 # But you can also use constrained layout
 # by setting ``constrained_layout=True`` and ``tight_layout=False``, which may look better.
-# See: https://matplotlib.org/3.2.1/tutorials/intermediate/constrainedlayout_guide.html.
+# See: https://matplotlib.org/tutorials/intermediate/constrainedlayout_guide.html.
 
 pitch = Pitch(nrows=2, ncols=3, tight_layout=False, constrained_layout=True)
 fig, axs = pitch.draw()
 
 ##############################################################################
 # If you want more control over how pitches are placed
-# you can use the grid method (also works for one axis)
+# you can use the grid method. This also works for one pitch (nrows=1 and ncols=1).
 
 pitch = Pitch()
 fig, axs = pitch.grid(nrows=3, ncols=3, figsize=(14.5, 10),
@@ -154,7 +154,8 @@ pitch = Pitch(goal_type='circle', linewidth=1)
 pitch.draw(axs[2])
 
 ##############################################################################
-#  The line markings and spot size can be adjusted via ``linewidth`` and ``spot_scale``.
+# The line markings and spot size can be adjusted via ``linewidth`` and ``spot_scale``.
+# Spot scale also adjusts the size of the circle goal posts.
 
 pitch = Pitch(linewidth=3,
               # the size of the penalty and center spots relative to the pitch_length
@@ -163,7 +164,7 @@ fig, ax = pitch.draw()
 
 ##############################################################################
 # If you need to lift the pitch markings above other elements of the chart.
-# You can do this via ``line_zorder``, ``stripe_zorder``# ,
+# You can do this via ``line_zorder``, ``stripe_zorder``,
 # ``positional_zorder``, and ``shade_zorder``.
 
 pitch = Pitch(line_zorder=2)  # e.g. useful if you want to plot pitch lines over heatmaps

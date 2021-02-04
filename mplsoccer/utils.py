@@ -164,21 +164,42 @@ def set_labels(ax, label_value, label_axis):
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
-    """
-    Adds an image to a figure using fig.add_axes and ax.imshow
+    """ Adds an image to a figure using fig.add_axes and ax.imshow
 
-    Args:
-        image (str): image path.
-        fig (matplotlib.figure.Figure): figure object
-        left (float): The left dimension of the new axes.
-        bottom (float): The bottom dimension of the new axes.
-        width (float, optional): The width of the new axes. Defaults to None.
-        height (float, optional): The height of the new axes. Defaults to None.
-        **kwargs: All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
+    If downsampling an image 'hamming' interpolation is recommended
 
-    Returns:
-        matplotlib.figure.Figure: figure object.
+    Parameters
+    ----------
+    image: str
+        The path to the image.
+    fig: matplotlib.figure.Figure
+        The figure on which to add the image.
+    left, bottom: float
+        The dimensions left, bottom of the new axes.
+        All quantities are in fractions of figure width and height.
+        This positions the image axis in the figure left% in from the figure side
+        and bottom% in from the figure bottom.
+    width, height: float, default None
+        The width, height of the new axes.
+        All quantities are in fractions of figure width and height.
+        For best results use only one of these so the image is scaled appropriately.
+    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from mplsoccer import add_image
+    >>> from urllib.request import urlopen
+    >>> fig, ax = plt.subplots()
+    >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+    >>> image = urlopen(image_url)
+    >>> fig = add_image(image, fig, left=0.1, bottom=0.2, width=0.4, height=0.4)
     """
+    
     # open image
     image = Image.open(image)
 
@@ -249,6 +270,16 @@ class Standardizer:
     width_from, width_to : float, default None
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
         'skillcorner', 'secondspectrum' and 'custom' pitch_type
+
+    Examples
+    --------
+    >>> from mplsoccer import Standardizer
+    >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom', \
+length_to=105, width_to=68)
+    >>> x = [20, 30]
+    >>> y = [50, 80]
+    >>> x_std, y_std = standard.transform(x, y)
+
     """
     def __init__(self, pitch_from, pitch_to, length_from=None,
                  width_from=None, length_to=None, width_to=None):
@@ -338,7 +369,7 @@ class Standardizer:
 class FontManager:
     """Utility to load fun fonts from https://fonts.google.com/ for matplotlib.
     Find a nice font at https://fonts.google.com/, and then get its corresponding URL
-    from https://github.com/google/fonts/. Lazily downloads the fonts.
+    from https://github.com/google/fonts/.
 
 
     The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll).
@@ -352,10 +383,12 @@ class FontManager:
 
     Examples
     --------
-    font_url = 'https://github.com/google/fonts/blob/master/ofl/abel/Abel-Regular.ttf?raw=true'
-    fm = FontManager(url=font_url)
-    fig, ax = plt.subplots()
-    ax.text("Good content.", fontproperties=fm.prop, size=60)
+    >>> from mplsoccer import FontManager
+    >>> import matplotlib.pyplot as plt
+    >>> font_url = 'https://github.com/google/fonts/blob/master/ofl/abel/Abel-Regular.ttf?raw=true'
+    >>> fm = FontManager(url=font_url)
+    >>> fig, ax = plt.subplots()
+    >>> ax.text("Good content.", fontproperties=fm.prop, size=60)
     """
 
     def __init__(self,

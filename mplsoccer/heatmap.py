@@ -32,7 +32,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), s
         The statistic to compute (default is 'count').
         The following statistics are available: 'count' (default),
         'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function. See:
-         https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
     bins : int or [int, int] or array_like or [array, array], optional
         The bin specification.
           * the number of bins for the two dimensions (nx = ny = bins),
@@ -46,10 +46,21 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), s
         'uefa' pitch coordinates (105m x 68m)
 
     Returns
-    ----------
+    -------
     bin_statistic : dict.
         The keys are 'statistic' (the calculated statistic),
         'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> import numpy as np
+    >>> pitch = Pitch(line_zorder=2, pitch_color='black')
+    >>> fig, ax = pitch.draw()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> stats = pitch.bin_statistic(x, y)
+    >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     x = np.ravel(x)
     y = np.ravel(y)
@@ -114,8 +125,19 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.pcolormesh.
 
     Returns
-    ----------
+    -------
     mesh : matplotlib.collections.QuadMesh
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> import numpy as np
+    >>> pitch = Pitch(line_zorder=2, pitch_color='black')
+    >>> fig, ax = pitch.draw()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> stats = pitch.bin_statistic(x, y)
+    >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     validate_ax(ax)
     if vertical:
@@ -151,6 +173,17 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
     bin_statistic : A list of dictionaries.
         The dictionary keys are 'statistic' (the calculated statistic),
         'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> import numpy as np
+    >>> pitch = Pitch(line_zorder=2, pitch_color='black')
+    >>> fig, ax = pitch.draw()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> stats = pitch.bin_statistic_positional(x, y)
+    >>> pitch.heatmap_positional(stats, edgecolors='black', cmap='hot', ax=ax)
     """
 
     # I tried several ways of creating positional bins. It's hard to do this because
@@ -267,8 +300,19 @@ def heatmap_positional(stats, ax=None, vertical=False, **kwargs):
     **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.pcolormesh.
 
     Returns
-    ----------
+    -------
     mesh : matplotlib.collections.QuadMesh
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> import numpy as np
+    >>> pitch = Pitch(line_zorder=2, pitch_color='black')
+    >>> fig, ax = pitch.draw()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> stats = pitch.bin_statistic_positional(x, y)
+    >>> pitch.heatmap_positional(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     validate_ax(ax)
     vmax = kwargs.pop('vmax', np.array([stat['statistic'].max() for stat in stats]).max())

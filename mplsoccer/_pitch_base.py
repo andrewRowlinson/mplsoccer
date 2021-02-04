@@ -392,14 +392,15 @@ class BasePitch(ABC):
 
         Examples
         --------
-        # plot on new figure
-        pitch = Pitch()
-        fig, ax = pitch.draw()
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
 
-        # plot on an existing figure
-        fig, ax = plt.subplots()
-        pitch = Pitch()
-        pitch.draw(ax=ax)
+        >>> from mplsoccer import Pitch
+        >>> import matplotlib.pyplot as plt
+        >>> fig, ax = plt.subplots()
+        >>> pitch = Pitch()
+        >>> pitch.draw(ax=ax)
         """
         if ax is None:
             fig, axs = self._setup_subplots()
@@ -665,7 +666,7 @@ class BasePitch(ABC):
     def jointgrid(self, pitch_height=0.5, marginal_height=0.1, space_height=0,
                   left=0.1, bottom=0.1, ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
         """ Create a grid with a pitch at the center and axes on the
-         top and right handside of the pitch.
+        top and right handside of the pitch.
 
         Parameters
         ----------
@@ -674,7 +675,7 @@ class BasePitch(ABC):
             The default is 50% of the figure.
         marginal_height : float, default 0.1
             The height of the marginal axes (either side of the pitch) in fractions
-             of the figure height.
+            of the figure height.
             The default is 10% of the figure.
         space_height : float, default 0
             The space between the pitch and the other axes in fractions of the figure height.
@@ -874,7 +875,7 @@ class BasePitch(ABC):
         """ Implement a method to reflect points in the pitch sides."""
 
     @abstractmethod
-    def kdeplot(self, x, y, ax=None, reflect=True, **kwargs):
+    def kdeplot(self, x, y, ax=None, **kwargs):
         """ Implement a wrapper for seaborn.kdeplot."""
 
     @abstractmethod

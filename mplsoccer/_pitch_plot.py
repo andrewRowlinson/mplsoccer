@@ -9,7 +9,7 @@ import seaborn as sns
 from matplotlib import rcParams
 from matplotlib.collections import PatchCollection
 from scipy.spatial import Voronoi
-from scipy.stats import circmean, gaussian_kde
+from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
 from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
@@ -285,6 +285,14 @@ class BasePitchPlot(BasePitch):
         Returns
         -------
         annotation : matplotlib.text.Annotation
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.annotate(text='center', xytext=(50, 50), xy=(60, 40), ha='center', va='center', \
+ax=ax arrowprops=dict(facecolor='black'))
         """
         validate_ax(ax)
         xy = self._reverse_annotate_if_vertical(xy)
@@ -533,7 +541,7 @@ class BasePitchPlot(BasePitch):
             The supported arrow types are: 'same', 'scale', and 'average'.
             'same' makes the arrows the same size (arrow_length).
             'scale' scales the arrow length by the average distance
-                in the cell (up to a max of arrow_length).
+            in the cell (up to a max of arrow_length).
             'average' makes the arrow size the average distance in the cell.
         arrow_length : float, default 5
             The arrow_length for the flow map. If the arrow_type='same',

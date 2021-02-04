@@ -3,9 +3,8 @@
 Statsbomb
 =========
 
-In the words of @Torvaney "I did The Bad Thing and started writing another
-API wrapper for Statsbomb data"
-(https://twitter.com/Torvaney/status/1251435801407184896).
+In the words of @Torvaney `"I did The Bad Thing and started writing another
+API wrapper for Statsbomb data" <https://twitter.com/Torvaney/status/1251435801407184896>`_
 
 Why?
 
@@ -14,14 +13,14 @@ useful for analysis.
 
 Here are some alternatives
 
-- https://github.com/Torvaney/statsbombapi
-- https://github.com/statsbomb/statsbombpy
-- https://github.com/imrankhan17/statsbomb-parser
+- `statsbombapi <https://github.com/Torvaney/statsbombapi>`_
+- `statsbombpy <https://github.com/statsbomb/statsbombpy>`_
+- `statsbomb-parser <https://github.com/imrankhan17/statsbomb-parser>`_
 
 I hope to inspire others to make a better one, so this one can become obsolete.
 
-Please be responsible with Statsbomb data. Register your details on
-https://www.statsbomb.com/resource-centreand
+Please be responsible with Statsbomb data.
+`Register your details <https://www.statsbomb.com/resource-centre>`_ and
 read the user agreement carefully (on the same page).
 """
 
