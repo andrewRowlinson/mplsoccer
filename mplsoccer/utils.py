@@ -199,14 +199,11 @@ def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     >>> image = urlopen(image_url)
     >>> fig = add_image(image, fig, left=0.1, bottom=0.2, width=0.4, height=0.4)
     """
-    
     # open image
     image = Image.open(image)
 
     # height, width, channel of shape
-    shape = np.array(image).shape
-
-    image_height, image_width = shape[0], shape[1]
+    image_width, image_height = image.size
     image_aspect = image_width / image_height
 
     figsize = fig.get_size_inches()
