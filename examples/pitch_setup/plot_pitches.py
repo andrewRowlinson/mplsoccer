@@ -3,11 +3,10 @@
 Basics
 ======
 
-First we import the Pitch class and set the matplotlib style sheet.
+First we import the Pitch classes and matplotlib
 """
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch, VerticalPitch
-plt.style.use('ggplot')
 
 ##############################################################################
 # Draw a pitch on a new axis
@@ -23,16 +22,17 @@ fig, ax = pitch.draw()
 # mplsoccer also plays nicely with other matplotlib figures. To draw a pitch on an
 # existing matplotlib axis specify an ``ax`` in the ``draw`` method.
 
-fig, ax = plt.subplots(nrows=1, ncols=2)
+fig, axs = plt.subplots(nrows=1, ncols=2)
 pitch = Pitch()
-pitch.draw(ax=ax[1])
+pie = axs[0].pie(x=[5, 15])
+pitch.draw(ax=axs[1])
 
 ##############################################################################
 # Supported data providers
 # ------------------------
 # mplsoccer supports 9 pitch types by specifying the ``pitch_type`` argument:
 # 'statsbomb', 'opta', 'tracab', 'wyscout', 'uefa', 'metricasports', 'custom',
-# 'skillcorner' and 'secondspectrum'. 
+# 'skillcorner' and 'secondspectrum'.
 # If you are using tracking data or the custom pitch ('metricasports', 'tracab',
 # 'skillcorner', 'secondspectrum' or 'custom'), you also need to specify the
 # ``pitch_length`` and ``pitch_width``, which are typically 105 and 68 respectively.
@@ -42,7 +42,8 @@ fig, ax = pitch.draw()
 
 ##############################################################################
 
-pitch = Pitch(pitch_type='tracab', pitch_length=105, pitch_width=68,  # example plotting a tracab pitch
+pitch = Pitch(pitch_type='tracab',  # example plotting a tracab pitch
+              pitch_length=105, pitch_width=68,
               axis=True, label=True)  # showing axis labels is optional
 fig, ax = pitch.draw()
 
@@ -54,7 +55,7 @@ fig, ax = pitch.draw()
 # tight_layout. See: https://matplotlib.org/3.2.1/tutorials/intermediate/tight_layout_guide.html.
 
 pitch = Pitch(nrows=2, ncols=3)
-fig, ax = pitch.draw()
+fig, axs = pitch.draw()
 
 ##############################################################################
 # But you can also use constrained layout
@@ -62,7 +63,18 @@ fig, ax = pitch.draw()
 # See: https://matplotlib.org/3.2.1/tutorials/intermediate/constrainedlayout_guide.html.
 
 pitch = Pitch(nrows=2, ncols=3, tight_layout=False, constrained_layout=True)
-fig, ax = pitch.draw()
+fig, axs = pitch.draw()
+
+##############################################################################
+# If you want more control over how pitches are placed
+# you can use the grid method (also works for one axis)
+
+pitch = Pitch()
+fig, axs = pitch.grid(nrows=3, ncols=3, figsize=(14.5, 10),
+                      grid_height=0.7,  # the grid takes up 70% of the figure height
+                      space=0.05,  # 5% of the grid height is reserved for space between axes
+                      left=None,  # centers the grid horizontally
+                      bottom=0.1)  # grid starts 10% up from the bottom of the figure
 
 ##############################################################################
 # Pitch orientation
@@ -70,7 +82,7 @@ fig, ax = pitch.draw()
 # There are four basic pitch orientations.
 # To get vertical pitches use the VerticalPitch class.
 # To get half pitches use the half=True argument.
-# 
+#
 # Horizontal full
 
 pitch = Pitch(half=False)
@@ -107,7 +119,8 @@ fig, ax = pitch.draw()
 # Pitch appearance
 # ----------------
 # The pitch appearance is adjustable.
-# Use ``pitch_color`` and ``line_color``, and ``stripe_color`` (if ``stripe=True``) to adjust the colors.
+# Use ``pitch_color`` and ``line_color``, and ``stripe_color`` (if ``stripe=True``)
+# to adjust the colors.
 
 pitch = Pitch(pitch_color='#aabb97', line_color='white',
               stripe_color='#c2d59d', stripe=True)  # optional stripes
@@ -118,7 +131,7 @@ fig, ax = pitch.draw()
 # -----------------
 # You can add the Juego de Posición pitch lines and shade the middle third
 
-pitch = Pitch(positional=True, shade_middle=True, positional_color='#9A9A9A')
+pitch = Pitch(positional=True, shade_middle=True, positional_color='#eadddd', shade_color='#f2f2f2')
 fig, ax = pitch.draw()
 
 ##############################################################################
@@ -129,21 +142,29 @@ pitch = Pitch(pitch_color='grass', line_color='white',
 fig, ax = pitch.draw()
 
 ##############################################################################
-# Two goal types are included ``goal_type='line'`` and ``goal_type='box'``.
+# Three goal types are included ``goal_type='line'``, ``goal_type='box'``,
+# and ``goal_type='circle'``
 
-pitch = Pitch(goal_type='box')
-fig, ax = pitch.draw()
+fig, axs = plt.subplots(nrows=3, figsize=(10, 18))
+pitch = Pitch(goal_type='box', goal_alpha=1)  # you can also adjust the transparency (alpha)
+pitch.draw(axs[0])
+pitch = Pitch(goal_type='line')
+pitch.draw(axs[1])
+pitch = Pitch(goal_type='circle', linewidth=1)
+pitch.draw(axs[2])
 
 ##############################################################################
 #  The line markings and spot size can be adjusted via ``linewidth`` and ``spot_scale``.
 
-pitch = Pitch(linewidth=3, 
-              spot_scale=0.01)  # the size of the penalty and center spots relative to the pitch_length
+pitch = Pitch(linewidth=3,
+              # the size of the penalty and center spots relative to the pitch_length
+              spot_scale=0.01)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # If you need to lift the pitch markings above other elements of the chart.
-# You can do this via ``line_zorder``, ``stripe_zorder``, ``positional_zorder``, and ``shade_zorder``.
+# You can do this via ``line_zorder``, ``stripe_zorder``# ,
+# ``positional_zorder``, and ``shade_zorder``.
 
 pitch = Pitch(line_zorder=2)  # e.g. useful if you want to plot pitch lines over heatmaps
 fig, ax = pitch.draw()
