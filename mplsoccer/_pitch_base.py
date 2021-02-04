@@ -22,7 +22,7 @@ class BasePitch(ABC):
     Parameters
     ----------
     figsize : tuple of float, default Matplotlib figure size
-        The figure size in inches by default.
+        The figure size in inches by default uses rcParams["figure.figsize"].
     nrows, ncols : int, default 1
         Number of rows/columns of the subplot grid.
     pitch_type : str, default 'statsbomb'
@@ -95,7 +95,7 @@ class BasePitch(ABC):
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
         'skillcorner', 'secondspectrum' and 'custom' pitch_type
     goal_type : str, default 'line'
-        Whether to display the goals as a 'line', a 'box' or to not display it at all (None)
+        Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
     goal_alpha : float, default 0.7
         The transparency of the goal. This is used when the goal_type='box'
     axis : bool, default False
@@ -130,8 +130,6 @@ class BasePitch(ABC):
                  layout=None, view=None, orientation=None):
 
         # initialize attributes
-        self.axes = None
-        self.fig = None
         self.figsize = figsize
         if self.figsize is None:
             self.figsize = rcParams['figure.figsize']
@@ -175,6 +173,17 @@ class BasePitch(ABC):
         self.constrained_layout = constrained_layout
         self.spot_scale = spot_scale
 
+        # other attributes for plotting circles - completed by
+        # _init_circles_and_arcs / _init_circles_and_arcs_equal_aspect
+        self.diameter1 = None
+        self.diameter2 = None
+        self.size_spot1 = None
+        self.size_spot2 = None
+        self.arc1_theta1 = None
+        self.arc1_theta2 = None
+        self.arc2_theta1 = None
+        self.arc2_theta2 = None
+
         # the other attributes - completed by
         # set_extent in Pitch and VerticalPitch (inherit from BasePitch)
         self.extent = None
@@ -183,6 +192,8 @@ class BasePitch(ABC):
         self.kde_clip = None
         self.hexbin_gridsize = None
         self.hex_extent = None
+        self.vertical = None
+        self.reverse_cmap = None
         self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
                                          length_from=pitch_length, pitch_to='uefa')
 
@@ -280,7 +291,7 @@ class BasePitch(ABC):
                           'half', 'positional', 'constrained_layout']:
             if not isinstance(getattr(self, attribute), bool):
                 raise TypeError(f"Invalid argument: '{attribute}' should be bool.")
-        valid_goal_type = ['line', 'box']
+        valid_goal_type = ['line', 'box', 'circle']
         if self.goal_type not in valid_goal_type:
             raise TypeError(f'Invalid argument: goal_type should be in {valid_goal_type}')
 
@@ -312,39 +323,41 @@ class BasePitch(ABC):
         self.arc2_theta2 = 180 + self.dim.arc
 
     def _init_circles_and_arcs_equal_aspect(self, ax):
-        r1 = self.dim.circle_diameter / 2 * self.dim.width / self.dim.pitch_width
-        r2 = self.dim.circle_diameter / 2 * self.dim.length / self.dim.pitch_length
+        # calculate the point that the arc intersects the penalty area
+        radius1 = self.dim.circle_diameter / 2 * self.dim.width / self.dim.pitch_width
+        radius2 = self.dim.circle_diameter / 2 * self.dim.length / self.dim.pitch_length
+        intersection = self.dim.center_width - (
+                radius1 * radius2 * (radius2 ** 2 -
+                                     (self.dim.penalty_area_length -
+                                      self.dim.penalty_left) ** 2) ** 0.5) / (radius2 ** 2)
+        arc_pen_top1 = (self.dim.penalty_area_length, intersection)
+        # scale the (center/ penalty) spot sizes
         size_spot = self.spot_scale * self.dim.pitch_length
         scaled_spot1 = size_spot * self.dim.width / self.dim.pitch_width
         scaled_spot2 = size_spot * self.dim.length / self.dim.pitch_length
-        xy = (self.dim.center_width, self.dim.center_length)
-        intersection = self.dim.center_width - (
-                r1 * r2 * (r2 ** 2 - (self.dim.penalty_area_length - self.dim.penalty_left)
-                           ** 2) ** 0.5) / (r2 ** 2)
-
-        xy1 = (self.dim.center_width + r2, self.dim.center_length)
-        xy2 = (self.dim.center_width, self.dim.center_length + r1)
-        spot1 = (self.dim.penalty_left, self.dim.center_width)
-        spot2 = (self.dim.penalty_right, self.dim.center_width)
-        center_spot = (self.dim.center_length, self.dim.center_width)
-        p2 = (self.dim.penalty_left, self.dim.center_width + scaled_spot1)
+        # center points
+        xy = (self.dim.center_length, self.dim.center_width)
+        xy1 = (self.dim.center_length, self.dim.center_width + radius2)
+        xy2 = (self.dim.center_length + radius1, self.dim.center_width)
+        # penalty spot points
         p1 = (self.dim.penalty_left + scaled_spot2, self.dim.center_width)
-        arc_pen_top1 = (self.dim.penalty_area_length, intersection)
-
+        spot1 = (self.dim.penalty_left, self.dim.center_width)
+        p2 = (self.dim.penalty_left, self.dim.center_width + scaled_spot1)
+        spot2 = (self.dim.penalty_right, self.dim.center_width)
+        # convert to ax_coordinates
         ax_coordinate_system = ax.transAxes
-        coord_name = ['xy', 'spot1', 'spot2', 'center', 'xy1', 'xy2', 'p1', 'p2', 'arc_pen_top1']
+        coord_name = ['xy', 'xy1', 'xy2', 'spot1', 'spot2', 'p1', 'p2', 'arc_pen_top1']
         coord_dict = {}
-        for i, coord in enumerate([xy, spot1, spot2, center_spot, xy1, xy2, p1, p2, arc_pen_top1]):
+        for i, coord in enumerate([xy, xy1, xy2, spot1, spot2, p1, p2, arc_pen_top1]):
             coord_dict[coord_name[i]] = self._to_ax_coord(ax, ax_coordinate_system, coord)
-
-        self.diameter1 = (coord_dict['xy1'][0] - coord_dict['xy'][0]) * 2
-        self.diameter2 = (coord_dict['xy2'][1] - coord_dict['xy'][1]) * 2
+        # work out diameter of the circles (multiply by 2 as radius)
+        self.diameter1 = (coord_dict['xy1'][1] - coord_dict['xy'][1]) * 2
+        self.diameter2 = (coord_dict['xy2'][0] - coord_dict['xy'][0]) * 2
         self.size_spot1 = (coord_dict['p1'][0] - coord_dict['spot1'][0]) * 2
         self.size_spot2 = (coord_dict['p2'][1] - coord_dict['spot1'][1]) * 2
-
+        # work out arc angles
         a = coord_dict['arc_pen_top1'][0] - coord_dict['spot1'][0]
         o = coord_dict['spot1'][1] - coord_dict['arc_pen_top1'][1]
-
         self.arc1_theta2 = np.degrees(np.arctan(o / a))
         self.arc1_theta1 = 360 - self.arc1_theta2
         self.arc2_theta1 = 180 - self.arc1_theta2
@@ -381,30 +394,27 @@ class BasePitch(ABC):
         pitch.draw(ax=ax)
         """
         if ax is None:
-            self._setup_subplots()
-            self.fig.set_tight_layout(self.tight_layout)
-            if hasattr(self, 'arc1_theta1') is False:
-                self._init_circles_and_arcs_equal_aspect(self.axes.flat[0])
-            for ax in self.axes.flat:
-                self._draw_ax(ax)
-            if self.axes.size == 1:
-                self.axes = self.axes.item()
-            return self.fig, self.axes
+            fig, axs = self._setup_subplots()
+            fig.set_tight_layout(self.tight_layout)
+            for axis in axs.flat:
+                self._draw_ax(axis)
+            if axs.size == 1:
+                axs = axs.item()
+            return fig, axs
 
-        else:
-            if hasattr(self, 'arc1_theta1') is False:
-                self._init_circles_and_arcs_equal_aspect(ax)
-            self._draw_ax(ax)
+        self._draw_ax(ax)
+        return None
 
     def _setup_subplots(self):
-        fig, axes = plt.subplots(nrows=self.nrows, ncols=self.ncols, figsize=self.figsize,
-                                 constrained_layout=self.constrained_layout)
+        fig, axs = plt.subplots(nrows=self.nrows, ncols=self.ncols, figsize=self.figsize,
+                                constrained_layout=self.constrained_layout)
         if (self.nrows == 1) and (self.ncols == 1):
-            axes = np.array([axes])
-        self.fig = fig
-        self.axes = axes
+            axs = np.array([axs])
+        return fig, axs
 
     def _draw_ax(self, ax):
+        if self.arc1_theta1 is None:
+            self._init_circles_and_arcs_equal_aspect(ax)
         self._set_axes(ax)
         self._set_background(ax)
         self._draw_pitch_markings(ax)
@@ -495,11 +505,9 @@ class BasePitch(ABC):
                                color=self.line_color, zorder=self.line_zorder)
 
     def _draw_goals(self, ax):
-        rect_prop = {'fill': False, 'linewidth': self.linewidth, 'color': self.line_color,
-                     'alpha': self.goal_alpha, 'zorder': self.line_zorder}
-        line_prop = {'linewidth': self.linewidth * 2, 'color': self.line_color,
-                     'zorder': self.line_zorder}
         if self.goal_type == 'box':
+            rect_prop = {'fill': False, 'linewidth': self.linewidth, 'color': self.line_color,
+                         'alpha': self.goal_alpha, 'zorder': self.line_zorder}
             self._draw_rectangle(ax, self.dim.right, self.dim.goal_bottom,
                                  self.dim.goal_length, self.dim.goal_width, **rect_prop)
             self._draw_rectangle(ax, self.dim.left - self.dim.goal_length,
@@ -507,10 +515,20 @@ class BasePitch(ABC):
                                  self.dim.goal_width, **rect_prop)
 
         elif self.goal_type == 'line':
+            goal_linewidth = self.linewidth * 2
+            line_prop = {'linewidth': goal_linewidth, 'color': self.line_color,
+                         'zorder': self.line_zorder}
             self._draw_line(ax, [self.dim.right, self.dim.right],
                             [self.dim.goal_top, self.dim.goal_bottom], **line_prop)
             self._draw_line(ax, [self.dim.left, self.dim.left],
                             [self.dim.goal_top, self.dim.goal_bottom], **line_prop)
+
+        elif self.goal_type == 'circle':
+            posts = [[self.dim.right, self.dim.goal_bottom], [self.dim.right, self.dim.goal_top],
+                     [self.dim.left, self.dim.goal_bottom], [self.dim.left, self.dim.goal_top]]
+            for post in posts:
+                self._draw_ellipse(ax, post[0], post[1], self.size_spot1, self.size_spot2,
+                                   color=self.line_color, zorder=self.line_zorder)
 
     def _draw_juego_de_posicion(self, ax):
         line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
@@ -534,134 +552,380 @@ class BasePitch(ABC):
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
 
+    def grid(self, grid_height=0.7, space=0.05, bottom=0.1, left=None,
+             figsize=None, nrows=None, ncols=None):
+        """ A helper to create a grid of pitches in a specified location
+
+        Parameters
+        ----------
+        grid_height : float, default 0.7
+            The height of the grid area in fractions of the figure height.
+            The default is the grid height is 70% of the figure height.
+        space : float, default 0.05
+            The total amount of the grid height reserved for spacing between axes.
+            Expressed as a fraction of the grid height. The default is 5% of the grid height.
+            The spacing across the grid width is automatically calculated to maintain even spacing.
+        bottom : float, default 0.1
+            The location of the bottom side of the grid in fractions of the figure height.
+            The default means that the grid is located 10% in from the bottom of the figure.
+        left : float, default None
+            The location of the left hand side of the grid in fractions of the figure width.
+            The default of None places the grid in the middle of the figure.
+        figsize : tuple of float, default None
+            The figure size in inches. The defalt of None uses the Pitch figsize.
+        nrows, ncols : int, default None
+            Number of rows/columns of the subplot grid.
+            The default of None uses the Pitch ncols/ nrows.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+        ax : a numpy array of matplotlib.axes.Axes
+        """
+
+        if figsize is None:
+            figsize = self.figsize
+        if ncols is None:
+            ncols = self.ncols
+        if nrows is None:
+            nrows = self.nrows
+
+        fig_aspect = figsize[0] / figsize[1]
+        total_space_height = grid_height * space
+        total_space_width = total_space_height * self.ax_aspect / fig_aspect
+
+        if grid_height + bottom > 1:
+            error_msg = ('The grid axes extends past the figure height. '
+                         'Reduce one of the grid_height or space so the total is ≤ 1.')
+            raise ValueError(error_msg)
+
+        if nrows > 1:
+            individual_space_height = total_space_height / (nrows - 1)
+        else:
+            total_space_height = 0
+            individual_space_height = 0
+
+        if ncols > 1:
+            individual_space_width = total_space_width / (ncols - 1)
+        else:
+            individual_space_width = 0
+
+        individual_pitch_height = (grid_height - total_space_height) / nrows
+        individual_pitch_width = individual_pitch_height * self.ax_aspect / fig_aspect
+        grid_width = (individual_pitch_width * ncols) + total_space_width
+
+        if grid_width > 1:
+            error_msg = ('The grid axes extends past the figure width. '
+                         'Reduce one of the grid_height/ space, or '
+                         'increase the figure width (the first number of the figsize).')
+            raise ValueError(error_msg)
+
+        if left is None:
+            left = (1 - grid_width) / 2
+
+        if grid_width + left > 1:
+            error_msg = ('The grid axes extends past the figure width. '
+                         'Reduce one of the grid_height/ space, or '
+                         'increase the figure width (the first number of the figsize).')
+            raise ValueError(error_msg)
+
+        bottom_coordinates = np.tile(individual_space_height + individual_pitch_height,
+                                     reps=nrows - 1).cumsum()
+        bottom_coordinates = np.insert(bottom_coordinates, 0, 0.)
+        bottom_coordinates = np.repeat(bottom_coordinates, ncols)
+        bottom_coordinates = bottom_coordinates + bottom
+        bottom_coordinates = bottom_coordinates[::-1]
+
+        left_coordinates = np.tile(individual_space_width + individual_pitch_width,
+                                   reps=ncols - 1).cumsum()
+        left_coordinates = np.insert(left_coordinates, 0, 0.)
+        left_coordinates = np.tile(left_coordinates, nrows)
+        left_coordinates = left_coordinates + left
+
+        fig = plt.figure(figsize=figsize)
+        axs = []
+        for idx, bottom_coord in enumerate(bottom_coordinates):
+            axs.append(fig.add_axes((left_coordinates[idx], bottom_coord,
+                                     individual_pitch_width, individual_pitch_height)))
+            self.draw(ax=axs[idx])
+        axs = np.squeeze(np.array(axs).reshape((nrows, ncols)))
+        if axs.size == 1:
+            axs = axs.item()
+
+        return fig, axs
+
+    def jointgrid(self, pitch_height=0.5, marginal_height=0.1, space_height=0,
+                  left=0.1, bottom=0.1, ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
+        """ Create a grid with a pitch at the center and axes on the
+         top and right handside of the pitch.
+
+        Parameters
+        ----------
+        pitch_height : float, default 0.5
+            The height of the pitch in fractions of the figure height.
+            The default is 50% of the figure.
+        marginal_height : float, default 0.1
+            The height of the marginal axes (either side of the pitch) in fractions
+             of the figure height.
+            The default is 10% of the figure.
+        space_height : float, default 0
+            The space between the pitch and the other axes in fractions of the figure height.
+            The default is no space (note it will still look like there is space
+            if the pitch has padding).
+        left : float, default 0.1
+            The location of the left hand side of the pitch in fractions of the figure width.
+            The default means that the pitch is located 10% in from the left of the figure.
+        bottom : float, default 0.1
+            The location of the bottom side of the pitch in fractions of the figure height.
+            The default means that the pitch is located 10% in from the bottom of the figure.
+        ax_left, ax_top, ax_right : bool, default True
+            Whether to include a Matplotlib Axes on the left/top/right side of the pitch.
+        ax_bottom : bool, default False
+            Whether to include a Matplotlib Axes on the bottom side of the pitch.
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+        ax : a 1d numpy array (length 5) of matplotlib.axes.Axes
+            format = array([pitch, marginal axes in order left, top, right, bottom])
+            if marginal axes is not present then axes replaced by None
+        """
+        if bottom + pitch_height + ((space_height + marginal_height) * ax_top) > 1.:
+            error_msg = ('The jointplot axes extends past the figure height. '
+                         'Reduce one of the pitch_height, space_height, marginal_height, '
+                         'or bottom so the total is ≤ 1')
+            raise ValueError(error_msg)
+
+        if bottom - ((space_height + marginal_height) * ax_bottom) < 0.:
+            error_msg = ('The jointplot axes extends past the figure bottom border. '
+                         'Increase the bottom argument so it is more than the space_height '
+                         '+ marginal_height.')
+            raise ValueError(error_msg)
+
+        fig_aspect = self.figsize[0] / self.figsize[1]
+        pitch_width = pitch_height * self.ax_aspect / fig_aspect
+        marginal_width = marginal_height / fig_aspect
+        space_width = space_height / fig_aspect
+        if left + pitch_width + ((space_width + marginal_width) * ax_right) > 1.:
+            error_msg = ('The jointplot axes extends past the figure width. '
+                         'Reduce one of the pitch_height, space_height, marginal_height, '
+                         'or left.')
+            raise ValueError(error_msg)
+
+        if left - ((space_width + marginal_width) * ax_left) < 0.:
+            error_msg = ('The jointplot axes extends past the figure left border. '
+                         'Increase the left argument so there is space for the left marginal axis.')
+            raise ValueError(error_msg)
+
+        left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
+                    np.abs(self.extent[1] - self.extent[0]))
+        right_pad = (np.abs(self.visible_pitch - self.extent)[1] /
+                     np.abs(self.extent[1] - self.extent[0]))
+        bottom_pad = (np.abs(self.visible_pitch - self.extent)[2] /
+                      np.abs(self.extent[3] - self.extent[2]))
+        top_pad = (np.abs(self.visible_pitch - self.extent)[3] /
+                   np.abs(self.extent[3] - self.extent[2]))
+
+        # add axes and draw pitch
+        fig = plt.figure(figsize=self.figsize)
+
+        # set axes limits
+        x0, x1, y0, y1 = self.visible_pitch
+
+        axs = []
+
+        if ax_left:
+            ax_0 = fig.add_axes((left - space_width - marginal_width,
+                                 bottom + (bottom_pad * pitch_height),
+                                 marginal_width,
+                                 pitch_height - (bottom_pad + top_pad) * pitch_height))
+            ax_0.set_ylim(y0, y1)
+            ax_0.invert_xaxis()
+            for spine in ['left', 'bottom', 'top']:
+                ax_0.spines[spine].set_visible(False)
+            axs.append(ax_0)
+        else:
+            axs.append(None)
+
+        if ax_top:
+            ax_1 = fig.add_axes((left + (left_pad * pitch_width),
+                                 bottom + pitch_height + space_height,
+                                 pitch_width - (left_pad + right_pad) * pitch_width,
+                                 marginal_height))
+            for spine in ['left', 'right', 'top']:
+                ax_1.spines[spine].set_visible(False)
+            ax_1.set_xlim(x0, x1)
+            axs.append(ax_1)
+        else:
+            axs.append(None)
+
+        if ax_right:
+            ax_2 = fig.add_axes((left + pitch_width + space_width,
+                                 bottom + (bottom_pad * pitch_height),
+                                 marginal_width,
+                                 pitch_height - (bottom_pad + top_pad) * pitch_height))
+            ax_2.set_ylim(y0, y1)
+            for spine in ['right', 'bottom', 'top']:
+                ax_2.spines[spine].set_visible(False)
+            axs.append(ax_2)
+        else:
+            axs.append(None)
+
+        if ax_bottom:
+            ax_3 = fig.add_axes((left + (left_pad * pitch_width),
+                                 bottom - space_height - marginal_height,
+                                 pitch_width - (left_pad + right_pad) * pitch_width,
+                                 marginal_height))
+            for spine in ['left', 'right', 'bottom']:
+                ax_3.spines[spine].set_visible(False)
+            ax_3.set_xlim(x0, x1)
+            ax_3.invert_yaxis()
+            axs.append(ax_3)
+        else:
+            axs.append(None)
+
+        ax_pitch = fig.add_axes((left, bottom, pitch_width, pitch_height))
+        self.draw(ax=ax_pitch)
+        axs.insert(0, ax_pitch)
+
+        for ax in axs[1:]:
+            if ax is not None:
+                plt.setp(ax.get_xticklabels(), visible=False)
+                plt.setp(ax.get_yticklabels(), visible=False)
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+        axs = np.array(axs)
+
+        return fig, axs
+
     # The methods below for drawing/ setting attributes for some of the pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
     # as they differ for horizontal/ vertical pitches
     @abstractmethod
     def _scale_pad(self):
-        pass
+        """ Implement a method to scale padding for equal aspect pitches."""
 
     @abstractmethod
     def _set_extent(self):
-        pass
+        """ Implement a method to set the pitch extents, stripe locations,
+         and attributes to help plotting on differnt orientations."""
 
     @abstractmethod
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
-        pass
+        """ Implement a method to draw rectangles on a axes."""
 
     @abstractmethod
     def _draw_line(self, ax, x, y, **kwargs):
-        pass
+        """ Implement a method to draw lines on a axes."""
 
     @abstractmethod
     def _draw_ellipse(self, ax, x, y, width, height, **kwargs):
-        pass
+        """ Implement a method to draw ellipses (circles) on a axes."""
 
     @abstractmethod
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
-        pass
+        """ Implement a method to draw arcs on a axes."""
 
     @abstractmethod
     def _draw_stripe(self, ax, i):
-        pass
+        """ Implement a method to draw stripes on a pitch (axvspan/axhspan)."""
 
     @abstractmethod
     def _draw_stripe_grass(self, pitch_color):
-        pass
+        """ Implement a method to draw stripes on a pitch.
+        Increase the array values at stripe locations."""
 
     @staticmethod
     @abstractmethod
     def _reverse_if_vertical(x, y):
-        pass
+        """ Implement a method to reverse x and y coordinates if drawing on a vertical pitch."""
 
     @staticmethod
     @abstractmethod
     def _reverse_vertices_if_vertical(vert):
-        pass
+        """ Implement a method to reverse vertices if drawing on a vertical pitch."""
 
     @staticmethod
     @abstractmethod
     def _reverse_annotate_if_vertical(annotate):
-        pass
+        """ Implement a method to reverse annotations if drawing on a vertical pitch."""
 
     # The plotting methods below are defined in _pitch_plot.py (BasePlotPitch)
     # This module contains all the plotting methods
     @abstractmethod
     def plot(self, x, y, ax=None, **kwargs):
-        pass
+        """ Implement a wrapper for matplotlib.axes.Axes.plot."""
 
     @abstractmethod
     def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
-        pass
+        """ Implement a wrapper for matplotlib.axes.Axes.scatter, while adding additional
+        features for rotating markers and plotting footballs."""
 
     @abstractmethod
     def _reflect_2d(self, x, y, standardized=False):
-        pass
+        """ Implement a method to reflect points in the pitch sides."""
 
     @abstractmethod
     def kdeplot(self, x, y, ax=None, reflect=True, **kwargs):
-        pass
+        """ Implement a wrapper for seaborn.kdeplot."""
 
     @abstractmethod
     def hexbin(self, x, y, ax=None, **kwargs):
-        pass
+        """ Implement a wrapper for matplotlib.axes.Axes.hexbin."""
 
     @abstractmethod
     def polygon(self, verts, ax=None, **kwargs):
-        pass
+        """ Implement a method to add polygons to the pitch."""
 
     @abstractmethod
     def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
-        pass
+        """ Implement a method to plot a triangle between a point and goal posts."""
 
     @abstractmethod
     def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
-        pass
+        """ Implement a wrapper for matplotlib.axes.Axes.annotate."""
 
     @abstractmethod
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), standardized=False):
-        pass
+        """ Calculate 2d binned statistics for arbritary shaped bins."""
 
     @abstractmethod
-    def heatmap(self, bin_statistic, ax=None, **kwargs):
-        pass
+    def heatmap(self, stats, ax=None, **kwargs):
+        """ Implement drawing heatmaps for arbritary shaped bins."""
 
     @abstractmethod
     def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
-        pass
+        """ Calculate the binned statistics for Juegos de posición zones."""
 
     @abstractmethod
-    def heatmap_positional(self, bin_statistic, ax=None, **kwargs):
-        pass
+    def heatmap_positional(self, stats, ax=None, **kwargs):
+        """ Implement a heatmap for the Juegos de posición zones."""
 
     @abstractmethod
-    def label_heatmap(self, bin_statistic, ax=None, **kwargs):
-        pass
+    def label_heatmap(self, stats, ax=None, **kwargs):
+        """ Implement a heatmap labeller."""
 
     @abstractmethod
     def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
-        pass
+        """ Implement a method to plot arrows."""
 
     @abstractmethod
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
               comet=False, transparent=False, alpha_start=0.01,
               alpha_end=1, cmap=None, ax=None, **kwargs):
-        pass
+        """ Implement a method to plot lines."""
 
     @abstractmethod
     def voronoi(self, x, y, teams):
-        pass
+        """ Calculate the Voronoi polygons for each team."""
 
     @abstractmethod
-    def calculate_angle_and_distance(self, xstart, ystart, xend, yend, standardized=False):
-        pass
+    def calculate_angle_and_distance(self, xstart, ystart, xend, yend,
+                                     standardized=False, degrees=False):
+        """ Calculate the angle and distance from a start and end location."""
 
     @abstractmethod
     def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5,
              color=None, ax=None, **kwargs):
-        pass
-
-    @abstractmethod
-    def jointgrid(self, pitch_height=0.5, marginal_height=0.1,
-                  space_height=0, left=0.1, bottom=0.1):
-        pass
+        """ Implement a flow diagram with arrows showing the average direction and
+        a heatmap showing the counts in each bin."""
