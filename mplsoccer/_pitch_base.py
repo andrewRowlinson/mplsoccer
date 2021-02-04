@@ -177,8 +177,8 @@ class BasePitch(ABC):
         # _init_circles_and_arcs / _init_circles_and_arcs_equal_aspect
         self.diameter1 = None
         self.diameter2 = None
-        self.size_spot1 = None
-        self.size_spot2 = None
+        self.diameter_spot1 = None
+        self.diameter_spot2 = None
         self.arc1_theta1 = None
         self.arc1_theta2 = None
         self.arc2_theta1 = None
@@ -315,8 +315,8 @@ class BasePitch(ABC):
         self.diameter1 = self.dim.circle_diameter
         self.diameter2 = self.dim.circle_diameter
         # *2 as elipse uses diameter rather than radius
-        self.size_spot1 = self.spot_scale * self.dim.length * 2
-        self.size_spot2 = self.spot_scale * self.dim.length * 2
+        self.diameter_spot1 = self.spot_scale * self.dim.length * 2
+        self.diameter_spot2 = self.spot_scale * self.dim.length * 2
         self.arc1_theta1 = -self.dim.arc
         self.arc1_theta2 = self.dim.arc
         self.arc2_theta1 = 180 - self.dim.arc
@@ -324,40 +324,41 @@ class BasePitch(ABC):
 
     def _init_circles_and_arcs_equal_aspect(self, ax):
         # calculate the point that the arc intersects the penalty area
-        radius1 = self.dim.circle_diameter / 2 * self.dim.width / self.dim.pitch_width
-        radius2 = self.dim.circle_diameter / 2 * self.dim.length / self.dim.pitch_length
+        radius1 = self.dim.circle_diameter / 2 * self.dim.length / self.dim.pitch_length
+        radius2 = self.dim.circle_diameter / 2 * self.dim.width / self.dim.pitch_width
         intersection = self.dim.center_width - (
-                radius1 * radius2 * (radius2 ** 2 -
+                radius1 * radius2 * (radius1 ** 2 -
                                      (self.dim.penalty_area_length -
-                                      self.dim.penalty_left) ** 2) ** 0.5) / (radius2 ** 2)
+                                      self.dim.penalty_left) ** 2) ** 0.5) / (radius1 ** 2)
         arc_pen_top1 = (self.dim.penalty_area_length, intersection)
         # scale the (center/ penalty) spot sizes
         size_spot = self.spot_scale * self.dim.pitch_length
-        scaled_spot1 = size_spot * self.dim.width / self.dim.pitch_width
-        scaled_spot2 = size_spot * self.dim.length / self.dim.pitch_length
+        scaled_spot1 = size_spot * self.dim.length / self.dim.pitch_length
+        scaled_spot2 = size_spot * self.dim.width / self.dim.pitch_width
         # center points
-        xy = (self.dim.center_length, self.dim.center_width)
-        xy1 = (self.dim.center_length, self.dim.center_width + radius2)
-        xy2 = (self.dim.center_length + radius1, self.dim.center_width)
+        center_xy = (self.dim.center_length, self.dim.center_width)
+        center_xy1 = (self.dim.center_length + radius1, self.dim.center_width)
+        center_xy2 = (self.dim.center_length, self.dim.center_width + radius2)
         # penalty spot points
-        p1 = (self.dim.penalty_left + scaled_spot2, self.dim.center_width)
-        spot1 = (self.dim.penalty_left, self.dim.center_width)
-        p2 = (self.dim.penalty_left, self.dim.center_width + scaled_spot1)
-        spot2 = (self.dim.penalty_right, self.dim.center_width)
-        # convert to ax_coordinates
-        ax_coordinate_system = ax.transAxes
-        coord_name = ['xy', 'xy1', 'xy2', 'spot1', 'spot2', 'p1', 'p2', 'arc_pen_top1']
+        spot_xy = (self.dim.penalty_left, self.dim.center_width)
+        spot_xy1 = (self.dim.penalty_left + scaled_spot1, self.dim.center_width)
+        spot_xy2 = (self.dim.penalty_left, self.dim.center_width + scaled_spot2)
+        # convert points to ax_coordinates
+        coord_name = ['arc_pen_top1', 'center_xy', 'center_xy1', 'center_xy2',
+                      'spot_xy', 'spot_xy1', 'spot_xy2']
+        points = [arc_pen_top1, center_xy, center_xy1, center_xy2,
+                  spot_xy, spot_xy1, spot_xy2]
         coord_dict = {}
-        for i, coord in enumerate([xy, xy1, xy2, spot1, spot2, p1, p2, arc_pen_top1]):
-            coord_dict[coord_name[i]] = self._to_ax_coord(ax, ax_coordinate_system, coord)
-        # work out diameter of the circles (multiply by 2 as radius)
-        self.diameter1 = (coord_dict['xy1'][1] - coord_dict['xy'][1]) * 2
-        self.diameter2 = (coord_dict['xy2'][0] - coord_dict['xy'][0]) * 2
-        self.size_spot1 = (coord_dict['p1'][0] - coord_dict['spot1'][0]) * 2
-        self.size_spot2 = (coord_dict['p2'][1] - coord_dict['spot1'][1]) * 2
-        # work out arc angles
-        a = coord_dict['arc_pen_top1'][0] - coord_dict['spot1'][0]
-        o = coord_dict['spot1'][1] - coord_dict['arc_pen_top1'][1]
+        for i, coord in enumerate(points):
+            coord_dict[coord_name[i]] = self._to_ax_coord(ax, ax.transAxes, coord)
+        # work out diameter of the circles (multiply radius by 2 to get diameter)
+        self.diameter1 = (coord_dict['center_xy1'][0] - coord_dict['center_xy'][0]) * 2
+        self.diameter2 = (coord_dict['center_xy2'][1] - coord_dict['center_xy'][1]) * 2
+        self.diameter_spot1 = (coord_dict['spot_xy1'][0] - coord_dict['spot_xy'][0]) * 2
+        self.diameter_spot2 = (coord_dict['spot_xy2'][1] - coord_dict['spot_xy'][1]) * 2
+        # work out the arc angles
+        a = coord_dict['arc_pen_top1'][0] - coord_dict['spot_xy'][0]
+        o = coord_dict['spot_xy'][1] - coord_dict['arc_pen_top1'][1]
         self.arc1_theta2 = np.degrees(np.arctan(o / a))
         self.arc1_theta1 = 360 - self.arc1_theta2
         self.arc2_theta1 = 180 - self.arc1_theta2
@@ -495,13 +496,13 @@ class BasePitch(ABC):
         # draw center and penalty spots
         if self.spot_scale > 0:
             self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
-                               self.size_spot1, self.size_spot2,
+                               self.diameter_spot1, self.diameter_spot2,
                                color=self.line_color, zorder=self.line_zorder)
             self._draw_ellipse(ax, self.dim.penalty_left, self.dim.center_width,
-                               self.size_spot1, self.size_spot2,
+                               self.diameter_spot1, self.diameter_spot2,
                                color=self.line_color, zorder=self.line_zorder)
             self._draw_ellipse(ax, self.dim.penalty_right, self.dim.center_width,
-                               self.size_spot1, self.size_spot2,
+                               self.diameter_spot1, self.diameter_spot2,
                                color=self.line_color, zorder=self.line_zorder)
 
     def _draw_goals(self, ax):
@@ -527,7 +528,7 @@ class BasePitch(ABC):
             posts = [[self.dim.right, self.dim.goal_bottom], [self.dim.right, self.dim.goal_top],
                      [self.dim.left, self.dim.goal_bottom], [self.dim.left, self.dim.goal_top]]
             for post in posts:
-                self._draw_ellipse(ax, post[0], post[1], self.size_spot1, self.size_spot2,
+                self._draw_ellipse(ax, post[0], post[1], self.diameter_spot1, self.diameter_spot2,
                                    color=self.line_color, zorder=self.line_zorder)
 
     def _draw_juego_de_posicion(self, ax):
