@@ -4,6 +4,8 @@ Version 1.0.0
 This release is a major refactor of mplsoccer and a merger with 
 [soccerplots](https://github.com/Slothfulwave612/soccerplots) for plotting Radars.
 
+---
+
 ### Breaking Changes
 1) ``orientation`` argument is removed. \
 To plot on a vertical pitch use the new ``VerticalPitch`` class.
@@ -15,10 +17,14 @@ For example, Pitch(view='half') becomes Pitch(half=True).
 5) removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
 6) ``add_image`` takes a file_path now rather than PIL image or NumPy array.
 
+---
+
 ### Changes
 1) ``hexbin`` now clips to the sides of the soccer pitch for more attractive visualizations.
 2) ``wyscout`` goal width increased to 12 units (from 10 units) to align with ggsoccer. \
 This matters as the new ``Standardizer`` class uses the goalpost dimensions.
+
+---
 
 ### Added
 1) Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
@@ -39,6 +45,8 @@ in degrees clockwise.
 10) Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
 to low transparency.
 
+---
+
 ### Fixes
 1) Changed ``Seaborn`` x and y from arguments to keyword arguments. \
 This fixes a FutureWarning from Seaborn that the only valid positional argument will be data.
@@ -47,11 +55,15 @@ For example, from mplsoccer import Pitch.
 3) Added __repr__ methods to classes.
 4) Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
 
+---
+
 ### Docs
 1) Added examples for custom colormaps
 2) Tweaked the StatsBomb data example to only update files if the JSON file has changed.
 3) Added more beautiful scatter examples.
 4) Added examples for ``grid`` and ``jointgrid``.
+
+---
 
 ### Refactoring
 The pitch class has been split into multiple modules and classes to simplify the code.
@@ -66,6 +78,8 @@ for drawing a soccer pitch from ``BasePitch``.
 a new ``Standardizer`` class.
 * The code for heatmaps, arrows, lines, scatter_rotation, and scatter_football are now \
 in separate modules (heatmap.py, quiver.py, linecollection.py, and scatterutils.py).
+
+---
 
 Version 0.0.21
 -----------
