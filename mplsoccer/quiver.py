@@ -10,6 +10,7 @@ from mplsoccer.utils import validate_ax
 
 __all__ = ['arrows']
 
+
 def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs):
     """ Utility wrapper around matplotlib.axes.Axes.quiver.
     Quiver uses locations and direction vectors usually.
@@ -64,6 +65,13 @@ def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs)
     >>> pitch = Pitch()
     >>> fig, ax = pitch.draw()
     >>> pitch.arrows(20, 20, 45, 80, ax=ax)
+
+    >>> from mplsoccer.quiver import arrows
+    >>> import matplotlib.pyplot as plt
+    >>> fig, ax = plt.subplots()
+    >>> arrows([0.1, 0.4], [0.1, 0.5], [0.9, 0.4], [0.8, 0.8], ax=ax)
+    >>> ax.set_xlim(0, 1)
+    >>> ax.set_ylim(0, 1)
     """
     validate_ax(ax)
 

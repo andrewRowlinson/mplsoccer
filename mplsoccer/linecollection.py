@@ -64,6 +64,18 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     Returns
     -------
     LineCollection : matplotlib.collections.LineCollection
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> pitch = Pitch()
+    >>> fig, ax = pitch.draw()
+    >>> pitch.lines(20, 20, 45, 80, comet=True, transparent=True, ax=ax)
+
+    >>> from mplsoccer.linecollection import lines
+    >>> import matplotlib.pyplot as plt
+    >>> fig, ax = plt.subplots()
+    >>> lines([0.1, 0.4], [0.1, 0.5], [0.9, 0.4], [0.8, 0.8], ax=ax)
     """
     validate_ax(ax)
     if not isinstance(comet, bool):

@@ -590,6 +590,12 @@ class BasePitch(ABC):
         -------
         fig : matplotlib.figure.Figure
         ax : a numpy array of matplotlib.axes.Axes
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figsize=(14, 12))
         """
 
         if figsize is None:
@@ -697,6 +703,16 @@ class BasePitch(ABC):
         ax : a 1d numpy array (length 5) of matplotlib.axes.Axes
             format = array([pitch, marginal axes in order left, top, right, bottom])
             if marginal axes is not present then axes replaced by None
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> import seaborn as sns
+        >>> pitch = Pitch()
+        >>> fig, axs = pitch.jointgrid(ax_left=False, ax_right=False, ax_bottom=False, ax_top=True)
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> sns.kdeplot(x=x, ax=axs[2], shade=True)
         """
         if bottom + pitch_height + ((space_height + marginal_height) * ax_top) > 1.:
             error_msg = ('The jointplot axes extends past the figure height. '

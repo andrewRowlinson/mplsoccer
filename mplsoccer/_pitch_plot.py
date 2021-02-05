@@ -39,6 +39,13 @@ class BasePitchPlot(BasePitch):
         Returns
         -------
         lines : A list of Line2D objects representing the plotted data.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.plot([30, 35, 20], [30, 19, 40], ax=ax)
         """
         validate_ax(ax)
         x, y = self._reverse_if_vertical(x, y)
@@ -74,6 +81,23 @@ class BasePitchPlot(BasePitch):
         paths : matplotlib.collections.PathCollection
                 or a tuple of (paths, paths) if marker='football'
 
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, ax=ax)
+
+        >>> from mplsoccer import Pitch
+        >>> from mplsoccer import arrowhead_marker
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, rotation_degrees=45, marker=arrowhead_marker, ax=ax)
+
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, marker='football', ax=ax)
         """
         validate_ax(ax)
 
@@ -128,6 +152,16 @@ class BasePitchPlot(BasePitch):
         Returns
         -------
         contour : matplotlib.contour.ContourSet
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> y = np.random.uniform(low=0, high=80, size=100)
+        >>> pitch.kdeplot(x, y, cmap='Reds', shade=True, levels=100, ax=ax)
         """
         validate_ax(ax)
 
@@ -164,6 +198,16 @@ class BasePitchPlot(BasePitch):
         Returns
         -------
         polycollection : matplotlib.collections.PolyCollection
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> y = np.random.uniform(low=0, high=80, size=100)
+        >>> pitch.hexbin(x, y, edgecolors='black', gridsize=(11, 5), cmap='Reds', ax=ax)
         """
         validate_ax(ax)
         x = np.ravel(x)
@@ -211,11 +255,22 @@ class BasePitchPlot(BasePitch):
         Returns
         -------
         PatchCollection : matplotlib.collections.PatchCollection
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(label=True, axis=True)
+        >>> fig, ax = pitch.draw()
+        >>> shape1 = np.array([[50, 2], [80, 30], [40, 30], [40, 20]])
+        >>> shape2 = np.array([[70, 70], [60, 50], [40, 40]])
+        >>> verts = [shape1, shape2]
+        >>> pitch.polygon(verts, color='red', alpha=0.3, ax=ax)
         """
         validate_ax(ax)
-        verts = np.asarray(verts)
         patch_list = []
         for vert in verts:
+            vert = np.asarray(vert)
             vert = self._reverse_vertices_if_vertical(vert)
             polygon = patches.Polygon(vert, closed=True)
             patch_list.append(polygon)
@@ -243,6 +298,13 @@ class BasePitchPlot(BasePitch):
         Returns
         -------
         PatchCollection : matplotlib.collections.PatchCollection
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.goal_angle(100, 30, alpha=0.5, color='red', ax=ax)
         """
         validate_ax(ax)
         valid_goal = ['left', 'right']
@@ -334,8 +396,24 @@ ax=ax arrowprops=dict(facecolor='black'))
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
 
         Returns
-        ----------
+        -------
         annotations : A list of matplotlib.text.Annotation.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> import matplotlib.patheffects as path_effects
+        >>> pitch = Pitch(line_zorder=2, pitch_color='black')
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> y = np.random.uniform(low=0, high=80, size=100)
+        >>> stats = pitch.bin_statistic(x, y)
+        >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
+        >>> stats['statistic'] = stats['statistic'].astype(int)
+        >>> path_eff = [path_effects.Stroke(linewidth=0.5, foreground='#22312b')]
+        >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center', \
+va='center', path_effects=path_eff)
         """
         validate_ax(ax)
 
@@ -407,6 +485,21 @@ ax=ax arrowprops=dict(facecolor='black'))
 
         team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
             Where the individual 2d arrays are coordinates of the Voronoi vertices.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=22)
+        >>> y = np.random.uniform(low=0, high=80, size=22)
+        >>> teams = np.array([0] * 11 + [1] * 11)
+        >>> pitch.scatter(x[teams == 0], y[teams == 0], color='red', ax=ax)
+        >>> pitch.scatter(x[teams == 1], y[teams == 1], color='blue', ax=ax)
+        >>> team1, team2 = pitch.voronoi(x, y, teams)
+        >>> team1_poly = pitch.polygon(team1, ax=ax, color='blue', alpha=0.3)
+        >>> team2_poly = pitch.polygon(team2, ax=ax, color='red', alpha=0.3)
         """
         x = np.ravel(x)
         y = np.ravel(y)
@@ -486,6 +579,13 @@ ax=ax arrowprops=dict(facecolor='black'))
             If degrees = True, then the angle is returned in degrees clockwise in the range [0, 360]
         distance: ndarray
             Array of distances.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> pitch.calculate_angle_and_distance(0, 40, 30, 20, degrees=True)
+        (array([326.30993247]), array([36.05551275]))
         """
         xstart = np.ravel(xstart)
         ystart = np.ravel(ystart)
@@ -561,6 +661,22 @@ ax=ax arrowprops=dict(facecolor='black'))
         Returns
         -------
         PolyCollection : matplotlib.quiver.Quiver
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> from mplsoccer.statsbomb import read_event, EVENT_SLUG
+        >>> df = read_event(f'{EVENT_SLUG}/7478.json', related_event_df=False, \
+shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
+        >>> team1, team2 = df.team_name.unique()
+        >>> mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1)
+        >>> df = df[mask_team1].copy()
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> bs_heatmap = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 4))
+        >>> hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Blues')
+        >>> fm = pitch.flow(df.x, df.y, df.end_x, df.end_y, color='black', arrow_type='same', \
+arrow_length=6, bins=(6, 4), headwidth=2, headlength=2, headaxislength=2, ax=ax)
         """
         validate_ax(ax)
         if self.dim.aspect != 1:
