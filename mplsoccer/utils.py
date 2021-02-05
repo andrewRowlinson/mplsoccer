@@ -348,13 +348,19 @@ length_to=105, width_to=68)
     @staticmethod
     def _standardize(markings_from, markings_to, coordinate):
         """" Helper method to standardize the data"""
+        # to deal with nans set nans to zero temporarily
+        mask_nan = np.isnan(coordinate)
+        coordinate[mask_nan] = 0
         pos = np.searchsorted(markings_from, coordinate)
         low_from = markings_from[pos - 1]
         high_from = markings_from[pos]
         proportion_of_way_between = (coordinate - low_from) / (high_from - low_from)
         low_to = markings_to[pos - 1]
         high_to = markings_to[pos]
-        return low_to + ((high_to - low_to) * proportion_of_way_between)
+        standardized_coordinate = low_to + ((high_to - low_to) * proportion_of_way_between)
+        # then set nans back to nan
+        standardized_coordinate[mask_nan] = np.nan
+        return standardized_coordinate
 
     def __repr__(self):
         return (f'{self.__class__.__name__}('
