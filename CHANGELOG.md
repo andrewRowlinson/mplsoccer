@@ -44,28 +44,29 @@ For example, StatsBomb to Tracab.
 pitch type where the length and width can vary.
 * :icecream: Added ``goal_alpha`` for controlling the transparency of ``goal_type='box'`` goals.
 * :icecream: Added ``goal_type='circle'`` to plot the goalposts as circles.
-* :ok: Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
+* :new: Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
 in degrees clockwise.
-* :ok: Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
+* :new: Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
 to low transparency.
 
 ---
 
 ### Fixes
-1) Changed ``Seaborn`` x and y from arguments to keyword arguments. \
+* :ok: Changed ``Seaborn`` x and y from arguments to keyword arguments. \
 This fixes a FutureWarning from Seaborn that the only valid positional argument will be data.
-2) Changed imports so that you do not need to reference the module. \
+* :ok: Changed imports so that you do not need to reference the module. \
 For example, from mplsoccer import Pitch.
-3) Added __repr__ methods to classes.
-4) Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
+* :ok: Added __repr__ methods to classes.
+* :ok: Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
 
 ---
 
 ### Docs
-1) Added examples for custom colormaps
-2) Tweaked the StatsBomb data example to only update files if the JSON file has changed.
-3) Added more beautiful scatter examples.
-4) Added examples for ``grid`` and ``jointgrid``.
+* :page_with_curl: Added examples for custom colormaps
+* :page_with_curl: Tweaked the StatsBomb data example to only update files if the \
+JSON file has changed.
+* :page_with_curl: Added more beautiful scatter examples.
+* :page_with_curl: Added examples for ``grid`` and ``jointgrid``.
 
 ---
 
