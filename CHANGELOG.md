@@ -7,15 +7,15 @@ This release is a major refactor of mplsoccer and a merger with
 ---
 
 ### Breaking Changes
-1) :x: ``orientation`` argument is removed. \
+* :x: ``orientation`` argument is removed. \
 To plot on a vertical pitch use the new ``VerticalPitch`` class.
-2) :x: ``layout`` argument is removed. Use the Matplotlib style ``nrows`` and ``ncols`` instead. \
+* :x: ``layout`` argument is removed. Use the Matplotlib style ``nrows`` and ``ncols`` instead. \
 For example, Pitch(layout=(4, 5)) becomes Pitch(nrows=4, ncols=5).
-3) :x: ``view`` argument is removed. Use half=True to display half-a-pitch. \
+* :x: ``view`` argument is removed. Use half=True to display half-a-pitch. \
 For example, Pitch(view='half') becomes Pitch(half=True).
-4) :x: ``pitch_type=stats`` pitch_type option removed.
-5) :x: removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
-6) :heavy_exclamation_mark: ``add_image`` takes a file_path now rather than \
+* :x: ``pitch_type=stats`` pitch_type option removed.
+* :x: removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
+* :heavy_exclamation_mark: ``add_image`` takes a file_path now rather than \
 PIL image or NumPy array.
 
 ---
