@@ -21,31 +21,32 @@ a PIL image or NumPy array.
 ---
 
 ### Changes
-*  :white_check_mark: ``hexbin`` now clips to the sides of the soccer pitch for more \
+* :white_check_mark: ``hexbin`` now clips to the sides of the soccer pitch for more \
 attractive visualizations.
-*  :heavy_exclamation_mark: ``wyscout`` goal width increased to 12 units (from 10 units) \
+* :heavy_exclamation_mark: ``wyscout`` goal width increased to 12 units (from 10 units) \
 to align with ggsoccer. This matters as the new ``Standardizer`` \
 class uses the goalpost dimensions.
 
 ---
 
 ### Added
-1) Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
+* :heart_eyes: Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
 for wonderful radar charts.
-2) Added new pitch_types: ``skillcorner``, ``secondspectrum``, and a ``custom`` \
-pitch type where the length and width can vary.
-3) Added ``goal_alpha`` for controlling the transparency of ``goal_type='box'`` goals.
-4) Added ``goal_type='circle'`` to plot the goalposts as circles.
-5) Added ``jointgrid`` method to draw optional marginal axes on the four-sides of a soccer pitch.
-This replaces the old ``jointplot``, which did not allow non-square pitches.
-6) Added the ``grid`` method to create a grid of pitches with more control than plt.subplots.
-7) Added ``FontManager`` from [ridge_map](https://github.com/colcarroll/ridge_map) for downloading \
-and using google fonts.
-8) Added ``Standardizer`` for changing from one provider data format to another. \
+* :strawberry: Added ``jointgrid`` method to draw optional marginal axes on the four-sides \
+of a soccer pitch. This replaces the old ``jointplot``, which did not allow non-square pitches.
+* :strawberry: Added the ``grid`` method to create a grid of pitches with more control \
+than plt.subplots.
+* :strawberry: Added ``FontManager`` from [ridge_map](https://github.com/colcarroll/ridge_map) \
+for downloading and using google fonts.
+* :strawberry: Added ``Standardizer`` for changing from one provider data format to another. \
 For example, StatsBomb to Tracab.
-9) Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
+* :icecream: Added new pitch_types: ``skillcorner``, ``secondspectrum``, and a ``custom`` \
+pitch type where the length and width can vary.
+* :icecream: Added ``goal_alpha`` for controlling the transparency of ``goal_type='box'`` goals.
+* :icecream: Added ``goal_type='circle'`` to plot the goalposts as circles.
+* :ok: Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
 in degrees clockwise.
-10) Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
+* :ok: Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
 to low transparency.
 
 ---
