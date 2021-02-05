@@ -73,52 +73,43 @@ def _simplify_cols_and_drop(df, col, cols=None):
 def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
                tactics_lineup_df=True, warn=True):
     """ Extracts individual event json and loads as a dictionary of up to
-    four pandas.DataFrame: 'event', 'related event', 'shot_freeze_frame', and 'tactics_lineup'.
+    four pandas.DataFrame: ``event``, ``related event``, ``shot_freeze_frame``,
+    and ``tactics_lineup``.
 
     Parameters
-        ----------
-        path_or_buf : a valid JSON str, path object or file-like object
-            Any valid string path is acceptable. The string could be a URL. Valid
-            URL schemes include http, ftp, s3, and file. For file URLs, a host is
-            expected. A local file could be:
-            ``file://localhost/path/to/table.json``.
-            If you want to pass in a path object, pandas accepts any
-            ``os.PathLike``.
-            By file-like object, we refer to objects with a ``read()`` method,
-            such as a file handler (e.g. via builtin ``open`` function)
-            or ``StringIO``.
+    ----------
+    path_or_buf : a valid JSON str, path object or file-like object
+        Any valid string path is acceptable. The string could be a URL. Valid
+        URL schemes include http, ftp, s3, and file. For file URLs, a host is
+        expected. A local file could be: ``file://localhost/path/to/table.json``.
+        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
+        By file-like object, we refer to objects with a ``read()`` method,
+        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
+    related_event_df : bool, default True
+        Whether to return a ``related_event`` Dataframe in the returned dictionary.
+    shot_freeze_frame_df : bool, default True
+        Whether to return a ``shot_freeze_frame`` in the returned dictionary.
+    tactics_lineup_df : bool, default True
+        Whether to return a ``tactics_lineup`` Dataframe in the returned dictionary.
+    warn : bool, default True
+        Whether to warn about Statsbomb's data license agreement.
 
-        related_event_df : bool, default True
-            Whether to return a 'related_event' Dataframe in the returned dictionary.
+    Returns
+    -------
+    Dict of up to 4 pandas.DataFrame.
+        Dict keys: ``event``, ``related_event``, ``shot_freeze_frame``, ``tactics_lineup``.
 
-        shot_freeze_frame_df : bool, default True
-            Whether to return a 'shot_freeze_frame' in the returned dictionary.
+    Examples
+    --------
+    >>> from mplsoccer.statsbomb import read_event
+    >>> import os
+    >>> PATH_TO_EDIT = os.path.join('open-data','data','events','7430.json')
+    >>> dict_dfs = read_event(PATH_TO_EDIT)
 
-        tactics_lineup_df : bool, default True
-            Whether to return a 'tactics_lineup' Dataframe in the returned dictionary.
-
-        warn : bool, default True
-            Whether to warn about Statsbomb's data license agreement.
-
-        Returns
-        -------
-        Dict of up to 4 pandas.DataFrame.
-            Dict keys: 'event', 'related_event', 'shot_freeze_frame', 'tactics_lineup'.
-
-
-        Examples
-        --------
-        # read from path - note change path to navigate to open-data folder
-        from mplsoccer.statsbomb import read_event
-        import os
-        PATH_TO_EDIT = os.path.join('open-data','data','events','7430.json')
-        dict_dfs = read_event(PATH_TO_EDIT)
-
-        # read from url
-        from mplsoccer.statsbomb import read_event, EVENT_SLUG
-        import os
-        URL = os.path.join(EVENT_SLUG,'7430.json')
-        dict_dfs = read_event(URL)
+    >>> from mplsoccer.statsbomb import read_event, EVENT_SLUG
+    >>> import os
+    >>> URL = f'{EVENT_SLUG}/7430.json'
+    >>> dict_dfs = read_event(URL)
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
@@ -285,38 +276,32 @@ def read_match(path_or_buf, warn=True):
     """ Extracts individual match json and loads as a pandas.DataFrame.
 
     Parameters
-        ----------
-        path_or_buf : a valid JSON str, path object or file-like object
-            Any valid string path is acceptable. The string could be a URL. Valid
-            URL schemes include http, ftp, s3, and file. For file URLs, a host is
-            expected. A local file could be:
-            ``file://localhost/path/to/table.json``.
-            If you want to pass in a path object, pandas accepts any
-            ``os.PathLike``.
-            By file-like object, we refer to objects with a ``read()`` method,
-            such as a file handler (e.g. via builtin ``open`` function)
-            or ``StringIO``.
+    ----------
+    path_or_buf : a valid JSON str, path object or file-like object
+        Any valid string path is acceptable. The string could be a URL. Valid
+        URL schemes include http, ftp, s3, and file. For file URLs, a host is
+        expected. A local file could be: ``file://localhost/path/to/table.json``.
+        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
+        By file-like object, we refer to objects with a ``read()`` method,
+        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
+    warn : bool, default True
+        Whether to warn about Statsbomb's data license agreement.
 
-        warn : bool, default True
-            Whether to warn about Statsbomb's data license agreement.
+    Returns
+    -------
+    pandas.DataFrame
 
-        Returns
-        -------
-        pandas.DataFrame
+    Examples
+    --------
+    >>> from mplsoccer.statsbomb import read_match
+    >>> import os
+    >>> PATH_TO_EDIT = os.path.join('open-data','data','matches','11','1.json')
+    >>> df_match = read_match(PATH_TO_EDIT)
 
-        Examples
-        --------
-        # read from path - note change path to navigate to open-data folder
-        from mplsoccer.statsbomb import read_match
-        import os
-        PATH_TO_EDIT = os.path.join('open-data','data','matches','11','1.json')
-        df_match = read_match(PATH_TO_EDIT)
-
-        # read from url
-        from mplsoccer.statsbomb import read_match, MATCH_SLUG
-        import os
-        URL = os.path.join(MATCH_SLUG,'11','1.json')
-        df_match = read_match(URL)
+    >>> from mplsoccer.statsbomb import read_match, MATCH_SLUG
+    >>> import os
+    >>> URL = f'{MATCH_SLUG}/11/1.json'
+    >>> df_match = read_match(URL)
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
@@ -362,36 +347,31 @@ def read_competition(path_or_buf, warn=True):
     """ Extracts competition json and loads as a pandas.DataFrame.
 
     Parameters
-        ----------
-        path_or_buf : a valid JSON str, path object or file-like object
-            Any valid string path is acceptable. The string could be a URL. Valid
-            URL schemes include http, ftp, s3, and file. For file URLs, a host is
-            expected. A local file could be:
-            ``file://localhost/path/to/table.json``.
-            If you want to pass in a path object, pandas accepts any
-            ``os.PathLike``.
-            By file-like object, we refer to objects with a ``read()`` method,
-            such as a file handler (e.g. via builtin ``open`` function)
-            or ``StringIO``.
+    ----------
+    path_or_buf : a valid JSON str, path object or file-like object
+        Any valid string path is acceptable. The string could be a URL. Valid
+        URL schemes include http, ftp, s3, and file. For file URLs, a host is
+        expected. A local file could be: ``file://localhost/path/to/table.json``.
+        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
+        By file-like object, we refer to objects with a ``read()`` method,
+        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
 
-        warn : bool, default True
-            Whether to warn about Statsbomb's data license agreement.
+    warn : bool, default True
+        Whether to warn about Statsbomb's data license agreement.
 
-        Returns
-        -------
-        pandas.DataFrame
+    Returns
+    -------
+    pandas.DataFrame
 
-        Examples
-        --------
-        # read from path - note change path to navigate to open-data folder
-        from mplsoccer.statsbomb import read_competition
-        import os
-        PATH_TO_EDIT = os.path.join('open-data','data','competitions.json')
-        df_competition = read_competition(PATH_TO_EDIT)
+    Examples
+    --------
+    >>> from mplsoccer.statsbomb import read_competition
+    >>> import os
+    >>> PATH_TO_EDIT = os.path.join('open-data','data','competitions.json')
+    >>> df_competition = read_competition(PATH_TO_EDIT)
 
-        # read from url
-        from mplsoccer.statsbomb import read_competition, COMPETITION_URL
-        df_competition = read_competition(COMPETITION_URL)
+    >>> from mplsoccer.statsbomb import read_competition, COMPETITION_URL
+    >>> df_competition = read_competition(COMPETITION_URL)
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
@@ -409,38 +389,33 @@ def read_lineup(path_or_buf, warn=True):
     """ Extracts individual lineup jsons and loads as a pandas.DataFrame.
 
     Parameters
-        ----------
-        path_or_buf : a valid JSON str, path object or file-like object
-            Any valid string path is acceptable. The string could be a URL. Valid
-            URL schemes include http, ftp, s3, and file. For file URLs, a host is
-            expected. A local file could be:
-            ``file://localhost/path/to/table.json``.
-            If you want to pass in a path object, pandas accepts any
-            ``os.PathLike``.
-            By file-like object, we refer to objects with a ``read()`` method,
-            such as a file handler (e.g. via builtin ``open`` function)
-            or ``StringIO``.
+    ----------
+    path_or_buf : a valid JSON str, path object or file-like object
+        Any valid string path is acceptable. The string could be a URL. Valid
+        URL schemes include http, ftp, s3, and file. For file URLs, a host is
+        expected. A local file could be: ``file://localhost/path/to/table.json``.
+        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
+        By file-like object, we refer to objects with a ``read()`` method,
+        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
 
-        warn : bool, default True
-            Whether to warn about Statsbomb's data license agreement.
+    warn : bool, default True
+        Whether to warn about Statsbomb's data license agreement.
 
-        Returns
-        -------
-        pandas.DataFrame
+    Returns
+    -------
+    pandas.DataFrame
 
-        Examples
-        --------
-        # read from path - note change path to navigate to open-data folder
-        from mplsoccer.statsbomb import read_lineup
-        import os
-        PATH_TO_EDIT = os.path.join('open-data','data','lineups','7430.json')
-        df_lineup = read_lineup(PATH_TO_EDIT)
+    Examples
+    --------
+    >>> from mplsoccer.statsbomb import read_lineup
+    >>> import os
+    >>> PATH_TO_EDIT = os.path.join('open-data','data','lineups','7430.json')
+    >>> df_lineup = read_lineup(PATH_TO_EDIT)
 
-        # read from url
-        from mplsoccer.statsbomb import read_lineup, LINEUP_SLUG
-        import os
-        URL = os.path.join(LINEUP_SLUG,'7430.json')
-        df_lineup = read_lineup(URL)
+    >>> from mplsoccer.statsbomb import read_lineup, LINEUP_SLUG
+    >>> import os
+    >>> URL = f'{LINEUP_SLUG}/7430.json'
+    >>> df_lineup = read_lineup(URL)
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
