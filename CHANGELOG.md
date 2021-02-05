@@ -16,14 +16,16 @@ For example, Pitch(view='half') becomes Pitch(half=True).
 * :x: ``pitch_type=stats`` pitch_type option removed.
 * :x: removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
 * :heavy_exclamation_mark: ``add_image`` takes a file_path now rather than \
-PIL image or NumPy array.
+a PIL image or NumPy array.
 
 ---
 
 ### Changes
-1) ``hexbin`` now clips to the sides of the soccer pitch for more attractive visualizations.
-2) ``wyscout`` goal width increased to 12 units (from 10 units) to align with ggsoccer. \
-This matters as the new ``Standardizer`` class uses the goalpost dimensions.
+*  :white_check_mark: ``hexbin`` now clips to the sides of the soccer pitch for more \
+attractive visualizations.
+*  :heavy_exclamation_mark: ``wyscout`` goal width increased to 12 units (from 10 units) \
+to align with ggsoccer. This matters as the new ``Standardizer`` \
+class uses the goalpost dimensions.
 
 ---
 
