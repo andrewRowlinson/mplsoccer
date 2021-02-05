@@ -37,7 +37,7 @@ of a soccer pitch. This replaces the old ``jointplot``, which did not allow non-
 * :strawberry: Added the ``grid`` method to create a grid of pitches with more control \
 than plt.subplots.
 * :strawberry: Added ``FontManager`` from [ridge_map](https://github.com/colcarroll/ridge_map) \
-for downloading and using google fonts.
+by [Colin Carroll](https://twitter.com/colindcarroll) for downloading and using google fonts.
 * :strawberry: Added ``Standardizer`` for changing from one provider data format to another. \
 For example, StatsBomb to Tracab.
 * :icecream: Added new pitch_types: ``skillcorner``, ``secondspectrum``, and a ``custom`` \
