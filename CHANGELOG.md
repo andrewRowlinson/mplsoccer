@@ -1,5 +1,5 @@
-Version 1.0.0
--------------
+:rocket: Version 1.0.0
+----------------------
 
 This release is a major refactor of mplsoccer and a merger with 
 [soccerplots](https://github.com/Slothfulwave612/soccerplots) for plotting Radars.
