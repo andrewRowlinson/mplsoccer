@@ -1,21 +1,71 @@
-Version 0.1.0
------------
+Version 1.0.0
+-------------
 
-This is a major refactor of mplsoccer and a merger with soccerplots (https://github.com/Slothfulwave612/soccerplots).
+This release is a major refactor of mplsoccer and a merger with 
+[soccerplots](https://github.com/Slothfulwave612/soccerplots) for plotting Radars.
 
-The Pitch class has been split into an abstract class BasePitch to simplify the code, with Pitch (horizontal) and VerticalPitch (vertical) 
-inheriting from the BasePitch class.
+### Breaking Changes
+1) ``orientation`` argument is removed. \
+To plot on a vertical pitch use the new ``VerticalPitch`` class.
+2) ``layout`` argument is removed. Use the Matplotlib style ``nrows`` and ``ncols`` instead. \
+For example, Pitch(layout=(4, 5)) becomes Pitch(nrows=4, ncols=5).
+3) ``view`` argument is removed. Use half=True to display half-a-pitch. \
+For example, Pitch(view='half') becomes Pitch(half=True).
+4) removed the ``pitch_type=stats`` pitch type option.
+5) removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
+6) ``add_image`` takes a file_path now rather than PIL image or NumPy array.
 
-### Changed
-1) orientation parameter is removed. To get a vertical pitch use the new VerticalPitch class.
-2) layout parameter is removed. Use the matplotlib nrows and ncols
-3) view is removed. Use half=True to get half of a pitch
-4) removed 'stats' pitch type
+### Changes
+1) ``hexbin`` now clips to the sides of the soccer pitch for more attractive visualizations.
+2) ``wyscout`` goal width increased to 12 units (from 10 units) to align with ggsoccer. \
+This matters as the new ``Standardizer`` class uses the goalpost dimensions.
 
 ### Added
-1) merged with soccerplots (https://github.com/Slothfulwave612/soccerplots) for wonderful radar charts.
-2) added pitch_types: skillcorner and a custom pitch type which you can use any width/length
+1) Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
+for wonderful radar charts.
+2) Added new pitch_types: ``skillcorner``, ``secondspectrum``, and a ``custom`` \
+pitch type where the length and width can vary.
+3) Added ``goal_alpha`` for controlling the transparency of ``goal_type='box'`` goals.
+4) Added ``goal_type='circle'`` to plot the goalposts as circles.
+5) Added ``jointgrid`` method to draw optional marginal axes on the four-sides of a soccer pitch.
+This replaces the old ``jointplot``, which did not allow non-square pitches.
+6) Added the ``grid`` method to create a grid of pitches with more control than plt.subplots.
+7) Added ``FontManager`` from [ridge_map](https://github.com/colcarroll/ridge_map) for downloading \
+and using google fonts.
+8) Added ``Standardizer`` for changing from one provider data format to another. \
+For example, StatsBomb to Tracab.
+9) Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
+in degrees clockwise.
+10) Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
+to low transparency.
 
+### Fixes
+1) Changed ``Seaborn`` x and y from arguments to keyword arguments. \
+This fixes a FutureWarning from Seaborn that the only valid positional argument will be data.
+2) Changed imports so that you do not need to reference the module. \
+For example, from mplsoccer import Pitch.
+3) Added __repr__ methods to classes.
+4) Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
+
+### Docs
+1) Added examples for custom colormaps
+2) Tweaked the StatsBomb data example to only update files if the JSON file has changed.
+3) Added more beautiful scatter examples.
+4) Added examples for ``grid`` and ``jointgrid``.
+
+### Refactoring
+The pitch class has been split into multiple modules and classes to simplify the code.
+This helps reduce the number of conditional if/else switches.
+* pitch.py contains the new classes for plotting/ drawing pitches. The ``Pitch`` class is for a \
+horizontally orientated soccer pitch, and the new ``VerticalPitch`` is for the \
+vertical orientation. A change from the old API of Pitch(orientation='vertical').
+* The ``Pitch`` and ``VerticalPitch`` classes inherit their \
+plotting methods from ``BasePitchPlot``. While ``BasePitchPlot`` inherits attributes and methods \
+for drawing a soccer pitch from ``BasePitch``.
+* The soccer pitch dimensions are in a separate module (dimensions.py) for reuse within \
+a new ``Standardizer`` class.
+* The code for heatmaps, arrows, lines, scatter_rotation, and scatter_football are now \
+in separate modules (heatmap.py, quiver.py, linecollection.py, and scatterutils.py).
 
 Version 0.0.21
 -----------
