@@ -90,7 +90,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), s
 
     statistic = statistic.T
     # this ensures that all the heatmaps are created consistently at the heatmap edges
-    # i.e. grid cells are created from the bottom to the top of the pitch. where the top edge
+    # i.e. grid cells are created from the bottom to the top of the pitch, where the top edge
     # always belongs to the cell above. First the raw coordinates have been flipped above
     # then the statistic is flipped back here
     if dim.invert_y and standardized is False:

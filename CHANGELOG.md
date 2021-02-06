@@ -26,6 +26,10 @@ attractive visualizations.
 * :heavy_exclamation_mark: ``wyscout`` goal width increased to 12 units (from 10 units) \
 to align with ggsoccer. This matters as the new ``Standardizer`` \
 class uses the goalpost dimensions.
+* :heavy_exclamation_mark: fixed ``bin_statistic_positional`` and ``heatmap_positional`` \
+so the heatmaps are created consistently at the heatmap edges \
+i.e. grid cells are created from the bottom to the top of the pitch, where the top edge \
+always belongs to the cell above.
 
 ---
 
