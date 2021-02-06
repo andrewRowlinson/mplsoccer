@@ -284,7 +284,7 @@ length_to=105, width_to=68)
         if pitch_from not in dimensions.valid:
             raise TypeError(f'Invalid argument: pitch_from should be in {dimensions.valid}')
         if (length_from is None or width_from is None) and pitch_from in dimensions.size_varies:
-            raise TypeError("Invalid argument: width_to and length_to must be specified.")
+            raise TypeError("Invalid argument: width_from and length_from must be specified.")
 
         if pitch_to not in dimensions.valid:
             raise TypeError(f'Invalid argument: pitch_to should be in {dimensions.valid}')
@@ -332,8 +332,7 @@ length_to=105, width_to=68)
 
         # clip outside to pitch extents
         x = x.clip(min=dim_from.left, max=dim_from.right)
-        y = y.clip(min=min(dim_from.bottom, dim_from.top),
-                   max=max(dim_from.bottom, dim_from.top))
+        y = y.clip(min=dim_from.pitch_extent[2], max=dim_from.pitch_extent[3])
 
         # for inverted axis flip the coordinates
         if dim_from.invert_y:
@@ -343,6 +342,11 @@ length_to=105, width_to=68)
                                            dim_to.x_markings_sorted, x)
         y_standardized = self._standardize(dim_from.y_markings_sorted,
                                            dim_to.y_markings_sorted, y)
+        
+        # for inverted axis flip the coordinates
+        if dim_to.invert_y:
+            y_standardized = dim_to.bottom - y_standardized
+            
         return x_standardized, y_standardized
 
     @staticmethod
