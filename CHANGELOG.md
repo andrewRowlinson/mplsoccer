@@ -56,7 +56,7 @@ to low transparency.
 This fixes a FutureWarning from Seaborn that the only valid positional argument will be data.
 * :ok: Changed imports so that you do not need to reference the module. \
 For example, from mplsoccer import Pitch.
-* :ok: Added __repr__ methods to classes.
+* :ok: Added repr methods for string representations of classes.
 * :ok: Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
 
 ---
