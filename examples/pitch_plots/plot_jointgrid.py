@@ -229,6 +229,7 @@ fig, axes = vertical_pitch.jointgrid(left=0.2, bottom=0.15, pitch_height=0.8, ma
 sc_team2 = vertical_pitch.scatter(df_team2.x, df_team2.y, s=df_team2.shot_statsbomb_xg * 700,
                                   alpha=0.5, ec='black', color='#697cd4', ax=axes[0])
 # kdeplots on the marginals
+# remember to flip the coordinates y=x, x=y for the marginals when using vertical orientation
 team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axes[3], color='#697cd4', shade=True)
 team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axes[4], color='#697cd4', shade=True)
 txt1 = axes[0].text(x=40, y=80, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
@@ -258,6 +259,7 @@ fig, axes = vertical_pitch.jointgrid(left=0.2, bottom=0.15, pitch_height=0.8, ma
 sc_team2 = vertical_pitch.scatter(df_team2.x, df_team2.y, s=df_team2.shot_statsbomb_xg * 700,
                                   alpha=0.5, ec='black', color='#697cd4', ax=axes[0])
 # kdeplots on the marginals
+# remember to flip the coordinates y=x, x=y for the marginals when using vertical orientation
 team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axes[3], color='#697cd4', shade=True)
 team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axes[4], color='#697cd4', shade=True)
 txt1 = axes[0].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
