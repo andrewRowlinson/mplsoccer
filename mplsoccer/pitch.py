@@ -137,12 +137,12 @@ class VerticalPitch(BasePitchPlot):
             pad[0:2] = -pad[0:2]
             visible_pad[0:2] = - visible_pad[0:2]
         self.extent = extent + pad
+        self.dim.aspect = 1 / self.dim.aspect
         self.ax_aspect = (abs(self.extent[1] - self.extent[0]) /
                           (abs(self.extent[3] - self.extent[2]) * self.dim.aspect))
         self.visible_pitch = extent + visible_pad
         if self.half:
             extent[2] = extent[2] - min(self.pad_bottom, self.dim.pitch_length/2)
-        self.dim.aspect = 1 / self.dim.aspect
 
         # hexbin
         self.hexbin_gridsize = (17, 17)
