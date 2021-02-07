@@ -733,7 +733,7 @@ class BasePitch(ABC):
         if left + pitch_width + ((space_width + marginal_width) * ax_right) > 1.:
             error_msg = ('The jointplot axes extends past the figure width. '
                          'Reduce one of the pitch_height, space_height, marginal_height, '
-                         'or left.')
+                         'left or the figure height.')
             raise ValueError(error_msg)
 
         if left - ((space_width + marginal_width) * ax_left) < 0.:
