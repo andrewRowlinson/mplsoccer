@@ -105,13 +105,13 @@ class Radar:
 
         # add labels around the last circles
         if params is not None:
-            ax = self.__add_labels(params=params, ax=ax)
+            ax = self._add_labels(params=params, ax=ax)
 
         # add ranges
         if not plot_range:
-            ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax, plot_range=False)
+            ax, xy, range_values = self._add_ranges(ranges=ranges, ax=ax, plot_range=False)
         else:
-            ax, xy, range_values = self.__add_ranges(ranges=ranges, ax=ax, plot_range=True)
+            ax, xy, range_values = self._add_ranges(ranges=ranges, ax=ax, plot_range=True)
 
         if compare:
             # for making comparison radar charts
@@ -121,18 +121,18 @@ class Radar:
                 value = values[i]
 
                 # get vertices
-                vertices = self.__get_vertices(value, xy, range_values)
+                vertices = self._get_vertices(value, xy, range_values)
 
                 # make the radar chart
-                ax = self.__plot_circles(ax=ax, radar_color=radar_color[i], vertices=vertices, alpha=alphas[i],
+                ax = self._plot_circles(ax=ax, radar_color=radar_color[i], vertices=vertices, alpha=alphas[i],
                                          compare=True)
 
         else:
             # get vertices
-            vertices = self.__get_vertices(values, xy, range_values)
+            vertices = self._get_vertices(values, xy, range_values)
 
             # make the radar chart
-            ax = self.__plot_circles(ax=ax, radar_color=radar_color, vertices=vertices)
+            ax = self._plot_circles(ax=ax, radar_color=radar_color, vertices=vertices)
 
         # add credits
         ax.text(22, -21.5, 'Inspired By: Statsbomb / Rami Moghadam', fontfamily=self.fontfamily, ha='right',
@@ -150,7 +150,7 @@ class Radar:
         ax.axis('off')
 
         if len(title) > 0:
-            ax = self.__plot_titles(ax, title)
+            ax = self._plot_titles(ax, title)
 
         # add image
         if image is not None and image_coord is not None:
@@ -161,7 +161,7 @@ class Radar:
 
         return fig, ax
 
-    def __plot_titles(self, ax, title):
+    def _plot_titles(self, ax, title):
         """
         Function for plotting title values to the radar-chart.
 
@@ -227,7 +227,7 @@ class Radar:
 
         return ax
 
-    def __plot_circles(self, ax, radar_color, vertices, alpha=None, compare=False):
+    def _plot_circles(self, ax, radar_color, vertices, alpha=None, compare=False):
         """
         Function to plot concentric circles.
 
@@ -274,7 +274,7 @@ class Radar:
 
         return ax
 
-    def __add_labels(self, params, ax, return_list=False, radius=19, range_val=False, plot_range=True):
+    def _add_labels(self, params, ax, return_list=False, radius=19, range_val=False, plot_range=True):
         """
         Function to add labels around the last circle.
 
@@ -292,7 +292,7 @@ class Radar:
         """
 
         # get coordinates and rotation values
-        coord = utils.get_coordinates(n=len(params))
+        coord = self.get_coordinates(n=len(params))
 
         if return_list:
             x_y = []
@@ -332,7 +332,7 @@ class Radar:
         else:
             return ax
 
-    def __add_ranges(self, ranges, ax, plot_range=True):
+    def _add_ranges(self, ranges, ax, plot_range=True):
         """
         Function to add range value around each circle.
 
@@ -366,15 +366,14 @@ class Radar:
             # parameter list
             params = range_values[:, i]
 
-            ax, xy = self.__add_labels(
+            ax, xy = self._add_labels(
                 params=params, ax=ax, return_list=True, radius=radius[i], range_val=True, plot_range=plot_range
             )
             x_y.append(xy)
 
         return ax, np.array(x_y), range_values
 
-    @staticmethod
-    def __get_vertices(values, xy, range_values):
+    def _get_vertices(self, values, xy, range_values):
         """
         Function to get vertex coordinates(x and y) for the required polygon.
 
@@ -409,8 +408,8 @@ class Radar:
 
                 else:
                     # get indices between which the value is present
-                    x_coord, y_coord = utils.get_indices_between(range_list=range_list, coord_list=coord_list,
-                                                                 value=values[i], reverse=True)
+                    x_coord, y_coord = self.get_indices_between(range_list=range_list, coord_list=coord_list,
+                                                                value=values[i], reverse=True)
 
             else:
                 if values[i] >= range_list[-1]:
@@ -423,13 +422,159 @@ class Radar:
 
                 else:
                     # get indices between which the value is present
-                    x_coord, y_coord = utils.get_indices_between(range_list=range_list, coord_list=coord_list,
+                    x_coord, y_coord = self.get_indices_between(range_list=range_list, coord_list=coord_list,
                                                                  value=values[i], reverse=False)
 
             # add x-y coordinate in vertices as a list
             vertices.append([x_coord, y_coord])
 
         return vertices
+
+    @staticmethod
+    def get_coordinates(n):
+        """
+        Function for getting coordinates and rotation values for the labels.
+
+        Args:
+            n (int): number of labels.
+
+        Returns:
+            list: coordinate and rotation values.
+        """
+
+        # calculate alpha
+        alpha = 2 * np.pi / n
+
+        # rotation values
+        alphas = alpha * np.arange(n)
+
+        # x-coordinate value
+        coord_x = np.cos(alphas)
+
+        # y-coordinate value
+        coord_y = np.sin(alphas)
+
+        return np.c_[coord_x, coord_y, alphas]
+
+    @staticmethod
+    def get_vertex_coord(old_value, old_min, old_max, new_min, new_max):
+        """
+        Function for getting coordinate for each vertex of the polygon.
+
+        Args:
+            old_value, old_min, old_max, new_min, new_max -- float values.
+
+        Returns:
+            float: the coordinate value either x or y.
+        """
+
+        # calculate the value
+        new_value = ((old_value - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
+
+        return new_value
+
+    def get_indices_between(self, range_list, coord_list, value, reverse):
+        """
+        Function to get the x-coordinate and y-coordinate for the polygon vertex.
+
+        Args:
+            range_list (list): range value for a particular parameter.
+            coord_list (list): coordinate values where the numerical labels are placed.
+            value (float): the value of the parameter.
+            reverse (bool): to tell whether the range values are in reversed order or not.
+
+        Returns:
+            tuple: x-coordinate and y-coordinate value.
+        """
+
+        # getting index value
+        idx_1, idx_2 = self.get_index(array=range_list, value=value, reverse=reverse)
+
+        # get x coordinate
+        x_coord = self.get_vertex_coord(
+            old_value=value,
+            old_min=range_list[idx_1],
+            old_max=range_list[idx_2],
+            new_min=coord_list[idx_1][0],
+            new_max=coord_list[idx_2][0]
+        )
+
+        # get y coordinate
+        y_coord = self.get_vertex_coord(
+            old_value=value,
+            old_min=range_list[idx_1],
+            old_max=range_list[idx_2],
+            new_min=coord_list[idx_1][1],
+            new_max=coord_list[idx_2][1]
+        )
+
+        return x_coord, y_coord
+
+    @staticmethod
+    def get_index(array, value, reverse):
+        """
+        Function to get the indices of two list items between which the value lies.
+
+        Args:
+            array (list): containing numerical values.
+            value (float/int): value to be searched.
+            reverse (bool): whether or not the range values are in reverse order.
+
+        Returns:
+            int: the two indices between which value lies.
+        """
+
+        if reverse:
+            # loop over the array/list
+            for i in range(0, len(array) - 1):
+                if array[i] >= value >= array[i + 1]:
+                    return i, i + 1
+
+        # loop over the array/list
+        for i in range(0, len(array) - 1):
+            if array[i] <= value <= array[i + 1]:
+                return i, i + 1
+
+    @staticmethod
+    def set_labels(ax, label_value, label_axis):
+        """
+        Function to set label for a given axis.
+
+        Args:
+            ax (axes.Axes): axis object.
+            label_value (list): ticklabel values.
+            label_axis (str): axis name, 'x' or 'y'
+
+        Returns:
+            list: label names
+        """
+
+        if label_axis == 'x':
+            ax.set_xticks(np.arange(len(label_value)))
+            axis = ax.get_xticklabels()
+        else:
+            ax.set_yticks(np.arange(len(label_value)) + 1)
+            axis = ax.get_yticklabels()
+
+        # fetch labels
+        labels = [items.get_text() for items in axis]
+
+        # init a count variable
+        if label_axis == 'x':
+            count = 0
+        else:
+            count = len(label_value) - 1
+
+        # iterate through all the labels and change the label name
+        for i in range(len(labels)):
+            labels[i] = label_value[count]
+
+            if label_axis == 'x':
+                count += 1
+            else:
+                count -= 1
+
+        return labels
 
     def __repr__(self):
         return f"""{self.__class__.__name__}(
