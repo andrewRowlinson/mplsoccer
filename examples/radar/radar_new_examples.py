@@ -30,7 +30,7 @@ radar_output = radar.draw_radar_compare(values, values_compare=values_compare, a
                                         kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6},
                                         kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
 radar_poly1, radar_poly2, vertices1, vertices2 = radar_output
-range_labels = radar.draw_range_labels(ax=ax, fontproperties=font_range.prop, fontsize=10)
+range_labels = radar.draw_range_labels(ax=ax, fontproperties=font_range.prop, fontsize=12)
 param_labels = radar.draw_param_labels(ax=ax, fontproperties=font_params.prop, fontsize=12)
 sc1 = ax.scatter(vertices1[:, 0], vertices1[:, 1], c='#00f2c1', s=80,
                  zorder=3, edgecolors='#01493b')
@@ -38,7 +38,7 @@ sc2 = ax.scatter(vertices2[:, 0], vertices2[:, 1], c='#d80499', s=80,
                  zorder=3, edgecolors='#440130')
 
 # just one radar
-radar2 = Radar(params, low, high, num_circles=6)
+radar2 = Radar(params, low, high, num_rings=6, center_circle_radius=2)
 fig_2, ax_2 = radar2.setup_axis()
 rings_inner_2 = radar2.draw_circles(ax=ax_2, facecolor='#ffb2b2', edgecolor='#ffffb2',
                                     hatch='//', linewidths=[0, 1, 3, 5])
@@ -46,7 +46,7 @@ radar_output = radar2.draw_radar(values, ax=ax_2,
                                  kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6},
                                  kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
 radar_poly_2, rings_outer_2, vertices_2 = radar_output
-range_labels_2 = radar2.draw_range_labels(ax=ax_2, fontproperties=font_range.prop, fontsize=10)
+range_labels_2 = radar2.draw_range_labels(ax=ax_2, fontproperties=font_range.prop, fontsize=12)
 param_labels_2 = radar2.draw_param_labels(ax=ax_2, fontproperties=font_params.prop, fontsize=12)
 sc1_2 = ax_2.scatter(vertices_2[:, 0], vertices_2[:, 1], c='#00f2c1', s=80,
                      edgecolors='#d80499', lw=2, zorder=3)
