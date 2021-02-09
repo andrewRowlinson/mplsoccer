@@ -1,592 +1,166 @@
-"""
-__author__: Anmol_Durgapal(@slothfulwave612)
+""" A Python module for plotting radar-chart.
 
-A Python module for plotting radar-chart.
+Author: Anmol_Durgapal(@slothfulwave612)
 
 The radar-chart theme is inspired by @Statsbomb/Rami_Moghadam.
 """
 
 import matplotlib.pyplot as plt
-# import necessary packages/modules
 import numpy as np
-from matplotlib.patches import Polygon
-
-from . import utils
-
-__all__ = ["Radar"]
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Polygon, Wedge
 
 
 class Radar:
-    """
-    class contains methods to make radar-chart.
-    """
-
-    def __init__(
-            self, background_color="#FFFFFF", patch_color="#D6D6D6", fontfamily="Liberation Serif",
-            label_fontsize=10, range_fontsize=6.5, label_color="#000000", range_color="#000000"
-    ):
-        """
-        Function to initialize the object of the class.
-
-        Args:
-            background_color (str, optional): the background color. Defaults to "#FFFFFF".
-            patch_color (str, optional): the color for our circle. Defaults to "#D6D6D6".
-            fontfamily (str, optional): fontfamily available in matplotlib. Defaults to "Liberation Serif".
-            label_fontsize (float, optional): the fontsize of label. Defaults to 10.
-            range_fontsize (float, optional): the fontsize for range values. Defaults to 6.5.
-            label_color (str, optional): color value for labels. Defaults to "#000000".
-            range_color (str, optional): color value for ranges. Defaults to "#000000".
-        """
-        self.background_color = background_color
-        self.patch_color = patch_color
-        self.fontfamily = fontfamily
-        self.label_fontsize = label_fontsize
-        self.range_fontsize = range_fontsize
-        self.label_color = label_color
-        self.range_color = range_color
-
-    def plot_radar(self, ranges, params, values, radar_color, plot_range=True, filename=None, dpi=300,
-                   title=None, alphas=(0.6, 0.6), compare=False, endnote=None, figsize=None,
-                   end_size=9, end_color="#95919B", image=None, image_coord=None, figax=None, **kwargs):
-        """
-        Function to plot radar-chart.
-
-        Args:
-            ranges (list): list of tuples containing min and max value for each parameter.
-            params (list): list of string values containing the name of parameters. Pass None to plot clean-radar-chart.
-            values (list): list of float values for each parameters/ nested list when making comparison charts.
-            radar_color (list): list of two color values.
-            plot_range (bool, optional): to plot the range values. Defaults to True.
-            filename (str, optional): the name per which the file will be saved added extension. Defaults to None.
-            dpi (int, optional): dots per inch value. Defaults to 300.
-            title (dict, optional): containing information of title and subtitle. Defaults to None.
-            alphas (tuple, optional): alpha value for color. Defaults to (0.6, 0.6).
-            compare (bool, optional): True, if comparison charts are to be made. Defaults to False.
-            endnote (str, optional): the endnote of the plot. Defaults to None.
-            figsize (tuple, optional): the size of the figure. Defaults to None.
-            end_size (int, optional): the font-size for the endnote string. Defaults to 9.
-            end_color (str, optional): color of the endnote. Defaults to "#95919B".
-            image (str, optional): image name to be added. Defaults to None.
-            image_coord (list, optional): containing left, bottom, width, height for image. Defaults to None.
-            figax (tuple, optional): figure and axis object. Defaults to None.
-            **kwargs --  All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
-
-        Returns:
-            matplotlib.figure.Figure: figure object.
-            axes.Axes: axis object.
-        """
-        # to plot comparison radar charts
-        if title is None:
-            title = dict()
-        if compare:
-            assert len(values) == len(radar_color) == len(
-                alphas), "Length for values, radar_color and alpha do not match"
-        else:
-            if params is None:
-                assert len(ranges) == len(values), "Length for ranges and values not matched"
-            else:
-                assert len(ranges) == len(params) == len(values), "Length for ranges, params and values not matched"
-
-        if figax:
-            fig, ax = figax
-        else:
-            if figsize is None:
-                figsize=(20,10)
-            fig, ax = plt.subplots(figsize=figsize, facecolor=self.background_color)
-            ax.set_facecolor(self.background_color)
-
-        # set axis
-        ax.set_aspect('equal')
-        ax.set(xlim=(-22, 22), ylim=(-23, 25))
-
-        if type(radar_color) == str:
-            # make radar_color a list
-            radar_color = [radar_color, '#D6D6D6']
-
-        # add labels around the last circles
-        if params is not None:
-            ax = self._add_labels(params=params, ax=ax)
-
-        # add ranges
-        if not plot_range:
-            ax, xy, range_values = self._add_ranges(ranges=ranges, ax=ax, plot_range=False)
-        else:
-            ax, xy, range_values = self._add_ranges(ranges=ranges, ax=ax, plot_range=True)
-
-        if compare:
-            # for making comparison radar charts
-
-            for i in range(len(values)):
-                # fetch value
-                value = values[i]
-
-                # get vertices
-                vertices = self._get_vertices(value, xy, range_values)
-
-                # make the radar chart
-                ax = self._plot_circles(ax=ax, radar_color=radar_color[i], vertices=vertices, alpha=alphas[i],
-                                         compare=True)
-
-        else:
-            # get vertices
-            vertices = self._get_vertices(values, xy, range_values)
-
-            # make the radar chart
-            ax = self._plot_circles(ax=ax, radar_color=radar_color, vertices=vertices)
-
-        # add credits
-        ax.text(22, -21.5, 'Inspired By: Statsbomb / Rami Moghadam', fontfamily=self.fontfamily, ha='right',
-                fontdict={"color": end_color}, fontsize=end_size)
-
-        # add endnote
-        if endnote is not None:
-            y_add = -22.5
-            for note in endnote.split('\n'):
-                ax.text(22, y_add, note, fontfamily=self.fontfamily, ha='right',
-                        fontdict={"color": end_color}, fontsize=end_size)
-                y_add -= 1
-
-        # tidy axis
-        ax.axis('off')
-
-        if len(title) > 0:
-            ax = self._plot_titles(ax, title)
-
-        # add image
-        if image is not None and image_coord is not None:
-            fig = utils.add_image(image, fig, image_coord[0], image_coord[1], image_coord[2], image_coord[3], **kwargs)
-
-        if filename:
-            fig.savefig(filename, dpi=dpi, bbox_inches='tight')
-
-        return fig, ax
-
-    def _plot_titles(self, ax, title):
-        """
-        Function for plotting title values to the radar-chart.
-
-        Args:
-            ax (axes.Axes): axis object.
-            title (dict): containing information of title and subtitle.
-
-        Returns:
-            axes.Axes: axis object.
-        """
-
-        if title.get('title_color') is None:
-            # add title color
-            title['title_color'] = '#000000'
-
-        if title.get('subtitle_color') is None:
-            # add a subtitle color
-            title['subtitle_color'] = '#000000'
-
-        if title.get('title_fontsize') is None:
-            # add titile fontsize
-            title['title_fontsize'] = 20
-
-        if title.get('sub_title_fontsize') is None:
-            # add subtitle fontsize
-            title['subtitle_fontsize'] = 15
-
-        if title.get('title_fontsize_2') is None:
-            # add title fontsize 2
-            title['title_fontsize_2'] = title['title_fontsize']
-
-        if title.get('subtitle_fontsize_2') is None:
-            # add subtitle fontsize 2
-            title['subtitle_fontsize_2'] = title['subtitle_fontsize']
-
-        if title.get('title_name'):
-            # plot the title name
-            ax.text(-22, 24, title['title_name'], fontsize=title['title_fontsize'], fontweight='bold',
-                    fontdict={'color': title['title_color']}, fontfamily=self.fontfamily)
-
-        if title.get('subtitle_name'):
-            # plot the title name
-            ax.text(-22, 22, title['subtitle_name'], fontsize=title['subtitle_fontsize'],
-                    fontdict={'color': title['subtitle_color']}, fontfamily=self.fontfamily)
-
-        if title.get('title_color_2') is None:
-            # add title color
-            title['title_color_2'] = '#000000'
-
-        if title.get('subtitle_color_2') is None:
-            # add subtitle color
-            title['subtitle_color_2'] = '#000000'
-
-        if title.get('title_name_2'):
-            # plot the second title name
-            ax.text(22, 24, title['title_name_2'], fontsize=title['title_fontsize_2'], fontweight='bold',
-                    fontdict={'color': title['title_color_2']}, ha='right', fontfamily=self.fontfamily)
-
-        if title.get('subtitle_name_2'):
-            # plot the second subtitle name
-            ax.text(22, 22, title['subtitle_name_2'], fontsize=title['subtitle_fontsize_2'],
-                    fontdict={'color': title['subtitle_color_2']}, ha='right', fontfamily=self.fontfamily)
-
-        return ax
-
-    def _plot_circles(self, ax, radar_color, vertices, alpha=None, compare=False):
-        """
-        Function to plot concentric circles.
-
-        Args:
-            ax (axes.Axes): axis object.
-            radar_color (list): color values.
-            vertices (list): coordinate values for each vertex of the polygon.
-            alpha (list, optional): alpha values for colors. Defaults to None.
-            compare (bool, optional): True, if a comparison chart is to be made. Defaults to False.
-
-        Returns:
-            axes.Axes: axis object.
-        """
-
-        # radius value for each circle
-        radius = [3.35, 6.7, 10.05, 13.4, 16.75]
-
-        # linewidth, zorder for circle
-        lw_circle, zorder_circle = 20, 2
-
-        if compare:
-            # for making comparison radar charts
-            # plot a polygon
-            radar_1 = Polygon(vertices, fc=radar_color, zorder=zorder_circle + 1, alpha=alpha)
-            ax.add_patch(radar_1)
-        else:
-            # plot a polygon
-            radar_1 = Polygon(vertices, fc=radar_color[0], zorder=zorder_circle - 1)
-            ax.add_patch(radar_1)
-
-        # create concentric circles
-        for rad in radius:
-            # create circle
-            circle_1 = plt.Circle(xy=(0, 0), radius=rad, fc='none', ec=self.patch_color, lw=lw_circle,
-                                  zorder=zorder_circle)
-            ax.add_patch(circle_1)
-
-            if not compare:
-                # create another circle to fill in second color
-                circle_2 = plt.Circle(xy=(0, 0), radius=rad, fc='none', ec=radar_color[1], lw=lw_circle,
-                                      zorder=zorder_circle + 1)
-                circle_2.set_clip_path(radar_1)
-                ax.add_patch(circle_2)
-
-        return ax
-
-    def _add_labels(self, params, ax, return_list=False, radius=19, range_val=False, plot_range=True):
-        """
-        Function to add labels around the last circle.
-
-        Args:
-            params (list): values containing the name of parameters.
-            ax (axes.Axes): axis object.
-            return_list (bool, optional): x and y values. Defaults to False.
-            radius (int, optional): radius of the circle around which labels are to be align. Defaults to 19.
-            range_val (bool, optional): to specify whether to plot range or not. Defaults to False.
-            plot_range (bool, optional): to plot the range values around the circle. Defaults to True.
-
-        Returns:
-            axes.Axes: axis object.
-            list: coordinate values (if return_list == True)
-        """
-
-        # get coordinates and rotation values
-        coord = self.get_coordinates(n=len(params))
-
-        if return_list:
-            x_y = []
-        for i in range(len(params)):
-            # fetch rotation value
-            rot = coord[i, 2]
-
-            # the x and y coordinate for labels
-            x, y = (radius * np.sin(rot), radius * np.cos(rot))
-
-            if return_list:
-                # add x_y coordinates
-                tup_temp = (x, y)
-                x_y.append(tup_temp)
-
-            if y < 0:
-                rot += np.pi
-
-            if type(params[i]) == np.float64:
-                p = round(params[i], 2)
-            else:
-                p = params[i]
-
-            if range_val:
-                size = self.range_fontsize
-                color = self.range_color
-            else:
-                size = self.label_fontsize
-                color = self.label_color
-
-            if plot_range:
-                ax.text(x, y, p, rotation=-np.rad2deg(rot), ha='center', va='center',
-                        fontsize=size, fontfamily=self.fontfamily, fontdict=dict(color=color))
-
-        if return_list:
-            return ax, x_y
-        else:
-            return ax
-
-    def _add_ranges(self, ranges, ax, plot_range=True):
-        """
-        Function to add range value around each circle.
-
-        Args:
-            ranges (list): list of tuples containing min and max value for each parameter.
-            ax (axes.Axes): axis object.
-            plot_range (bool, optional): to plot the range values around the circle. Defaults to True.
-
-        Returns:
-            axes.Axes: axis object.
-            numpy.array: x and y coordinate for each numerical range values.
-            numpy.array: range value for each parameter.
-        """
-
-        # radius value for every circle
-        radius = [2.5, 4.1, 5.8, 7.5, 9.2, 10.9, 12.6, 14.3, 15.9, 17.6]
-
-        # x and y coordinate values for range numbers
-        x_y = []
-
-        # range values for every ranges
-        range_values = np.array([])
-
-        for rng in ranges:
-            value = np.linspace(start=rng[0], stop=rng[1], num=10)
-            range_values = np.append(range_values, value)
-
-        range_values = range_values.reshape((len(ranges), 10))
-
-        for i in range(len(radius)):
-            # parameter list
-            params = range_values[:, i]
-
-            ax, xy = self._add_labels(
-                params=params, ax=ax, return_list=True, radius=radius[i], range_val=True, plot_range=plot_range
-            )
-            x_y.append(xy)
-
-        return ax, np.array(x_y), range_values
-
-    def _get_vertices(self, values, xy, range_values):
-        """
-        Function to get vertex coordinates(x and y) for the required polygon.
-
-        Args:
-            values (list): value for each parameter.
-            xy (numpy.array): coordinate values for each label-number.
-            range_values (numpy.array): range value for each parameter.
-
-        Returns:
-            numpy.array: coordinates for each vertex of the polygon.
-        """
-
-        # init an empty list
-        vertices = []
-
-        # calculating coordinate values
-        for i in range(len(range_values)):
-
-            # list of range value for each parameter
-            range_list = range_values[i, :]
-            coord_list = xy[:, i]
-
-            if range_list[0] > range_list[-1]:
-                # if range values are in reversed order
-                if values[i] >= range_list[0]:
-                    # if value is greater
-                    x_coord, y_coord = coord_list[0, 0], coord_list[0, 1]
-
-                elif values[i] <= range_list[-1]:
-                    # if value is smaller
-                    x_coord, y_coord = coord_list[-1, 0], coord_list[-1, 1]
-
-                else:
-                    # get indices between which the value is present
-                    x_coord, y_coord = self.get_indices_between(range_list=range_list, coord_list=coord_list,
-                                                                value=values[i], reverse=True)
-
-            else:
-                if values[i] >= range_list[-1]:
-                    # if value is greater
-                    x_coord, y_coord = coord_list[-1, 0], coord_list[-1, 1]
-
-                elif values[i] <= range_list[0]:
-                    # if value is smaller
-                    x_coord, y_coord = coord_list[0, 0], coord_list[0, 1]
-
-                else:
-                    # get indices between which the value is present
-                    x_coord, y_coord = self.get_indices_between(range_list=range_list, coord_list=coord_list,
-                                                                 value=values[i], reverse=False)
-
-            # add x-y coordinate in vertices as a list
-            vertices.append([x_coord, y_coord])
-
-        return vertices
-
-    @staticmethod
-    def get_coordinates(n):
-        """
-        Function for getting coordinates and rotation values for the labels.
-
-        Args:
-            n (int): number of labels.
-
-        Returns:
-            list: coordinate and rotation values.
-        """
-
-        # calculate alpha
-        alpha = 2 * np.pi / n
-
-        # rotation values
-        alphas = alpha * np.arange(n)
-
-        # x-coordinate value
-        coord_x = np.cos(alphas)
-
-        # y-coordinate value
-        coord_y = np.sin(alphas)
-
-        return np.c_[coord_x, coord_y, alphas]
-
-    @staticmethod
-    def get_vertex_coord(old_value, old_min, old_max, new_min, new_max):
-        """
-        Function for getting coordinate for each vertex of the polygon.
-
-        Args:
-            old_value, old_min, old_max, new_min, new_max -- float values.
-
-        Returns:
-            float: the coordinate value either x or y.
-        """
-
-        # calculate the value
-        new_value = ((old_value - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
-
-        return new_value
-
-    def get_indices_between(self, range_list, coord_list, value, reverse):
-        """
-        Function to get the x-coordinate and y-coordinate for the polygon vertex.
-
-        Args:
-            range_list (list): range value for a particular parameter.
-            coord_list (list): coordinate values where the numerical labels are placed.
-            value (float): the value of the parameter.
-            reverse (bool): to tell whether the range values are in reversed order or not.
-
-        Returns:
-            tuple: x-coordinate and y-coordinate value.
-        """
-
-        # getting index value
-        idx_1, idx_2 = self.get_index(array=range_list, value=value, reverse=reverse)
-
-        # get x coordinate
-        x_coord = self.get_vertex_coord(
-            old_value=value,
-            old_min=range_list[idx_1],
-            old_max=range_list[idx_2],
-            new_min=coord_list[idx_1][0],
-            new_max=coord_list[idx_2][0]
-        )
-
-        # get y coordinate
-        y_coord = self.get_vertex_coord(
-            old_value=value,
-            old_min=range_list[idx_1],
-            old_max=range_list[idx_2],
-            new_min=coord_list[idx_1][1],
-            new_max=coord_list[idx_2][1]
-        )
-
-        return x_coord, y_coord
-
-    @staticmethod
-    def get_index(array, value, reverse):
-        """
-        Function to get the indices of two list items between which the value lies.
-
-        Args:
-            array (list): containing numerical values.
-            value (float/int): value to be searched.
-            reverse (bool): whether or not the range values are in reverse order.
-
-        Returns:
-            int: the two indices between which value lies.
-        """
-
-        if reverse:
-            # loop over the array/list
-            for i in range(0, len(array) - 1):
-                if array[i] >= value >= array[i + 1]:
-                    return i, i + 1
-
-        # loop over the array/list
-        for i in range(0, len(array) - 1):
-            if array[i] <= value <= array[i + 1]:
-                return i, i + 1
-
-    @staticmethod
-    def set_labels(ax, label_value, label_axis):
-        """
-        Function to set label for a given axis.
-
-        Args:
-            ax (axes.Axes): axis object.
-            label_value (list): ticklabel values.
-            label_axis (str): axis name, 'x' or 'y'
-
-        Returns:
-            list: label names
-        """
-
-        if label_axis == 'x':
-            ax.set_xticks(np.arange(len(label_value)))
-            axis = ax.get_xticklabels()
-        else:
-            ax.set_yticks(np.arange(len(label_value)) + 1)
-            axis = ax.get_yticklabels()
-
-        # fetch labels
-        labels = [items.get_text() for items in axis]
-
-        # init a count variable
-        if label_axis == 'x':
-            count = 0
-        else:
-            count = len(label_value) - 1
-
-        # iterate through all the labels and change the label name
-        for i in range(len(labels)):
-            labels[i] = label_value[count]
-
-            if label_axis == 'x':
-                count += 1
-            else:
-                count -= 1
-
-        return labels
+    def __init__(self, params, range_low, range_high, figsize=(12, 12), facecolor='#FFFFFF',
+                 width=1, num_circles=5):
+        self.params = np.asarray(params)
+        self.range_low = np.asarray(range_low)
+        self.range_high = np.asarray(range_high)
+        self.figsize = figsize
+        self.facecolor = facecolor
+        self.width = width
+        self.num_circles = num_circles
+        self.even_num_circles = self.num_circles % 2 == 0
+        self.num_labels = len(self.params)
+
+        # validation checks
+        if self.params.size != self.range_low.size:
+            msg = 'The size of params and range_low must match'
+            raise ValueError(msg)
+        if self.params.size != self.range_high.size:
+            msg = 'The size of params and range_high must match'
+            raise ValueError(msg)
+        if not isinstance(num_circles, int):
+            msg = 'num_circles must be an integer'
+            raise TypeError(msg)
+
+        # get the rotation angles
+        self.rotation = (2 * np.pi / self.num_labels) * np.arange(self.num_labels)
+        self.rotation_sin = np.sin(self.rotation)
+        self.rotation_cos = np.cos(self.rotation)
+
+        # flip the rotation if the label is in lower half
+        mask_flip_label = (self.rotation > np.pi / 2) & (self.rotation < np.pi / 2 * 3)
+        self.rotation[mask_flip_label] = self.rotation[mask_flip_label] + np.pi
+        self.rotation_degrees = -np.rad2deg(self.rotation)
 
     def __repr__(self):
-        return f"""{self.__class__.__name__}(
-            background_color={self.background_color},
-            patch_color={self.patch_color},
-            fontfamily={self.fontfamily},
-            label_fontsize={self.label_fontsize},
-            range_fontsize={self.range_fontsize},
-            label_color={self.label_color},
-            range_color={self.range_color}
-        )"""
+        return (f'{self.__class__.__name__}('
+                f'figsize={self.figsize!r}, facecolor={self.facecolor!r}, '
+                f'width={self.width!r}, num_circles={self.num_circles!r}, '
+                f'params={self.params!r}, range_low={self.range_low!r}, '
+                f'range_high={self.range_high!r})')
 
-    # __str__ is the same as __repr__
-    __str__ = __repr__
+    def _setup_axis(self, ax=None):
+        ax.set_facecolor(self.facecolor)
+        ax.set_aspect('equal')
+        lim = self.width * (self.num_circles + 4)
+        ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
+        ax.axis('off')
 
+    def setup_axis(self, ax=None):
+        if ax is None:
+            fig, ax = plt.subplots(figsize=self.figsize)
+            self._setup_axis(ax)
+            return fig, ax
+
+        self._setup_axis(ax)
+        return None
+
+    def draw_circles(self, ax=None, inner=True, **kwargs):
+        radius = np.tile(np.array([self.width]), self.num_circles + 1).cumsum()
+        if (inner and self.even_num_circles) or (inner is False and self.even_num_circles is False):
+            ax_circles = radius[0::2]
+        else:
+            ax_circles = radius[1::2]
+        rings = [Wedge(center=(0, 0), r=radius, width=self.width, theta1=0, theta2=360) for radius
+                 in ax_circles]
+        rings = PatchCollection(rings, **kwargs)
+        rings = ax.add_collection(rings)
+        return rings
+
+    def _draw_radar(self, values, ax=None, **kwargs):
+        # calculate vertices via the proportion of the way the value is between the low/high range
+        values_min_max = np.minimum(np.maximum(values, self.range_low), self.range_high)
+        proportion = (values_min_max - self.range_low) / (self.range_high - self.range_low)
+        vertices = (proportion * self.num_circles * self.width) + self.width
+        vertices = np.c_[self.rotation_sin * vertices, self.rotation_cos * vertices]
+        # create radar patch from the vertices
+        radar = Polygon(vertices, **kwargs)
+        radar = ax.add_patch(radar)
+        return radar, vertices
+
+    def draw_radar(self, values, ax=None, kwargs_radar=None, kwargs_rings=None):
+        if kwargs_radar is None:
+            kwargs_radar = {}
+        if kwargs_rings is None:
+            kwargs_rings = {}
+        # to arrays
+        values = np.asarray(values)
+        # validate array size
+        if values.size != self.params.size:
+            msg = 'The size of params and values must match'
+            raise ValueError(msg)
+        # plot radar and outer rings, clip the outer rings to the radar
+        radar, vertices = self._draw_radar(values, ax=ax, zorder=1, **kwargs_radar)
+        rings = self.draw_circles(ax=ax, inner=False, zorder=2, **kwargs_rings)
+        rings.set_clip_path(radar)
+        return radar, rings, vertices
+
+    def draw_radar_compare(self, values, values_compare, ax=None,
+                           kwargs_radar=None, kwargs_compare=None):
+        if kwargs_radar is None:
+            kwargs_radar = {}
+        if kwargs_compare is None:
+            kwargs_compare = {}
+        # to arrays
+        values = np.asarray(values)
+        values_compare = np.asarray(values_compare)
+        # validate array size
+        if values.size != self.params.size:
+            msg = 'The size of params and values must match'
+            raise ValueError(msg)
+        if values_compare.size != self.params.size:
+            msg = 'The size of params and values_compare must match'
+            raise ValueError(msg)
+        # plot radars
+        radar, vertices = self._draw_radar(values, ax=ax, **kwargs_radar)
+        radar2, vertices2 = self._draw_radar(values_compare, ax=ax, **kwargs_compare)
+        return radar, radar2, vertices, vertices2
+
+    def draw_range_labels(self, ax=None, **kwargs):
+        # create the label values - linearly interpolate between the low and high for each circle
+        label_values = np.linspace(self.range_low.reshape(-1, 1), self.range_high.reshape(-1, 1),
+                                   num=self.num_circles, axis=1).ravel()
+        # if the range is under 1, round to 2 decimal places (2dp) else 1dp
+        mask_round_to_2dp = np.repeat(self.range_high < 1, self.num_circles)
+        rounding = ['%.2f' if mask else '%.1f' for mask in mask_round_to_2dp]
+        # repeat the rotation degrees for each circle so it matches the length of the label_values
+        label_rotations = np.repeat(self.rotation_degrees, self.num_circles)
+        # calculate how far out from the center (radius) to place each label, convert to coordinates
+        label_radius = self.width + np.linspace(self.width, self.width * self.num_circles,
+                                                self.num_circles)
+        label_xs = np.tile(label_radius, self.num_labels) * np.repeat(self.rotation_sin,
+                                                                      label_radius.size)
+        label_ys = np.tile(label_radius, self.num_labels) * np.repeat(self.rotation_cos,
+                                                                      label_radius.size)
+        # write the labels on the axis
+        label_list = []
+        for idx, label in enumerate(label_values):
+            text = ax.text(label_xs[idx], label_ys[idx], rounding[idx] % float(label),
+                           rotation=label_rotations[idx], ha='center', va='center', **kwargs)
+            label_list.append(text)
+        return label_list
+
+    def draw_param_labels(self, ax=None, **kwargs):
+        # calculate how far out from the center (radius) to place each label, convert to coordinates
+        param_xs = self.width * (self.num_circles + 2.5) * self.rotation_sin
+        param_ys = self.width * (self.num_circles + 2.5) * self.rotation_cos
+        label_list = []
+        # write the labels on the axis
+        for idx, label in enumerate(self.params):
+            text = ax.text(param_xs[idx], param_ys[idx], label,
+                           rotation=self.rotation_degrees[idx], ha='center', va='center', **kwargs)
+            label_list.append(text)
+        return label_list
