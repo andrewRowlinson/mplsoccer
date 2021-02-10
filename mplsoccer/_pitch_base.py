@@ -561,15 +561,22 @@ class BasePitch(ABC):
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
 
-    def grid(self, grid_height=0.7, space=0.05, bottom=0.1, left=None,
-             figsize=None, nrows=None, ncols=None):
+    def grid(self, nrows=None, ncols=None, grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1, left=None,
+             figheight=None, figwidth=None):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
         ----------
+        nrows, ncols : int, default None
+            Number of rows/columns of the subplot grid.
+            The default of None uses the Pitch ncols/ nrows.
         grid_height : float, default 0.7
             The height of the grid area in fractions of the figure height.
             The default is the grid height is 70% of the figure height.
+        grid_width : float, default 0.8
+            The width of the grid area in fractions of the figure width.
+            The default is the grid is 80% of the figure width. This is ignored
+            if the figwidth is set.
         space : float, default 0.05
             The total amount of the grid height reserved for spacing between axes.
             Expressed as a fraction of the grid height. The default is 5% of the grid height.
@@ -580,11 +587,11 @@ class BasePitch(ABC):
         left : float, default None
             The location of the left hand side of the grid in fractions of the figure width.
             The default of None places the grid in the middle of the figure.
-        figsize : tuple of float, default None
-            The figure size in inches. The defalt of None uses the Pitch figsize.
-        nrows, ncols : int, default None
-            Number of rows/columns of the subplot grid.
-            The default of None uses the Pitch ncols/ nrows.
+        figheight : float, default None
+            The figure height in inches. The default of None uses the Pitch figure height.
+        figwidth : float, default None
+            The figure width in inches. The default of None sets the width so that it takes up
+            approximately 80% of the figure width (the default grid width).
 
         Returns
         -------
@@ -598,14 +605,17 @@ class BasePitch(ABC):
         >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figsize=(14, 12))
         """
 
-        if figsize is None:
-            figsize = self.figsize
+        if figheight is None:
+            figheight = self.figsize[1]
         if ncols is None:
             ncols = self.ncols
         if nrows is None:
             nrows = self.nrows
+        if figwidth is None:
+            figwidth = figheight * grid_height / grid_width * self.ax_aspect * ((1 - space) * ncols / nrows + space)
 
-        fig_aspect = figsize[0] / figsize[1]
+        figsize = (figwidth, figheight)
+        fig_aspect = figwidth / figheight
         total_space_height = grid_height * space
         total_space_width = total_space_height * self.ax_aspect / fig_aspect
 
@@ -628,7 +638,7 @@ class BasePitch(ABC):
         individual_pitch_height = (grid_height - total_space_height) / nrows
         individual_pitch_width = individual_pitch_height * self.ax_aspect / fig_aspect
         grid_width = (individual_pitch_width * ncols) + total_space_width
-
+        
         if grid_width > 1:
             error_msg = ('The grid axes extends past the figure width. '
                          'Reduce one of the grid_height/ space, or '
