@@ -5,6 +5,8 @@ Authors: Anmol_Durgapal(@slothfulwave612) and Andrew Rowlinson (@numberstorm)
 The radar-chart theme is inspired by @Statsbomb/Rami_Moghadam.
 """
 
+import textwrap
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import PatchCollection
@@ -18,9 +20,12 @@ class Radar:
     ----------
     params : sequence of str
         The name of parameters (e.g. 'Key Passes')
-    range_min, range_max : sequence of floats
-         min and max values for each parameter.
-    num_rings : int, default 5
+    range_inner, range_outer : sequence of floats
+         The values at the inner and outer edge of the Radar for each parameter.
+    round_int : sequence of bool, default None
+        Whether to round the respective range values to integers (if True) or floats (if False).
+        The default (None) sets all range values to floats.
+    num_rings : int, default 6
         The number of concentric circles. This excludes the center circle so the
         total number is num_rings + 1.
     ring_width : float, default 1
@@ -30,11 +35,15 @@ class Radar:
         the same size as the center circle radius. If the center_circle_radius is increased to
         more than the ring_width then the center circle radius is wider than the rings.
     """
-    def __init__(self, params, range_min, range_max,
-                 num_rings=5, ring_width=1, center_circle_radius=1):
+    def __init__(self, params, range_inner, range_outer, round_int=None,
+                 num_rings=6, ring_width=1, center_circle_radius=1):
         self.params = np.asarray(params)
-        self.range_min = np.asarray(range_min)
-        self.range_max = np.asarray(range_max)
+        self.range_inner = np.asarray(range_inner)
+        self.range_outer = np.asarray(range_outer)
+        if round_int is None:
+            self.round_int = np.array([False] * self.params.size)
+        else:
+            self.round_int = np.asarray(round_int)
         self.ring_width = ring_width
         self.center_circle_radius = center_circle_radius
         self.num_rings = num_rings
@@ -42,11 +51,14 @@ class Radar:
         self.num_labels = len(self.params)
 
         # validation checks
-        if self.params.size != self.range_min.size:
-            msg = 'The size of params and range_min must match'
+        if self.params.size != self.range_inner.size:
+            msg = 'The size of params and range_inner must match'
             raise ValueError(msg)
-        if self.params.size != self.range_max.size:
-            msg = 'The size of params and range_max must match'
+        if self.params.size != self.range_outer.size:
+            msg = 'The size of params and range_outer must match'
+            raise ValueError(msg)
+        if self.params.size != self.round_int.size:
+            msg = 'The size of params and round_int must match'
             raise ValueError(msg)
         if not isinstance(num_rings, int):
             msg = 'num_rings must be an integer'
@@ -67,16 +79,26 @@ class Radar:
 
     def __repr__(self):
         return (f'{self.__class__.__name__}('
-                f'ring_width={self.ring_width!r}, num_rings={self.num_rings!r}, '
-                f'params={self.params!r}, range_min={self.range_min!r}, '
-                f'range_max={self.range_max!r})')
+                f'ring_width={self.ring_width!r}, '
+                f'center_circle_radius={self.center_circle_radius!r}, '
+                f'num_rings={self.num_rings!r}, '
+                f'params={self.params!r}, '
+                f'range_inner={self.range_inner!r}, '
+                f'range_outer={self.range_outer!r}, '
+                f'round_int={self.round_int!r})')
 
     def _setup_axis(self, facecolor='#FFFFFF', ax=None):
         ax.set_facecolor(facecolor)
         ax.set_aspect('equal')
-        lim = self.ring_width * (self.num_rings + 4)
+        lim = self.center_circle_radius + self.ring_width * (self.num_rings + 4)
         ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
-        ax.axis('off')
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.grid(False)
+        ax.tick_params(top=False, bottom=False, left=False, right=False,
+                       labelleft=False, labelbottom=False)
 
     def setup_axis(self, facecolor='#FFFFFF', figsize=(12, 12), ax=None, **kwargs):
         """ Setup an axis for plotting radar charts. If an ax is specified the settings are applied
@@ -102,14 +124,14 @@ class Radar:
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0], \
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
+range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
 
         >>> from mplsoccer import Radar
         >>> import matplotlib.pyplot as plt
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0], \
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
+range_outer=[10, 10, 10])
         >>> fig, ax = plt.subplots(figsize=(12, 12))
         >>> radar.setup_axis(ax=ax)
         """
@@ -139,12 +161,12 @@ range_max=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0], \
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
+range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         """
-        radius = np.tile(self.ring_width, self.num_rings)
+        radius = np.tile(self.ring_width, self.num_rings + 1)
         radius = np.insert(radius, 0, self.center_circle_radius)
         radius = radius.cumsum()
         if (inner and self.even_num_rings) or (inner is False and self.even_num_rings is False):
@@ -167,8 +189,11 @@ range_max=[10, 10, 10])
 
     def _draw_radar(self, values, ax=None, **kwargs):
         # calculate vertices via the proportion of the way the value is between the low/high range
-        values_min_max = np.minimum(np.maximum(values, self.range_min), self.range_max)
-        proportion = (values_min_max - self.range_min) / (self.range_max - self.range_min)
+        label_range = np.abs(self.range_outer - self.range_inner)
+        range_min = np.minimum(self.range_inner, self.range_outer)
+        range_max = np.maximum(self.range_inner, self.range_outer)
+        values_clipped = np.minimum(np.maximum(values, range_min), range_max)
+        proportion = np.abs(values_clipped - self.range_inner) / label_range
         vertices = (proportion * self.num_rings * self.ring_width) + self.center_circle_radius
         vertices = np.c_[self.rotation_sin * vertices, self.rotation_cos * vertices]
         # create radar patch from the vertices
@@ -200,8 +225,8 @@ range_max=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0],
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
@@ -254,8 +279,8 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0],
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
@@ -283,14 +308,22 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         radar2, vertices2 = self._draw_radar(values_compare, ax=ax, **kwargs_compare)
         return radar, radar2, vertices, vertices2
 
-    def draw_range_labels(self, ax=None, **kwargs):
+    def draw_range_labels(self, ax=None, offset=0, **kwargs):
         """ Draw the range labels.
-        These are linearly interpolated labels between range_min and range_max on the ring edges.
+        These labels are linearly interpolated between range_inner and
+        range_outer on the ring edges.
+
+        The range labels are formatted to 1 or 2, decimal places (dp),
+        depending on whether the maximum of the range is less than or equal to one
+        (1dp) or more than one (2dp). If round_int is True for the parameter, this is
+        overriden so integers are shown instead.
 
         Parameters
         ----------
         ax : matplotlib axis, default None
             The axis to plot on.
+        offset : float, default 0
+            Offset the range labels from the center of the rings.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text.
 
         Returns
@@ -300,8 +333,8 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0],
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
@@ -311,17 +344,26 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         """
         # create the label values - linearly interpolate between the low and high for each circle
-        label_values = np.linspace(self.range_min.reshape(-1, 1), self.range_max.reshape(-1, 1),
-                                   num=self.num_rings, axis=1).ravel()
+        label_values = np.linspace(self.range_inner.reshape(-1, 1), self.range_outer.reshape(-1, 1),
+                                   num=self.num_rings + 1, axis=1).ravel()
+        # remove the first entry so we do not label the inner circle
+        mask = np.ones_like(label_values, dtype=bool)
+        mask[0::self.num_rings + 1] = 0
+        label_values = label_values[mask]
         # if the range is under 1, round to 2 decimal places (2dp) else 1dp
-        mask_round_to_2dp = np.repeat(self.range_max < 1, self.num_rings)
-        rounding = ['%.2f' if mask else '%.1f' for mask in mask_round_to_2dp]
+        mask_round_to_2dp = np.repeat(np.maximum(self.range_inner, self.range_outer) <= 1,
+                                      self.num_rings)
+        round_format = np.where(mask_round_to_2dp, '%.2f', '%.1f')
+        # if the round_int array is True format as an integer rather than a float
+        mask_int = np.repeat(self.round_int, self.num_rings)
+        round_format[mask_int] = '%.0f'
         # repeat the rotation degrees for each circle so it matches the length of the label_values
         label_rotations = np.repeat(self.rotation_degrees, self.num_rings)
         # calculate how far out from the center (radius) to place each label, convert to coordinates
-        label_radius = (self.center_circle_radius + np.linspace(self.ring_width,
-                                                                self.ring_width * self.num_rings,
-                                                                self.num_rings))
+        label_radius = np.linspace(self.ring_width,
+                                   self.ring_width * self.num_rings,
+                                   self.num_rings)
+        label_radius = (self.center_circle_radius + offset + label_radius)
         label_xs = np.tile(label_radius, self.num_labels) * np.repeat(self.rotation_sin,
                                                                       label_radius.size)
         label_ys = np.tile(label_radius, self.num_labels) * np.repeat(self.rotation_cos,
@@ -329,18 +371,23 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         # write the labels on the axis
         label_list = []
         for idx, label in enumerate(label_values):
-            text = ax.text(label_xs[idx], label_ys[idx], rounding[idx] % float(label),
+            text = ax.text(label_xs[idx], label_ys[idx], round_format[idx] % label,
                            rotation=label_rotations[idx], ha='center', va='center', **kwargs)
             label_list.append(text)
         return label_list
 
-    def draw_param_labels(self, ax=None, **kwargs):
+    def draw_param_labels(self, ax=None, wrap=15, offset=2.5, **kwargs):
         """ Draw the parameter labels (e.g. 'Key Passes') on the edge of the chart.
 
         Parameters
         ----------
         ax : matplotlib axis, default None
             The axis to plot on.
+        offset : float, default 2.5
+            Offset the param labels from the last of the rings.
+        wrap : int, default 15
+            Wrap the labels so that every line is at most ``wrap`` characters long
+            (long words are not broken).
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text.
 
         Returns
@@ -350,8 +397,8 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_min=[0, 0, 0],
-range_max=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
@@ -363,12 +410,15 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         """
         # calculate how far out from the center (radius) to place each label, convert to coordinates
         # place one-and-a-half ring widths away from the edge of the last circle
-        param_radius = self.center_circle_radius + (self.ring_width * (self.num_rings + 1.5))
+        outer_ring = self.center_circle_radius + (self.ring_width * self.num_rings)
+        param_radius = outer_ring + offset
         param_xs = param_radius * self.rotation_sin
         param_ys = param_radius * self.rotation_cos
         label_list = []
         # write the labels on the axis
         for idx, label in enumerate(self.params):
+            if wrap is not None:
+                label = '\n'.join(textwrap.wrap(label, wrap, break_long_words=False))
             text = ax.text(param_xs[idx], param_ys[idx], label,
                            rotation=self.rotation_degrees[idx], ha='center', va='center', **kwargs)
             label_list.append(text)
