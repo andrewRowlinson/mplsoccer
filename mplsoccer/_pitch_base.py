@@ -561,8 +561,8 @@ class BasePitch(ABC):
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
 
-    def grid(self, nrows=None, ncols=None, grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1, left=None,
-             figheight=None, figwidth=None):
+    def grid(self, nrows=None, ncols=None, grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1,
+             left=None, figheight=None, figwidth=None):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
@@ -576,7 +576,7 @@ class BasePitch(ABC):
         grid_width : float, default 0.8
             The width of the grid area in fractions of the figure width.
             The default is the grid is 80% of the figure width. This is ignored
-            if the figwidth is set.
+            if the figwidth is set (instead it is calculated).
         space : float, default 0.05
             The total amount of the grid height reserved for spacing between axes.
             Expressed as a fraction of the grid height. The default is 5% of the grid height.
@@ -612,7 +612,12 @@ class BasePitch(ABC):
         if nrows is None:
             nrows = self.nrows
         if figwidth is None:
-            figwidth = figheight * grid_height / grid_width * self.ax_aspect * ((1 - space) * ncols / nrows + space)
+            if nrows > 1:
+                figwidth = (figheight * grid_height / grid_width * self.ax_aspect *
+                            ((1 - space) * ncols / nrows + space))
+            else:
+                figwidth = (figheight * grid_height / grid_width * self.ax_aspect *
+                            (ncols / nrows + space))
 
         figsize = (figwidth, figheight)
         fig_aspect = figwidth / figheight
@@ -638,7 +643,7 @@ class BasePitch(ABC):
         individual_pitch_height = (grid_height - total_space_height) / nrows
         individual_pitch_width = individual_pitch_height * self.ax_aspect / fig_aspect
         grid_width = (individual_pitch_width * ncols) + total_space_width
-        
+
         if grid_width > 1:
             error_msg = ('The grid axes extends past the figure width. '
                          'Reduce one of the grid_height/ space, or '
