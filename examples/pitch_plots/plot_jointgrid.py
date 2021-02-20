@@ -55,11 +55,13 @@ df_team1['x'] = pitch.dim.right - df_team1.x
 # Plotting a standard shot map with step charts
 # ---------------------------------------------
 
-fig, axes = pitch.jointgrid(left=0.15,  # pitch axis starts 15% in from the side of the figure
-                            bottom=0.075,  # pitch axis starts 7.5% in from the side of the figure
-                            marginal_height=0.1,  # marginal axes heights are 10% of figure height
-                            space_height=0,  # 0% space between the pitch and the marginal axes
-                            pitch_height=0.8)  # the pitch width takes up 80% of the figure height
+fig, axes = pitch.jointgrid(figheight=10,  # the figure is 10 inches high
+                            left=None,  # joint grid center-aligned
+                            bottom=0.075,  # grid starts 7.5% in from the bottom of the figure
+                            marginal=0.1,  # marginal axes heights are 10% of grid height
+                            space=0,  # 0% of the grid height reserved for space between axes
+                            grid_width=0.9,  # the grid width takes up 90% of the figure width
+                            grid_height=0.8)  # the grid height takes up 80% of the figure height
 # we plot a usual scatter plot but the scatter size is based on expected goals
 # note that the size is the expected goals * 700
 # so any shots with an expected goals = 1 would take a size of 700 (points**2)
@@ -76,6 +78,7 @@ txt1 = axes[0].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba495c'
                     ha='center', va='center', fontsize=30)
 txt2 = axes[0].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
                     ha='center', va='center', fontsize=30)
+# the spine closest to the pitch shows by default, we can remove the axes here so it doesn't
 _ = axes[1].axis('off')
 _ = axes[2].axis('off')
 _ = axes[3].axis('off')
@@ -84,9 +87,9 @@ _ = axes[3].axis('off')
 # Plotting a standard shot map with rug plots
 # -------------------------------------------
 
-# increased the size of the pitch_height and decreased the marginal height
-# as rug plots are only lines, we don't need as much space taken up by the marginal axes
-fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8, marginal_height=0.02)
+# decreased the marginal height as rug plots are only lines,
+# we don't need as much space taken up by the marginal axes
+fig, axes = pitch.jointgrid(figheight=10, left=None, bottom=0.075, marginal=0.02)
 sc_team1 = pitch.scatter(df_team1.x, df_team1.y, s=df_team1.shot_statsbomb_xg * 700,
                          ec='black', color='#ba495c', ax=axes[0])
 sc_team2 = pitch.scatter(df_team2.x, df_team2.y, s=df_team1.shot_statsbomb_xg * 700,
@@ -137,7 +140,7 @@ blue = get_cmap('Blues')(np.linspace(0, 1, 100))[60]
 # Hexbin shot map with kdeplot marginal axes
 # ------------------------------------------
 
-fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8)
+fig, axes = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8)
 # plot the hexbins
 hex1 = pitch.hexbin(df_team1.x, df_team1.y, ax=axes[0], edgecolors=pitch.line_color, cmap='Reds')
 hex2 = pitch.hexbin(df_team2.x, df_team2.y, ax=axes[0], edgecolors=pitch.line_color, cmap='Blues')
@@ -164,7 +167,7 @@ _ = axes[3].axis('off')
 # Heatmap shot map with histogram/ kdeplot on the marginal axes
 # -------------------------------------------------------------
 
-fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8)
+fig, axes = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8)
 bs1 = pitch.bin_statistic(df_team1.x, df_team1.y, bins=(18, 12))
 bs2 = pitch.bin_statistic(df_team2.x, df_team2.y, bins=(18, 12))
 # get the min/ max values for normalizing across both teams
@@ -194,7 +197,7 @@ _ = axes[3].axis('off')
 # Kdeplot shot map with kdeplot on the marginal axes
 # --------------------------------------------------
 
-fig, axes = pitch.jointgrid(left=0.15, bottom=0.075, pitch_height=0.8)
+fig, axes = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8)
 # increase number of levels for a smoother looking heatmap
 kde1 = pitch.kdeplot(df_team1.x, df_team1.y, ax=axes[0], cmap='Reds', levels=75, shade=True)
 kde2 = pitch.kdeplot(df_team2.x, df_team2.y, ax=axes[0], cmap='Blues', levels=75, shade=True)
@@ -218,10 +221,7 @@ _ = axes[3].axis('off')
 # ax_left, ax_top, ax_left, ax_right. Here we set the bottom and right
 # marginal axes to display for a single team.
 
-# we leave enough room here for the bottom marginal axes
-# the pitch starts at 15% of the figure height. The bottom marginal axes is 10% of the figure height
-# therefore 5% of the figure height is left as a margin at the bottom of the plot
-fig, axes = vertical_pitch.jointgrid(left=0.2, bottom=0.15, pitch_height=0.8, marginal_height=0.1,
+fig, axes = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15, grid_height=0.7, marginal=0.1,
                                      # here we filter out the left and top marginal axes
                                      ax_top=False, ax_bottom=True, ax_left=False, ax_right=True)
 # typical shot map where the scatter points vary by the expected goals value
@@ -243,15 +243,12 @@ _ = axes[4].axis('off')
 # The jointgrid also works with arbritary padding.
 # So you can crop the pitc and still have the marginal axes to plot on.
 
-vertical_pitch = VerticalPitch(figsize=(16, 9), half=True,
+vertical_pitch = VerticalPitch(half=True,
                                # here we remove some of the pitch on the left/ right/ bottom
                                pad_top=0.05, pad_right=-15, pad_bottom=-20, pad_left=-15,
                                goal_type='line')
 
-# we leave enough room here for the bottom marginal axes
-# the pitch starts at 15% of the figure height. The bottom marginal axes is 10% of the figure height
-# therefore 5% of the figure height is left as a margin at the bottom of the plot
-fig, axes = vertical_pitch.jointgrid(left=0.2, bottom=0.15, pitch_height=0.8, marginal_height=0.1,
+fig, axes = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15, grid_height=0.7, marginal=0.1,
                                      # here we filter out the left and top marginal axes
                                      ax_top=False, ax_bottom=True, ax_left=False, ax_right=True)
 # typical shot map where the scatter points vary by the expected goals value

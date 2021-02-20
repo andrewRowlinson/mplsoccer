@@ -83,6 +83,33 @@ def validate_ax(ax):
         raise TypeError(msg)
 
 
+def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
+                grid=False, tick=False, label=False):
+    """ Helper method to set the visibility of matplotlib spines, grid and ticks/ labels.
+    By default sets all to invisible.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axis to set visibility on.
+    spine_bottom, spine_top, spine_left, spine_right : bool, default False
+        Whether to show the spines.
+    grid : bool, default False
+        Whether to show the grid lines.
+    tick : bool, deafult False
+        Whether to draw the ticks.
+    label : bool, default False
+        Whether to draw the tick labels.
+    """
+    ax.spines['bottom'].set_visible(spine_bottom)
+    ax.spines['top'].set_visible(spine_top)
+    ax.spines['left'].set_visible(spine_left)
+    ax.spines['right'].set_visible(spine_right)
+    ax.grid(grid)
+    ax.tick_params(bottom=tick, top=tick, left=tick, right=tick,
+                   labelbottom=label, labeltop=label, labelleft=label, labelright=label)
+
+
 class Standardizer:
     """ Convert from one set of coordinates to another.
 
@@ -173,11 +200,11 @@ length_to=105, width_to=68)
                                            dim_to.x_markings_sorted, x)
         y_standardized = self._standardize(dim_from.y_markings_sorted,
                                            dim_to.y_markings_sorted, y)
-        
+
         # for inverted axis flip the coordinates
         if dim_to.invert_y:
             y_standardized = dim_to.bottom - y_standardized
-            
+
         return x_standardized, y_standardized
 
     @staticmethod
