@@ -13,8 +13,9 @@ from mplsoccer import Pitch, VerticalPitch
 # --------------------------
 # Let's plot on a new axis first.
 
-pitch = Pitch(figsize=(8, 4))  # specifying figure size is optional (width, height)
-fig, ax = pitch.draw()
+pitch = Pitch()
+# specifying figure size (width, height)
+fig, ax = pitch.draw(figsize=(8, 4))
 
 ##############################################################################
 # Draw on an existing axis
@@ -52,25 +53,25 @@ fig, ax = pitch.draw()
 # -------------------------
 # mplsoccer also plots on grids by specifying nrows and ncols.
 # The default is to use
-# tight_layout. See: https://matplotlib.org/tutorials/intermediate/tight_layout_guide.html.
+# tight_layout. See: https://matplotlib.org/stable/tutorials/intermediate/tight_layout_guide.html.
 
-pitch = Pitch(nrows=2, ncols=3)
-fig, axs = pitch.draw()
+pitch = Pitch()
+fig, axs = pitch.draw(nrows=2, ncols=3)
 
 ##############################################################################
 # But you can also use constrained layout
 # by setting ``constrained_layout=True`` and ``tight_layout=False``, which may look better.
-# See: https://matplotlib.org/tutorials/intermediate/constrainedlayout_guide.html.
+# See: https://matplotlib.org/stable/tutorials/intermediate/constrainedlayout_guide.html.
 
-pitch = Pitch(nrows=2, ncols=3, tight_layout=False, constrained_layout=True)
-fig, axs = pitch.draw()
+pitch = Pitch()
+fig, axs = pitch.draw(nrows=2, ncols=3, tight_layout=False, constrained_layout=True)
 
 ##############################################################################
 # If you want more control over how pitches are placed
 # you can use the grid method. This also works for one pitch (nrows=1 and ncols=1).
 
 pitch = Pitch()
-fig, axs = pitch.grid(nrows=3, ncols=3, figsize=(14.5, 10),
+fig, axs = pitch.grid(nrows=3, ncols=3, figheight=10,
                       grid_height=0.7,  # the grid takes up 70% of the figure height
                       space=0.05,  # 5% of the grid height is reserved for space between axes
                       left=None,  # centers the grid horizontally
@@ -185,6 +186,6 @@ fig, ax = pitch.draw()
 # Finally let's use matplotlib's xkcd theme.
 
 plt.xkcd()
-pitch = Pitch(pitch_color='grass', stripe=True, figsize=(8, 4))
-fig, ax = pitch.draw()
+pitch = Pitch(pitch_color='grass', stripe=True)
+fig, ax = pitch.draw(figsize=(8, 4))
 annotation = ax.annotate('Who can resist this?', (60, 10), fontsize=30, ha='center')
