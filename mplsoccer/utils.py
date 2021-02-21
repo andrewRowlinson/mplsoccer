@@ -15,14 +15,14 @@ from mplsoccer import dimensions
 __all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager']
 
 
-def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
+def add_image(path, fig, left, bottom, width=None, height=None, **kwargs):
     """ Adds an image to a figure using fig.add_axes and ax.imshow
 
     If downsampling an image 'hamming' interpolation is recommended
 
     Parameters
     ----------
-    image: str
+    path: str
         The path to the image.
     fig: matplotlib.figure.Figure
         The figure on which to add the image.
@@ -52,7 +52,7 @@ def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     >>> fig = add_image(image, fig, left=0.1, bottom=0.2, width=0.4, height=0.4)
     """
     # open image
-    image = Image.open(image)
+    image = Image.open(path)
 
     # height, width, channel of shape
     image_width, image_height = image.size
@@ -253,7 +253,7 @@ class FontManager:
     >>> font_url = 'https://github.com/google/fonts/blob/master/ofl/abel/Abel-Regular.ttf?raw=true'
     >>> fm = FontManager(url=font_url)
     >>> fig, ax = plt.subplots()
-    >>> ax.text("Good content.", fontproperties=fm.prop, size=60)
+    >>> ax.text(x=0.5, y=0.5, s="Good content.", fontproperties=fm.prop, size=30)
     """
 
     def __init__(self,

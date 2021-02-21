@@ -66,7 +66,7 @@ class BasePitch(ABC):
     positional_linestyle : str or tuple
         Linestyle for the Juego de Posición lines:
          {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}
-        see: https://matplotlib.org/3.2.1/gallery/lines_bars_and_markers/linestyles.html
+        see: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
     positional_color : any Matplotlib color, default '#eadddd'
         The line color for the Juego de Posición lines.
     shade_middle : bool, default False
@@ -87,7 +87,7 @@ class BasePitch(ABC):
     goal_alpha : float, default 0.7
         The transparency of the goal. This is used when the goal_type='box'
     axis : bool, default False
-        Whether to include the axis: True means the axis is 'on' and False means the axis is 'off'.
+        Whether to set the axis spines to visible.
     label : bool, default False
         Whether to include the axis labels.
     tick : bool, default False
@@ -276,8 +276,8 @@ class BasePitch(ABC):
             warnings.warn(msg)
 
         # type checks
-        for attribute in ['axis', 'stripe', 'tick', 'label', 'shade_middle', 'tight_layout',
-                          'half', 'positional', 'constrained_layout']:
+        for attribute in ['axis', 'stripe', 'tick', 'label', 'shade_middle',
+                          'half', 'positional']:
             if not isinstance(getattr(self, attribute), bool):
                 raise TypeError(f"Invalid argument: '{attribute}' should be bool.")
         valid_goal_type = ['line', 'box', 'circle']
@@ -400,6 +400,11 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> pitch.draw(ax=ax)
         """
+        if constrained_layout and tight_layout:
+            msg = ('You have set constrained_layout==True and tight_layout==True,'
+                   ' set one to False as they are incompatible.')
+            warnings.warn(msg)
+
         if figsize is None:
             figsize = rcParams['figure.figsize']
         if ax is None:
@@ -565,7 +570,7 @@ class BasePitch(ABC):
         figheight : float, default 9
             The figure height in inches.
         nrows, ncols : int, default 1
-            Number of rows/columns of the subplot grid.
+            Number of rows/columns of pitches in the grid.
         grid_height : float, default 0.7
             The height of the grid area in fractions of the figure height.
             The default is the grid height is 70% of the figure height.
@@ -582,7 +587,6 @@ class BasePitch(ABC):
         left : float, default None
             The location of the left hand side of the grid in fractions of the figure width.
             The default of None places the grid in the middle of the figure.
-
 
         Returns
         -------
@@ -663,8 +667,7 @@ class BasePitch(ABC):
     def jointgrid(self, figheight=9, grid_height=0.7, grid_width=0.8,
                   space=0, marginal=0.1, left=0.1, bottom=0.1,
                   ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
-        """ Create a grid with a pitch at the center and axes on the
-        top and right handside of the pitch.
+        """ Create a grid with a pitch at the center and (marginal) axes at the sides of the pitch.
 
         Parameters
         ----------
@@ -680,16 +683,16 @@ class BasePitch(ABC):
             The total amount of the grid height reserved for spacing between axes.
             Expressed as a fraction of the grid height. The default is 0% of the grid height.
             The default is no space (note it will still look like there is space
-            if the pitch has padding).
+            if the pitch has padding, e.g. pad_top=15).
         marginal : float, default 0.1
             The total amount of the grid height reserved for the marginal axes.
             Expressed as a fraction of the grid height. The default is 10% of the grid height.
         left : float, default 0.1
-            The location of the left hand side of the pitch in fractions of the figure width.
-            The default means that the pitch is located 10% in from the left of the figure.
+            The location of the left hand side of the grid in fractions of the figure width.
+            The default means that the grid is located 10% in from the left of the figure.
         bottom : float, default 0.1
-            The location of the bottom side of the pitch in fractions of the figure height.
-            The default means that the pitch is located 10% in from the bottom of the figure.
+            The location of the bottom side of the grid in fractions of the figure height.
+            The default means that the grid is located 10% in from the bottom of the figure.
         ax_left, ax_top, ax_right : bool, default True
             Whether to include a Matplotlib Axes on the left/top/right side of the pitch.
         ax_bottom : bool, default False
@@ -700,7 +703,7 @@ class BasePitch(ABC):
         fig : matplotlib.figure.Figure
         ax : a 1d numpy array (length 5) of matplotlib.axes.Axes
             format = array([pitch, marginal axes in order left, top, right, bottom])
-            if marginal axes is not present then axes replaced by None
+            if a marginal axes is not present then axes replaced by None
 
         Examples
         --------

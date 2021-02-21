@@ -19,7 +19,7 @@ def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs)
     The function also automatically flips the x and y coordinates if the pitch is vertical.
 
     Plot a 2D field of arrows.
-    See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.quiver.html
+    See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.quiver.html
 
     Parameters
     ----------

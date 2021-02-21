@@ -234,14 +234,14 @@ class BasePitchPlot(BasePitch):
 
     def polygon(self, verts, ax=None, **kwargs):
         """ Plot polygons using a PatchCollection.
-        See: https://matplotlib.org/api/collections_api.html.
+        See: https://matplotlib.org/stable/api/collections_api.html.
         Automatically flips the x and y vertices if the pitch is vertical.
 
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
 
         To use cmap use set_array as per this example:
-        https://matplotlib.org/gallery/shapes_and_collections/patch_collection.html)
+        https://matplotlib.org/stable/gallery/shapes_and_collections/patch_collection.html.
 
         Parameters
         ----------
@@ -280,7 +280,7 @@ class BasePitchPlot(BasePitch):
 
     def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
         """ Plot a polygon with the angle to the goal using PatchCollection.
-        See: https://matplotlib.org/api/collections_api.html.
+        See: https://matplotlib.org/stable/api/collections_api.html.
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
 
@@ -330,7 +330,7 @@ class BasePitchPlot(BasePitch):
         which automatically flips the xy and xytext coordinates if the pitch is vertical.
 
         Annotate the point xy with text.
-        See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.annotate.html
+        See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html
 
         Parameters
         ----------
@@ -354,7 +354,7 @@ class BasePitchPlot(BasePitch):
         >>> pitch = Pitch()
         >>> fig, ax = pitch.draw()
         >>> pitch.annotate(text='center', xytext=(50, 50), xy=(60, 40), ha='center', va='center', \
-ax=ax arrowprops=dict(facecolor='black'))
+ax=ax, arrowprops=dict(facecolor='black'))
         """
         validate_ax(ax)
         xy = self._reverse_annotate_if_vertical(xy)

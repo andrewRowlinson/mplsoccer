@@ -110,7 +110,7 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     """ Utility wrapper around matplotlib.axes.Axes.pcolormesh
     which automatically flips the x_grid and y_grid coordinates if the pitch is vertical.
 
-    See: https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
+    See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
 
     Parameters
     ----------

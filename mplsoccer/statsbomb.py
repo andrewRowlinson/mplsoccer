@@ -107,7 +107,6 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
     >>> dict_dfs = read_event(PATH_TO_EDIT)
 
     >>> from mplsoccer.statsbomb import read_event, EVENT_SLUG
-    >>> import os
     >>> URL = f'{EVENT_SLUG}/7430.json'
     >>> dict_dfs = read_event(URL)
     """
@@ -299,7 +298,6 @@ def read_match(path_or_buf, warn=True):
     >>> df_match = read_match(PATH_TO_EDIT)
 
     >>> from mplsoccer.statsbomb import read_match, MATCH_SLUG
-    >>> import os
     >>> URL = f'{MATCH_SLUG}/11/1.json'
     >>> df_match = read_match(URL)
     """
@@ -413,7 +411,6 @@ def read_lineup(path_or_buf, warn=True):
     >>> df_lineup = read_lineup(PATH_TO_EDIT)
 
     >>> from mplsoccer.statsbomb import read_lineup, LINEUP_SLUG
-    >>> import os
     >>> URL = f'{LINEUP_SLUG}/7430.json'
     >>> df_lineup = read_lineup(URL)
     """
