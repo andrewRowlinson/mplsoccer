@@ -12,7 +12,7 @@ from PIL import Image
 
 from mplsoccer import dimensions
 
-__all__ = ['add_image', 'validate_ax', 'Standardizer', 'FontManager']
+__all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):

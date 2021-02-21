@@ -12,6 +12,8 @@ import numpy as np
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon, Wedge
 
+from mplsoccer.utils import set_visible
+
 
 class Radar:
     """ A class for plotting radar charts in Matplotlib
@@ -92,13 +94,7 @@ class Radar:
         ax.set_aspect('equal')
         lim = self.center_circle_radius + self.ring_width * (self.num_rings + 4)
         ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
-        ax.spines['bottom'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.grid(False)
-        ax.tick_params(top=False, bottom=False, left=False, right=False,
-                       labelleft=False, labelbottom=False)
+        set_visible(ax)
 
     def setup_axis(self, facecolor='#FFFFFF', figsize=(12, 12), ax=None, **kwargs):
         """ Setup an axis for plotting radar charts. If an ax is specified the settings are applied

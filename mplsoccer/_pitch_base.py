@@ -21,10 +21,6 @@ class BasePitch(ABC):
 
     Parameters
     ----------
-    figsize : tuple of float, default Matplotlib figure size
-        The figure size in inches by default uses rcParams["figure.figsize"].
-    nrows, ncols : int, default 1
-        Number of rows/columns of the subplot grid.
     pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
@@ -37,11 +33,11 @@ class BasePitch(ABC):
         To remove the background set to "None" or 'None'.
     line_color : any Matplotlib color, default None
         The line color for the pitch markings. If None, defaults to rcParams["grid.color"].
+    linewidth : float, default 2
+        The line width for the pitch markings.
     line_zorder : float, default 0.9
         Set the zorder for the pitch lines (a matplotlib artist).
          Artists with lower zorder values are drawn first.
-    linewidth : float, default 2
-        The line width for the pitch markings.
     spot_scale : float, default 0.002
         The size of the penalty and center spots relative to the pitch length.
     stripe : bool, default False
@@ -51,20 +47,12 @@ class BasePitch(ABC):
     stripe_zorder : float, default 0.6
         Set the zorder for the stripes (a matplotlib artist).
          Artists with lower zorder values are drawn first.
-    pad_left : float, default None
+    pad_left, pad_right : float, default None
         Adjusts the left xlim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
-    pad_right : float, default None
-        Adjusts the right xlim of the axis. Positive values increase the plot area,
-        while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
-    pad_bottom : float, default None
+    pad_bottom, pad_top : float, default None
         Adjusts the bottom ylim of the axis. Positive values increase the plot area,
-        while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
-    pad_top : float, default None
-        Adjusts the top ylim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
     positional : bool, default False
@@ -104,12 +92,14 @@ class BasePitch(ABC):
         Whether to include the axis labels.
     tick : bool, default False
         Whether to include the axis ticks.
-    tight_layout : bool, default True
-        Whether to use Matplotlib's tight layout.
-    constrained_layout : bool, default False
-        Whether to use Matplotlib's constrained layout.
+    figsize : deprecated, default None
+        The figsize argument has been moved to the draw method.
+    tight_layout : deprecated, default None
+        The tight_layout argument has been moved to the draw method.
+    constrained_layout : deprecated, default None
+        The constrained_layout argument has been moved to the draw method.
     layout : deprecated, default None
-        Layout is deprecated. Please use nrows and ncols arguments instead.
+        Layout is deprecated. Please use nrows and ncols arguments of the draw method instead.
     view : deprecated, default None
         View is deprecated. Please use half=True or half=False arguements instead.
     orientation : deprecated, default None
@@ -117,24 +107,19 @@ class BasePitch(ABC):
         from mplsoccer import VerticalPitch.
     """
 
-    def __init__(self, figsize=None, nrows=1, ncols=1, pitch_type='statsbomb', half=False,
-                 pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9,
+    def __init__(self, pitch_type='statsbomb', half=False,
+                 pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9, spot_scale=0.002,
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=0.7,
-                 label=False, tick=False, axis=False,
-                 tight_layout=True, constrained_layout=False, spot_scale=0.002,
+                 axis=False, label=False, tick=False,
+                 figsize=None, tight_layout=None, constrained_layout=None,
                  layout=None, view=None, orientation=None):
 
         # initialize attributes
-        self.figsize = figsize
-        if self.figsize is None:
-            self.figsize = rcParams['figure.figsize']
-        self.nrows = nrows
-        self.ncols = ncols
         self.pitch_type = pitch_type
         self.half = half
         self.pitch_color = pitch_color
@@ -144,6 +129,7 @@ class BasePitch(ABC):
         if self.line_color is None:
             self.line_color = rcParams["grid.color"]
         self.linewidth = linewidth
+        self.spot_scale = spot_scale
         self.line_zorder = line_zorder
         self.stripe = stripe
         self.stripe_color = stripe_color
@@ -166,12 +152,9 @@ class BasePitch(ABC):
         self.pitch_width = pitch_width
         self.goal_type = goal_type
         self.goal_alpha = goal_alpha
+        self.axis = axis
         self.label = label
         self.tick = tick
-        self.axis = axis
-        self.tight_layout = tight_layout
-        self.constrained_layout = constrained_layout
-        self.spot_scale = spot_scale
 
         # other attributes for plotting circles - completed by
         # _init_circles_and_arcs / _init_circles_and_arcs_equal_aspect
@@ -198,6 +181,15 @@ class BasePitch(ABC):
                                          length_from=pitch_length, pitch_to='uefa')
 
         # deprecation warnings
+        if figsize is not None:
+            msg = "figsize has moved to the draw method."
+            warnings.warn(msg)
+        if tight_layout is not None:
+            msg = "tight_layout has moved to the draw method."
+            warnings.warn(msg)
+        if constrained_layout is not None:
+            msg = "constrained_layout has moved to the draw method."
+            warnings.warn(msg)
         if layout is not None:
             msg = "layout is deprecated. Please use nrows and ncols arguments instead."
             warnings.warn(msg)
@@ -253,7 +245,6 @@ class BasePitch(ABC):
 
     def __repr__(self):
         return (f'{self.__class__.__name__}('
-                f'figsize={self.figsize!r}, nrows={self.nrows!r}, ncols={self.ncols!r}, '
                 f'pitch_type={self.pitch_type!r}, half={self.half!r}, '
                 f'pitch_color={self.pitch_color!r}, line_color={self.line_color!r}, '
                 f'linewidth={self.linewidth!r}, line_zorder={self.line_zorder!r}, '
@@ -269,8 +260,6 @@ class BasePitch(ABC):
                 f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
                 f'label={self.label!r}, tick={self.tick!r}, axis={self.axis!r}, '
-                f'tight_layout={self.tight_layout!r}, '
-                f'constrained_layout={self.constrained_layout!r}, '
                 f'spot_scale={self.spot_scale!r})')
 
     def _validation_checks(self):
@@ -375,7 +364,8 @@ class BasePitch(ABC):
     def _to_ax_coord(ax, coord_system, point):
         return coord_system.inverted().transform(ax.transData.transform_point(point))
 
-    def draw(self, ax=None):
+    def draw(self, ax=None, figsize=None, nrows=1, ncols=1,
+             tight_layout=True, constrained_layout=False):
         """ Draws the specified soccer/ football pitch(es).
         If an ax is specified the pitch is drawn on an existing axis.
 
@@ -384,6 +374,14 @@ class BasePitch(ABC):
         ax : matplotlib axis, default None
             A matplotlib.axes.Axes to draw the pitch on.
             If None is specified the pitch is plotted on a new figure.
+        figsize : tuple of float, default Matplotlib figure size
+            The figure size in inches by default uses rcParams["figure.figsize"].
+        nrows, ncols : int, default 1
+            Number of rows/columns of the subplot grid.
+        tight_layout : bool, default True
+            Whether to use Matplotlib's tight layout.
+        constrained_layout : bool, default False
+            Whether to use Matplotlib's constrained layout.
 
         Returns
         -------
@@ -402,9 +400,11 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> pitch.draw(ax=ax)
         """
+        if figsize is None:
+            figsize = rcParams['figure.figsize']
         if ax is None:
-            fig, axs = self._setup_subplots()
-            fig.set_tight_layout(self.tight_layout)
+            fig, axs = self._setup_subplots(nrows, ncols, figsize, constrained_layout)
+            fig.set_tight_layout(tight_layout)
             for axis in axs.flat:
                 self._draw_ax(axis)
             if axs.size == 1:
@@ -414,10 +414,11 @@ class BasePitch(ABC):
         self._draw_ax(ax)
         return None
 
-    def _setup_subplots(self):
-        fig, axs = plt.subplots(nrows=self.nrows, ncols=self.ncols, figsize=self.figsize,
-                                constrained_layout=self.constrained_layout)
-        if (self.nrows == 1) and (self.ncols == 1):
+    @staticmethod
+    def _setup_subplots(nrows, ncols, figsize, constrained_layout):
+        fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize,
+                                constrained_layout=constrained_layout)
+        if (nrows == 1) and (ncols == 1):
             axs = np.array([axs])
         return fig, axs
 
@@ -555,17 +556,16 @@ class BasePitch(ABC):
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
 
-    def grid(self, figheight=None, nrows=None, ncols=None,
+    def grid(self, figheight=9, nrows=1, ncols=1,
              grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1, left=None, ):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
         ----------
-        figheight : float, default None
-            The figure height in inches. The default of None uses the Pitch figure height.
-        nrows, ncols : int, default None
+        figheight : float, default 9
+            The figure height in inches.
+        nrows, ncols : int, default 1
             Number of rows/columns of the subplot grid.
-            The default of None uses the Pitch ncols/ nrows.
         grid_height : float, default 0.7
             The height of the grid area in fractions of the figure height.
             The default is the grid height is 70% of the figure height.
@@ -600,18 +600,13 @@ class BasePitch(ABC):
                          'Reduce one of the grid_height or bottom so the total is ≤ 1.')
             raise ValueError(error_msg)
 
-        if grid_width > 1:
-            error_msg = ('The grid axes extends past the figure width. '
-                         'Reduce the grid_width to ≤ 1.')
-            raise ValueError(error_msg)
+        if left is None:
+            left = (1 - grid_width) / 2
 
-        # use class defaults if empty
-        if figheight is None:
-            figheight = self.figsize[1]
-        if ncols is None:
-            ncols = self.ncols
-        if nrows is None:
-            nrows = self.nrows
+        if grid_width + left > 1:
+            error_msg = ('The grid axes extends past the figure width. '
+                         'Reduce one of the grid_width or left so the total is ≤ 1.')
+            raise ValueError(error_msg)
 
         # calculate the figure width
         if nrows > 1:
@@ -639,15 +634,6 @@ class BasePitch(ABC):
 
         individual_pitch_height = (grid_height - total_space_height) / nrows
         individual_pitch_width = individual_pitch_height * self.ax_aspect / fig_aspect
-        grid_width = (individual_pitch_width * ncols) + total_space_width
-
-        if left is None:
-            left = (1 - grid_width) / 2
-
-        if grid_width + left > 1:
-            error_msg = ('The grid axes extends past the figure width. '
-                         'Reduce one of the grid_width or left so the total is ≤ 1.')
-            raise ValueError(error_msg)
 
         bottom_coordinates = np.tile(individual_space_height + individual_pitch_height,
                                      reps=nrows - 1).cumsum()
@@ -674,7 +660,7 @@ class BasePitch(ABC):
 
         return fig, axs
 
-    def jointgrid(self, figheight=None, grid_height=0.7, grid_width=0.8,
+    def jointgrid(self, figheight=9, grid_height=0.7, grid_width=0.8,
                   space=0, marginal=0.1, left=0.1, bottom=0.1,
                   ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
         """ Create a grid with a pitch at the center and axes on the
@@ -682,8 +668,8 @@ class BasePitch(ABC):
 
         Parameters
         ----------
-        figheight : float, default None
-            The figure height in inches. The default of None uses the Pitch figure height.
+        figheight : float, default 9
+            The figure height in inches.
         grid_height : float, default 0.7
             The height of the grid area in fractions of the figure height.
             The default is the grid height is 70% of the figure height.
@@ -726,21 +712,17 @@ class BasePitch(ABC):
         >>> x = np.random.uniform(low=0, high=120, size=100)
         >>> sns.kdeplot(x=x, ax=axs[2], shade=True)
         """
-        # defaults if None
-        if left is None:
-            left = (1 - grid_width) / 2
-        if figheight is None:
-            figheight = self.figsize[1]
-
-        # validation
-        if bottom + grid_height > 1.:
-            error_msg = ('The jointplot axes extends past the figure height. '
-                         'Reduce one of the grid_height or bottom.')
+        if grid_height + bottom > 1:
+            error_msg = ('The grid axes extends past the figure height. '
+                         'Reduce one of the grid_height or bottom so the total is ≤ 1.')
             raise ValueError(error_msg)
 
-        if left + grid_width > 1.:
-            error_msg = ('The jointplot axes extends past the figure width. '
-                         'Reduce one of the grid_width or left.')
+        if left is None:
+            left = (1 - grid_width) / 2
+
+        if grid_width + left > 1:
+            error_msg = ('The grid axes extends past the figure width. '
+                         'Reduce one of the grid_width or left so the total is ≤ 1.')
             raise ValueError(error_msg)
 
         # calculate the marginal and space heights for the bottom/ top of the grid
