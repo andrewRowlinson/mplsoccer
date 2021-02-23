@@ -43,13 +43,11 @@ fm_rubik = FontManager(('https://github.com/google/fonts/blob/master/ofl/rubikmo
 # For choosing color schemes, I really like this website
 # `iWantHue <https://medialab.github.io/iwanthue/>`_.
 
-pitch = VerticalPitch(figsize=(12, 10),
-                      # make it so the pitch extends slightly below the halfway line
-                      pad_bottom=0.5,
+pitch = VerticalPitch(pad_bottom=0.5,  # pitch extends slightly below halfway line
                       half=True,  # half of a pitch
                       goal_type='box',
                       goal_alpha=0.8)  # control the goal transparency
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 sc = pitch.scatter(df_shots_barca.x, df_shots_barca.y,
                    # size varies between 100 and 1000 (points squared)
                    s=(df_shots_barca.shot_statsbomb_xg * 900) + 100,
@@ -71,7 +69,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 # In this example, we will also pass the expected goals to the c argument and
 # use a matplotlib colormap to map the expected goals to colors
 
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 sc = pitch.scatter(df_shots_barca.x, df_shots_barca.y,
                    # size varies between 100 and 1900 (points squared)
                    s=(df_shots_barca.shot_statsbomb_xg * 1900) + 100,
@@ -104,7 +102,7 @@ cmap = ListedColormap(cmap, name='Greys')
 # convert the statsbomb xg to colors
 edgecolors = cmap(df_shots_barca.shot_statsbomb_xg)
 
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 sc = pitch.scatter(df_shots_barca.x, df_shots_barca.y,
                    s=1000,
                    edgecolors=edgecolors,  # give the markers a charcoal border
@@ -129,7 +127,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 
 cmap = create_transparent_cmap(color='#b94b75', n_segments=100, alpha_start=0.5, alpha_end=1)
 
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 sc = pitch.scatter(df_shots_barca.x, df_shots_barca.y,
                    # size varies between 100 and 1900 (points squared)
                    s=(df_shots_barca.shot_statsbomb_xg * 1900) + 100,
@@ -159,7 +157,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 df_goals_barca = df_shots_barca[df_shots_barca.outcome_name == 'Goal'].copy()
 df_non_goal_shots_barca = df_shots_barca[df_shots_barca.outcome_name != 'Goal'].copy()
 
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 
 # plot non-goal shots with hatch
 sc1 = pitch.scatter(df_non_goal_shots_barca.x, df_non_goal_shots_barca.y,
@@ -198,7 +196,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 df_goals_barca = df_shots_barca[df_shots_barca.outcome_name == 'Goal'].copy()
 df_non_goal_shots_barca = df_shots_barca[df_shots_barca.outcome_name != 'Goal'].copy()
 
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 
 # plot non-goal shots with hatch
 sc1 = pitch.scatter(df_non_goal_shots_barca.x, df_non_goal_shots_barca.y,
@@ -239,9 +237,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 # The disadvantage of this approach is that sometimes people misinterpret the pitch
 # and think the areas towards the edges are the edges of the pitch. You
 # might also miss some shots near the half-way line.
-pitch = VerticalPitch(figsize=(12, 10),
-                      # make it so the pitch extends slightly below the halfway line
-                      pad_top=0.5,
+pitch = VerticalPitch(pad_top=0.5,  # only a small amount of space at the top of the pitch
                       pad_bottom=-20,  # reduce the area displayed at the bottom of the pitch
                       pad_left=-15,  # reduce the area displayed on the left of the pitch
                       pad_right=-15,  # reduce the area displayed on the right of the pitch
@@ -252,7 +248,7 @@ pitch = VerticalPitch(figsize=(12, 10),
 df_goals_barca = df_shots_barca[df_shots_barca.outcome_name == 'Goal'].copy()
 df_non_goal_shots_barca = df_shots_barca[df_shots_barca.outcome_name != 'Goal'].copy()
 
-fig, ax = pitch.draw()
+fig, ax = pitch.draw(figsize=(12, 10))
 
 # plot non-goal shots with hatch
 sc1 = pitch.scatter(df_non_goal_shots_barca.x, df_non_goal_shots_barca.y,
@@ -296,8 +292,8 @@ txt = ax.text(x=40, y=85, s='Barcelona shots\nversus Sevilla',
 # arrow facing in the direction of the pass
 # The marker size is going to relate to the pass distance,
 # so larger markers mean the pass was longer.
-pitch = Pitch(figsize=(14, 12))
-fig, ax = pitch.draw()
+pitch = Pitch()
+fig, ax = pitch.draw(figsize=(14, 12))
 angle, distance = pitch.calculate_angle_and_distance(df_pass_barca.x, df_pass_barca.y,
                                                      df_pass_barca.end_x, df_pass_barca.end_y,
                                                      standardized=False, degrees=True)

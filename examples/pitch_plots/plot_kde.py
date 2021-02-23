@@ -1,10 +1,10 @@
 """
 ================================
-Event distribution using kdeplot 
+Event distribution using kdeplot
 ================================
 
-This example shows how to plot the location of events occurring in a match 
-using kernel density estimation (KDE).
+This example shows how to plot the location of events occurring in a match
+ using kernel density estimation (KDE).
 """
 
 from mplsoccer import Pitch
@@ -31,9 +31,8 @@ df_false9.head()
 ##############################################################################
 # Plotting Messi's first game as a False-9
 
-pitch = Pitch(pitch_type='statsbomb', figsize=(16, 11),
-              pitch_color='grass', stripe=True, constrained_layout=False)
-fig, ax = pitch.draw()
+pitch = Pitch(pitch_type='statsbomb', pitch_color='grass', stripe=True)
+fig, ax = pitch.draw(figsize=(16, 11))
 
 # plotting
 ax.set_title('The first Game Messi played in the false 9 role', fontsize=30, pad=20)
@@ -55,13 +54,14 @@ fig.tight_layout()
 # Plotting both Messi's first game as a False-9 and the game directly before
 
 # Setup the pitches
-pitch = Pitch(pitch_type='statsbomb', figsize=(16, 7), ncols=2, nrows=1,
-              pitch_color='grass', stripe=True, constrained_layout=False)
-fig, ax = pitch.draw()
+pitch = Pitch(pitch_type='statsbomb', pitch_color='grass', stripe=True)
+fig, ax = pitch.draw(figsize=(16, 7), ncols=2, nrows=1)
 
 # set the titles
-ax[0].set_title('Messi in the game directly before \n playing in the false 9 role', fontsize=25, pad=20)
-ax[1].set_title('The first Game Messi \nplayed in the false 9 role', fontsize=25, pad=20)
+TITLE_STR1 = 'Messi in the game directly before \n playing in the false 9 role'
+TITLE_STR2 = 'The first Game Messi \nplayed in the false 9 role'
+ax[0].set_title(TITLE_STR1, fontsize=25, pad=20)
+ax[1].set_title(TITLE_STR2, fontsize=25, pad=20)
 
 # plot the kernel density estimation
 pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax=ax[0], cmap='plasma', linewidths=3)

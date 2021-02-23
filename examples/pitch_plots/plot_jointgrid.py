@@ -24,10 +24,8 @@ df = read_event(f'{EVENT_SLUG}/9860.json', **kwargs)['event']
 # setup the mplsoccer StatsBomb Pitches
 # note not much padding around the pitch so the marginal axis are tight to the pitch
 # if you are using a different goal type you will need to increase the padding to see the goals
-pitch = Pitch(figsize=(16, 9), pad_top=0.05, pad_right=0.05, pad_bottom=0.05,
-              pad_left=0.05, line_zorder=2)
-vertical_pitch = VerticalPitch(figsize=(16, 9), half=True,
-                               pad_top=0.05, pad_right=0.05, pad_bottom=0.05,
+pitch = Pitch(pad_top=0.05, pad_right=0.05, pad_bottom=0.05, pad_left=0.05, line_zorder=2)
+vertical_pitch = VerticalPitch(half=True, pad_top=0.05, pad_right=0.05, pad_bottom=0.05,
                                pad_left=0.05, line_zorder=2)
 
 # setup a mplsoccer FontManager to download google fonts (Roboto-Regular / SigmarOne-Regular)
@@ -221,7 +219,8 @@ _ = axes[3].axis('off')
 # ax_left, ax_top, ax_left, ax_right. Here we set the bottom and right
 # marginal axes to display for a single team.
 
-fig, axes = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15, grid_height=0.7, marginal=0.1,
+fig, axes = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
+                                     grid_height=0.7, marginal=0.1,
                                      # here we filter out the left and top marginal axes
                                      ax_top=False, ax_bottom=True, ax_left=False, ax_right=True)
 # typical shot map where the scatter points vary by the expected goals value
@@ -248,7 +247,8 @@ vertical_pitch = VerticalPitch(half=True,
                                pad_top=0.05, pad_right=-15, pad_bottom=-20, pad_left=-15,
                                goal_type='line')
 
-fig, axes = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15, grid_height=0.7, marginal=0.1,
+fig, axes = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
+                                     grid_height=0.7, marginal=0.1,
                                      # here we filter out the left and top marginal axes
                                      ax_top=False, ax_bottom=True, ax_left=False, ax_right=True)
 # typical shot map where the scatter points vary by the expected goals value

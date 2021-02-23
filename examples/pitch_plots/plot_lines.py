@@ -12,9 +12,11 @@ from matplotlib import rcParams
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
-# get event dataframe for game 7478, create a dataframe of the passes, and a boolean mask for the outcome
+# get event dataframe for game 7478, create a dataframe of the passes,
+# and a boolean mask for the outcome
 df = read_event(f'{EVENT_SLUG}/7478.json',
-                related_event_df=False, shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
+                related_event_df=False, shot_freeze_frame_df=False,
+                tactics_lineup_df=False)['event']
 
 ##############################################################################
 # Boolean mask for filtering the dataset by team
@@ -37,10 +39,8 @@ df_pass.head()
 # Plotting
 
 # Setup the pitch
-pitch = Pitch(pitch_type='statsbomb',
-              pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
-              constrained_layout=False, tight_layout=True)
-fig, ax = pitch.draw()
+pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
+fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=False, tight_layout=True)
 
 # Plot the completed passes
 lc1 = pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,

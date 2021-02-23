@@ -1,9 +1,10 @@
 """
-================
-Custom colormaps
-================
+===================
+Customize colormaps
+===================
 
-This example shows how to make a custom colormap (cmap) in Matplotlib. Colormaps are used to
+This example shows how to use cmasher colormaps and
+also how to make a custom colormap (cmap) in Matplotlib. Colormaps are used to
 map from a value to a color in a chart.
 """
 
@@ -78,9 +79,8 @@ for i, cmap in enumerate(cmaps):
 
 ##############################################################################
 # Cyan colormap heatmap
-pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#122c3d',
-                      figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#122c3d')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 bs = pitch.bin_statistic(df.x, df.y, bins=(12, 8))
 heatmap = pitch.heatmap(bs, edgecolors='#122c3d', ax=ax, cmap=pearl_earring_cmap)
 
@@ -92,17 +92,16 @@ hexmap = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#122c3d', gridsize=(8, 8),
 
 ##############################################################################
 # Cyan colormap kdeplot
-pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#15242e',
-                      figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#15242e')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 # note use the colormap with 100 colors for a smoother finish
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_cmap_004.png'
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=pearl_earring_cmap_100, shade=True, levels=100)
 
 ##############################################################################
 # Flamingo colormap heatmap
-pitch = VerticalPitch(line_color='#000009', line_zorder=2, pitch_color='white', figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#000009', line_zorder=2, pitch_color='white')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 bs = pitch.bin_statistic(df.x, df.y, bins=(12, 8))
 heatmap = pitch.heatmap(bs, ax=ax, edgecolors='#f4f4f4', cmap=flamingo_cmap)
 
@@ -113,15 +112,14 @@ hexmap = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#f4f4f4', gridsize=(8, 8), 
 
 ##############################################################################
 # Flamingo colormap kdeplot
-pitch = VerticalPitch(line_color='#000009', line_zorder=2, pitch_color='#e3aca7', figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#000009', line_zorder=2, pitch_color='#e3aca7')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=flamingo_cmap_100, shade=True, levels=100)
 
 ##############################################################################
 # Violet colormap heatmap
-pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2,
-                      pitch_color='#20143f', figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#20143f')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 bs = pitch.bin_statistic(df.x, df.y, bins=(12, 8))
 heatmap = pitch.heatmap(bs, ax=ax, edgecolors='#20143f', cmap=el_greco_violet_cmap)
 
@@ -133,16 +131,14 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#20143f',
 
 ##############################################################################
 # Violet colormap kdeplot
-pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2,
-                      pitch_color='#332a49', figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#332a49')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_violet_cmap_100, shade=True, levels=100)
 
 ##############################################################################
 # Yellow colormap heatmap
-pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2,
-                      pitch_color='#471c15', figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#471c15')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 bs = pitch.bin_statistic(df.x, df.y, bins=(12, 8))
 heatmap = pitch.heatmap(bs, ax=ax, edgecolors='#471c15', cmap=el_greco_yellow_cmap)
 
@@ -154,7 +150,6 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#443d07',
 
 ##############################################################################
 # Yellow colormap kdeplot
-pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2,
-                      pitch_color='#7c2e2a', figsize=(4.4, 6.4))
-fig, ax = pitch.draw()
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#7c2e2a')
+fig, ax = pitch.draw(figsize=(4.4, 6.4))
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_yellow_cmap_100, shade=True, levels=100)

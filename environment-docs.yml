@@ -7,6 +7,7 @@ dependencies:
   - scipy
   - seaborn
   - sphinx
+  - cmasher
   - pyarrow
   - beautifulsoup4
   - lxml

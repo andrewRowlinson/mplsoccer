@@ -6,6 +6,7 @@ dependencies:
   - jupyter
   - pandas
   - scipy
+  - cmasher
   - seaborn
   - beautifulsoup4
   - pyarrow

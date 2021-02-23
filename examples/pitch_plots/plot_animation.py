@@ -100,9 +100,8 @@ df_ball.head()
 # Plot the animation
 
 # First set up the figure, the axis
-pitch = Pitch(pitch_type='metricasports', figsize=(16, 10.4), goal_type='line',
-              pitch_width=68, pitch_length=105)
-fig, ax = pitch.draw()
+pitch = Pitch(pitch_type='metricasports', goal_type='line', pitch_width=68, pitch_length=105)
+fig, ax = pitch.draw(figsize=(16, 10.4))
 
 # then setup the pitch plot markers we want to animate
 marker_kwargs = {'marker': 'o', 'markeredgecolor': 'black', 'linestyle': 'None'}
