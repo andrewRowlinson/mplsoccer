@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap
+import cmasher as cmr
 
 from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
@@ -27,9 +28,66 @@ mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pres
 df = df.loc[mask_chelsea_pressure, ['x', 'y']]
 
 ##############################################################################
+# cmasher colormaps
+# -----------------------
+# Cmasher colormaps are scientific colormaps that have been designed to be
+# perceptually uniform (i.e. color changes visually look the same as the value changes)
+# and mostly colorblind friendly. A great choice
+# to get started and potentially more exciting than the default matplotlib choices.
+#
+# Let's first get a dictionary of all the colormaps
+#
+# See the docs for more info: https://cmasher.readthedoavorite cs.io/.
+cmap_dict = cmr.cm.cmap_cd
+all_cmap_dict = {}
+for cmap_type_key in cmap_dict:
+    for key, cmap in cmap_dict[cmap_type_key].items():
+        if key[-2:] != '_r':
+            all_cmap_dict[key] = cmap
+
+##############################################################################
+# Cmasher kdeplot
+# ---------------
+# Here's all the cmasher colormaps plotted as a grid so you can find your
+# favorite.
+pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#122c3d')
+fig, axs = pitch.grid(nrows=11, ncols=4, space=0.1, figheight=40,
+                      grid_width=0.9, grid_height=0.98, bottom=0.01, left=0.05)
+cmap_names = list(all_cmap_dict.keys())
+for idx, ax in enumerate(axs.flat):
+    cmap_name = f'cmr.{cmap_names[idx]}'
+    cmap = all_cmap_dict[cmap_names[idx]]
+    kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=cmap, shade=True, levels=100)
+    ax.set_title(cmap_name, fontsize=15)
+
+##############################################################################
+# Cmasher kdeplot
+# ---------------
+# I like the look of the voltage colormap so let's plot in against a light and
+# dark background
+#
+# You can reverse any of the colormaps, by putting
+# _r at the end, for example cmr.arctic_r (this also applies to matplotlib cmaps).
+#
+# Reversing the colormaps is sometimes helpful so the high value colors do not bleed into the
+# background. I prefer dark to light colormaps on dark background, and light to dark
+# colormaps on light backgrounds. I have shown this below using the same colormap in reverse.
+
+# dark
+pitch_dark = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#122c3d')
+fig, ax = pitch_dark.draw()
+kdeplot_dark = pitch_dark.kdeplot(df.x, df.y, ax=ax, cmap=cmr.voltage, shade=True, levels=100)
+
+# light
+pitch_light = VerticalPitch(line_zorder=2)
+fig, ax = pitch_light.draw()
+kdeplot_light = pitch_light.kdeplot(df.x, df.y, ax=ax, cmap=cmr.voltage_r, shade=True, levels=100)
+
+##############################################################################
 # Create colormaps using LinearSegmentedColormap
 # ----------------------------------------------
-# In these examples we will use a list of two colours and the colormaps will
+# Sometimes its nice to make your own colormaps, maybe to even match team colors.
+# In these examples we will use a list of two colors and the colormaps will
 # linearly increase between these two colors (note you can do more such as use 3 colors).
 #
 # For dark theme backgrounds, I prefer going from dark to light colors. This is so the null values
