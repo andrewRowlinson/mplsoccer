@@ -25,7 +25,9 @@ def _split_location_cols(df, col, new_cols):
     if col in df.columns:
         mask_not_null = df[col].notnull()
         df_not_null = df.loc[mask_not_null, col]
-        df_new = pd.DataFrame(df_not_null.tolist(), index=df_not_null.index, columns=new_cols)
+        df_new = pd.DataFrame(df_not_null.tolist(), index=df_not_null.index)
+        new_cols = new_cols[:len(df_new.columns)]  # variable whether z location is present
+        df_new.columns = new_cols
         df.loc[mask_not_null, new_cols] = df_new
         df.drop(col, axis=1, inplace=True)
 
@@ -155,7 +157,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
     df.reset_index(inplace=True, drop=True)
     
     # split location info to x, y and (z for shot) columns and drop old columns
-    _split_location_cols(df, 'location', ['x', 'y'])
+    _split_location_cols(df, 'location', ['x', 'y', 'z'])
     _split_location_cols(df, 'pass_end_location', ['pass_end_x', 'pass_end_y'])
     _split_location_cols(df, 'carry_end_location', ['carry_end_x', 'carry_end_y'])
     _split_location_cols(df, 'shot_end_location', ['shot_end_x', 'shot_end_y', 'shot_end_z'])
@@ -250,7 +252,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True, ta
             'sub_type_name',  'outcome_id', 'outcome_name', 'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
-            'position_name', 'duration', 'x', 'y', 'end_x', 'end_y', 'end_z',
+            'position_name', 'duration', 'x', 'y', 'z', 'end_x', 'end_y', 'end_z',
             'body_part_id', 'body_part_name', 'technique_id', 'technique_name']  
     other_cols = df.columns[~df.columns.isin(cols)]
     cols.extend(other_cols)

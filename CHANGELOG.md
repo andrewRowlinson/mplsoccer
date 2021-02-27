@@ -1,3 +1,10 @@
+Version 0.0.22
+--------------
+
+### Hot fix
+Fixed statsbomb read_event to read the z location, as StatsBomb recently changed their data so it also records the shot impact height 'z' location.
+
+
 Version 0.0.21
 -----------
 
