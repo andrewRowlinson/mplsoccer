@@ -562,7 +562,7 @@ class BasePitch(ABC):
                              **shade_prop)
 
     def grid(self, figheight=9, nrows=1, ncols=1,
-             grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1, left=None, ):
+             grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1, left=None):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
