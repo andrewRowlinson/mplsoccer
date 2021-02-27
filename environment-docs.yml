@@ -10,7 +10,6 @@ dependencies:
   - pyarrow
   - beautifulsoup4
   - lxml
-  - conda-forge::ffmpeg
   - pillow
   - pip
   - pip:
