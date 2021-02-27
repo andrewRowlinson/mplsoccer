@@ -614,8 +614,8 @@ class BasePitch(ABC):
 
         # calculate the figure width
         if nrows > 1:
-            figwidth = (figheight * grid_height / grid_width * self.ax_aspect *
-                        ((1 - space) * ncols / nrows + space))
+            figwidth = figheight * grid_height / grid_width * (((1 - space) * self.ax_aspect * ncols/ nrows) + 
+                                                               (space * (ncols - 1) / (nrows - 1)))
         else:
             figwidth = (figheight * grid_height / grid_width * self.ax_aspect *
                         (ncols / nrows + space))
@@ -623,8 +623,7 @@ class BasePitch(ABC):
         figsize = (figwidth, figheight)
         fig_aspect = figwidth / figheight
         total_space_height = grid_height * space
-        total_space_width = total_space_height * self.ax_aspect / fig_aspect
-
+      
         if nrows > 1:
             individual_space_height = total_space_height / (nrows - 1)
         else:
@@ -632,7 +631,7 @@ class BasePitch(ABC):
             individual_space_height = 0
 
         if ncols > 1:
-            individual_space_width = total_space_width / (ncols - 1)
+            individual_space_width = individual_space_height / fig_aspect
         else:
             individual_space_width = 0
 
