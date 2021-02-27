@@ -153,7 +153,7 @@ hexmap = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#122c3d', gridsize=(8, 8),
 pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#15242e')
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
 # note use the colormap with 100 colors for a smoother finish
-# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_cmap_004.png'
+# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_cmap_007.png'
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=pearl_earring_cmap_100, shade=True, levels=100)
 
 ##############################################################################
