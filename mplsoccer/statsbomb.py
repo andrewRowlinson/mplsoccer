@@ -152,7 +152,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
     df.reset_index(inplace=True, drop=True)
 
     # split location info to x, y and (z for shot) columns and drop old columns
-    _split_location_cols(df, 'location', ['x', 'y'])
+    _split_location_cols(df, 'location', ['x', 'y', 'z'])
     _split_location_cols(df, 'pass_end_location', ['pass_end_x', 'pass_end_y'])
     _split_location_cols(df, 'carry_end_location', ['carry_end_x', 'carry_end_y'])
     _split_location_cols(df, 'shot_end_location', ['shot_end_x', 'shot_end_y', 'shot_end_z'])
