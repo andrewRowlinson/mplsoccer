@@ -561,8 +561,10 @@ class BasePitch(ABC):
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
 
-    def grid(self, figheight=9, nrows=1, ncols=1,
-             grid_height=0.7, grid_width=0.8, space=0.05, bottom=0.1, left=None):
+    def grid(self, figheight=9, nrows=1, ncols=1, left=None,
+             bottom=0.025, endnote_height=0.065, endnote_space=0.01,
+             grid_height=0.715, grid_width=0.95, space=0.05,
+             title_space=0.01, title_height=0.15):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
@@ -571,27 +573,41 @@ class BasePitch(ABC):
             The figure height in inches.
         nrows, ncols : int, default 1
             Number of rows/columns of pitches in the grid.
-        grid_height : float, default 0.7
-            The height of the grid area in fractions of the figure height.
-            The default is the grid height is 70% of the figure height.
-        grid_width : float, default 0.8
-            The width of the grid area in fractions of the figure width.
-            The default is the grid is 80% of the figure width.
-        space : float, default 0.05
-            The total amount of the grid height reserved for spacing between axes.
-            Expressed as a fraction of the grid height. The default is 5% of the grid height.
-            The spacing across the grid width is automatically calculated to maintain even spacing.
-        bottom : float, default 0.1
-            The location of the bottom side of the grid in fractions of the figure height.
-            The default means that the grid is located 10% in from the bottom of the figure.
         left : float, default None
-            The location of the left hand side of the grid in fractions of the figure width.
-            The default of None places the grid in the middle of the figure.
+            The location of the left hand side of the axes in fractions of the figure width.
+            The default of None places the axes in the middle of the figure.
+        bottom : float, default 0.025
+            The location of the bottom endnote axes in fractions of the figure height.
+            The default means that the endnote is located 2.5% in from the bottom of the figure.
+        endnote_height: float, default 0.065
+            The height of the endnote axes in fractions of the figure height.
+            The default is the endnote is 6.5% of the figure height.
+        endnote_space : float, default 0.01
+            The space between the pitch grid and endnote axis in fractions of the figure height.
+            The default space is 1% of the figure height.
+        grid_height : float, default 0.715
+            The height of the pitch grid in fractions of the figure height.
+            The default is the grid height is 71.5% of the figure height.
+        grid_width : float, default 0.95
+            The width of the pitch grid in fractions of the figure width.
+            The default is the grid is 95% of the figure width.
+        space : float, default 0.05
+            The total amount of the grid height reserved for spacing between the pitch axes.
+            Expressed as a fraction of the grid_height. The default is 5% of the grid height.
+            The spacing across the grid width is automatically calculated to maintain even spacing.
+        title_space : float, default 0.01
+            The space between the pitch grid and title axis in fractions of the figure height.
+            The default space is 1% of the figure height.
+        title_height : float, default 0.15
+            The height of the title axis in fractions of the figure height.
+            The default is the title axis is 15% of the figure height.
 
         Returns
         -------
         fig : matplotlib.figure.Figure
-        ax : a numpy array of matplotlib.axes.Axes
+        axs : a numpy array of matplotlib.axes.Axes with drawn pitches
+        ax_title : a matplotlib.axes.Axes for plotting the title
+        ax_endnote : a matplotlib.axes.Axes for plotting the endnote
 
         Examples
         --------
@@ -599,13 +615,14 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figheight=14)
         """
-        if grid_height + bottom > 1:
-            error_msg = ('The grid axes extends past the figure height. '
-                         'Reduce one of the grid_height or bottom so the total is ≤ 1.')
-            raise ValueError(error_msg)
-
         if left is None:
             left = (1 - grid_width) / 2
+
+        if bottom + endnote_height + endnote_space + grid_height + title_space + title_height > 1:
+            error_msg = ('The axes extends past the figure height. '
+                         'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
+                         'title_space or title_height so the total is ≤ 1.')
+            raise ValueError(error_msg)
 
         if grid_width + left > 1:
             error_msg = ('The grid axes extends past the figure width. '
@@ -613,36 +630,45 @@ class BasePitch(ABC):
             raise ValueError(error_msg)
 
         # calculate the figure width
-        if nrows > 1:
-            figwidth = figheight * grid_height / grid_width * (((1 - space) * self.ax_aspect * ncols/ nrows) + 
+        if (nrows > 1) and (ncols > 1):
+            figwidth = figheight * grid_height / grid_width * (((1 - space) * self.ax_aspect *
+                                                                ncols / nrows) +
                                                                (space * (ncols - 1) / (nrows - 1)))
+        elif (nrows > 1) and (ncols == 1):
+            figwidth = grid_height * figheight / grid_width * (1 - space) * self.ax_aspect / nrows
+        elif (nrows == 1) and (ncols > 1):
+            figwidth = grid_height * figheight / grid_width * (space + self.ax_aspect * ncols)
         else:
-            figwidth = (figheight * grid_height / grid_width * self.ax_aspect *
-                        (ncols / nrows + space))
+            figwidth = grid_height * self.ax_aspect * figheight / grid_width
 
         figsize = (figwidth, figheight)
         fig_aspect = figwidth / figheight
-        total_space_height = grid_height * space
-      
-        if nrows > 1:
-            individual_space_height = total_space_height / (nrows - 1)
-        else:
-            total_space_height = 0
-            individual_space_height = 0
 
-        if ncols > 1:
+        if (nrows > 1) and (ncols > 1):
+            individual_space_height = grid_height * space / (nrows - 1)
             individual_space_width = individual_space_height / fig_aspect
-        else:
+            individual_pitch_height = grid_height * (1 - space) / nrows
+        elif (nrows > 1) and (ncols == 1):
+            individual_space_height = grid_height * space / (nrows - 1)
             individual_space_width = 0
+            individual_pitch_height = grid_height * (1 - space) / nrows
+        elif (nrows == 1) and (ncols > 1):
+            individual_space_height = 0
+            individual_space_width = grid_height * space / fig_aspect / (ncols - 1)
+            individual_pitch_height = grid_height
+        else:
+            individual_space_height = 0
+            individual_space_width = 0
+            individual_pitch_height = grid_height
 
-        individual_pitch_height = (grid_height - total_space_height) / nrows
         individual_pitch_width = individual_pitch_height * self.ax_aspect / fig_aspect
 
         bottom_coordinates = np.tile(individual_space_height + individual_pitch_height,
                                      reps=nrows - 1).cumsum()
         bottom_coordinates = np.insert(bottom_coordinates, 0, 0.)
         bottom_coordinates = np.repeat(bottom_coordinates, ncols)
-        bottom_coordinates = bottom_coordinates + bottom
+        grid_bottom = bottom + endnote_height + endnote_space
+        bottom_coordinates = bottom_coordinates + grid_bottom
         bottom_coordinates = bottom_coordinates[::-1]
 
         left_coordinates = np.tile(individual_space_width + individual_pitch_width,
@@ -661,7 +687,18 @@ class BasePitch(ABC):
         if axs.size == 1:
             axs = axs.item()
 
-        return fig, axs
+        left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
+                    np.abs(self.extent[1] - self.extent[0])) * individual_pitch_width
+        right_pad = (np.abs(self.visible_pitch - self.extent)[1] /
+                     np.abs(self.extent[1] - self.extent[0])) * individual_pitch_width
+        title_left = left + left_pad
+        title_width = grid_width - left_pad - right_pad
+        ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
+                                 title_width, title_height))
+        ax_endnote = fig.add_axes((title_left, bottom,
+                                   title_width, endnote_height))
+
+        return fig, axs, ax_title, ax_endnote
 
     def jointgrid(self, figheight=9, grid_height=0.7, grid_width=0.8,
                   space=0, marginal=0.1, left=0.1, bottom=0.1,
