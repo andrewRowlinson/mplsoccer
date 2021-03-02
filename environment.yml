@@ -12,7 +12,6 @@ dependencies:
   - pyarrow
   - pillow
   - lxml
-  - conda-forge::ffmpeg
   - pip
   - pip:
       - mplsoccer

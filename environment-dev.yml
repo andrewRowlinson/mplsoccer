@@ -14,7 +14,6 @@ dependencies:
   - lxml
   - setuptools
   - twine
-  - conda-forge::ffmpeg
   - pillow
   - pylint
   - sphinx-gallery

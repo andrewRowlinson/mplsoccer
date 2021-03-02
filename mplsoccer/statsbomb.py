@@ -27,11 +27,13 @@ def _split_location_cols(df, col, new_cols):
     if col in df.columns:
         mask_not_null = df[col].notnull()
         df_not_null = df.loc[mask_not_null, col]
-        df_new = pd.DataFrame(df_not_null.tolist(), index=df_not_null.index, columns=new_cols)
+        df_new = pd.DataFrame(df_not_null.tolist(), index=df_not_null.index)
+        new_cols = new_cols[:len(df_new.columns)]  # variable whether z location is present
+        df_new.columns = new_cols
         df.loc[mask_not_null, new_cols] = df_new
         df.drop(col, axis=1, inplace=True)
 
-
+        
 def _list_dictionary_to_df(df, col, value_name, var_name, id_col='id'):
     """ Some columns are a list of dictionaries. This turns them into a new dataframe of rows."""
     df = df.loc[df[col].notnull(), [id_col, col]]
@@ -259,7 +261,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
             'sub_type_name',  'outcome_id', 'outcome_name', 'play_pattern_id', 'play_pattern_name',
             'possession_team_id', 'possession',  'possession_team_name', 'team_id', 'team_name',
             'player_id', 'player_name', 'position_id',
-            'position_name', 'duration', 'x', 'y', 'end_x', 'end_y', 'end_z',
+            'position_name', 'duration', 'x', 'y', 'z', 'end_x', 'end_y', 'end_z',
             'body_part_id', 'body_part_name', 'technique_id', 'technique_name']
     other_cols = df.columns[~df.columns.isin(cols)]
     cols.extend(other_cols)

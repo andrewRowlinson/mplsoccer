@@ -90,6 +90,14 @@ in separate modules (heatmap.py, quiver.py, linecollection.py, and scatterutils.
 
 ---
 
+:rocket: Version 0.0.22
+-----------------------
+
+### Hot fix
+Fixed statsbomb read_event to read the z location, as StatsBomb recently changed their data so it also records the shot impact height 'z' location.
+
+---
+
 :rocket: Version 0.0.21
 -----------------------
 

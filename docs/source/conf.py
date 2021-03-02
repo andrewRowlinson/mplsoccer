@@ -71,6 +71,7 @@ exclude_patterns = ['_build']
 sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
+	'image_scrapers': ('matplotlib'),
     'matplotlib_animations': True,
     'subsection_order': ExplicitOrder(['../../examples/radar',
 									   '../../examples/pitch_plots',
