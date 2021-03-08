@@ -15,15 +15,15 @@ from mplsoccer import dimensions
 __all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager']
 
 
-def add_image(path, fig, left, bottom, width=None, height=None, **kwargs):
+def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     """ Adds an image to a figure using fig.add_axes and ax.imshow
 
     If downsampling an image 'hamming' interpolation is recommended
 
     Parameters
     ----------
-    path: str
-        The path to the image.
+    image: array-like or PIL image
+        The image data.
     fig: matplotlib.figure.Figure
         The figure on which to add the image.
     left, bottom: float
@@ -39,23 +39,25 @@ def add_image(path, fig, left, bottom, width=None, height=None, **kwargs):
 
     Returns
     -------
-    matplotlib.figure.Figure
+    matplotlib.axes.Axes
 
     Examples
     --------
     >>> import matplotlib.pyplot as plt
+    >>> from PIL import Image
     >>> from mplsoccer import add_image
     >>> from urllib.request import urlopen
     >>> fig, ax = plt.subplots()
     >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
     >>> image = urlopen(image_url)
-    >>> fig = add_image(image, fig, left=0.1, bottom=0.2, width=0.4, height=0.4)
+    >>> image = Image.open(image)
+    >>> ax_image = add_image(image, fig, left=0.1, bottom=0.2, width=0.4, height=0.4)
     """
-    # open image
-    image = Image.open(path)
+    if isinstance(image, Image.Image):
+        image_width, image_height = image.size
+    else:
+        image_height, image_width = image.shape[:2]
 
-    # height, width, channel of shape
-    image_width, image_height = image.size
     image_aspect = image_width / image_height
 
     figsize = fig.get_size_inches()
@@ -73,7 +75,7 @@ def add_image(path, fig, left, bottom, width=None, height=None, **kwargs):
 
     ax_image.imshow(image, **kwargs)
 
-    return fig
+    return ax_image
 
 
 def validate_ax(ax):
@@ -243,21 +245,21 @@ class FontManager:
     ----------
     url : str, default is the url for Roboto-Regular.ttf
         Can really be any .ttf file, but probably looks like
-        'https://github.com/google/fonts/blob/master/ofl/cinzel/static/Cinzel-Regular.ttf?raw=true'
+        'https://github.com/google/fonts/blob/main/ofl/cinzel/static/Cinzel-Regular.ttf?raw=true'
         Note make sure the ?raw=true is at the end.
 
     Examples
     --------
     >>> from mplsoccer import FontManager
     >>> import matplotlib.pyplot as plt
-    >>> font_url = 'https://github.com/google/fonts/blob/master/ofl/abel/Abel-Regular.ttf?raw=true'
+    >>> font_url = 'https://github.com/google/fonts/blob/main/ofl/abel/Abel-Regular.ttf?raw=true'
     >>> fm = FontManager(url=font_url)
     >>> fig, ax = plt.subplots()
     >>> ax.text(x=0.5, y=0.5, s="Good content.", fontproperties=fm.prop, size=30)
     """
 
     def __init__(self,
-                 url=('https://github.com/google/fonts/blob/master/'
+                 url=('https://github.com/google/fonts/blob/main/'
                       'apache/roboto/static/Roboto-Regular.ttf?raw=true')):
         self.url = url
         with NamedTemporaryFile(delete=False, suffix=".ttf") as temp_file:

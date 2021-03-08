@@ -10,6 +10,7 @@ from urllib.request import urlopen
 import matplotlib.patheffects as path_effects
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 from mplsoccer import Pitch, add_image
 
@@ -81,7 +82,7 @@ if len(teams) == 18:
         ax.remove()
 # load the StatsBomb logo and add it to the plot
 LOGO_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'
-sb_logo = urlopen(LOGO_URL)
+sb_logo = Image.open(urlopen(LOGO_URL))
 add_image(sb_logo, fig, left=0.9, bottom=0.975, width=0.1)
 title = fig.suptitle('Pressure events %, Bundesliga, 2019/20', fontsize=20)
 
@@ -119,7 +120,7 @@ if len(teams) == 18:
     for ax in axes[-1, 3:]:
         ax.remove()
 # load the StatsBomb logo and add it to the plot
-sb_logo = urlopen(LOGO_URL)
+sb_logo = Image.open(urlopen(LOGO_URL))
 add_image(sb_logo, fig, left=0.9, bottom=0.975, width=0.1)
 TITLE_STR = 'Pressure events, percentage point difference from the Bundesliga average 2019/20'
 title = fig.suptitle(TITLE_STR, fontsize=20)

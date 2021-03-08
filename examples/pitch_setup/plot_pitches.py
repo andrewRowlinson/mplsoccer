@@ -69,13 +69,18 @@ fig, axs = pitch.draw(nrows=2, ncols=3, tight_layout=False, constrained_layout=T
 ##############################################################################
 # If you want more control over how pitches are placed
 # you can use the grid method. This also works for one pitch (nrows=1 and ncols=1).
+# It also plots axes for an endnote and title (see the plot_grid example for more information).
 
 pitch = Pitch()
-fig, axs = pitch.grid(nrows=3, ncols=3, figheight=10,
-                      grid_height=0.7,  # the grid takes up 70% of the figure height
-                      space=0.05,  # 5% of the grid height is reserved for space between axes
-                      left=None,  # centers the grid horizontally
-                      bottom=0.1)  # grid starts 10% up from the bottom of the figure
+fig, axs, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=3, figheight=10,
+                                            # the grid takes up 71.5% of the figure height
+                                            grid_height=0.715,
+                                            # 5% of grid_height is reserved for space between axes
+                                            space=0.05,
+                                            # centers the grid horizontally
+                                            left=None,
+                                            # grid starts 2.5% up from the bottom of the figure
+                                            bottom=0.025)
 
 ##############################################################################
 # Pitch orientation

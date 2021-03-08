@@ -617,6 +617,12 @@ class BasePitch(ABC):
         """
         if left is None:
             left = (1 - grid_width) / 2
+            
+        if title_height == 0:
+            title_space = 0
+        
+        if endnote_height == 0:
+            endnote_space = 0
 
         if bottom + endnote_height + endnote_space + grid_height + title_space + title_height > 1:
             error_msg = ('The axes extends past the figure height. '
@@ -693,10 +699,18 @@ class BasePitch(ABC):
                      np.abs(self.extent[1] - self.extent[0])) * individual_pitch_width
         title_left = left + left_pad
         title_width = grid_width - left_pad - right_pad
-        ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
-                                 title_width, title_height))
-        ax_endnote = fig.add_axes((title_left, bottom,
-                                   title_width, endnote_height))
+        
+        if title_height > 0:
+            ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
+                                     title_width, title_height))
+        else:
+            ax_title = None
+        
+        if endnote_height > 0:
+            ax_endnote = fig.add_axes((title_left, bottom,
+                                       title_width, endnote_height))
+        else:
+            ax_endnote = None
 
         return fig, axs, ax_title, ax_endnote
 

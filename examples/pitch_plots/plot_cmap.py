@@ -51,8 +51,9 @@ for cmap_type_key in cmap_dict:
 # Here's all the cmasher colormaps plotted as a grid so you can find your
 # favorite.
 pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#122c3d')
-fig, axs = pitch.grid(nrows=11, ncols=4, space=0.1, figheight=40,
-                      grid_width=0.9, grid_height=0.98, bottom=0.01, left=0.05)
+fig, axs, _, _ = pitch.grid(nrows=11, ncols=4, space=0.1, figheight=40,
+                            title_height=0, endnote_height=0,
+                            grid_width=0.9, grid_height=0.98, bottom=0.01, left=0.05)
 cmap_names = list(all_cmap_dict.keys())
 for idx, ax in enumerate(axs.flat):
     cmap_name = f'cmr.{cmap_names[idx]}'

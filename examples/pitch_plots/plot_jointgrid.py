@@ -30,7 +30,7 @@ vertical_pitch = VerticalPitch(half=True, pad_top=0.05, pad_right=0.05, pad_bott
 
 # setup a mplsoccer FontManager to download google fonts (Roboto-Regular / SigmarOne-Regular)
 fm = FontManager()
-fm_rubik = FontManager(('https://github.com/google/fonts/blob/master/ofl/rubikmonoone/'
+fm_rubik = FontManager(('https://github.com/google/fonts/blob/main/ofl/rubikmonoone/'
                         'RubikMonoOne-Regular.ttf?raw=true'))
 
 ##############################################################################
