@@ -68,7 +68,13 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), s
         raise ValueError("x and y must be the same size")
 
     if values is not None:
+        # make values nan safe
         values = np.ravel(values)
+        mask = np.isnan(values)
+        x = x[~mask]
+        y = y[~mask]
+        values = values[~mask]
+        
     if (values is None) & (statistic == 'count'):
         values = x
     if (values is None) & (statistic != 'count'):
@@ -315,8 +321,9 @@ def heatmap_positional(stats, ax=None, vertical=False, **kwargs):
     >>> pitch.heatmap_positional(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     validate_ax(ax)
-    vmax = kwargs.pop('vmax', np.array([stat['statistic'].max() for stat in stats]).max())
-    vmin = kwargs.pop('vmin', np.array([stat['statistic'].min() for stat in stats]).min())
+    # make vmin/vmax nan safe with np.nanmax/ np.nanmin
+    vmax = kwargs.pop('vmax', np.nanmax([np.nanmax(stat['statistic']) for stat in stats]))
+    vmin = kwargs.pop('vmin', np.nanmin([np.nanmin(stat['statistic']) for stat in stats]))
 
     mesh_list = []
     for bin_stat in stats:
