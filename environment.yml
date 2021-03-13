@@ -16,3 +16,4 @@ dependencies:
   - pip:
       - mplsoccer
       - highlight-text
+      - kloppy
