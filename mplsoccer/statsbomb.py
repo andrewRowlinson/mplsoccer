@@ -5,6 +5,7 @@
 
 import os
 import warnings
+import requests
 
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ def _split_location_cols(df, col, new_cols):
         df.loc[mask_not_null, new_cols] = df_new
         df.drop(col, axis=1, inplace=True)
 
-        
+
 def _list_dictionary_to_df(df, col, value_name, var_name, id_col='id'):
     """ Some columns are a list of dictionaries. This turns them into a new dataframe of rows."""
     df = df.loc[df[col].notnull(), [id_col, col]]
@@ -81,12 +82,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
     Parameters
     ----------
     path_or_buf : a valid JSON str, path object or file-like object
-        Any valid string path is acceptable. The string could be a URL. Valid
-        URL schemes include http, ftp, s3, and file. For file URLs, a host is
-        expected. A local file could be: ``file://localhost/path/to/table.json``.
-        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
-        By file-like object, we refer to objects with a ``read()`` method,
-        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
+        or a requests.models.Response.
     related_event_df : bool, default True
         Whether to return a ``related_event`` Dataframe in the returned dictionary.
     shot_freeze_frame_df : bool, default True
@@ -118,7 +114,13 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
     df_dict = {}
 
     # read as dataframe
-    df = pd.read_json(path_or_buf, encoding='utf-8')
+    if isinstance(path_or_buf, requests.models.Response):
+        df = pd.read_json(path_or_buf.content, encoding='utf-8')
+        match_id = int(path_or_buf.url.split('/')[-1].split('.')[0])
+    else:
+        df = pd.read_json(path_or_buf, encoding='utf-8')
+        match_id = int(os.path.basename(path_or_buf)[:-5])
+
     if df.empty:
         print(f'Skipping {path_or_buf}: empty json')
         return None
@@ -130,7 +132,6 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
     df.drop('timestamp', axis=1, inplace=True)
 
     # get match id and add to the event dataframe
-    match_id = int(os.path.basename(path_or_buf)[:-5])
     df['match_id'] = match_id
 
     # loop through the columns that are still dictionary columns
@@ -279,12 +280,7 @@ def read_match(path_or_buf, warn=True):
     Parameters
     ----------
     path_or_buf : a valid JSON str, path object or file-like object
-        Any valid string path is acceptable. The string could be a URL. Valid
-        URL schemes include http, ftp, s3, and file. For file URLs, a host is
-        expected. A local file could be: ``file://localhost/path/to/table.json``.
-        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
-        By file-like object, we refer to objects with a ``read()`` method,
-        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
+        or a requests.models.Response.
     warn : bool, default True
         Whether to warn about Statsbomb's data license agreement.
 
@@ -306,7 +302,10 @@ def read_match(path_or_buf, warn=True):
     if warn:
         warnings.warn(STATSBOMB_WARNING)
 
-    df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
+    if isinstance(path_or_buf, requests.models.Response):
+        df_match = pd.read_json(path_or_buf.content, convert_dates=['match_date', 'last_updated'])
+    else:
+        df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
     if df_match.empty:
         print(f'Skipping {path_or_buf}: empty json')
         return None
@@ -349,13 +348,7 @@ def read_competition(path_or_buf, warn=True):
     Parameters
     ----------
     path_or_buf : a valid JSON str, path object or file-like object
-        Any valid string path is acceptable. The string could be a URL. Valid
-        URL schemes include http, ftp, s3, and file. For file URLs, a host is
-        expected. A local file could be: ``file://localhost/path/to/table.json``.
-        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
-        By file-like object, we refer to objects with a ``read()`` method,
-        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
-
+        or a requests.models.Response.
     warn : bool, default True
         Whether to warn about Statsbomb's data license agreement.
 
@@ -375,8 +368,12 @@ def read_competition(path_or_buf, warn=True):
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
-
-    df_competition = pd.read_json(path_or_buf, convert_dates=['match_updated', 'match_available'])
+    if isinstance(path_or_buf, requests.models.Response):
+        df_competition = pd.read_json(path_or_buf.content, convert_dates=['match_updated',
+                                                                          'match_available'])
+    else:
+        df_competition = pd.read_json(path_or_buf, convert_dates=['match_updated',
+                                                                  'match_available'])
     if df_competition.empty:
         print(f'Skipping {path_or_buf}: empty json')
         return None
@@ -391,13 +388,7 @@ def read_lineup(path_or_buf, warn=True):
     Parameters
     ----------
     path_or_buf : a valid JSON str, path object or file-like object
-        Any valid string path is acceptable. The string could be a URL. Valid
-        URL schemes include http, ftp, s3, and file. For file URLs, a host is
-        expected. A local file could be: ``file://localhost/path/to/table.json``.
-        If you want to pass in a path object, pandas accepts any ``os.PathLike``.
-        By file-like object, we refer to objects with a ``read()`` method,
-        such as a file handler (e.g. via builtin ``open`` function) or ``StringIO``.
-
+        or a requests.models.Response.
     warn : bool, default True
         Whether to warn about Statsbomb's data license agreement.
 
@@ -418,12 +409,16 @@ def read_lineup(path_or_buf, warn=True):
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
-
-    df_lineup = pd.read_json(path_or_buf)
+    if isinstance(path_or_buf, requests.models.Response):
+        df_lineup = pd.read_json(path_or_buf.content, encoding='utf-8')
+        match_id = int(path_or_buf.url.split('/')[-1].split('.')[0])
+    else:
+        df_lineup = pd.read_json(path_or_buf, encoding='utf-8')
+        match_id = os.path.basename(path_or_buf[:-5])
     if df_lineup.empty:
         print(f'Skipping {path_or_buf}: empty json')
         return None
-    df_lineup['match_id'] = os.path.basename(path_or_buf[:-5])
+    df_lineup['match_id'] = match_id
     # each line has a column named player that contains a list of dictionaries
     # we split into seperate columns and then create a new row for each player using melt
     df_lineup_players = df_lineup.lineup.apply(pd.Series)
