@@ -90,13 +90,19 @@ in separate modules (heatmap.py, quiver.py, linecollection.py, and scatterutils.
 
 ---
 
+:rocket: Version 0.0.23
+-----------------------
+
+### Hot fix
+Fixed the statsbomb module to allow a requests response to be used in read_event, read_match, read_competition and read_lineup. This should allow the statsbomb module to be used with the StatsBomb API via the requests library.
+
+
 :rocket: Version 0.0.22
 -----------------------
 
 ### Hot fix
 Fixed statsbomb read_event to read the z location, as StatsBomb recently changed their data so it also records the shot impact height 'z' location.
 
----
 
 :rocket: Version 0.0.21
 -----------------------
