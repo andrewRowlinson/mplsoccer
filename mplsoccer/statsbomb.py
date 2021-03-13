@@ -5,7 +5,6 @@
 
 import os
 import warnings
-import requests
 
 import numpy as np
 import pandas as pd
@@ -114,7 +113,7 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
     df_dict = {}
 
     # read as dataframe
-    if isinstance(path_or_buf, requests.models.Response):
+    if type(path_or_buf).__name__ == 'Response':
         df = pd.read_json(path_or_buf.content, encoding='utf-8')
         match_id = int(path_or_buf.url.split('/')[-1].split('.')[0])
     else:
@@ -302,7 +301,7 @@ def read_match(path_or_buf, warn=True):
     if warn:
         warnings.warn(STATSBOMB_WARNING)
 
-    if isinstance(path_or_buf, requests.models.Response):
+    if type(path_or_buf).__name__ == 'Response':
         df_match = pd.read_json(path_or_buf.content, convert_dates=['match_date', 'last_updated'])
     else:
         df_match = pd.read_json(path_or_buf, convert_dates=['match_date', 'last_updated'])
@@ -368,7 +367,7 @@ def read_competition(path_or_buf, warn=True):
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
-    if isinstance(path_or_buf, requests.models.Response):
+    if type(path_or_buf).__name__ == 'Response':
         df_competition = pd.read_json(path_or_buf.content, convert_dates=['match_updated',
                                                                           'match_available'])
     else:
@@ -409,7 +408,7 @@ def read_lineup(path_or_buf, warn=True):
     """
     if warn:
         warnings.warn(STATSBOMB_WARNING)
-    if isinstance(path_or_buf, requests.models.Response):
+    if type(path_or_buf).__name__ == 'Response':
         df_lineup = pd.read_json(path_or_buf.content, encoding='utf-8')
         match_id = int(path_or_buf.url.split('/')[-1].split('.')[0])
     else:
