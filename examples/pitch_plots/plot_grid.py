@@ -20,6 +20,7 @@ by `@danzn1 <https://twitter.com/danzn1>`_.
 """
 
 from urllib.request import urlopen
+import warnings
 
 import cmasher as cmr
 import numpy as np
@@ -215,6 +216,10 @@ sb_logo = Image.open(urlopen(SB_LOGO_URL))
 
 ##############################################################################
 # Plotting the Pass Maps
+
+# filtering out some highlight_text warnings - the warnings aren't correct as the
+# text fits inside the axes.
+warnings.simplefilter("ignore", UserWarning)
 
 # plot the 5 * 3 grid
 fig, axs, ax_title, ax_endnote = pitch.grid(nrows=5, ncols=3, figheight=30,
