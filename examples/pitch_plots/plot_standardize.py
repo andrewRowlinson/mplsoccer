@@ -16,6 +16,8 @@ the side-lines. For example, Liverpool’s ground, Anfield, is 68 meters wide an
 Craven Cottage, is 65 meters wide. With the fixed pitch coordinates,
 the extra three meters of space squeezes between the penalty area and the pitch side-lines.
 
+.. image:: ../../explain_standardizer.png
+
 During conversion, coordinates outside the pitch side-lines are clipped to the pitch shape,
 while missing values are maintained.
 
