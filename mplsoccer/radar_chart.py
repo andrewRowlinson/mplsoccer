@@ -2,7 +2,7 @@
 
 Authors: Anmol_Durgapal(@slothfulwave612) and Andrew Rowlinson (@numberstorm)
 
-The radar-chart theme is inspired by @Statsbomb/Rami_Moghadam.
+The radar-chart theme is inspired by StatsBomb/Rami_Moghadam.
 """
 
 import textwrap
@@ -27,7 +27,7 @@ class Radar:
     round_int : sequence of bool, default None
         Whether to round the respective range values to integers (if True) or floats (if False).
         The default (None) sets all range values to floats.
-    num_rings : int, default 6
+    num_rings : int, default 4
         The number of concentric circles. This excludes the center circle so the
         total number is num_rings + 1.
     ring_width : float, default 1
@@ -38,7 +38,7 @@ class Radar:
         more than the ring_width then the center circle radius is wider than the rings.
     """
     def __init__(self, params, range_inner, range_outer, round_int=None,
-                 num_rings=6, ring_width=1, center_circle_radius=1):
+                 num_rings=4, ring_width=1, center_circle_radius=1):
         self.params = np.asarray(params)
         self.range_inner = np.asarray(range_inner)
         self.range_outer = np.asarray(range_outer)
@@ -92,7 +92,7 @@ class Radar:
     def _setup_axis(self, facecolor='#FFFFFF', ax=None):
         ax.set_facecolor(facecolor)
         ax.set_aspect('equal')
-        lim = self.center_circle_radius + self.ring_width * (self.num_rings + 4)
+        lim = self.center_circle_radius + self.ring_width * (self.num_rings + 1.5)
         ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
         set_visible(ax)
 
@@ -221,7 +221,7 @@ range_outer=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
 range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
@@ -275,7 +275,7 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
 range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
@@ -329,7 +329,7 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
 range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
@@ -372,14 +372,14 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
             label_list.append(text)
         return label_list
 
-    def draw_param_labels(self, ax=None, wrap=15, offset=2.5, **kwargs):
+    def draw_param_labels(self, ax=None, wrap=15, offset=1, **kwargs):
         """ Draw the parameter labels (e.g. 'Key Passes') on the edge of the chart.
 
         Parameters
         ----------
         ax : matplotlib axis, default None
             The axis to plot on.
-        offset : float, default 2.5
+        offset : float, default 1
             Offset the param labels from the last of the rings.
         wrap : int, default 15
             Wrap the labels so that every line is at most ``wrap`` characters long
@@ -393,7 +393,7 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
 range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
@@ -405,7 +405,7 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         >>> param_labels = radar.draw_param_labels(ax=ax)
         """
         # calculate how far out from the center (radius) to place each label, convert to coordinates
-        # place one-and-a-half ring widths away from the edge of the last circle
+        # default places one-and-a-half units (offset) away from the edge of the last circle
         outer_ring = self.center_circle_radius + (self.ring_width * self.num_rings)
         param_radius = outer_ring + offset
         param_xs = param_radius * self.rotation_sin

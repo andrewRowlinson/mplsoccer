@@ -30,11 +30,31 @@ Plot a StatsBomb pitch
 
 ```python
 from mplsoccer import Pitch
+import matplotlib.pyplot as plt
 pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
 fig, ax = pitch.draw()
+plt.show()
 ```
 ![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/quick_start.png?raw=true 
 "statsbomb quick start pitch example")
+
+Plot a Radar
+```python
+from mplsoccer import Radar
+import matplotlib.pyplot as plt
+radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], range_outer=[10, 10, 10])
+fig, ax = radar.setup_axis()
+rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
+values = [5, 3, 10]
+radar_poly, rings, vertices = radar.draw_radar(values, ax=ax,
+                                               kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6}, 
+                                               kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
+range_labels = radar.draw_range_labels(ax=ax)
+param_labels = radar.draw_param_labels(ax=ax)
+plt.show()
+```
+![alt text](https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/quick_start_radar.png?raw=true 
+"radar quick start example")
 
 ---
 
