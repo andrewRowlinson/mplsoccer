@@ -23,6 +23,7 @@ from urllib.request import urlopen
 import warnings
 
 import cmasher as cmr
+import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 from highlight_text import ax_text
@@ -174,8 +175,7 @@ lineup_team = lineup[lineup.team_name == team].copy()
 # filter the events to exclude some set pieces
 set_pieces = ['Throw-in', 'Free Kick', 'Corner', 'Kick Off', 'Goal Kick']
 # for the team pass map
-passes_excl_set = events[(events.team_name == team) & (events.type_name == 'Pass') &
-                         (~events.sub_type_name.isin(set_pieces))].copy()
+pass_receipts = events[(events.team_name == team) & (events.type_name == 'Ball Receipt')].copy()
 # for the player pass maps
 passes_excl_throw = events[(events.team_name == team) & (events.type_name == 'Pass') &
                            (events.sub_type_name != 'Throw-in')].copy()
@@ -276,11 +276,11 @@ for idx, ax in enumerate(axs.flat):
 
 # plot on the last Pass Map
 # (note ax=ax as we have cycled through to the last axes in the loop)
-pitch.kdeplot(x=passes_excl_set.x, y=passes_excl_set.y, ax=ax,
+pitch.kdeplot(x=pass_receipts.x, y=pass_receipts.y, ax=ax,
               cmap=cmr.lavender,
               levels=100,
               thresh=0, shade=True)
-ax.text(0, -5, f'{team}: Open Play Pass Heatmap', ha='left', va='center',
+ax.text(0, -5, f'{team}: Pass Receipt Heatmap', ha='left', va='center',
         fontsize=20, fontproperties=fm_scada.prop)
 
 # remove unused axes (if any)
@@ -305,7 +305,7 @@ ax_endnote.axis('off')
 ax_title.text(0.5, 0.65, f'{team1} Pass Maps vs {team2}', fontsize=40,
               fontproperties=fm_scada.prop, va='center', ha='center')
 SUB_TEXT = ('Player Pass Maps: exclude throw-ins only\n'
-            'Team heatmap: includes all attempted passes, excluding set pieces')
+            'Team heatmap: includes all attempted pass receipts')
 ax_title.text(0.5, 0.35, SUB_TEXT, fontsize=20,
               fontproperties=fm_scada.prop, va='center', ha='center')
 # plot logos (same height as the title_ax)
@@ -326,3 +326,5 @@ ax_deportivo_logo = add_image(deportivo_logo, fig, left=0.8521,
 title = ax_title.axis('off')
 # setting this example to the gallery thumbnail
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_grid_005'
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

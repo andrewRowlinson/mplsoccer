@@ -9,6 +9,7 @@ This example shows how to plot a pitch with a textured background behind it.
 from urllib.request import urlopen
 
 from PIL import Image
+import matplotlib.pyplot as plt
 
 from mplsoccer.pitch import Pitch
 from mplsoccer.utils import add_image
@@ -31,3 +32,5 @@ ax.set_zorder(1)
 ax_image.set_zorder(0)
 # save with 'tight' and no padding to avoid borders
 # fig.savefig('cloud.png', bbox_inches='tight', pad_inches=0)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

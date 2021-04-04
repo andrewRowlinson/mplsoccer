@@ -52,3 +52,5 @@ t2 = pitch.polygon(team2, ax=ax, fc='#6f63c5', ec='white', lw=3, alpha=0.4)
 # Plot players
 sc1 = pitch.scatter(x[teams], y[teams], ax=ax, c='#c34c45', s=150)
 sc2 = pitch.scatter(x[~teams], y[~teams], ax=ax, c='#6f63c5', s=150)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

@@ -10,6 +10,7 @@ See: https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanati
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
@@ -47,3 +48,5 @@ for i, pos in enumerate(positions):
                         ax=ax[i], ha='center', va='bottom')
 TITLE_STR = 'Location of pressure events - 3 home games for Chelsea FC Women'
 title = fig.suptitle(TITLE_STR, x=0.5, y=0.98, fontsize=30,)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

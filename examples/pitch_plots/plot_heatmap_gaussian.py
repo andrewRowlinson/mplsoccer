@@ -40,3 +40,5 @@ pcm = pitch.heatmap(bin_statistic, ax=ax, cmap='hot', edgecolors='#22312b')
 cbar = fig.colorbar(pcm, ax=ax)
 TITLE_STR = 'Location of pressure events - 3 home games for Chelsea FC Women'
 title = fig.suptitle(TITLE_STR, x=0.4, y=0.98, fontsize=23)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

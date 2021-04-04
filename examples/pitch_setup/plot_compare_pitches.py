@@ -67,3 +67,5 @@ for idx, pt in enumerate(pitch_types):
         axes[idx].annotate(TEXT, xy=(xmax, ymin), xytext=xytext,
                            alpha=0, arrowprops=arrowprops, **font_kwargs)
 fig.tight_layout()
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

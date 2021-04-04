@@ -6,6 +6,8 @@ Pass plot using lines and cmap
 This example shows how to plot all passes leading to shots from a team using a colormap (cmap).
 """
 
+import matplotlib.pyplot as plt
+
 from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 from matplotlib import rcParams
@@ -67,3 +69,5 @@ ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='lower center'
 
 # Set the figure facecolor
 fig.set_facecolor('#22312b')
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

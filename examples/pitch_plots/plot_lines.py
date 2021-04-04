@@ -6,9 +6,11 @@ Pass plot using lines
 This example shows how to plot all passes from a team in a match as lines.
 """
 
+import matplotlib.pyplot as plt
+from matplotlib import rcParams
+
 from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
-from matplotlib import rcParams
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
@@ -62,3 +64,5 @@ ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
 
 # Set the figure facecolor
 fig.set_facecolor('#22312b')
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

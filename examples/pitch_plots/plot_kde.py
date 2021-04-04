@@ -7,6 +7,8 @@ This example shows how to plot the location of events occurring in a match
  using kernel density estimation (KDE).
 """
 
+import matplotlib.pyplot as plt
+
 from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
@@ -78,3 +80,5 @@ pitch.annotate('fewer events', (80, 17), (80, 5), ax=ax[0], color='white', ha='c
                fontsize=20, arrowprops=dict(facecolor='white', edgecolor='None'))
 
 fig.tight_layout()
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

@@ -10,23 +10,21 @@ This release is a major refactor of mplsoccer and a merger with
 * :x: ``orientation`` argument is removed. \
 To plot on a vertical pitch use the new ``VerticalPitch`` class.
 * :x: ``layout`` argument is removed. Use the Matplotlib style ``nrows`` and ``ncols`` instead. \
-For example, Pitch(layout=(4, 5)) becomes Pitch(nrows=4, ncols=5).
+For example, Pitch(layout=(4, 5)) becomes pitch = Pitch() and pitch.draw(nrows=4, ncols=5).
 * :x: ``view`` argument is removed. Use half=True to display half-a-pitch. \
 For example, Pitch(view='half') becomes Pitch(half=True).
 * :x: ``pitch_type=stats`` pitch_type option removed.
 * :x: removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
-* :heavy_exclamation_mark: ``add_image`` takes a file_path now rather than \
-a PIL image or NumPy array.
 
 ---
 
 ### Changes
-* :white_check_mark: ``hexbin`` now clips to the sides of the soccer pitch for more \
-attractive visualizations.
+* :white_check_mark: ``hexbin`` now clips to the sides of the soccer pitch for a more \
+attractive visualization.
 * :heavy_exclamation_mark: ``wyscout`` goal width increased to 12 units (from 10 units) \
 to align with ggsoccer. This matters as the new ``Standardizer`` \
 class uses the goalpost dimensions.
-* :heavy_exclamation_mark: fixed ``bin_statistic_positional`` and ``heatmap_positional`` \
+* :heavy_exclamation_mark: fixed  the``bin_statistic_positional`` and ``heatmap_positional`` \
 so the heatmaps are created consistently at the heatmap edges \
 i.e. grid cells are created from the bottom to the top of the pitch, where the top edge \
 always belongs to the cell above.
@@ -36,7 +34,7 @@ always belongs to the cell above.
 ### Added
 * :heart_eyes: Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
 for wonderful radar charts.
-* :strawberry: Added ``jointgrid`` method to draw optional marginal axes on the four-sides \
+* :strawberry: Added a ``jointgrid`` method to draw optional marginal axes on the four-sides \
 of a soccer pitch. This replaces the old ``jointplot``, which did not allow non-square pitches.
 * :strawberry: Added the ``grid`` method to create a grid of pitches with more control \
 than plt.subplots.
@@ -50,7 +48,7 @@ pitch type where the length and width can vary.
 * :icecream: Added ``goal_type='circle'`` to plot the goalposts as circles.
 * :new: Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
 in degrees clockwise.
-* :new: Added ``create_transparent_cmap`` to enable colormaps that vary from high transparency \
+* :new: Added ``create_transparent_cmap`` to create colormaps that vary from high transparency \
 to low transparency.
 
 ---
@@ -59,7 +57,7 @@ to low transparency.
 * :ok: Changed ``Seaborn`` x and y from arguments to keyword arguments. \
 This fixes a FutureWarning from Seaborn that the only valid positional argument will be data.
 * :ok: Changed imports so that you do not need to reference the module. \
-For example, from mplsoccer import Pitch.
+For example, you can now use: from mplsoccer import Pitch.
 * :ok: Added repr methods for string representations of classes.
 * :ok: Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
 

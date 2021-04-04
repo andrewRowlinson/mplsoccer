@@ -7,6 +7,7 @@ This example shows how to plot the passes from a team as a pass flow plot.
 """
 
 from matplotlib import rcParams
+import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
 from mplsoccer import Pitch
@@ -78,3 +79,5 @@ fm = pitch.flow(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y, color='black
                 arrow_type='average', bins=bins, ax=ax)
 ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
 fig.set_facecolor('#22312b')
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

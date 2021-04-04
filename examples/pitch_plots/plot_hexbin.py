@@ -7,6 +7,8 @@ This example shows how to plot the location of events occurring in a match
  using hexbins.
 """
 
+import matplotlib.pyplot as plt
+
 from mplsoccer import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
@@ -30,3 +32,5 @@ TITLE_STR1 = 'Messi in the game directly before \n playing in the false 9 role'
 TITLE_STR2 = 'The first Game Messi \nplayed in the false 9 role'
 title1 = ax[0].set_title(TITLE_STR1, fontsize=25, pad=20)
 title2 = ax[1].set_title(TITLE_STR2, fontsize=25, pad=20)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

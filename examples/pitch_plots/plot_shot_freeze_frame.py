@@ -6,9 +6,11 @@ Shot freeze frame
 This example shows how to plot a shot freeze frame.
 """
 
+import matplotlib.pyplot as plt
+
 from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, read_lineup, EVENT_SLUG, LINEUP_SLUG
-import matplotlib.pyplot as plt
+
 plt.style.use('ggplot')
 
 # get event and lineup dataframes for game 7478
@@ -78,3 +80,5 @@ for i, label in enumerate(df_freeze_frame.player_jersey_number):
 # add a legend and title
 legend = ax.legend(loc='center left', labelspacing=1, fontsize=15)
 title = ax.set_title(f'{df_shot_event.player_name.iloc[0]}\n{team1} vs. {team2}', fontsize=30)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

@@ -8,6 +8,7 @@ This example shows how to scrape pressure events from FBRef.com and plot them as
 from urllib.request import urlopen
 
 import matplotlib.patheffects as path_effects
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -124,3 +125,5 @@ sb_logo = Image.open(urlopen(LOGO_URL))
 add_image(sb_logo, fig, left=0.9, bottom=0.975, width=0.1)
 TITLE_STR = 'Pressure events, percentage point difference from the Bundesliga average 2019/20'
 title = fig.suptitle(TITLE_STR, fontsize=20)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

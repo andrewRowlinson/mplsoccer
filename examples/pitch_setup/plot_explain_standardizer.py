@@ -7,11 +7,12 @@ This example is used to explain why you should use mplsoccer's standardization t
 It shows how pitches stretch to fit pitches of a fixed dimension.
 More details are available in the Standardize data example.
 """
-from mplsoccer import Pitch, VerticalPitch, FontManager
-from mplsoccer.quiver import arrows
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
-import numpy as np
+
+from mplsoccer import Pitch, VerticalPitch, FontManager
+from mplsoccer.quiver import arrows
 
 FIGWIDTH, FIGHEIGHT = 14, 10
 FIGSIZE = (FIGWIDTH, FIGHEIGHT)
@@ -299,4 +300,4 @@ poly(pitch5, pitch6, 'Expand', font_kwargs, ax5, ax6, ax_all, bbox5, bbox6,
      pos3x='penalty_area_top', pos3y='penalty_area_left',
      pos4x='penalty_area_bottom', pos4y='penalty_area_left')
 
-plt.show()
+plt.show()  # If you are using a Jupyter notebook you do not need this line

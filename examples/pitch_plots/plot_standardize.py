@@ -29,6 +29,7 @@ import os
 import json
 
 import pandas as pd
+import matplotlib.pyplot as plt
 import requests
 from kloppy import WyscoutSerializer, to_pandas
 from adjustText import adjust_text
@@ -205,3 +206,5 @@ print('Calculated distance in meters')
 print(pd.Series(distance).describe())
 print('\nDistances in the StatsBomb data')
 print((df_rayo_vallecano.pass_length * 0.9144).describe())  # note converted from yards to meters
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

@@ -9,6 +9,7 @@ This is written by `@DymondFormation <https://twitter.com/DymondFormation>`_
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 
 from mplsoccer import Pitch
@@ -141,3 +142,5 @@ for index, row in average_locs_and_count.iterrows():
 title = ax.set_title("{} {} Formation vs {}".format(TEAM, FORMATION, OPPONENT),
                      size=28, y=0.97, color='#c7d5cc')
 fig.set_facecolor("#22312b")
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

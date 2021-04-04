@@ -8,6 +8,7 @@ This example shows how to plot a scatter chart.
 
 import numpy as np
 from matplotlib import cm
+import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
 from mplsoccer import VerticalPitch, Pitch
@@ -306,3 +307,5 @@ title1 = fig.text(x=0.5, y=0.94, s='Barcelona Open play passes', va='center', ha
                   fontproperties=fm_rubik.prop, )
 title2 = fig.text(x=0.5, y=0.9, s='Larger marker = greater pass distance', va='center',
                   ha='center', size=15, color=pitch.line_color, fontproperties=fm_rubik.prop)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

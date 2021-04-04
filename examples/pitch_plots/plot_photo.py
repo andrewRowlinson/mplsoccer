@@ -84,3 +84,5 @@ title = fig.suptitle("Messi's greatest hits", x=0.42, y=0.9, va='center', ha='ce
 # Photo from: https://en.wikipedia.org/wiki/Lionel_Messi#/media/File:Messi_vs_Nigeria_2018.jpg;
 # License: https://creativecommons.org/licenses/by-sa/3.0/;
 # Creator: Кирилл Венедиктов
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

@@ -7,6 +7,7 @@ This example shows how to plot all pressure events from three matches as a heatm
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from mplsoccer import VerticalPitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
@@ -45,3 +46,5 @@ for i, bin_dimension in enumerate(bins):
                         ax=ax[i], ha='center', va='bottom')
 TITLE_STR = 'Location of pressure events - 3 home games for Chelsea FC Women'
 title = fig.suptitle(TITLE_STR, x=0.5, y=0.98, fontsize=30)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

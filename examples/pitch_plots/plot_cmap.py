@@ -212,3 +212,5 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#443d07',
 pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#7c2e2a')
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
 kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_yellow_cmap_100, shade=True, levels=100)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

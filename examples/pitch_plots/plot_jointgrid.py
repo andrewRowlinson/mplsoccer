@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib.cm import get_cmap
+import matplotlib.pyplot as plt
 
 from mplsoccer import Pitch, VerticalPitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
@@ -279,3 +280,5 @@ txt1 = axes[0].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pit
                     ha='center', va='center', fontsize=60)
 _ = axes[3].axis('off')
 _ = axes[4].axis('off')
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

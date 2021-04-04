@@ -387,5 +387,4 @@ title4_text = axs['title'].text(0.99, 0.25, 'Position', fontsize=15,
 
 fig.set_facecolor('#f2dad2')
 
-# If you are not using a Jupyter notebook, you need to add this to show the plots:
-plt.show()
+plt.show()  # If you are using a Jupyter notebook you do not need this line
