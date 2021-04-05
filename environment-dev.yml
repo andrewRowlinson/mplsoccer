@@ -8,16 +8,21 @@ dependencies:
   - scipy
   - seaborn
   - sphinx
+  - cmasher
   - pyarrow
   - beautifulsoup4
   - lxml
+  - setuptools
+  - twine
   - pillow
+  - pylint
+  - sphinx-gallery
+  - sphinx_rtd_theme
+  - numpydoc
+  - wheel
   - pip
   - pip:
-      - setuptools
-      - twine
-      - wheel
-      - sphinx-gallery
-      - sphinx_rtd_theme
-      - numpydoc
       - -e .
+      - highlight-text
+      - kloppy
+      - adjustText
