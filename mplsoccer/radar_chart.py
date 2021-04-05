@@ -14,6 +14,8 @@ from matplotlib.patches import Polygon, Wedge
 
 from mplsoccer.utils import set_visible
 
+__all__ = ['Radar']
+
 
 class Radar:
     """ A class for plotting radar charts in Matplotlib

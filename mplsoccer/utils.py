@@ -12,7 +12,7 @@ from PIL import Image
 
 from mplsoccer import dimensions
 
-__all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager']
+__all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager', 'set_labels']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -110,6 +110,46 @@ def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine
     ax.grid(grid)
     ax.tick_params(bottom=tick, top=tick, left=tick, right=tick,
                    labelbottom=label, labeltop=label, labelleft=label, labelright=label)
+
+
+def set_labels(ax, label_value, label_axis):
+    """
+    Function to set label for a given axis.
+
+    Args:
+        ax (axes.Axes): axis object.
+        label_value (list): ticklabel values.
+        label_axis (str): axis name, 'x' or 'y'
+
+    Returns:
+        list: label names
+    """
+    if label_axis == 'x':
+        ax.set_xticks(np.arange(len(label_value)))
+        axis = ax.get_xticklabels()
+    else:
+        ax.set_yticks(np.arange(len(label_value)) + 1)
+        axis = ax.get_yticklabels()
+
+    ## fetch labels
+    labels = [items.get_text() for items in axis]
+
+    ## init a count variable
+    if label_axis == 'x':
+        count = 0
+    else:
+        count = len(label_value) - 1
+
+    ## iterate through all the labels and change the label name
+    for i in range(len(labels)):
+        labels[i] = label_value[count]
+
+        if label_axis == 'x':
+            count += 1
+        else:
+            count -= 1
+
+    return labels
 
 
 class Standardizer:

@@ -7,3 +7,4 @@ from mplsoccer.quiver import *
 from mplsoccer.radar_chart import *
 from mplsoccer.scatterutils import *
 from mplsoccer.utils import *
+from mplsoccer.bumpy_chart import *
