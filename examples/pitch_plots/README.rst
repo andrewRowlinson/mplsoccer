@@ -1,5 +1,5 @@
---------
-Plotting
---------
+-------
+Pitches
+-------
 
-Examples of all the plotting methods in mplsoccer.
+Examples of the methods for plotting pitches in mplsoccer.

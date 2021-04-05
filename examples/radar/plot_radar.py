@@ -205,10 +205,10 @@ title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
 # sphinx_gallery_thumbnail_path = 'gallery/radar/images/sphx_glr_plot_radar_004.png'
 
 ##############################################################################
-# Comparison with titles
-# ----------------------
+# Comparison Radar with Titles
+# ----------------------++++++
 # Here we will make a very simple radar chart using ``mplsoccer`` module ``radar_chart``.
-# We will only change the defauly facecolors.
+# We will only change the default facecolors.
 
 # creating the figure using the function defined above:
 fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
