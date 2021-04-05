@@ -1,20 +1,13 @@
-"""`mplsoccer.scatterutils` is a python module containing Matplotlib
-markers and a function to rotate markers."""
+"""`mplsoccer.scatterutils` is a python module containing Matplotlib markers and a function to rotate markers."""
 
 # Authors: Andrew Rowlinson, https://twitter.com/numberstorm
 # License: MIT
 
-import matplotlib.markers as mmarkers
 import matplotlib.path as mpath
 import numpy as np
-from matplotlib.legend import Legend
-from matplotlib.legend_handler import HandlerPathCollection
+import matplotlib.markers as mmarkers
 
-__all__ = ['scatter_football', 'scatter_rotation', 'arrowhead_marker']
-
-
-# Note that the football-marker arrays are based on the
-# in my other repo, but the arrays are copied here
+# Note that the football-marker arrays are based on the code in my other repo, but the arrays are copied here
 # https://github.com/andrewRowlinson/data-science/blob/master/data_visualization/matplotlib_football_marker.ipynb
 
 # football hexagon arrays
@@ -175,10 +168,8 @@ arrowhead_marker = mpath.Path(np.array([[0.,  1.], [-1., -1.], [0., -0.4], [1., 
 
 
 def _mscatter(x, y, markers=None, ax=None, **kwargs):
-    """ Helper function to allow rotation of scatter points."""
-    # based on:
-    # https://stackoverflow.com/questions/52303660/iterating-markers-in-plots/52303895#52303895
-    scatter_plot = ax.scatter(x, y, **kwargs)
+    # based on https://stackoverflow.com/questions/52303660/iterating-markers-in-plots/52303895#52303895
+    sc = ax.scatter(x, y, **kwargs)
     if markers is not None:
         paths = []
         for marker in markers:
@@ -188,104 +179,5 @@ def _mscatter(x, y, markers=None, ax=None, **kwargs):
                 marker_obj = mmarkers.MarkerStyle(marker)
             path = marker_obj.get_path().transformed(marker_obj.get_transform())
             paths.append(path)
-        scatter_plot.set_paths(paths)
-    return scatter_plot
-
-
-def scatter_rotation(x, y, rotation_degrees, marker=None, ax=None, vertical=False, **kwargs):
-    """ Scatter plot with points rotated by rotation_degrees clockwise.
-
-    Parameters
-    ----------
-    x, y : array-like or scalar.
-        Commonly, these parameters are 1D arrays.
-    rotation_degrees: array-like or scalar, default None.
-        Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play.
-        In a horizontal pitch, 0 degrees is this way →
-    marker: MarkerStyle, optional
-        The marker style. marker can be either an instance of the class or the
-        text shorthand for a particular marker. Defaults to None, in which case it takes
-        the value of rcParams["scatter.marker"] (default: 'o') = 'o'.
-    ax : matplotlib.axes.Axes, default None
-        The axis to plot on.
-    vertical : bool, default False
-        Rotates the markers correctly for the orientation. If using a vertical setup
-        where the x and y axis are flipped set vertical=True.
-    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
-
-    Returns
-    -------
-    paths : matplotlib.collections.PathCollection
-    """
-    rotation_degrees = np.ma.ravel(rotation_degrees)
-    if x.size != rotation_degrees.size:
-        raise ValueError("x and rotation_degrees must be the same size")
-    # rotated counter clockwise - this makes it clockwise with zero facing the direction of play
-    rotation_degrees = - rotation_degrees
-    # if horizontal rotate by 90 degrees so 0 degrees is this way →
-    if vertical is False:
-        rotation_degrees = rotation_degrees - 90
-    markers = []
-    for degrees in rotation_degrees:
-        marker_style = mmarkers.MarkerStyle(marker=marker)
-        marker_style._transform = marker_style.get_transform().rotate_deg(degrees)
-        markers.append(marker_style)
-
-    rotated_scatter = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
-    return rotated_scatter
-
-
-def scatter_football(x, y, ax=None, **kwargs):
-    """ Scatter plot of football markers.
-    Plots two scatter plots one for the hexagons and one for the pentagons of the football.
-
-    Parameters
-    ----------
-    x, y : array-like or scalar.
-        Commonly, these parameters are 1D arrays.
-    ax : matplotlib.axes.Axes, default None
-        The axis to plot on.
-    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
-
-    Returns
-    -------
-    (paths, paths) : a tuple of matplotlib.collections.PathCollection
-    """
-    linewidths = kwargs.pop('linewidths', 0.5)
-    hexcolor = kwargs.pop('c', 'white')
-    pentcolor = kwargs.pop('edgecolors', 'black')
-    s = kwargs.pop('s', 500)
-    sc_hex = ax.scatter(x, y, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
-                        marker=football_hexagon_marker, s=s, **kwargs)
-
-    if 'label' in kwargs.keys():
-        Legend.update_default_handler_map({sc_hex: HandlerFootball()})
-        del kwargs['label']
-
-    sc_pent = ax.scatter(x, y, edgecolors=pentcolor, c=pentcolor, linewidths=linewidths,
-                         marker=football_pentagon_marker, s=s, **kwargs)
-
-    return sc_hex, sc_pent
-
-
-class HandlerFootball(HandlerPathCollection):
-    """Automatically generated by scatter_football() if label is a keyword
-    to allow use of football marker in legend."""
-    def create_collection(self, orig_handle, sizes, offsets, transOffset):
-        edgecolor = orig_handle.get_edgecolor()[0]
-        facecolor = orig_handle.get_facecolor()[0]
-        sizes = [size*0.249 for size in sizes]
-        p = type(orig_handle)([football_hexagon_marker, football_pentagon_marker],
-                              sizes=sizes,
-                              offsets=offsets,
-                              transOffset=transOffset,
-                              facecolors=[facecolor, edgecolor],
-                              edgecolors=edgecolor)
-        return p
-
-    def _default_update_prop(self, legend_handle, orig_handle):
-        facecolor = legend_handle.get_facecolor()
-        edgecolor = legend_handle.get_edgecolor()
-        legend_handle.update_from(orig_handle)
-        legend_handle.set_facecolor(facecolor)
-        legend_handle.set_edgecolor(edgecolor)
+        sc.set_paths(paths)
+        return sc

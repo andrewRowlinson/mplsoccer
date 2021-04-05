@@ -7,17 +7,13 @@ dependencies:
   - scipy
   - seaborn
   - sphinx
-  - cmasher
   - pyarrow
   - beautifulsoup4
   - lxml
   - pillow
   - pip
-  - sphinx-gallery
-  - sphinx_rtd_theme
-  - numpydoc
   - pip:
+      - sphinx-gallery >= 0.7
+      - sphinx_rtd_theme
+      - numpydoc
       - -e .
-      - highlight-text
-      - kloppy
-      - adjustText

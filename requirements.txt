@@ -4,4 +4,3 @@ seaborn
 scipy
 pandas
 beautifulsoup4
-Pillow

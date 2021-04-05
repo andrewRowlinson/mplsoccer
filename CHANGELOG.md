@@ -1,109 +1,20 @@
-:rocket: Version 1.0.0
-----------------------
-
-This release is a major refactor of mplsoccer and a merger with 
-[soccerplots](https://github.com/Slothfulwave612/soccerplots) for plotting Radars.
-
----
-
-### Breaking Changes
-* :x: ``orientation`` argument is removed. \
-To plot on a vertical pitch use the new ``VerticalPitch`` class.
-* :x: ``layout`` argument is removed. Use the Matplotlib style ``nrows`` and ``ncols`` instead. \
-For example, Pitch(layout=(4, 5)) becomes pitch = Pitch() and pitch.draw(nrows=4, ncols=5).
-* :x: ``view`` argument is removed. Use half=True to display half-a-pitch. \
-For example, Pitch(view='half') becomes Pitch(half=True).
-* :x: ``pitch_type=stats`` pitch_type option removed.
-* :x: removed ``jointplot`` method and replaced with the more flexible ``jointgrid`` method.
-
----
-
-### Changes
-* :white_check_mark: ``hexbin`` now clips to the sides of the soccer pitch for a more \
-attractive visualization.
-* :heavy_exclamation_mark: ``wyscout`` goal width increased to 12 units (from 10 units) \
-to align with ggsoccer. This matters as the new ``Standardizer`` \
-class uses the goalpost dimensions.
-* :heavy_exclamation_mark: fixed  the``bin_statistic_positional`` and ``heatmap_positional`` \
-so the heatmaps are created consistently at the heatmap edges \
-i.e. grid cells are created from the bottom to the top of the pitch, where the top edge \
-always belongs to the cell above.
-
----
-
-### Added
-* :heart_eyes: Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
-for wonderful radar charts.
-* :strawberry: Added a ``jointgrid`` method to draw optional marginal axes on the four-sides \
-of a soccer pitch. This replaces the old ``jointplot``, which did not allow non-square pitches.
-* :strawberry: Added the ``grid`` method to create a grid of pitches with more control \
-than plt.subplots.
-* :strawberry: Added ``FontManager`` from [ridge_map](https://github.com/colcarroll/ridge_map) \
-by [Colin Carroll](https://twitter.com/colindcarroll) for downloading and using google fonts.
-* :strawberry: Added ``Standardizer`` for changing from one provider data format to another. \
-For example, StatsBomb to Tracab.
-* :icecream: Added new pitch_types: ``skillcorner``, ``secondspectrum``, and a ``custom`` \
-pitch type where the length and width can vary.
-* :icecream: Added ``goal_alpha`` for controlling the transparency of ``goal_type='box'`` goals.
-* :icecream: Added ``goal_type='circle'`` to plot the goalposts as circles.
-* :new: Added ``degrees=True`` option so calculate_angle_and_degrees can output the angle \
-in degrees clockwise.
-* :new: Added ``create_transparent_cmap`` to create colormaps that vary from high transparency \
-to low transparency.
-
----
-
-### Fixes
-* :ok: Changed ``Seaborn`` x and y from arguments to keyword arguments. \
-This fixes a FutureWarning from Seaborn that the only valid positional argument will be data.
-* :ok: Changed imports so that you do not need to reference the module. \
-For example, you can now use: from mplsoccer import Pitch.
-* :ok: Added repr methods for string representations of classes.
-* :ok: Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
-
----
-
-### Docs
-* :page_with_curl: Added examples for custom colormaps
-* :page_with_curl: Tweaked the StatsBomb data example to only update files if the \
-JSON file has changed.
-* :page_with_curl: Added more beautiful scatter examples.
-* :page_with_curl: Added examples for ``grid`` and ``jointgrid``.
-
----
-
-### Refactoring
-The pitch class has been split into multiple modules and classes to simplify the code.
-This helps reduce the number of conditional if/else switches.
-* pitch.py contains the new classes for plotting/ drawing pitches. The ``Pitch`` class is for a \
-horizontally orientated soccer pitch, and the new ``VerticalPitch`` is for the \
-vertical orientation. A change from the old API of Pitch(orientation='vertical').
-* The ``Pitch`` and ``VerticalPitch`` classes inherit their \
-plotting methods from ``BasePitchPlot``. While ``BasePitchPlot`` inherits attributes and methods \
-for drawing a soccer pitch from ``BasePitch``.
-* The soccer pitch dimensions are in a separate module (dimensions.py) for reuse within \
-a new ``Standardizer`` class.
-* The code for heatmaps, arrows, lines, scatter_rotation, and scatter_football are now \
-in separate modules (heatmap.py, quiver.py, linecollection.py, and scatterutils.py).
-
----
-
-:rocket: Version 0.0.23
------------------------
+Version 0.0.23
+--------------
 
 ### Hot fix
-Fixed the statsbomb module to allow a requests response to be used in read_event, read_match, read_competition and read_lineup. This should allow the statsbomb module to be used with the StatsBomb API via the requests library.
+Fixed the statsbomb module to allow a requests response to be used in read_event, read_match, read_competition and read_lineup.
+This should allow the statsbomb module to be used with the StatsBomb API via the requests library.
 
 
-:rocket: Version 0.0.22
------------------------
+Version 0.0.22
+--------------
 
 ### Hot fix
 Fixed statsbomb read_event to read the z location, as StatsBomb recently changed their data so it also records the shot impact height 'z' location.
 
 
-:rocket: Version 0.0.21
------------------------
+Version 0.0.21
+-----------
 
 ### Changed
 1) changed the name of the 'statsperform' pitch_type to 'uefa'
@@ -123,28 +34,28 @@ Fixed statsbomb read_event to read the z location, as StatsBomb recently changed
 3) added parameters to shade the middle section of the pitch and draw Juego de posición pitch markings. 
 4) added a method flow to plot a pass flow map and a new example using this method
 
-:rocket: Version 0.0.20
------------------------
+Version 0.0.20
+-----------
 
 ### Fixed
 1) Fixed arrows so the arrows scale correctly when the dots per inches (dpi) of the figure is changed. Before the units were in dots so the arrow got smaller as the dots per inches increases. Fixed this so the arrow is in points (1/72th of an inch) so the arrow stays the same size when the dots per inch changes.
 
 
-:rocket: Version 0.0.19
------------------------
+Version 0.0.19
+-----------
 
 ### Fixed
 1) Fixed arrows legend to work in recent versions of matplotlib.
 
-:rocket: Version 0.0.17 / 0.0.18
-----------------------------------------
+Version 0.0.17 / 0.0.18
+-----------
 
 ### Changed
 1) changed the event_type_name/ event_type_id columns in the StatsBomb data to sub_type_name, sub_type_id.
 
 
-:rocket: Version 0.0.16
------------------------
+Version 0.0.16
+-----------
 
 ### Changed
 1) combined the StatsBomb technique columns (pass_technique, goalkeeper_technique, shot_technique) into techique_id and technique_name
@@ -155,40 +66,40 @@ goalkeeper_shot_saved_off_target, shot_saved_off_target, goalkeeper_shot_saved_t
 goalkeeper_lost_out, goalkeeper_lost_in_play, goalkeeper_success_out, goalkeeper_success_in_play, goalkeeper_saved_to_post,
 shot_kick_off, goalkeeper_penalty_saved_to_post
 
-:rocket: Version 0.0.15
------------------------
+Version 0.0.15
+-----------
 
 ### Changed
 1) changed Pitch so axes aren't raveled when using subplots, e.g. layout=(2, 2). So colorbar can be used with subplots.
 
 
-:rocket: Version 0.0.14
------------------------
+Version 0.0.14
+-----------
 
 ### Changed
 1) changed the internal workings of bin statistics and heatmaps so the results of bin_statistic can be used for other purposes.
 2) removed print function from Pitch.
 
-:rocket: Version 0.0.12
------------------------
+Version 0.0.12
+-----------
 
 ### Changed
 1) changed the wyscout goal posts y locations to 45/ 55 for consistency with [socceraction](https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py). 
 
-:rocket: Version 0.0.11
------------------------
+Version 0.0.11
+-----------
 
 ### Changed
 1) fixed the statsbomb module so the event dataset has simplified names for the end coordinates. Previously they were shot_end_x, pass_end_x etc. Now they are under three columns: end_x, end_y, end_z.
 
-:rocket: Version 0.0.10
------------------------
+Version 0.0.10
+-----------
 
 ### Fixed
 1) fixed the statsbomb module so it works when the json is empty.
 
-:rocket: Version 0.0.9
-----------------------
+Version 0.0.9
+-----------
 
 ### Added
 1) Added Pitch.voronoi() for calculating Voronoi vertices.
@@ -196,35 +107,35 @@ shot_kick_off, goalkeeper_penalty_saved_to_post
 3) Added Pitch.polygon() for plotting polygons on the pitch (e.g. goal angle and Voronoi)
 4) Added add_image for adding images to matplotlib figures.
 
-:rocket: Version 0.0.8
-----------------------
+Version 0.0.8
+-----------
 
 ### Fixed
 1) Made the statsbomb module clean the data faster.
 
-:rocket: Version 0.0.7
-----------------------
+Version 0.0.7
+-----------
 
 ### Fixed
 1) fixed Pitch.label_heatmap(). Now filters out labels outside of the pitch extent.
 
 
-:rocket: Version 0.0.6
-----------------------
+Version 0.0.6
+-----------
 
 ### Fixed
 1) fixed Pitch.bin_statistic(). Now works for ``statistic`` arguments other than 'count'.
 
 
-:rocket: Version 0.0.5
-----------------------
+Version 0.0.5
+-----------
 
 ### Fixed
 1) fixed Pitch.heatmap() bug. Now returns a mesh in horizontal orientation.
 
 
-:rocket: Version 0.0.4
-----------------------
+Version 0.0.4
+-----------
 
 ### Added
 1) Docs and gallery added.
@@ -243,13 +154,13 @@ shot_kick_off, goalkeeper_penalty_saved_to_post
 9) Default penalty and center spot size now smaller and can be adjusted.
 10) Pitch default colors changed, pitch_color is now not plotted by default ('None') and pitch lines are taken from the rcParams 'grid.color'.  
 
-:rocket: Version 0.0.3
-----------------------
+Version 0.0.3
+-----------
 
 Minor pep8 fixes.
 
-:rocket: Version 0.0.2
-----------------------
+Version 0.0.2
+-----------
 
 ### Added
 1) Added constrained_layout option for Pitch class
@@ -276,12 +187,12 @@ Minor pep8 fixes.
 4) Fixed the Pitch.lines() method so that when transparent=True its consistent across pitch types. It is more transparent at the line start and more opaque at the line end.
 5) Fixed how dimensions are represented in the Pitch class internally (left, right, bottom, top) so they match the horizontal pitch orientation.
 
-:rocket: Version 0.0.1
-----------------------
+Version 0.0.1
+-----------
 ### Fixed
 1) Fixed the README so it loads pictures from the raw GitHub files.
     
-:rocket: Version 0.0.0
-----------------------
+Version 0.0.0
+-----------
 
 Initial version. Pitch class with plotting methods: scatter, lines, quiver, kdeplot, hexbin, and joint_plot. Scatter accepts marker='football' to plot footballs.
