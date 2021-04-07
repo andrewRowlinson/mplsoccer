@@ -260,7 +260,7 @@ for idx, ax in enumerate(axs.flat):
                              f'{round(100 * len(complete_pass)/total_pass, 1)}%')
         ax_text(0, -5, annotation_string, ha='left', va='center', fontsize=20,
                 fontproperties=fm_scada.prop,  # using the fontmanager for the google font
-                highlight_colors='#56ae6c', ax=ax)
+                highlight_textprops=[{"color": '#56ae6c'}], ax=ax)
 
         # add information for subsitutions on/off and arrows
         if not np.isnan(lineup_team.iloc[idx].off):

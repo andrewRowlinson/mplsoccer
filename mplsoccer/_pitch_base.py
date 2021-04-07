@@ -562,7 +562,7 @@ class BasePitch(ABC):
                              **shade_prop)
 
     def grid(self, figheight=9, nrows=1, ncols=1, left=None, grid_width=0.95,
-             bottom=0.025, endnote_height=0.065, endnote_space=0.01,
+             bottom=None, endnote_height=0.065, endnote_space=0.01,
              grid_height=0.715, title_space=0.01, title_height=0.15, space=0.05):
         """ A helper to create a grid of pitches in a specified location
 
@@ -577,11 +577,11 @@ class BasePitch(ABC):
             The default of None places the axes in the middle of the figure.
         grid_width : float, default 0.95
             The width of the pitch grid in fractions of the figure width.
-            The default is the grid is 95% of the figure width.            
-        bottom : float, default 0.025
+            The default is the grid is 95% of the figure width.
+        bottom : float, default None
             The location of the bottom endnote axes in fractions of the figure height.
-            The default means that the endnote is located 2.5% in from the bottom of the figure.
-            If the endnote_height=0, then the pitch grid is located at the bottom coordinate instead.
+            The default of None places the axes in the middle of the figure.
+            If the endnote_height=0 then the pitch grid is located at the bottom coordinate instead.
         endnote_height: float, default 0.065
             The height of the endnote axes in fractions of the figure height.
             The default is the endnote is 6.5% of the figure height.
@@ -605,7 +605,7 @@ class BasePitch(ABC):
             The total amount of the grid height reserved for spacing between the pitch axes.
             Expressed as a fraction of the grid_height. The default is 5% of the grid height.
             The spacing across the grid width is automatically calculated to maintain even spacing.
-            
+
         Returns
         -------
         fig : matplotlib.figure.Figure
@@ -617,27 +617,36 @@ class BasePitch(ABC):
         --------
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
-        >>> fig, axs, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figheight=14)
+        >>> fig, axs, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=3, \
+                                                        grid_height=0.7, figheight=14)
         """
         if left is None:
             left = (1 - grid_width) / 2
-            
+
         if title_height == 0:
             title_space = 0
-        
+
         if endnote_height == 0:
             endnote_space = 0
 
-        if bottom + endnote_height + endnote_space + grid_height + title_space + title_height > 1:
-            error_msg = ('The axes extends past the figure height. '
-                         'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
-                         'title_space or title_height so the total is ≤ 1.')
-            raise ValueError(error_msg)
+        error_msg_height = ('The axes extends past the figure height. '
+                            'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
+                            'title_space or title_height so the total is ≤ 1.')
+        error_msg_width = ('The grid axes extends past the figure width. '
+                           'Reduce one of the grid_width or left so the total is ≤ 1.')
+
+        axes_height = endnote_height + endnote_space + grid_height + title_space + title_height
+        if axes_height > 1:
+            raise ValueError(error_msg_height)
+
+        if bottom is None:
+            bottom = (1 - axes_height) / 2
+
+        if bottom + axes_height > 1:
+            raise ValueError(error_msg_height)
 
         if grid_width + left > 1:
-            error_msg = ('The grid axes extends past the figure width. '
-                         'Reduce one of the grid_width or left so the total is ≤ 1.')
-            raise ValueError(error_msg)
+            raise ValueError(error_msg_width)
 
         # calculate the figure width
         if (nrows > 1) and (ncols > 1):
@@ -703,23 +712,23 @@ class BasePitch(ABC):
                      np.abs(self.extent[1] - self.extent[0])) * individual_pitch_width
         title_left = left + left_pad
         title_width = grid_width - left_pad - right_pad
-        
+
         if title_height > 0:
             ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
                                      title_width, title_height))
         else:
             ax_title = None
-        
+
         if endnote_height > 0:
             ax_endnote = fig.add_axes((title_left, bottom,
                                        title_width, endnote_height))
         else:
             ax_endnote = None
 
-        return fig, axs, ax_title, ax_endnote    
-    
-    def jointgrid(self, figheight=9, left=None, grid_width=0.8, 
-                  bottom=0.025, endnote_height=0.065, endnote_space=0.01,
+        return fig, axs, ax_title, ax_endnote
+
+    def jointgrid(self, figheight=9, left=None, grid_width=0.95,
+                  bottom=None, endnote_height=0.065, endnote_space=0.01,
                   grid_height=0.715, title_space=0.01, title_height=0.15,
                   space=0, marginal=0.1, ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
         """ Create a grid with a pitch at the center and (marginal) axes at the sides of the pitch.
@@ -731,13 +740,13 @@ class BasePitch(ABC):
         left : float, default None
             The location of the left hand side of the grid in fractions of the figure width.
             The default of None places the axes in the middle of the figure.
-        grid_width : float, default 0.8
+        grid_width : float, default 0.95
             The width of the grid area in fractions of the figure width.
             The default is the grid is 80% of the figure width.
-        bottom : float, default 0.1
+        bottom : float, default None
             The location of the bottom endnote axes in fractions of the figure height.
-            The default means that the endnote is located 10% in from the bottom of the figure.
-            If the endnote_height=0, then the joint grid is located at the bottom coordinate instead.
+            The default of None places the axes in the middle of the figure.
+            If the endnote_height=0 then the joint grid is located at the bottom coordinate instead.
         endnote_height: float, default 0.065
             The height of the endnote axes in fractions of the figure height.
             The default is the endnote is 6.5% of the figure height.
@@ -746,7 +755,7 @@ class BasePitch(ABC):
             The space between the joint grid and endnote axis in fractions of the figure height.
             The default space is 1% of the figure height.
             If endnote_height=0, then the endnote_space is set to zero.
-        grid_height : float, default 0.7
+        grid_height : float, default 0.715
             The height of the joint grid area in fractions of the figure height.
             The default is the grid height is 70% of the figure height.
         title_space : float, default 0.01
@@ -757,18 +766,18 @@ class BasePitch(ABC):
             The height of the title axis in fractions of the figure height.
             The default is the title axis is 15% of the figure height.
             If title_height=0, then the title axes is not plotted.
-        space : float, default 0
+        space : float, default 0.01
             The total amount of the grid height reserved for spacing between axes.
-            Expressed as a fraction of the grid height. The default is 0% of the grid height.
-            The default is no space (note it will still look like there is space
-            if the pitch has padding, e.g. pad_top=15).
+            Expressed as a fraction of the grid height. The default is 0.01% of the grid height.
+            Note if space is zero, it will still look like there is space
+            if the pitch has padding, e.g. pad_top=15.
         marginal : float, default 0.1
             The total amount of the grid height reserved for the marginal axes.
             Expressed as a fraction of the grid height. The default is 10% of the grid height.
         ax_left, ax_top, ax_right : bool, default True
             Whether to include a Matplotlib Axes on the left/top/right side of the pitch.
         ax_bottom : bool, default False
-            Whether to include a Matplotlib Axes on the bottom side of the pitch.            
+            Whether to include a Matplotlib Axes on the bottom side of the pitch.
 
         Returns
         -------
@@ -776,7 +785,7 @@ class BasePitch(ABC):
         axs : dict[label, Axes]
             A dictionary mapping the labels to the Axes objects.
             The possible keys are 'left', 'right', 'bottom', 'top' for the marginal axes,
-            'pitch', 'title' and 'endnote'.           
+            'pitch', 'title' and 'endnote'.
 
         Examples
         --------
@@ -784,30 +793,38 @@ class BasePitch(ABC):
         >>> import numpy as np
         >>> import seaborn as sns
         >>> pitch = Pitch()
-        >>> fig, axs = pitch.jointgrid(ax_left=False, ax_right=False,
+        >>> fig, axs = pitch.jointgrid(ax_left=False, ax_right=False, \
                                        ax_bottom=False, ax_top=True)
         >>> x = np.random.uniform(low=0, high=120, size=100)
         >>> sns.kdeplot(x=x, ax=axs['top'], shade=True)
         """
         if left is None:
             left = (1 - grid_width) / 2
-            
+
         if title_height == 0:
             title_space = 0
-        
+
         if endnote_height == 0:
             endnote_space = 0
 
-        if bottom + endnote_height + endnote_space + grid_height + title_space + title_height > 1:
-            error_msg = ('The axes extends past the figure height. '
-                         'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
-                         'title_space or title_height so the total is ≤ 1.')
-            raise ValueError(error_msg)
+        error_msg_height = ('The axes extends past the figure height. '
+                            'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
+                            'title_space or title_height so the total is ≤ 1.')
+        error_msg_width = ('The grid axes extends past the figure width. '
+                           'Reduce one of the grid_width or left so the total is ≤ 1.')
+
+        axes_height = endnote_height + endnote_space + grid_height + title_space + title_height
+        if axes_height > 1:
+            raise ValueError(error_msg_height)
+
+        if bottom is None:
+            bottom = (1 - axes_height) / 2
+
+        if bottom + axes_height > 1:
+            raise ValueError(error_msg_height)
 
         if grid_width + left > 1:
-            error_msg = ('The grid axes extends past the figure width. '
-                         'Reduce one of the grid_width or left so the total is ≤ 1.')
-            raise ValueError(error_msg)
+            raise ValueError(error_msg_width)
 
         # calculate the marginal and space heights for the bottom/ top of the grid
         space_height = space * grid_height
@@ -863,18 +880,18 @@ class BasePitch(ABC):
 
         # create the figure
         fig = plt.figure(figsize=(figwidth, figheight))
-        
+
         title_left = left + left_pad * (not ax_left)
         title_width = grid_width - left_pad * (not ax_left) - right_pad * (not ax_right)
         grid_bottom = bottom + endnote_height + endnote_space
-        
+
         # create the axes
-        axs = {}        
+        axs = {}
         if title_height > 0:
             ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
                                      title_width, title_height))
             axs['title'] = ax_title
-        
+
         if endnote_height > 0:
             ax_endnote = fig.add_axes((title_left, bottom,
                                        title_width, endnote_height))
@@ -892,7 +909,8 @@ class BasePitch(ABC):
 
         if ax_top:
             ax_1 = fig.add_axes((left + marginal_left + space_left + left_pad,
-                                 grid_bottom + marginal_bottom + space_bottom + pitch_height + space_top,
+                                 (grid_bottom + marginal_bottom + space_bottom +
+                                  pitch_height + space_top),
                                  pitch_width - left_pad - right_pad,
                                  marginal_top))
             ax_1.set_xlim(x0, x1)

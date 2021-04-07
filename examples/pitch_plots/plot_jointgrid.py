@@ -80,9 +80,9 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
                          ha='center', va='center', fontsize=30)
 # the spine closest to the pitch shows by default, we can remove the axes here so it doesn't
-axs['top'].axis('off')
-axs['left'].axis('off')
-axs['right'].axis('off')
+_ = axs['top'].axis('off')
+_ = axs['left'].axis('off')
+_ = axs['right'].axis('off')
 
 ##############################################################################
 # Plotting a standard shot map with rug plots
@@ -106,9 +106,9 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
                          ha='center', va='center', fontsize=30)
-axs['left'].axis('off')
-axs['top'].axis('off')
-axs['right'].axis('off')
+_ = axs['left'].axis('off')
+_ = axs['top'].axis('off')
+_ = axs['right'].axis('off')
 
 ##############################################################################
 # Get more shot data for additional games
@@ -164,9 +164,9 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
                          ha='center', va='center', fontsize=30)
-axs['left'].axis('off')
-axs['top'].axis('off')
-axs['right'].axis('off')
+_ = axs['left'].axis('off')
+_ = axs['top'].axis('off')
+_ = axs['right'].axis('off')
 
 ##############################################################################
 # Heatmap shot map with histogram/ kdeplot on the marginal axes
@@ -196,9 +196,9 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
                          ha='center', va='center', fontsize=30)
-axs['left'].axis('off')
-axs['top'].axis('off')
-axs['right'].axis('off')
+_ = axs['left'].axis('off')
+_ = axs['top'].axis('off')
+_ = axs['right'].axis('off')
 
 ##############################################################################
 # Kdeplot shot map with kdeplot on the marginal axes
@@ -219,9 +219,9 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
                          ha='center', va='center', fontsize=30)
-axs['left'].axis('off')
-axs['top'].axis('off')
-axs['right'].axis('off')
+_ = axs['left'].axis('off')
+_ = axs['top'].axis('off')
+_ = axs['right'].axis('off')
 
 ##############################################################################
 # Vertical shot map with kdeplot marginals
@@ -247,8 +247,8 @@ team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade
 team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
 txt1 = axs['pitch'].text(x=40, y=80, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
                          ha='center', va='center', fontsize=60)
-axs['right'].axis('off')
-axs['bottom'].axis('off')
+_ = axs['right'].axis('off')
+_ = axs['bottom'].axis('off')
 
 ##############################################################################
 # Crop the pitch
@@ -278,7 +278,7 @@ team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade
 team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
 txt1 = axs['pitch'].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
                          ha='center', va='center', fontsize=60)
-axs['right'].axis('off')
-axs['bottom'].axis('off')
+_ = axs['right'].axis('off')
+_ = axs['bottom'].axis('off')
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

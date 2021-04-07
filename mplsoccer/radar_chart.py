@@ -332,13 +332,15 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         --------
         >>> from mplsoccer import Radar
         >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+                          range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
         >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
-kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6}, \
-kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
+                                                           kwargs_radar={'facecolor': '#00f2c1', \
+                                                                         'alpha': 0.6}, \
+                                                           kwargs_rings={'facecolor': '#d80499', \
+                                                                         'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         """
         # create the label values - linearly interpolate between the low and high for each circle
@@ -396,13 +398,15 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         --------
         >>> from mplsoccer import Radar
         >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+                          range_outer=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
         >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
-kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6}, \
-kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
+                                                           kwargs_radar={'facecolor': '#00f2c1', \
+                                                                         'alpha': 0.6}, \
+                                                           kwargs_rings={'facecolor': '#d80499', \
+                                                                         'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         >>> param_labels = radar.draw_param_labels(ax=ax)
         """

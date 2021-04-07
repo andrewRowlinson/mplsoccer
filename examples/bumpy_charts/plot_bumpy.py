@@ -88,8 +88,8 @@ fig.text(0.09, 0.95, title, size=27, color="#F2F2F2", fontproperties=font_bold.p
 
 # add subtitle
 fig_text(
-    0.09, 0.92, sub_title, color="#F2F2F2", 
-    highlight_colors=["crimson", "skyblue", "gold"], 
+    0.09, 0.92, sub_title, color="#F2F2F2",
+    highlight_textprops=[{"color": 'crimson'}, {"color": 'skyblue'}, {"color": 'gold'}],
     size=23, fig=fig, fontproperties=font_bold.prop
 )
 
@@ -156,7 +156,7 @@ fig.text(0.09, 0.95, title, size=27, color="#F2F2F2", fontproperties=font_bold.p
 # add subtitle
 fig_text(
     0.09, 0.92, sub_title, color="#F2F2F2", 
-    highlight_colors=["crimson", "skyblue", "gold"], 
+    highlight_textprops=[{"color": 'crimson'}, {"color": 'skyblue'}, {"color": 'gold'}],
     size=23, fig=fig, fontproperties=font_bold.prop
 )
 
@@ -233,7 +233,7 @@ fig.text(0.03, 0.95, title, size=27, color="#222222", fontproperties=font_bold.p
 # add subtitle
 fig_text(
     0.03, 0.92, sub_title, color="#222222", 
-    highlight_colors=["crimson", "blue"], 
+    highlight_textprops=[{"color": 'crimson'}, {"color": 'blue'}],
     size=23, fig=fig, fontproperties=font_bold.prop
 )
 
@@ -287,8 +287,8 @@ title = "Comparison Between <Cristián Zapata> and <Francesco Acerbi>"
 
 # add title
 fig_text(
-    0.02, 0.95, title, color="#F2F2F2", 
-    highlight_colors=["crimson", "cornflowerblue"], 
+    0.02, 0.95, title, color="#F2F2F2",
+    highlight_textprops=[{"color": 'crimson'}, {"color": 'cornflowerblue'}],
     size=34, fig=fig, fontproperties=font_bold.prop
 )
 

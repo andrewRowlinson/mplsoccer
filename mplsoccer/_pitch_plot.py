@@ -354,7 +354,7 @@ class BasePitchPlot(BasePitch):
         >>> pitch = Pitch()
         >>> fig, ax = pitch.draw()
         >>> pitch.annotate(text='center', xytext=(50, 50), xy=(60, 40), ha='center', va='center', \
-ax=ax, arrowprops=dict(facecolor='black'))
+                           ax=ax, arrowprops=dict(facecolor='black'))
         """
         validate_ax(ax)
         xy = self._reverse_annotate_if_vertical(xy)
@@ -413,7 +413,7 @@ ax=ax, arrowprops=dict(facecolor='black'))
         >>> stats['statistic'] = stats['statistic'].astype(int)
         >>> path_eff = [path_effects.Stroke(linewidth=0.5, foreground='#22312b')]
         >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center', \
-va='center', path_effects=path_eff)
+                                       va='center', path_effects=path_eff)
         """
         validate_ax(ax)
 
@@ -667,7 +667,7 @@ va='center', path_effects=path_eff)
         >>> from mplsoccer import Pitch
         >>> from mplsoccer.statsbomb import read_event, EVENT_SLUG
         >>> df = read_event(f'{EVENT_SLUG}/7478.json', related_event_df=False, \
-shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
+                            shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
         >>> team1, team2 = df.team_name.unique()
         >>> mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1)
         >>> df = df[mask_team1].copy()
@@ -676,7 +676,8 @@ shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
         >>> bs_heatmap = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 4))
         >>> hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Blues')
         >>> fm = pitch.flow(df.x, df.y, df.end_x, df.end_y, color='black', arrow_type='same', \
-arrow_length=6, bins=(6, 4), headwidth=2, headlength=2, headaxislength=2, ax=ax)
+                            arrow_length=6, bins=(6, 4), headwidth=2, headlength=2, \
+                            headaxislength=2, ax=ax)
         """
         validate_ax(ax)
         if self.dim.aspect != 1:

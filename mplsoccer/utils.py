@@ -131,16 +131,16 @@ def set_labels(ax, label_value, label_axis):
         ax.set_yticks(np.arange(len(label_value)) + 1)
         axis = ax.get_yticklabels()
 
-    ## fetch labels
+    # fetch labels
     labels = [items.get_text() for items in axis]
 
-    ## init a count variable
+    # init a count variable
     if label_axis == 'x':
         count = 0
     else:
         count = len(label_value) - 1
 
-    ## iterate through all the labels and change the label name
+    # iterate through all the labels and change the label name
     for i in range(len(labels)):
         labels[i] = label_value[count]
 
@@ -172,7 +172,7 @@ class Standardizer:
     --------
     >>> from mplsoccer import Standardizer
     >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom', \
-length_to=105, width_to=68)
+                                length_to=105, width_to=68)
     >>> x = [20, 30]
     >>> y = [50, 80]
     >>> x_std, y_std = standard.transform(x, y)

@@ -109,7 +109,7 @@ title1_text = title_ax.text(0.5, 0.7, TITLE_STR1, fontsize=28, color='#000009',
                             ha='center', va='center')
 ax_text(0.5, 0.3, TITLE_STR2, ha='center', va='center', fontsize=18, color='#000009',
         fontproperties=robotto_regular.prop,
-        highlight_colors=['#800610', '#08306b'], ax=title_ax)
+        highlight_textprops=[{"color": '#800610'}, {"color": '#08306b'}], ax=title_ax)
 
 # turn off title and endnote axes
 endnote_ax.axis('off')
