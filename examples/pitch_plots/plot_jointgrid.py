@@ -54,35 +54,35 @@ df_team1['x'] = pitch.dim.right - df_team1.x
 # Plotting a standard shot map with step charts
 # ---------------------------------------------
 
-fig, axes, _, _ = pitch.jointgrid(figheight=10,  # the figure is 10 inches high
-                                  left=None,  # joint grid center-aligned
-                                  bottom=0.075,  # grid starts 7.5% in from the bottom of the figure
-                                  marginal=0.1,  # marginal axes heights are 10% of grid height
-                                  space=0,  # 0% of the grid height reserved for space between axes
-                                  grid_width=0.9,  # the grid width takes up 90% of the figure width
-                                  title_height=0,  # plot without a title axes
-                                  endnote_height=0,  # plot without an endnote axes
-                                  grid_height=0.8)  # grid takes up 80% of the figure height
+fig, axs = pitch.jointgrid(figheight=10,  # the figure is 10 inches high
+                           left=None,  # joint grid center-aligned
+                           bottom=0.075,  # grid starts 7.5% in from the bottom of the figure
+                           marginal=0.1,  # marginal axes heights are 10% of grid height
+                           space=0,  # 0% of the grid height reserved for space between axes
+                           grid_width=0.9,  # the grid width takes up 90% of the figure width
+                           title_height=0,  # plot without a title axes
+                           endnote_height=0,  # plot without an endnote axes
+                           grid_height=0.8)  # grid takes up 80% of the figure height
 # we plot a usual scatter plot but the scatter size is based on expected goals
 # note that the size is the expected goals * 700
 # so any shots with an expected goals = 1 would take a size of 700 (points**2)
 sc_team1 = pitch.scatter(df_team1.x, df_team1.y, s=df_team1.shot_statsbomb_xg * 700,
-                         ec='black', color='#ba495c', ax=axes[0])
+                         ec='black', color='#ba495c', ax=axs['pitch'])
 sc_team2 = pitch.scatter(df_team2.x, df_team2.y, s=df_team1.shot_statsbomb_xg * 700,
-                         ec='black', color='#697cd4', ax=axes[0])
+                         ec='black', color='#697cd4', ax=axs['pitch'])
 # (step) histograms on each of the left, top, and right marginal axes
-team1_hist_y = sns.histplot(y=df_team1.y, ax=axes[1], element='step', color='#ba495c')
-team1_hist_x = sns.histplot(x=df_team1.x, ax=axes[2], element='step', color='#ba495c')
-team2_hist_x = sns.histplot(x=df_team2.x, ax=axes[2], element='step', color='#697cd4')
-team2_hist_y = sns.histplot(y=df_team2.y, ax=axes[3], element='step', color='#697cd4')
-txt1 = axes[0].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba495c',
-                    ha='center', va='center', fontsize=30)
-txt2 = axes[0].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
-                    ha='center', va='center', fontsize=30)
+team1_hist_y = sns.histplot(y=df_team1.y, ax=axs['left'], element='step', color='#ba495c')
+team1_hist_x = sns.histplot(x=df_team1.x, ax=axs['top'], element='step', color='#ba495c')
+team2_hist_x = sns.histplot(x=df_team2.x, ax=axs['top'], element='step', color='#697cd4')
+team2_hist_y = sns.histplot(y=df_team2.y, ax=axs['right'], element='step', color='#697cd4')
+txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba495c',
+                         ha='center', va='center', fontsize=30)
+txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
+                         ha='center', va='center', fontsize=30)
 # the spine closest to the pitch shows by default, we can remove the axes here so it doesn't
-_ = axes[1].axis('off')
-_ = axes[2].axis('off')
-_ = axes[3].axis('off')
+axs['top'].axis('off')
+axs['left'].axis('off')
+axs['right'].axis('off')
 
 ##############################################################################
 # Plotting a standard shot map with rug plots
@@ -90,25 +90,25 @@ _ = axes[3].axis('off')
 
 # decreased the marginal height as rug plots are only lines,
 # we don't need as much space taken up by the marginal axes
-fig, axes, _, _ = pitch.jointgrid(figheight=10, left=None, bottom=0.075, marginal=0.02,
-                                  # plot without title/ endnote axes
-                                  endnote_height=0, title_height=0)
+fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, marginal=0.02,
+                           # plot without title/ endnote axes
+                           endnote_height=0, title_height=0)
 sc_team1 = pitch.scatter(df_team1.x, df_team1.y, s=df_team1.shot_statsbomb_xg * 700,
-                         ec='black', color='#ba495c', ax=axes[0])
+                         ec='black', color='#ba495c', ax=axs['pitch'])
 sc_team2 = pitch.scatter(df_team2.x, df_team2.y, s=df_team1.shot_statsbomb_xg * 700,
-                         ec='black', color='#697cd4', ax=axes[0])
+                         ec='black', color='#697cd4', ax=axs['pitch'])
 # note height=1 means that the whole of the marginal axes are taken up by the rugplots
-team1_rug_y = sns.rugplot(y=df_team1.y, ax=axes[1], color='#ba495c', height=1)
-team1_rug_y = sns.rugplot(y=df_team2.y, ax=axes[3], color='#697cd4', height=1)
-team1_rug_x = sns.rugplot(x=df_team1.x, ax=axes[2], color='#ba495c', height=1)
-team2_rug_x = sns.rugplot(x=df_team2.x, ax=axes[2], color='#697cd4', height=1)
-txt1 = axes[0].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba495c',
-                    ha='center', va='center', fontsize=30)
-txt2 = axes[0].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
-                    ha='center', va='center', fontsize=30)
-_ = axes[1].axis('off')
-_ = axes[2].axis('off')
-_ = axes[3].axis('off')
+team1_rug_y = sns.rugplot(y=df_team1.y, ax=axs['left'], color='#ba495c', height=1)
+team1_rug_y = sns.rugplot(y=df_team2.y, ax=axs['right'], color='#697cd4', height=1)
+team1_rug_x = sns.rugplot(x=df_team1.x, ax=axs['top'], color='#ba495c', height=1)
+team2_rug_x = sns.rugplot(x=df_team2.x, ax=axs['top'], color='#697cd4', height=1)
+txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba495c',
+                         ha='center', va='center', fontsize=30)
+txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
+                         ha='center', va='center', fontsize=30)
+axs['left'].axis('off')
+axs['top'].axis('off')
+axs['right'].axis('off')
 
 ##############################################################################
 # Get more shot data for additional games
@@ -143,12 +143,12 @@ blue = get_cmap('Blues')(np.linspace(0, 1, 100))[60]
 # Hexbin shot map with kdeplot marginal axes
 # ------------------------------------------
 
-fig, axes, _, _ = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
-                                  # plot without endnote/ title axes
-                                  endnote_height=0, title_height=0)
+fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
+                           # plot without endnote/ title axes
+                           endnote_height=0, title_height=0)
 # plot the hexbins
-hex1 = pitch.hexbin(df_team1.x, df_team1.y, ax=axes[0], edgecolors=pitch.line_color, cmap='Reds')
-hex2 = pitch.hexbin(df_team2.x, df_team2.y, ax=axes[0], edgecolors=pitch.line_color, cmap='Blues')
+hex1 = pitch.hexbin(df_team1.x, df_team1.y, ax=axs['pitch'], edgecolors=pitch.line_color, cmap='Reds')
+hex2 = pitch.hexbin(df_team2.x, df_team2.y, ax=axs['pitch'], edgecolors=pitch.line_color, cmap='Blues')
 # normalize the values so the colors depend on the minimum/ value for both teams
 # this ensures that darker colors mean more shots relative to both teams
 vmin = min(hex1.get_array().min(), hex2.get_array().min())
@@ -156,25 +156,25 @@ vmax = max(hex1.get_array().max(), hex2.get_array().max())
 hex1.set_clim(vmin=vmin, vmax=vmax)
 hex2.set_clim(vmin=vmin, vmax=vmax)
 # plot kdeplots on the marginals
-team1_hist_y = sns.kdeplot(y=df_team1.y, ax=axes[1], color=red, shade=True)
-team1_hist_x = sns.kdeplot(x=df_team1.x, ax=axes[2], color=red, shade=True)
-team2_hist_x = sns.kdeplot(x=df_team2.x, ax=axes[2], color=blue, shade=True)
-team2_hist_y = sns.kdeplot(y=df_team2.y, ax=axes[3], color=blue, shade=True)
-txt1 = axes[0].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
-                    ha='center', va='center', fontsize=30)
-txt2 = axes[0].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
-                    ha='center', va='center', fontsize=30)
-_ = axes[1].axis('off')
-_ = axes[2].axis('off')
-_ = axes[3].axis('off')
+team1_hist_y = sns.kdeplot(y=df_team1.y, ax=axs['left'], color=red, shade=True)
+team1_hist_x = sns.kdeplot(x=df_team1.x, ax=axs['top'], color=red, shade=True)
+team2_hist_x = sns.kdeplot(x=df_team2.x, ax=axs['top'], color=blue, shade=True)
+team2_hist_y = sns.kdeplot(y=df_team2.y, ax=axs['right'], color=blue, shade=True)
+txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
+                         ha='center', va='center', fontsize=30)
+txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
+                         ha='center', va='center', fontsize=30)
+axs['left'].axis('off')
+axs['top'].axis('off')
+axs['right'].axis('off')
 
 ##############################################################################
 # Heatmap shot map with histogram/ kdeplot on the marginal axes
 # -------------------------------------------------------------
 
-fig, axes, _, _ = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
-                                  # plot without endnote/ title axes
-                                  title_height=0, endnote_height=0)
+fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
+                           # plot without endnote/ title axes
+                           title_height=0, endnote_height=0)
 bs1 = pitch.bin_statistic(df_team1.x, df_team1.y, bins=(18, 12))
 bs2 = pitch.bin_statistic(df_team2.x, df_team2.y, bins=(18, 12))
 # get the min/ max values for normalizing across both teams
@@ -185,43 +185,43 @@ vmin = max(bs2['statistic'].min(), bs1['statistic'].min())
 bs1['statistic'][bs1['statistic'] == 0] = np.nan
 bs2['statistic'][bs2['statistic'] == 0] = np.nan
 # set the vmin/ vmax so the colors depend on the minimum/maximum value for both teams
-hm1 = pitch.heatmap(bs1, ax=axes[0], cmap='Reds', vmin=vmin, vmax=vmax, edgecolor='#f9f9f9')
-hm2 = pitch.heatmap(bs2, ax=axes[0], cmap='Blues', vmin=vmin, vmax=vmax, edgecolor='#f9f9f9')
+hm1 = pitch.heatmap(bs1, ax=axs['pitch'], cmap='Reds', vmin=vmin, vmax=vmax, edgecolor='#f9f9f9')
+hm2 = pitch.heatmap(bs2, ax=axs['pitch'], cmap='Blues', vmin=vmin, vmax=vmax, edgecolor='#f9f9f9')
 # histograms with kdeplot
-team1_hist_y = sns.histplot(y=df_team1.y, ax=axes[1], color=red, linewidth=1, kde=True)
-team1_hist_x = sns.histplot(x=df_team1.x, ax=axes[2], color=red, linewidth=1, kde=True)
-team2_hist_x = sns.histplot(x=df_team2.x, ax=axes[2], color=blue, linewidth=1, kde=True)
-team2_hist_y = sns.histplot(y=df_team2.y, ax=axes[3], color=blue, linewidth=1, kde=True)
-txt1 = axes[0].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
-                    ha='center', va='center', fontsize=30)
-txt2 = axes[0].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
-                    ha='center', va='center', fontsize=30)
-_ = axes[1].axis('off')
-_ = axes[2].axis('off')
-_ = axes[3].axis('off')
+team1_hist_y = sns.histplot(y=df_team1.y, ax=axs['left'], color=red, linewidth=1, kde=True)
+team1_hist_x = sns.histplot(x=df_team1.x, ax=axs['top'], color=red, linewidth=1, kde=True)
+team2_hist_x = sns.histplot(x=df_team2.x, ax=axs['top'], color=blue, linewidth=1, kde=True)
+team2_hist_y = sns.histplot(y=df_team2.y, ax=axs['right'], color=blue, linewidth=1, kde=True)
+txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
+                         ha='center', va='center', fontsize=30)
+txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
+                         ha='center', va='center', fontsize=30)
+axs['left'].axis('off')
+axs['top'].axis('off')
+axs['right'].axis('off')
 
 ##############################################################################
 # Kdeplot shot map with kdeplot on the marginal axes
 # --------------------------------------------------
 
-fig, axes, _, _ = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
-                                  # plot without endnote/ title axes
-                                  title_height=0, endnote_height=0)
+fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
+                           # plot without endnote/ title axes
+                           title_height=0, endnote_height=0)
 # increase number of levels for a smoother looking heatmap
-kde1 = pitch.kdeplot(df_team1.x, df_team1.y, ax=axes[0], cmap='Reds', levels=75, shade=True)
-kde2 = pitch.kdeplot(df_team2.x, df_team2.y, ax=axes[0], cmap='Blues', levels=75, shade=True)
+kde1 = pitch.kdeplot(df_team1.x, df_team1.y, ax=axs['pitch'], cmap='Reds', levels=75, shade=True)
+kde2 = pitch.kdeplot(df_team2.x, df_team2.y, ax=axs['pitch'], cmap='Blues', levels=75, shade=True)
 # kdeplot on marginal axes
-team1_hist_y = sns.kdeplot(y=df_team1.y, ax=axes[1], color=red, shade=True)
-team1_hist_x = sns.kdeplot(x=df_team1.x, ax=axes[2], color=red, shade=True)
-team2_hist_x = sns.kdeplot(x=df_team2.x, ax=axes[2], color=blue, shade=True)
-team2_hist_y = sns.kdeplot(y=df_team2.y, ax=axes[3], color=blue, shade=True)
-txt1 = axes[0].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
-                    ha='center', va='center', fontsize=30)
-txt2 = axes[0].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
-                    ha='center', va='center', fontsize=30)
-_ = axes[1].axis('off')
-_ = axes[2].axis('off')
-_ = axes[3].axis('off')
+team1_hist_y = sns.kdeplot(y=df_team1.y, ax=axs['left'], color=red, shade=True)
+team1_hist_x = sns.kdeplot(x=df_team1.x, ax=axs['top'], color=red, shade=True)
+team2_hist_x = sns.kdeplot(x=df_team2.x, ax=axs['top'], color=blue, shade=True)
+team2_hist_y = sns.kdeplot(y=df_team2.y, ax=axs['right'], color=blue, shade=True)
+txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
+                         ha='center', va='center', fontsize=30)
+txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
+                         ha='center', va='center', fontsize=30)
+axs['left'].axis('off')
+axs['top'].axis('off')
+axs['right'].axis('off')
 
 ##############################################################################
 # Vertical shot map with kdeplot marginals
@@ -230,25 +230,25 @@ _ = axes[3].axis('off')
 # ax_left, ax_top, ax_left, ax_right. Here we set the bottom and right
 # marginal axes to display for a single team.
 
-fig, axes, _, _ = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
-                                           grid_height=0.7, marginal=0.1,
-                                           # plot without endnote/ title axes
-                                           endnote_height=0, title_height=0,
-                                           # here we filter out the left and top marginal axes
-                                           ax_top=False, ax_bottom=True,
-                                           ax_left=False, ax_right=True)
+fig, axs = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
+                                    grid_height=0.7, marginal=0.1,
+                                    # plot without endnote/ title axes
+                                    endnote_height=0, title_height=0,
+                                    # here we filter out the left and top marginal axes
+                                    ax_top=False, ax_bottom=True,
+                                    ax_left=False, ax_right=True)
 # typical shot map where the scatter points vary by the expected goals value
 # using alpha for transparency as there are a lot of shots stacked around the six-yard box
 sc_team2 = vertical_pitch.scatter(df_team2.x, df_team2.y, s=df_team2.shot_statsbomb_xg * 700,
-                                  alpha=0.5, ec='black', color='#697cd4', ax=axes[0])
+                                  alpha=0.5, ec='black', color='#697cd4', ax=axs['pitch'])
 # kdeplots on the marginals
 # remember to flip the coordinates y=x, x=y for the marginals when using vertical orientation
-team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axes[3], color='#697cd4', shade=True)
-team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axes[4], color='#697cd4', shade=True)
-txt1 = axes[0].text(x=40, y=80, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
-                    ha='center', va='center', fontsize=60)
-_ = axes[3].axis('off')
-_ = axes[4].axis('off')
+team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade=True)
+team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
+txt1 = axs['pitch'].text(x=40, y=80, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
+                         ha='center', va='center', fontsize=60)
+axs['right'].axis('off')
+axs['bottom'].axis('off')
 
 ##############################################################################
 # Crop the pitch
@@ -261,24 +261,24 @@ vertical_pitch = VerticalPitch(half=True,
                                pad_top=0.05, pad_right=-15, pad_bottom=-20, pad_left=-15,
                                goal_type='line')
 
-fig, axes, _, _ = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
-                                           grid_height=0.7, marginal=0.1,
-                                           # plot without an endnote/ title axes
-                                           title_height=0, endnote_height=0,
-                                           # here we filter out the left and top marginal axes
-                                           ax_top=False, ax_bottom=True,
-                                           ax_left=False, ax_right=True)
+fig, axs = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
+                                    grid_height=0.7, marginal=0.1,
+                                    # plot without an endnote/ title axes
+                                    title_height=0, endnote_height=0,
+                                    # here we filter out the left and top marginal axes
+                                    ax_top=False, ax_bottom=True,
+                                    ax_left=False, ax_right=True)
 # typical shot map where the scatter points vary by the expected goals value
 # using alpha for transparency as there are a lot of shots stacked around the six-yard box
 sc_team2 = vertical_pitch.scatter(df_team2.x, df_team2.y, s=df_team2.shot_statsbomb_xg * 700,
-                                  alpha=0.5, ec='black', color='#697cd4', ax=axes[0])
+                                  alpha=0.5, ec='black', color='#697cd4', ax=axs['pitch'])
 # kdeplots on the marginals
 # remember to flip the coordinates y=x, x=y for the marginals when using vertical orientation
-team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axes[3], color='#697cd4', shade=True)
-team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axes[4], color='#697cd4', shade=True)
-txt1 = axes[0].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
-                    ha='center', va='center', fontsize=60)
-_ = axes[3].axis('off')
-_ = axes[4].axis('off')
+team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade=True)
+team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
+txt1 = axs['pitch'].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
+                         ha='center', va='center', fontsize=60)
+axs['right'].axis('off')
+axs['bottom'].axis('off')
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

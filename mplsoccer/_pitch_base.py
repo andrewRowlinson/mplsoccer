@@ -721,10 +721,6 @@ class BasePitch(ABC):
     def jointgrid(self, figheight=9, left=None, grid_width=0.8, 
                   bottom=0.025, endnote_height=0.065, endnote_space=0.01,
                   grid_height=0.715, title_space=0.01, title_height=0.15,
-                  
-                  
-                  #bottom=0.1, endnote_height=0.065, endnote_space=0.01,
-                  #grid_height=0.7, title_space=0.01, title_height=0.15,
                   space=0, marginal=0.1, ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
         """ Create a grid with a pitch at the center and (marginal) axes at the sides of the pitch.
 
@@ -777,12 +773,10 @@ class BasePitch(ABC):
         Returns
         -------
         fig : matplotlib.figure.Figure
-        axs : a 1d numpy array (length 5) of matplotlib.axes.Axes
-            format = array([pitch, marginal axes in order left, top, right, bottom])
-            if a marginal axes is not present then axes replaced by None
-        ax_title : a matplotlib.axes.Axes for plotting the title
-        ax_endnote : a matplotlib.axes.Axes for plotting the endnote
-            
+        axs : dict[label, Axes]
+            A dictionary mapping the labels to the Axes objects.
+            The possible keys are 'left', 'right', 'bottom', 'top' for the marginal axes,
+            'pitch', 'title' and 'endnote'.           
 
         Examples
         --------
@@ -790,10 +784,10 @@ class BasePitch(ABC):
         >>> import numpy as np
         >>> import seaborn as sns
         >>> pitch = Pitch()
-        >>> fig, axs, ax_title, ax_endnote = pitch.jointgrid(ax_left=False, ax_right=False,
-                                                             ax_bottom=False, ax_top=True)
+        >>> fig, axs = pitch.jointgrid(ax_left=False, ax_right=False,
+                                       ax_bottom=False, ax_top=True)
         >>> x = np.random.uniform(low=0, high=120, size=100)
-        >>> sns.kdeplot(x=x, ax=axs[2], shade=True)
+        >>> sns.kdeplot(x=x, ax=axs['top'], shade=True)
         """
         if left is None:
             left = (1 - grid_width) / 2
@@ -873,20 +867,19 @@ class BasePitch(ABC):
         title_left = left + left_pad * (not ax_left)
         title_width = grid_width - left_pad * (not ax_left) - right_pad * (not ax_right)
         grid_bottom = bottom + endnote_height + endnote_space
+        
+        # create the axes
+        axs = {}        
         if title_height > 0:
             ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
                                      title_width, title_height))
-        else:
-            ax_title = None
+            axs['title'] = ax_title
         
         if endnote_height > 0:
             ax_endnote = fig.add_axes((title_left, bottom,
                                        title_width, endnote_height))
-        else:
-            ax_endnote = None
-        
-        # create the marginal axes
-        axs = []
+            axs['endnote'] = ax_endnote
+
         if ax_left:
             ax_0 = fig.add_axes((left,
                                  grid_bottom + marginal_bottom + space_bottom + bottom_pad,
@@ -895,9 +888,7 @@ class BasePitch(ABC):
             ax_0.set_ylim(y0, y1)
             ax_0.invert_xaxis()
             set_visible(ax_0, spine_right=True)
-            axs.append(ax_0)
-        else:
-            axs.append(None)
+            axs['left'] = ax_0
 
         if ax_top:
             ax_1 = fig.add_axes((left + marginal_left + space_left + left_pad,
@@ -906,9 +897,7 @@ class BasePitch(ABC):
                                  marginal_top))
             ax_1.set_xlim(x0, x1)
             set_visible(ax_1, spine_bottom=True)
-            axs.append(ax_1)
-        else:
-            axs.append(None)
+            axs['top'] = ax_1
 
         if ax_right:
             ax_2 = fig.add_axes((left + marginal_left + space_left + pitch_width + space_right,
@@ -917,9 +906,7 @@ class BasePitch(ABC):
                                  pitch_height - bottom_pad - top_pad))
             ax_2.set_ylim(y0, y1)
             set_visible(ax_2, spine_left=True)
-            axs.append(ax_2)
-        else:
-            axs.append(None)
+            axs['right'] = ax_2
 
         if ax_bottom:
             ax_3 = fig.add_axes((left + marginal_left + space_left + left_pad,
@@ -929,19 +916,16 @@ class BasePitch(ABC):
             ax_3.set_xlim(x0, x1)
             ax_3.invert_yaxis()
             set_visible(ax_3, spine_top=True)
-            axs.append(ax_3)
-        else:
-            axs.append(None)
+            axs['bottom'] = ax_3
 
         # create the pitch axes
         ax_pitch = fig.add_axes((left + marginal_left + space_left,
                                  grid_bottom + marginal_bottom + space_bottom,
                                  pitch_width, pitch_height))
         self.draw(ax=ax_pitch)
-        axs.insert(0, ax_pitch)
+        axs['pitch'] = ax_pitch
 
-        axs = np.array(axs)
-        return fig, axs, ax_title, ax_endnote
+        return fig, axs
 
     # The methods below for drawing/ setting attributes for some of the pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
