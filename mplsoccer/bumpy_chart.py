@@ -1,7 +1,6 @@
-"""
-A Python module for plotting radar-chart.
+"""A Python module for plotting bump chart.
 
-Authors: Anmol_Durgapal(@slothfulwave612)
+Author: Anmol_Durgapal(@slothfulwave612)
 """
 
 # import required packages/modules
@@ -20,42 +19,56 @@ __all__ = ['Bumpy']
 
 
 class Bumpy:
-    """
-    contains methods to make bumpy-charts.
+    """ A class for plotting bump-charts in Matplotlib
+
+    Parameters
+    ----------
+    background_color : str, default "#1B1B1B"
+        The background-color of the plot.
+    scatter : bool, default True
+        To plot scatter points or not.
+        "value" --> scatter point for highlighted attribute.
+    scatter_color : str, default "#4F535C"
+        Color value for our scatter points. 
+    line_color : str, default None
+        Color value for the connecting lines.
+        if None --> takes the same color as scatter_color.
+    scatter_points : str, default 'o'
+        Type of marker user wants to plot.
+    scatter_primary : str, default None
+        Type of marker user wants to plot for highlighted attribute. 
+    scatter_size : float, default 100
+        Size of the scatter_points.
+    ticklabel_size : float, default 13
+        Fontsize of the ticklabel.
+    curviness : float, default 0.85
+        Value of the curved line.
+    rotate_xticks : float, default 0
+        Rotation of xticklabels in degrees.
+    rotate_yticks : float, default 0
+        Rotation of yticklabels.
+    show_right : bool, default False
+        yticklabels to be shown at the right y-axis or not.
+    label_size : float, default 20
+        Fontsize of the x and y labels.
+    labelpad : float, default 20
+        Padding between labels and ticklables.
+    alignment_xvalue : float, default 0.035
+        Value for alignment of x-label.
+    alignment_yvalue : float, default 0.16
+        Value for alignment of y-label
+    label_color : str, default "#FFFFFF"
+        Color value for labels.
+    plot_labels : bool, default True
+        To plot the labels.
     """
 
     def __init__(
         self, background_color="#1B1B1B", scatter=True, scatter_color="#4F535C", line_color=None,
         scatter_points='o', scatter_primary=None, scatter_size=100, ticklabel_size=13, 
         curviness=0.85, rotate_xticks=0, rotate_yticks=0, show_right=False, label_size=20, labelpad=20, 
-        horizontalalignment_x='left', horizontalalignment_y='right', alignment_xvalue=0.035, 
-        alignment_yvalue=0.16, label_color='#F2F2F2', plot_labels=True
+        alignment_xvalue=0.035, alignment_yvalue=0.16, label_color='#F2F2F2', plot_labels=True
     ):
-        """
-        Function to initialize the object of the class.
-
-        Args:
-            background_color (str, optional): background color for the plot. Defaults to "#1B1B1B".
-            scatter (bool/str, optional): to plot scatter points or not. Defaults to True.
-                                          "value" --> scatter point for highlighted attribute.
-            scatter_color (str, optional): color value for our scatter points. Defaults to "#4F535C".
-            line_color (str, optional): color value for the connecting lines. Defaults to None.
-                                        if None --> takes the same color as scatter_color.
-            scatter_points (str, optional): type of marker user wants to plot. Defaults to 'o'.
-            scatter_primary (str, optional): type of marker user wants to plot for highlighted attribute. Defaults to None.
-            scatter_size (float, optional): size of the scatter_points. Defaults to 100.
-            ticklabel_size (float, optional): fontsize of the ticklabel. Defaults to 13.
-            curviness (float, optional): value of the curved line. Defaults to 0.85.
-            rotate_xticks (int, optional): rotation of xticklabels in degrees. Defaults to 0.
-            rotate_yticks (int, optional): rotation of yticklabels. Defaults to 0.
-            show_right (bool, optional): yticklabels to be shown at the right y-axis or not. Defaults to False.
-            label_size (int, optional): fontsize of the x and y labels. Defaults to 20.
-            labelpad (int, optional): padding between labels and ticklables. Defaults to 20.
-            alignment_xvalue (float, optional): value for alignment of x-label. Defaults to 0.035.
-            alignment_yvalue (float, optional): value for alignment of y-label. Defaults to 0.16.
-            label_color (str, optional): color value for labels. Defaults to '#FFFFFF'.
-            plot_labels (bool, optional): to plot the labels. Defaults to True.
-        """
         self.background_color = background_color
         self.scatter = scatter
         self.scatter_color = scatter_color
@@ -82,41 +95,73 @@ class Bumpy:
             self.scatter_primary = self.scatter_points
         else:
             self.scatter_primary = scatter_primary
+        
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'background_color={self.background_color}, '
+                f'scatter={self.scatter}, '
+                f'scatter_color={self.scatter_color}, '
+                f'scatter_points={self.scatter_points}, '
+                f'scatter_size={self.scatter_size}, '
+                f'ticklabel_size={self.ticklabel_size}, '
+                f'curviness={self.curviness}) '
+                f'rotate_xticks={self.rotate_xticks}) '
+                f'rotate_yticks={self.rotate_yticks}) '
+                f'show_right={self.show_right}) '
+                f'label_size={self.label_size}) '
+                f'labelpad={self.labelpad}) '
+                f'align_xval={self.align_xval}) '
+                f'align_yval={self.align_yval}) '
+                f'label_color={self.label_color}) '
+                f'plot_labels={self.plot_labels}) ')
 
     def plot(
         self, x_list, y_list, values, highlight_dict, figsize=(12,8), lw=2,
         secondary_alpha=1, x_label=None, y_label=None, xlim=None, ylim=None, 
-        figax=None, upside_down=False, fontproperties=None
+        ax=None, upside_down=False, fontproperties=None
         ):
-        """
-        Function to plot bumpy-chart.
+        """ Function to plot bumpy-chart.
 
-        Args:
-            x_list (list): xticklabel values(serial-wise order from left to right).
-            y_list (list): yticklabel values(serial-wise order from top to bottom).
-            values (dict): containing key as team-name and value as list of rank for that team.
-            highlight_dict (dict): containing key as the team-name to be highlighted with their corresponding color.
-            figsize (tuple, optional): size of the plot. Defaults to (12,8).
-            lw (int, optional): line-width for the lines in the plot. Defaults to 2.
-            secondary_alpha (float, optional): alpha value for non-shaded lines/markers. Default to 1.
-            x_label (str, optional): x-label-name. Defaults to None.
-            y_label (str, optional): y-label-name. Defaults to None.
-            xlim (tuple, optional): limit for x axis value. Defaults to None.
-            ylim (tuple, optional): limit for y axis value. Defaults to None.
-            figax (tuple, optional): figure and axis object. Defaults to None.
-            upside_down (bool, optional): to plot chart upside down. Defaults to False.
-            fontproperties (fontmanage, optional): fontproperties for labels and ticks. Defaults to None.
+        Parameters
+        ----------
+        x_list : sequence of float/str
+            xticklabel values(serial-wise order from left to right).
+        y_list : sequence of float/str
+            yticklabel values(serial-wise order from top to bottom).
+        values : dict
+            Containing key as team-name and value as list of rank for that team.
+        highlight_dict : dict
+            Containing key as the team-name to be highlighted with their corresponding color.
+        figsize : tuple, default (12,8)
+            Size of the plot. Defaults to (12,8).
+        lw : int, default 2
+            Line-width for the lines in the plot.
+        secondary_alpha : float, default 1
+            Alpha value for non-shaded lines/markers.
+        x_label, y_label : str, default None
+            x-label and y-label name
+        xlim, ylim: tuple, default None
+            Limit for x-axis and y-axis respectively.
+        ax : axes.Axes object, default None
+            axes object on which chart will be plotted.
+        upside_down : bool, default False
+            To plot chart upside down.
+        fontproperties : FontManager, default None
+            Fontproperties for labels and ticks.
 
-        Returns:
-            matplotlib.figure.Figure: figure object.
-            axes.Axes: axes object.
+        Returns
+        -------
+        If ax=None returns a matplotlib Figure and Axes.
+        Else the settings are applied on an existing axis and returns None.
         """
-        if figax:
-            fig, ax = figax
-        else:
+        if ax is None:
             # create subplot
             fig, ax = plt.subplots(figsize=figsize, facecolor=self.background_color)
             ax.set_facecolor(self.background_color)
+
+            return_figax = True
+        else:
+            return_figax = False
 
         # length of values dict
         len_y = len(y_list)
@@ -192,8 +237,8 @@ class Bumpy:
         if self.plot_labels == True:
             if upside_down == True:
                 y_list = y_list[::-1]
-            fig, ax = self.add_labels(
-                x_list, y_list, highlight_dict, figax=(fig, ax), 
+            self.__add_labels(
+                x_list, y_list, highlight_dict, ax=ax, 
                 x_label=x_label, y_label=y_label, 
                 fontproperties=fontproperties
             )
@@ -204,32 +249,30 @@ class Bumpy:
         elif ylim != None:
             ax.set(ylim=ylim)
 
-        return fig, ax
+        if return_figax:
+            return fig, ax
 
-    def add_labels(
+    def __add_labels(
         self, x_list, y_list, highlight_dict, 
-        figax, x_label, y_label, fontproperties=None
+        ax, x_label, y_label, fontproperties=None
     ):
-        """
-        Function to add labels and titles to the plot.
+        """ Function to add labels and titles to the plot.
 
-        Args:
-            x_list (list): xticklabel values(serial-wise order from left to right).
-            y_list (list): yticklabel values(serial-wise order from top to bottom).
-            highlight_dict (dict): containing key as the team-name to be highlighted with their corresponding color.
-            figax (tuple): containing figure and axis object.
-            x_label (str): x-label-name.
-            y_label (str): y-label-name.
-            fontproperties (fontmanage, optional): fontproperties for labels and ticks. Defaults to None.
-
-        Returns:
-            matplotlib.figure.Figure: figure object.
-            axes.Axes: axis object.
+        Parameters
+        ----------
+        x_list : sequence of float/str
+            xticklabel values(serial-wise order from left to right).
+        y_list : sequence of float/str
+            yticklabel values(serial-wise order from top to bottom).
+        highlight_dict : dict
+            Containing key as the team-name to be highlighted with their corresponding color.
+        ax : axes.Axes object
+            axes object on which chart will be plotted.
+        x_label, y_label : str
+            x-label and y-label name
+        fontproperties : FontManager, default None
+            Fontproperties for labels and ticks.
         """        
-        
-        # fetch figure and axis object
-        fig, ax = figax[0], figax[1]
-
         # remove spines
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -262,18 +305,6 @@ class Bumpy:
         if self.show_right == True:
             ax.tick_params(direction='out', axis='y', which='both', labelleft=True, labelright=True,
                     right=True, left=True)
-
-        return fig, ax
-    
-    def __repr__(self):        
-        return f"""{self.__class__.__name__}(background_color='{self.background_color}', scatter_color='{self.scatter_color}', 
-                   scatter_points='{self.scatter_points}', scatter_size={self.scatter_size},
-                   ticklabel_size={self.ticklabel_size}, curviness={self.curviness}, 
-                   rotate_xticks={self.rotate_xticks}, rotate_y_ticks={self.rotate_yticks},
-                   show_right={self.show_right}, label_size={self.label_size}, labelpad={self.labelpad},
-                   self.alignment_xvalue={self.align_xval}, self.alignment_yvalue={self.align_yval}, 
-                   label_color={self.label_color}, plot_labels={self.plot_labels}),
-                   line_color={self.line_color}, scatter_primary={self.scatter_primary}"""
 
     # __str__ is the same as __repr__
     __str__ = __repr__

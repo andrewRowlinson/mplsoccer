@@ -74,6 +74,7 @@ sphinx_gallery_conf = {
 	'image_scrapers': ('matplotlib'),
     'matplotlib_animations': True,
     'subsection_order': ExplicitOrder(['../../examples/radar',
+                                       '../../examples/pizza_plots',
                                        '../../examples/bumpy_charts',
 									   '../../examples/pitch_plots',
                                        '../../examples/statsbomb',
