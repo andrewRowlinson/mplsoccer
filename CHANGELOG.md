@@ -33,7 +33,8 @@ always belongs to the cell above.
 
 ### Added
 * :heart_eyes: Merged mplsoccer with [soccerplots](https://github.com/Slothfulwave612/soccerplots) \
-for wonderful radar charts.
+for wonderful radar charts and  bumpy charts.
+* :strawberry: Added Nightingale Rose Charts (also known as pizza charts).
 * :strawberry: Added a ``jointgrid`` method to draw optional marginal axes on the four-sides \
 of a soccer pitch. This replaces the old ``jointplot``, which did not allow non-square pitches.
 * :strawberry: Added the ``grid`` method to create a grid of pitches with more control \
@@ -60,6 +61,7 @@ This fixes a FutureWarning from Seaborn that the only valid positional argument 
 For example, you can now use: from mplsoccer import Pitch.
 * :ok: Added repr methods for string representations of classes.
 * :ok: Stopped the storage of the Matplotlib figure and axes in the pitch class attributes.
+* :ok: Fixed a FutureWarning from Pandas that the lookup method will be deprecated.
 
 ---
 
@@ -67,7 +69,7 @@ For example, you can now use: from mplsoccer import Pitch.
 * :page_with_curl: Added examples for custom colormaps
 * :page_with_curl: Tweaked the StatsBomb data example to only update files if the \
 JSON file has changed.
-* :page_with_curl: Added more beautiful scatter examples.
+* :page_with_curl: Added more beautiful scatter examples and chart titles.
 * :page_with_curl: Added examples for ``grid`` and ``jointgrid``.
 
 ---

@@ -63,6 +63,8 @@ In mplsoccer, you can:
 
 - plot football/soccer pitches on nine different pitch types
 - plot radar charts
+- plot Nightingale/pizza charts
+- plot bumpy charts for showing changes over time
 - plot arrows, heatmaps, hexbins, scatter, and (comet) lines
 - load StatsBomb data as a tidy dataframe
 - standardize pitch coordinates into a single format
