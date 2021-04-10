@@ -12,7 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 
-from mplsoccer import Pitch
+from mplsoccer import Pitch, FontManager
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
 ##############################################################################
@@ -20,7 +20,7 @@ from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
 MATCH_ID = 15946
 TEAM = 'Barcelona'
-OPPONENT = 'Alavés (A), 2018/19 La Liga'
+OPPONENT = 'versus Alavés (A), 2018/19 La Liga'
 event_dict = read_event(f'{EVENT_SLUG}/{MATCH_ID}.json', warn=False)
 players = event_dict['tactics_lineup']
 events = event_dict['event']
@@ -128,8 +128,9 @@ color[:, 3] = c_transparency
 ##############################################################################
 # Plotting
 
-pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc', )
+pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
 fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
+fig.set_facecolor("#22312b")
 pass_lines = pitch.lines(passes_between.x, passes_between.y,
                          passes_between.x_end, passes_between.y_end, lw=passes_between.width,
                          color=color, zorder=1, ax=ax)
@@ -139,8 +140,41 @@ pass_nodes = pitch.scatter(average_locs_and_count.x, average_locs_and_count.y,
 for index, row in average_locs_and_count.iterrows():
     pitch.annotate(row.name, xy=(row.x, row.y), c='white', va='center',
                    ha='center', size=16, weight='bold', ax=ax)
-title = ax.set_title("{} {} Formation vs {}".format(TEAM, FORMATION, OPPONENT),
-                     size=28, y=0.97, color='#c7d5cc')
+
+##############################################################################
+# Plot the chart again with a title.
+# We will use mplsoccer's grid function to plot a pitch with a title and endnote axes.
+
+fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0,
+                      # Turn off the endnote/title axis. I usually do this after
+                      # I am happy with the chart layout and text placement
+                      axis=False,
+                      title_space=0, grid_height=0.82, endnote_height=0.05)
 fig.set_facecolor("#22312b")
+pass_lines = pitch.lines(passes_between.x, passes_between.y,
+                         passes_between.x_end, passes_between.y_end, lw=passes_between.width,
+                         color=color, zorder=1, ax=axs['pitch'])
+pass_nodes = pitch.scatter(average_locs_and_count.x, average_locs_and_count.y,
+                           s=average_locs_and_count.marker_size,
+                           color='red', edgecolors='black', linewidth=1, alpha=1, ax=axs['pitch'])
+for index, row in average_locs_and_count.iterrows():
+    pitch.annotate(row.name, xy=(row.x, row.y), c='white', va='center',
+                   ha='center', size=16, weight='bold', ax=axs['pitch'])
+
+# Load a custom font.
+URL = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Regular.ttf?raw=true'
+robotto_regular = FontManager(URL)
+
+# endnote /title
+axs['endnote'].text(1, 0.5, '@your_twitter_handle', color='#c7d5cc',
+                    va='center', ha='right', fontsize=15,
+                    fontproperties=robotto_regular.prop)
+TITLE_TEXT = f'{TEAM}, {FORMATION} formation'
+axs['title'].text(0.5, 0.7, TITLE_TEXT, color='#c7d5cc',
+                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=30)
+axs['title'].text(0.5, 0.25, OPPONENT, color='#c7d5cc',
+                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=18)
+
+# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_pass_network_002.png'
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

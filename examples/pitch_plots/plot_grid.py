@@ -38,38 +38,38 @@ from mplsoccer.statsbomb import read_event, read_lineup, EVENT_SLUG, LINEUP_SLUG
 # The defaults setup a pitch with a 2.5%
 # (of the figure height/ width) border around the sides.
 pitch = Pitch()
-fig, ax, ax_title, ax_endnote = pitch.grid()
+fig, axs = pitch.grid()
 
 ##############################################################################
 # Multiple Pitches side by side
 # -----------------------------
 # Next up let's plot 3 pitches side-by-side.
 pitch = VerticalPitch()
-fig, ax, ax_title, ax_endnote = pitch.grid(figheight=15, ncols=3)
+fig, axs = pitch.grid(figheight=15, ncols=3)
 
 ##############################################################################
 # Grid of Pitches
 # ---------------
 # Here's how to plot a grid of pitches
 pitch = Pitch(linewidth=4)
-fig, ax, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=4,  # number of rows/ columns
-                                           figheight=25,  # the figure height in inches
-                                           bottom=0.025,  # starts 2.5% in from the figure bottom
-                                           # grid takes up 83% of the figure height
-                                           # I calculated this so most of the figure is pitches
-                                           # 1 - (bottom + endnote_height + endnote_space +
-                                           # title_height + title_space) - 0.025 [space at top]
-                                           grid_height=0.83,
-                                           # reduced the amount of the figure height reserved
-                                           # for the ax_endnote and ax_title since it is in
-                                           # fractions of the figure height and the figure height
-                                           # has increased. e.g. now the title_height is
-                                           # 8% of the figheight (25).
-                                           grid_width=0.95,  # the grid takes up 95% of the figwidth
-                                           # 5% of the grid_height is the space between pitches.
-                                           space=0.05,
-                                           endnote_height=0.02, endnote_space=0.01,
-                                           title_height=0.08, title_space=0.01)
+fig, axs = pitch.grid(nrows=3, ncols=4,  # number of rows/ columns
+                      figheight=25,  # the figure height in inches
+                      bottom=0.025,  # starts 2.5% in from the figure bottom
+                      # grid takes up 83% of the figure height
+                      # I calculated this so most of the figure is pitches
+                      # 1 - (bottom + endnote_height + endnote_space +
+                      # title_height + title_space) - 0.025 [space at top]
+                      grid_height=0.83,
+                      # reduced the amount of the figure height reserved
+                      # for the ax_endnote and ax_title since it is in
+                      # fractions of the figure height and the figure height
+                      # has increased. e.g. now the title_height is
+                      # 8% of the figheight (25).
+                      grid_width=0.95,  # the grid takes up 95% of the figwidth
+                      # 5% of the grid_height is the space between pitches.
+                      space=0.05,
+                      endnote_height=0.02, endnote_space=0.01,
+                      title_height=0.08, title_space=0.01)
 
 ##############################################################################
 # Removing the endnote/title
@@ -77,20 +77,20 @@ fig, ax, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=4,  # number of rows/ 
 # You can remove the endnote/title axis by setting the endnote_height/ title_height
 # to zero.
 pitch = Pitch(linewidth=4)
-fig, ax, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=4,  # number of rows/ columns
-                                           figheight=25,  # the figure height in inches
-                                           bottom=0.025,  # starts 2.5% in from the figure bottom
-                                           # increased the grid_height as no title/ endnote
-                                           # now it takes up 95% of the figheight
-                                           grid_height=0.95,
-                                           grid_width=0.95,  # the grid takes up 95% of the figwidth
-                                           # 6% of the grid_height is the space between pitches.
-                                           space=0.06,
-                                           # set the endnote/title height to zero so
-                                           # they are not plotted. note this automatically
-                                           # sets the endnote/title space to zero
-                                           # so the grid starts at the bottom/left location
-                                           endnote_height=0, title_height=0)
+fig, axs = pitch.grid(nrows=3, ncols=4,  # number of rows/ columns
+                      figheight=25,  # the figure height in inches
+                      bottom=0.025,  # starts 2.5% in from the figure bottom
+                      # increased the grid_height as no title/ endnote
+                      # now it takes up 95% of the figheight
+                      grid_height=0.95,
+                      grid_width=0.95,  # the grid takes up 95% of the figwidth
+                      # 6% of the grid_height is the space between pitches.
+                      space=0.06,
+                      # set the endnote/title height to zero so
+                      # they are not plotted. note this automatically
+                      # sets the endnote/title space to zero
+                      # so the grid starts at the bottom/left location
+                      endnote_height=0, title_height=0)
 
 ##############################################################################
 # Pass maps
@@ -222,11 +222,14 @@ sb_logo = Image.open(urlopen(SB_LOGO_URL))
 warnings.simplefilter("ignore", UserWarning)
 
 # plot the 5 * 3 grid
-fig, axs, ax_title, ax_endnote = pitch.grid(nrows=5, ncols=3, figheight=30,
-                                            endnote_height=0.03, endnote_space=0,
-                                            title_height=0.08, grid_height=0.84)
+fig, axs = pitch.grid(nrows=5, ncols=3, figheight=30,
+                      endnote_height=0.03, endnote_space=0,
+                      # Turn off the endnote/title axis. I usually do this after
+                      # I am happy with the chart layout and text placement
+                      axis=False,
+                      title_height=0.08, grid_height=0.84)
 # cycle through the grid axes and plot the player pass maps
-for idx, ax in enumerate(axs.flat):
+for idx, ax in enumerate(axs['pitch'].flat):
     # only plot the pass maps up to the total number of players
     if idx < num_players:
         # filter the complete/incomplete passes for each player (excudes throw-ins)
@@ -284,46 +287,44 @@ ax.text(0, -5, f'{team}: Pass Receipt Heatmap', ha='left', va='center',
         fontsize=20, fontproperties=fm_scada.prop)
 
 # remove unused axes (if any)
-for ax in axs.flat[11 + num_sub:-1]:
+for ax in axs['pitch'].flat[11 + num_sub:-1]:
     ax.remove()
 
 # endnote text
-ax_endnote.text(0, 0.5, 'The format is copied from @DymondFormation',
-                fontsize=20, fontproperties=fm_scada.prop, va='center', ha='left')
+axs['endnote'].text(0, 0.5, 'The format is copied from @DymondFormation',
+                    fontsize=20, fontproperties=fm_scada.prop, va='center', ha='left')
 # to get the left position to align with the pitches I plotted it once with a random
 # left position (e.g. 0.5) and then used the following code
 # bbox_sb = ax_sb_logo.get_position()
-# bbox_endnote = ax_endnote.get_position()
+# bbox_endnote = axs['endnote'].get_position()
 # left = bbox_endnote.x1 - bbox_sb.width
 ax_sb_logo = add_image(sb_logo, fig, left=0.7970,
                        # set the bottom and height to align with the endnote
-                       bottom=ax_endnote.get_position().y0,
-                       height=ax_endnote.get_position().height)
-ax_endnote.axis('off')
+                       bottom=axs['endnote'].get_position().y0,
+                       height=axs['endnote'].get_position().height)
 
 # title text
-ax_title.text(0.5, 0.65, f'{team1} Pass Maps vs {team2}', fontsize=40,
-              fontproperties=fm_scada.prop, va='center', ha='center')
+axs['title'].text(0.5, 0.65, f'{team1} Pass Maps vs {team2}', fontsize=40,
+                  fontproperties=fm_scada.prop, va='center', ha='center')
 SUB_TEXT = ('Player Pass Maps: exclude throw-ins only\n'
             'Team heatmap: includes all attempted pass receipts')
-ax_title.text(0.5, 0.35, SUB_TEXT, fontsize=20,
-              fontproperties=fm_scada.prop, va='center', ha='center')
+axs['title'].text(0.5, 0.35, SUB_TEXT, fontsize=20,
+                  fontproperties=fm_scada.prop, va='center', ha='center')
 # plot logos (same height as the title_ax)
 # set the barca logo to align with the left/bottom of the title axes
 ax_barca_logo = add_image(barca_logo, fig,
-                          left=ax_title.get_position().x0,
-                          bottom=ax_title.get_position().y0,
-                          height=ax_title.get_position().height)
+                          left=axs['title'].get_position().x0,
+                          bottom=axs['title'].get_position().y0,
+                          height=axs['title'].get_position().height)
 # set the deportivo logo to align with the right/bottom of the title axes
 # to get the left position to align with the pitches I plotted it once with a random
 # left position (e.g. 0.5) and then used the following code
 # bbox_logo = ax_deportivo_logo.get_position()
-# bbox_title = ax_title.get_position()
+# bbox_title = axs['title'].get_position()
 # left = bbox_title.x1 - bbox_logo.width
 ax_deportivo_logo = add_image(deportivo_logo, fig, left=0.8521,
-                              bottom=ax_title.get_position().y0,
-                              height=ax_title.get_position().height)
-title = ax_title.axis('off')
+                              bottom=axs['title'].get_position().y0,
+                              height=axs['title'].get_position().height)
 # setting this example to the gallery thumbnail
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_grid_005'
 

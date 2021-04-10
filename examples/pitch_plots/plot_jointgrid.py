@@ -147,8 +147,10 @@ fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.
                            # plot without endnote/ title axes
                            endnote_height=0, title_height=0)
 # plot the hexbins
-hex1 = pitch.hexbin(df_team1.x, df_team1.y, ax=axs['pitch'], edgecolors=pitch.line_color, cmap='Reds')
-hex2 = pitch.hexbin(df_team2.x, df_team2.y, ax=axs['pitch'], edgecolors=pitch.line_color, cmap='Blues')
+hex1 = pitch.hexbin(df_team1.x, df_team1.y, ax=axs['pitch'],
+                    edgecolors=pitch.line_color, cmap='Reds')
+hex2 = pitch.hexbin(df_team2.x, df_team2.y, ax=axs['pitch'],
+                    edgecolors=pitch.line_color, cmap='Blues')
 # normalize the values so the colors depend on the minimum/ value for both teams
 # this ensures that darker colors mean more shots relative to both teams
 vmin = min(hex1.get_array().min(), hex2.get_array().min())
@@ -280,5 +282,49 @@ txt1 = axs['pitch'].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, colo
                          ha='center', va='center', fontsize=60)
 _ = axs['right'].axis('off')
 _ = axs['bottom'].axis('off')
+
+##############################################################################
+# Add a title and endnote
+# -----------------------
+# The jointgrid also has an option to plot an endnote and a title axes.
+
+vertical_pitch = VerticalPitch(half=True,
+                               # here we remove some of the pitch on the left/ right/ bottom
+                               pad_top=0.05, pad_right=-15, pad_bottom=-20, pad_left=-15,
+                               goal_type='line')
+
+fig, axs = vertical_pitch.jointgrid(figheight=10, left=None, bottom=None,  # center aligned
+                                    grid_width=0.95, marginal=0.1,
+                                    # setting up the heights/space so it takes up 95% of the figure
+                                    grid_height=0.80,
+                                    title_height=0.1, endnote_height=0.03,
+                                    title_space=0.01, endnote_space=0.01,
+                                    # here we filter out the left and top marginal axes
+                                    ax_top=False, ax_bottom=True,
+                                    ax_left=False, ax_right=True)
+# typical shot map where the scatter points vary by the expected goals value
+# using alpha for transparency as there are a lot of shots stacked around the six-yard box
+sc_team2 = vertical_pitch.scatter(df_team2.x, df_team2.y, s=df_team2.shot_statsbomb_xg * 700,
+                                  alpha=0.5, ec='black', color='#697cd4', ax=axs['pitch'])
+# kdeplots on the marginals
+# remember to flip the coordinates y=x, x=y for the marginals when using vertical orientation
+team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade=True)
+team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
+txt1 = axs['pitch'].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
+                         ha='center', va='center', fontsize=60)
+
+# titles and endnote
+axs['title'].text(0.5, 0.7, "Sevilla's shots versus Barcelona", color=pitch.line_color,
+                  fontproperties=fm_rubik.prop, fontsize=18, ha='center', va='center')
+axs['title'].text(0.5, 0.3, "2014/15 to 2019/20", color=pitch.line_color,
+                  fontproperties=fm_rubik.prop, fontsize=12, ha='center', va='center')
+axs['endnote'].text(1, 0.5, '@your_amazing_tag', ha='right', va='center',
+                    color=pitch.line_color, fontproperties=fm_rubik.prop)
+
+# turn of axes
+_ = axs['right'].axis('off')
+_ = axs['bottom'].axis('off')
+_ = axs['title'].axis('off')
+_ = axs['endnote'].axis('off')
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

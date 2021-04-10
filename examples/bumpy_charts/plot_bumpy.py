@@ -25,9 +25,9 @@ from highlight_text import fig_text
 # respect to each other rather than the actual values itself. We are going to make use of the weekwise standing data for Premier League 2019/20.
 #
 # `Link To The Data
-# <https://github.com/Slothfulwave612/data/blob/master/football/season_2019_20/Premier_League.json>`_,
+# <https://github.com/Slothfulwave612/data/blob/master/football/season_2019_20/Premier_League.json>`__,
 # `Link To The Image
-# <https://github.com/Slothfulwave612/data/blob/master/football/logo/epl.png>`_.
+# <https://github.com/Slothfulwave612/data/blob/master/football/logo/epl.png>`__.
 
 # download fonts
 font_normal = FontManager(

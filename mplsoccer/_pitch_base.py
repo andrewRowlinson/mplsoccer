@@ -563,7 +563,7 @@ class BasePitch(ABC):
 
     def grid(self, figheight=9, nrows=1, ncols=1, left=None, grid_width=0.95,
              bottom=None, endnote_height=0.065, endnote_space=0.01,
-             grid_height=0.715, title_space=0.01, title_height=0.15, space=0.05):
+             grid_height=0.715, title_space=0.01, title_height=0.15, space=0.05, axis=False):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
@@ -605,20 +605,21 @@ class BasePitch(ABC):
             The total amount of the grid height reserved for spacing between the pitch axes.
             Expressed as a fraction of the grid_height. The default is 5% of the grid height.
             The spacing across the grid width is automatically calculated to maintain even spacing.
+        axis : bool, default True
+            Whether the endnote and title axes are 'on'.
 
         Returns
         -------
         fig : matplotlib.figure.Figure
-        axs : a numpy array of matplotlib.axes.Axes with drawn pitches
-        ax_title : a matplotlib.axes.Axes for plotting the title
-        ax_endnote : a matplotlib.axes.Axes for plotting the endnote
+        axs : dict[label, Axes]
+            A dictionary mapping the labels to the Axes objects.
+            The possible keys are 'pitch', 'title', and 'endnote'.
 
         Examples
         --------
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
-        >>> fig, axs, ax_title, ax_endnote = pitch.grid(nrows=3, ncols=3, \
-                                                        grid_height=0.7, figheight=14)
+        >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figheight=14)
         """
         if left is None:
             left = (1 - grid_width) / 2
@@ -713,19 +714,23 @@ class BasePitch(ABC):
         title_left = left + left_pad
         title_width = grid_width - left_pad - right_pad
 
+        result_axes = {'pitch': axs}
+
         if title_height > 0:
             ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
                                      title_width, title_height))
-        else:
-            ax_title = None
+            if axis is False:
+                ax_title.axis('off')
+            result_axes['title'] = ax_title
 
         if endnote_height > 0:
             ax_endnote = fig.add_axes((title_left, bottom,
                                        title_width, endnote_height))
-        else:
-            ax_endnote = None
+            if axis is False:
+                ax_endnote.axis('off')
+            result_axes['endnote'] = ax_endnote
 
-        return fig, axs, ax_title, ax_endnote
+        return fig, result_axes
 
     def jointgrid(self, figheight=9, left=None, grid_width=0.95,
                   bottom=None, endnote_height=0.065, endnote_space=0.01,

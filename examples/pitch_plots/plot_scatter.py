@@ -279,6 +279,49 @@ txt = ax.text(x=40, y=85, s='Barcelona shots\nversus Sevilla',
               va='center', ha='center')
 
 ##############################################################################
+# Plot the chart again with a title
+# ---------------------------------
+# We will use mplsoccer's grid function to plot a pitch with a title and endnote axes.
+
+fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0,
+                      # Turn off the endnote/title axis. I usually do this after
+                      # I am happy with the chart layout and text placement
+                      axis=False,
+                      title_space=0, grid_height=0.82, endnote_height=0.05)
+
+# plot non-goal shots with hatch
+sc1 = pitch.scatter(df_non_goal_shots_barca.x, df_non_goal_shots_barca.y,
+                    # size varies between 100 and 1900 (points squared)
+                    s=(df_non_goal_shots_barca.shot_statsbomb_xg * 1900) + 100,
+                    edgecolors='#606060',  # give the markers a charcoal border
+                    c='None',  # no facecolor for the markers
+                    hatch='///',  # the all important hatch (triple diagonal lines)
+                    # for other markers types see: https://matplotlib.org/api/markers_api.html
+                    marker='o',
+                    ax=axs['pitch'])
+
+# plot goal shots with a color
+sc2 = pitch.scatter(df_goals_barca.x, df_goals_barca.y,
+                    # size varies between 100 and 1900 (points squared)
+                    s=(df_goals_barca.shot_statsbomb_xg * 1900) + 100,
+                    edgecolors='#606060',  # give the markers a charcoal border
+                    c='#b94b75',  # color for scatter in hex format
+                    # for other markers types see: https://matplotlib.org/api/markers_api.html
+                    marker='o',
+                    ax=axs['pitch'])
+
+# endnote text
+axs['endnote'].text(1, 0.5, '@your_twitter_handle', color=pitch.line_color,
+                    va='center', ha='right', fontsize=15,
+                    fontproperties=fm_rubik.prop)
+
+# title text
+axs['title'].text(0.5, 0.7, "Barcelona shots", color=pitch.line_color,
+                  va='center', ha='center', fontproperties=fm_rubik.prop, fontsize=30)
+axs['title'].text(0.5, 0.25, "versus Sevilla", color=pitch.line_color,
+                  va='center', ha='center', fontproperties=fm_rubik.prop, fontsize=20)
+
+##############################################################################
 # Rotated markers
 # ---------------
 # I also included a method for rotating markers in mplsoccer.

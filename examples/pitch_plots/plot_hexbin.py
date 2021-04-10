@@ -28,7 +28,7 @@ df_before_false9 = df_before_false9.loc[df_before_false9.player_id == 5503, ['x'
 
 ##############################################################################
 # Create a custom colormap.
-# Note see the`custom colormaps
+# Note see the `custom colormaps
 # <https://mplsoccer.readthedocs.io/en/latest/gallery/pitch_plots/plot_cmap.html>`_
 # example for more ideas.
 flamingo_cmap = LinearSegmentedColormap.from_list("Flamingo - 10 colors",
@@ -44,7 +44,9 @@ hexmap = pitch.hexbin(df_false9.x, df_false9.y, ax=ax, edgecolors='#f4f4f4',
 ##############################################################################
 # Load a custom font.
 URL = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Regular.ttf?raw=true'
+URL2 = 'https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Bold.ttf?raw=true'
 robotto_regular = FontManager(URL)
+robboto_bold = FontManager(URL2)
 
 ##############################################################################
 # Load images.
@@ -59,61 +61,59 @@ sb_logo = Image.open(urlopen(SB_LOGO_URL))
 # Plot the chart again with a title.
 # We will use mplsoccer's grid function to plot a pitch with a title and endnote axes.
 
-fig, pitch_ax, title_ax, endnote_ax = pitch.grid(figheight=10, title_height=0.08, endnote_space=0,
-                                                 title_space=0,
-                                                 grid_height=0.82, endnote_height=0.05)
-hexmap = pitch.hexbin(df_false9.x, df_false9.y, ax=pitch_ax, edgecolors='#f4f4f4',
+fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0,
+                      title_space=0,
+                      # Turn off the endnote/title axis. I usually do this after
+                      # I am happy with the chart layout and text placement
+                      axis=False,
+                      grid_height=0.82, endnote_height=0.05)
+hexmap = pitch.hexbin(df_false9.x, df_false9.y, ax=axs['pitch'], edgecolors='#f4f4f4',
                       gridsize=(8, 8), cmap=flamingo_cmap)
-endnote_ax.text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
-                fontproperties=robotto_regular.prop)
-endnote_ax.axis('off')
-title_ax.text(0.5, 0.7, "Lionel Messi's Actions", color='#000009',
-              va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=30)
-title_ax.text(0.5, 0.25, "First game as a false nine", color='#000009',
-              va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=20)
-title_ax.axis('off')
+axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
+                    fontproperties=robotto_regular.prop)
+axs['title'].text(0.5, 0.7, "Lionel Messi's Actions", color='#000009',
+                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=30)
+axs['title'].text(0.5, 0.25, "First game as a false nine", color='#000009',
+                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=20)
 ax_sb_logo = add_image(sb_logo, fig,
                        # set the left, bottom and height to align with the endnote
-                       left=endnote_ax.get_position().x0,
-                       bottom=endnote_ax.get_position().y0,
-                       height=endnote_ax.get_position().height)
+                       left=axs['endnote'].get_position().x0,
+                       bottom=axs['endnote'].get_position().y0,
+                       height=axs['endnote'].get_position().height)
 
 ##############################################################################
 # Plot Messi's actions in the matches before and after becoming a false-9.
 # We will use mplsoccer's grid function, which is a convenient way to plot a grid
 # of pitches with a title and endnote axes.
 
-fig, pitch_axs, title_ax, endnote_ax = pitch.grid(ncols=2)
-hexmap_before = pitch.hexbin(df_before_false9.x, df_before_false9.y, ax=pitch_axs[0],
+fig, axs = pitch.grid(ncols=2, axis=False)
+hexmap_before = pitch.hexbin(df_before_false9.x, df_before_false9.y, ax=axs['pitch'][0],
                              edgecolors='#f4f4f4',
                              gridsize=(8, 8), cmap='Reds')
-hexmap2_after = pitch.hexbin(df_false9.x, df_false9.y, ax=pitch_axs[1], edgecolors='#f4f4f4',
+hexmap2_after = pitch.hexbin(df_false9.x, df_false9.y, ax=axs['pitch'][1], edgecolors='#f4f4f4',
                              gridsize=(8, 8), cmap='Blues')
 ax_sb_logo = add_image(sb_logo, fig,
                        # set the left, bottom and height to align with the endnote
-                       left=endnote_ax.get_position().x0,
-                       bottom=endnote_ax.get_position().y0,
-                       height=endnote_ax.get_position().height)
+                       left=axs['endnote'].get_position().x0,
+                       bottom=axs['endnote'].get_position().y0,
+                       height=axs['endnote'].get_position().height)
 ax_messi = add_image(messi_image, fig, interpolation='hanning',
                      # set the left, bottom and height to align with the title
-                     left=title_ax.get_position().x0,
-                     bottom=title_ax.get_position().y0,
-                     height=title_ax.get_position().height)
+                     left=axs['title'].get_position().x0,
+                     bottom=axs['title'].get_position().y0,
+                     height=axs['title'].get_position().height)
 
 # titles using highlight_text and a google font (Robotto)
 
 TITLE_STR1 = 'The Evolution of Lionel Messi'
 TITLE_STR2 = 'Actions in the match <before> and\n<after> becoming a False-9'
-title1_text = title_ax.text(0.5, 0.7, TITLE_STR1, fontsize=28, color='#000009',
-                            fontproperties=robotto_regular.prop,
-                            ha='center', va='center')
+title1_text = axs['title'].text(0.5, 0.7, TITLE_STR1, fontsize=28, color='#000009',
+                                fontproperties=robotto_regular.prop,
+                                ha='center', va='center')
+highlight_text = [{'color': '#800610', 'fontproperties': robboto_bold.prop},
+                  {'color': '#08306b', 'fontproperties': robboto_bold.prop}]
 ax_text(0.5, 0.3, TITLE_STR2, ha='center', va='center', fontsize=18, color='#000009',
-        fontproperties=robotto_regular.prop,
-        highlight_textprops=[{"color": '#800610'}, {"color": '#08306b'}], ax=title_ax)
-
-# turn off title and endnote axes
-endnote_ax.axis('off')
-title_ax.axis('off')
+        fontproperties=robotto_regular.prop, highlight_textprops=highlight_text, ax=axs['title'])
 
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_hexbin_003.png'
 

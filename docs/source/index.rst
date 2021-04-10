@@ -88,6 +88,8 @@ mplsoccer was inspired by:
    installation
    gallery/pitch_setup/plot_pitches
    gallery/radar/plot_radar
+   gallery/pizza_plots/plot_pizza
+   gallery/bumpy_charts/plot_bumpy
    gallery/statsbomb/plot_statsbomb_data
    gallery/index
    api

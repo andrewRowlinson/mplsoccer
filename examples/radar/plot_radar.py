@@ -76,7 +76,8 @@ robotto_bold = FontManager(URL6)
 ##############################################################################
 # Player Values
 # -------------
-# Here are the player values we are going to plot:
+# Here are the player values we are going to plot. The values are taken
+# from the excellent `fbref <https://fbref.com/en/>`_ website (supplied by StatsBomb).
 
 bruno_values =  [0.25, 0.42, 0.42, 3.47, 1.04, 8.06, 5.62, 0.97, 0.56, 5.14, 3.54]
 bruyne_values = [0.32, 0.00, 0.43, 3.50, 0.98, 7.72, 6.18, 0.98, 1.71, 4.88, 4.96]
