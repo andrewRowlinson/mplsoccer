@@ -732,6 +732,64 @@ class BasePitch(ABC):
 
         return fig, result_axes
 
+    def calculate_grid_dimensions(self, figwidth, figheight, nrows, ncols, max_grid, space):
+        """ A helper method to propose a grid_width and grid_height for grid based on the inputs.
+
+        Parameters
+        ----------
+        figwidth, figheight : float
+            The figure width/height in inches.
+        nrows, ncols : int
+            Number of rows/columns of pitches in the grid.
+        max_grid : float
+            The longest side of the grid in fractions of the figure width / height.
+            Should be between zero and one.
+        space : float
+            The total amount of the grid height reserved for spacing between the pitch axes.
+            Expressed as a fraction of the grid_height.
+
+        Returns
+        -------
+        grid_width, grid_height : the suggested grid_width and grid_height
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> grid_width, grid_height = pitch.calculate_grid_dimensions(figwidth=16, figheight=9, \
+                                                                      nrows=1, ncols=1, \
+                                                                      max_grid=1,  space=0)
+        """
+        # calculate the grid_width given the max_grid as grid_height
+        if (nrows > 1) and (ncols > 1):
+            grid1 = max_grid * figheight / figwidth * (((1 - space) * self.ax_aspect *
+                                                        ncols / nrows) +
+                                                       (space * (ncols - 1) / (nrows - 1)))
+        elif (nrows > 1) and (ncols == 1):
+            grid1 = max_grid * figheight / figwidth * (1 - space) * self.ax_aspect / nrows
+        elif (nrows == 1) and (ncols > 1):
+            grid1 = max_grid * figheight / figwidth * (space + self.ax_aspect * ncols)
+        else:
+            grid1 = max_grid * figheight / figwidth * self.ax_aspect
+
+        # calculate grid_height given the max_grid as grid_width
+        if (nrows > 1) and (ncols > 1):
+            grid2 = max_grid / figheight * figwidth / (((1 - space) * self.ax_aspect *
+                                                        ncols / nrows) +
+                                                       (space * (ncols - 1) / (nrows - 1)))
+        elif (nrows > 1) and (ncols == 1):
+            grid2 = max_grid / figheight * figwidth / (1 - space) * self.ax_aspect / nrows
+
+        elif (nrows == 1) and (ncols > 1):
+            grid2 = max_grid / figheight * figwidth / (space + self.ax_aspect * ncols)
+        else:
+            grid2 = max_grid / figheight * figwidth / self.ax_aspect
+
+        # decide whether the max_grid is the grid_width or grid_height and set the other value
+        if (grid1 > 1) | ((grid2 >= grid1) & (grid2 <= 1)):
+            return max_grid, grid2
+        return grid1, max_grid
+
     def jointgrid(self, figheight=9, left=None, grid_width=0.95,
                   bottom=None, endnote_height=0.065, endnote_space=0.01,
                   grid_height=0.715, title_space=0.01, title_height=0.15,
