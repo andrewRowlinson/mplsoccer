@@ -67,7 +67,9 @@ def _simplify_cols_and_drop(df, col, cols=None):
     """ Function to merge similar columns together and drop original columns. """
     if cols is None:
         cols = df.columns[df.columns.str.contains(col)]
-    df[col] = df.lookup(df.index, df[cols].notnull().idxmax(axis=1))
+    df_melt = df[cols].melt(ignore_index=False).copy()
+    df_melt = df_melt[df_melt.value.notnull()].copy()
+    df.loc[df_melt.index, col] = df_melt.value
     df.drop(cols, axis=1, errors='ignore', inplace=True)
     return df
 
