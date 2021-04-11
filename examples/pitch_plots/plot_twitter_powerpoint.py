@@ -12,10 +12,15 @@ the other hand the algorithms might pick up engagement from people clicking to
 enlarge cropped photos.
 
 For Twitter, the following aspect ratios prevent images getting cropped (width then height):
+
 * A single image: ``16 by 9``
+
 * Two images: ``7 by 8``
+
 * One ``7 by 8`` and two ``7 by 4``
+
 * Four images: ``7 by 4``
+
 """
 from mplsoccer import Pitch, VerticalPitch
 import matplotlib.pyplot as plt
