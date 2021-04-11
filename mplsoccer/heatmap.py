@@ -11,7 +11,7 @@ _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
 
-def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), standardized=False):
+def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
     """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
 
     This method automatically sets the range, changes some of the scipy defaults,
@@ -41,6 +41,8 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), s
           * the bin edges in each dimension (x_edge, y_edge = bins).
             If the bin edges are specified, the number of bins will be,
             (nx = len(x_edge)-1, ny = len(y_edge)-1).
+    normalize : bool, default False
+        Whether to normalize the statistic by dividing by the total.
     standardized : bool, default False
         Whether the x, y values have been standardized to the
         'uefa' pitch coordinates (105m x 68m)
@@ -101,6 +103,9 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), s
     # then the statistic is flipped back here
     if dim.invert_y and standardized is False:
         statistic = np.flip(statistic, axis=0)
+        
+    if normalize:
+        statistic = statistic / statistic.sum()
 
     x_grid, y_grid = np.meshgrid(x_edge, y_edge)
 
@@ -154,7 +159,7 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     return mesh
 
 
-def bin_statistic_positional(x, y, values=None, dim=None, positional='full', statistic='count'):
+def bin_statistic_positional(x, y, values=None, dim=None, positional='full', statistic='count', normalize=False):
     """ Calculates binned statistics for the Juego de posición (position game) concept.
     It uses scipy.stats.binned_statistic_2d.
 
@@ -173,6 +178,8 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         The following statistics are available: 'count' (default),
         'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function. See:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html.
+    normalize : bool, default False
+        Whether to normalize the statistic by dividing by the total.
 
     Returns
     -------
@@ -285,6 +292,11 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         stats = [stats]
     else:
         raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
+        
+    if normalize:
+        total = np.array([stat['statistic'].sum() for stat in stats]).sum()
+        for stat in stats:
+            stat['statistic'] = stat['statistic'] / total
 
     return stats
 

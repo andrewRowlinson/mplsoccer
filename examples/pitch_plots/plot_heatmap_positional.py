@@ -9,7 +9,6 @@ See: https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanati
 
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -26,6 +25,19 @@ mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pres
 df = df.loc[mask_chelsea_pressure, ['x', 'y']]
 
 ##############################################################################
+# Custom colormap, font, and path effects
+
+# see the custom colormaps example for more ideas on setting colormaps
+pearl_earring_cmap = LinearSegmentedColormap.from_list("Pearl Earring - 10 colors",
+                                                       ['#15242e', '#4393c4'], N=10)
+
+# fontmanager for google font (robotto)
+robotto_regular = FontManager()
+
+path_eff = [path_effects.Stroke(linewidth=3, foreground='black'),
+            path_effects.Normal()]
+
+##############################################################################
 # Plot positional heatmap
 # -----------------------
 
@@ -34,18 +46,13 @@ pitch = VerticalPitch(pitch_type='statsbomb', line_zorder=2,
                       pitch_color='#22312b', line_color='white')
 # draw
 fig, ax = pitch.draw(figsize=(4.125, 6))
-bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count', positional='full')
+bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count',
+                                               positional='full', normalize=True)
 pitch.heatmap_positional(bin_statistic, ax=ax, cmap='coolwarm', edgecolors='#22312b')
 pitch.scatter(df.x, df.y, c='white', s=2, ax=ax)
-total = np.array([bs['statistic'].sum() for bs in bin_statistic]).sum()
-for bs in bin_statistic:
-    bs['statistic'] = (pd.DataFrame(bs['statistic'] / total)
-                       .applymap(lambda x: '{:.0%}'.format(x))
-                       .values)
-path_eff = [path_effects.Stroke(linewidth=3, foreground='black'),
-            path_effects.Normal()]
 labels = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
-                             ax=ax, ha='center', va='center', path_effects=path_eff)
+                             ax=ax, ha='center', va='center',
+                             str_format='{:.0%}', path_effects=path_eff)
 
 ##############################################################################
 # Plot the chart again with a title
@@ -60,28 +67,14 @@ fig, axs = pitch.grid(endnote_height=0.03, endnote_space=0,
                       grid_height=0.84)
 fig.set_facecolor('#1e4259')
 
-# see the custom colormaps example for more ideas on setting colormaps
-pearl_earring_cmap = LinearSegmentedColormap.from_list("Pearl Earring - 10 colors",
-                                                       ['#15242e', '#4393c4'], N=10)
-
-# fontmanager for google font (robotto)
-robotto_regular = FontManager()
-
-bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count', positional='full')
+# heatmap and labels
+bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count',
+                                               positional='full', normalize=True)
 pitch.heatmap_positional(bin_statistic, ax=axs['pitch'],
                          cmap=pearl_earring_cmap, edgecolors='#22312b')
-# replace raw counts with percentages and add percentage sign
-# (note immutable named tuple so used _replace)
-pitch.scatter(df.x, df.y, c='white', s=2, ax=ax)
-total = np.array([bs['statistic'].sum() for bs in bin_statistic]).sum()
-for bs in bin_statistic:
-    bs['statistic'] = (pd.DataFrame(bs['statistic'] / total)
-                       .applymap(lambda x: '{:.0%}'.format(x))
-                       .values)
-path_eff = [path_effects.Stroke(linewidth=3, foreground='black'),
-            path_effects.Normal()]
 labels = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
-                             ax=axs['pitch'], ha='center', va='center', path_effects=path_eff)
+                             ax=axs['pitch'], ha='center', va='center',
+                             str_format='{:.0%}', path_effects=path_eff)
 
 # endnote and title
 axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,

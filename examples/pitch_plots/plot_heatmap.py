@@ -106,16 +106,11 @@ axs['title'].text(0.5, 0.5, "Pressure applied by Chelsea FC Women", color='white
 pitch = VerticalPitch(pitch_type='statsbomb', line_zorder=2, pitch_color='#f4edf0')
 fig, ax = pitch.draw(figsize=(4.125, 6))
 fig.set_facecolor('#f4edf0')
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 5))
+bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 5), normalize=True)
 pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9')
-# replace raw counts with percentages and add percentage sign
-# (note immutable named tuple so used _replace)
-bin_statistic['statistic'] = ((pd.DataFrame((bin_statistic['statistic'] /
-                                             bin_statistic['statistic'].sum())))
-                              .applymap(lambda x: '{:.0%}'.format(x))
-                              .values)
 labels = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
-                             ax=ax, ha='center', va='center', path_effects=path_eff)
+                             ax=ax, ha='center', va='center',
+                             str_format='{:.0%}', path_effects=path_eff)
 
 ##############################################################################
 # Plot heatmap with defined bins
@@ -129,16 +124,12 @@ fig.set_facecolor('#f4edf0')
 bin_x = np.linspace(pitch.dim.left, pitch.dim.right, num=7)
 bin_y = np.sort(np.array([pitch.dim.bottom, pitch.dim.six_yard_bottom,
                           pitch.dim.six_yard_top, pitch.dim.top]))
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(bin_x, bin_y))
+bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count',
+                                    bins=(bin_x, bin_y), normalize=True)
 pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9')
-# replace raw counts with percentages and add percentage sign
-# (note immutable named tuple so used _replace)
-bin_statistic['statistic'] = ((pd.DataFrame((bin_statistic['statistic'] /
-                                             bin_statistic['statistic'].sum())))
-                              .applymap(lambda x: '{:.0%}'.format(x))
-                              .values)
 labels2 = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
-                              ax=ax, ha='center', va='center', path_effects=path_eff)
+                              ax=ax, ha='center', va='center',
+                              str_format='{:.0%}', path_effects=path_eff)
 
 ##############################################################################
 # Plot the chart again with a title
@@ -156,17 +147,12 @@ fig.set_facecolor('#1e4259')
 bin_x = np.linspace(pitch.dim.left, pitch.dim.right, num=7)
 bin_y = np.sort(np.array([pitch.dim.bottom, pitch.dim.six_yard_bottom,
                           pitch.dim.six_yard_top, pitch.dim.top]))
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(bin_x, bin_y))
+bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count',
+                                    bins=(bin_x, bin_y), normalize=True)
 pitch.heatmap(bin_statistic, ax=axs['pitch'], cmap=pearl_earring_cmap, edgecolor='#f9f9f9')
-# replace raw counts with percentages and add percentage sign
-# (note immutable named tuple so used _replace)
-bin_statistic['statistic'] = ((pd.DataFrame((bin_statistic['statistic'] /
-                                             bin_statistic['statistic'].sum())))
-                              .applymap(lambda x: '{:.0%}'.format(x))
-                              .values)
-
 labels3 = pitch.label_heatmap(bin_statistic, color='#dee6ea', fontsize=18,
-                              ax=axs['pitch'], ha='center', va='center', path_effects=path_eff)
+                              ax=axs['pitch'], ha='center', va='center',
+                              str_format='{:.0%}', path_effects=path_eff)
 
 # endnote and title
 axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,

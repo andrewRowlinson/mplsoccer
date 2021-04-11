@@ -51,6 +51,10 @@ pitch type where the length and width can vary.
 in degrees clockwise.
 * :new: Added ``create_transparent_cmap`` to create colormaps that vary from high transparency \
 to low transparency.
+* :new: Added ``normalize`` option to ``bin_statistic`` and ``bin_statistic_positional`` \
+so the results are divided by the total.
+* Added ``str_format`` option to ``label_heatmap`` to enable formatting of heatmap labels, \
+e.g. % or rounding.
 
 ---
 

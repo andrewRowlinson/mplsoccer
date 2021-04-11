@@ -363,9 +363,9 @@ class BasePitchPlot(BasePitch):
         return ax.annotate(text, xy, xytext, **kwargs)
 
     @docstring.copy(bin_statistic)
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), standardized=False):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
         stats = bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
-                              bins=bins, standardized=standardized)
+                              bins=bins, normalize=normalize, standardized=standardized)
         return stats
 
     @docstring.copy(heatmap)
@@ -374,9 +374,9 @@ class BasePitchPlot(BasePitch):
         return mesh
 
     @docstring.copy(bin_statistic_positional)
-    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
+    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count', normalize=False):
         stats = bin_statistic_positional(x, y, values=values,
-                                         dim=self.dim, positional=positional, statistic=statistic)
+                                         dim=self.dim, positional=positional, statistic=statistic, normalize=normalize)
         return stats
 
     @docstring.copy(heatmap_positional)
@@ -384,15 +384,18 @@ class BasePitchPlot(BasePitch):
         mesh = heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
         return mesh
 
-    def label_heatmap(self, stats, ax=None, **kwargs):
+    def label_heatmap(self, stats, str_format=None, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
         Parameters
         ----------
         stats : A dictionary or list of dictionaries.
             This should be calculated via bin_statistic_positional() or bin_statistic().
+        str_format : str
+            A format string passed to str_format.format() to format the labels.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
+
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
 
         Returns
@@ -434,6 +437,8 @@ class BasePitchPlot(BasePitch):
             cx = np.ravel(bin_stat['cx'])[~mask_clip]
             cy = np.ravel(bin_stat['cy'])[~mask_clip]
             for idx, text_str in enumerate(text):
+                if str_format is not None:
+                    text_str = str_format.format(text_str)
                 annotation = self.annotate(text_str, (cx[idx], cy[idx]), ax=ax, **kwargs)
                 annotation_list.append(annotation)
 

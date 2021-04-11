@@ -9,7 +9,6 @@ from urllib.request import urlopen
 
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from PIL import Image
 
@@ -88,14 +87,9 @@ for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
     # fill in the bin statistics from df and plot the heatmap
     bin_statistic['statistic'] = df.loc[df.Squad == teams[i], pressure_cols].values
     heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='coolwarm', vmin=vmin, vmax=vmax)
-    # format and plot labels
-    bin_statistic['statistic'] = (pd.DataFrame(bin_statistic['statistic'])
-                                  .round(0)
-                                  .astype(np.int32)
-                                  .applymap(lambda x: '{:d}%'.format(x)).values)
     annotate = pitch.label_heatmap(bin_statistic, color='white', fontproperties=fm.prop,
                                    path_effects=path_eff, fontsize=50, ax=ax,
-                                   ha='center', va='center')
+                                   str_format='{0:.0f}%', ha='center', va='center')
 
 # if its the Bundesliga remove the two spare pitches
 if len(teams) == 18:
@@ -150,14 +144,9 @@ for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
     # fill in the bin statistics from df and plot the heatmap
     bin_statistic['statistic'] = df.loc[df.Squad == teams[i], pressure_cols].values
     heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='coolwarm', vmin=vmin, vmax=vmax)
-    # format and plot labels
-    bin_statistic['statistic'] = (pd.DataFrame(bin_statistic['statistic'])
-                                  .round(0)
-                                  .astype(np.int32)
-                                  .applymap(lambda x: '{:d}%'.format(x)).values)
     annotate = pitch.label_heatmap(bin_statistic, color='white', fontproperties=fm.prop,
-                                   path_effects=path_eff,
-                                   fontsize=50, ax=ax, ha='center', va='center')
+                                   path_effects=path_eff, str_format='{0:.0f}%', fontsize=50,
+                                   ax=ax, ha='center', va='center')
 
 # if its the Bundesliga remove the two spare pitches
 if len(teams) == 18:

@@ -1096,7 +1096,7 @@ class BasePitch(ABC):
         """ Implement a wrapper for matplotlib.axes.Axes.annotate."""
 
     @abstractmethod
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), standardized=False):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
         """ Calculate 2d binned statistics for arbritary shaped bins."""
 
     @abstractmethod
@@ -1104,7 +1104,7 @@ class BasePitch(ABC):
         """ Implement drawing heatmaps for arbritary shaped bins."""
 
     @abstractmethod
-    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count'):
+    def bin_statistic_positional(self, x, y, values=None, positional='full', normalize=False, statistic='count'):
         """ Calculate the binned statistics for Juegos de posición zones."""
 
     @abstractmethod
