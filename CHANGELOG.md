@@ -55,6 +55,8 @@ to low transparency.
 so the results are divided by the total.
 * Added ``str_format`` option to ``label_heatmap`` to enable formatting of heatmap labels, \
 e.g. % or rounding.
+* Added ``exclude_zeros`` option (default False) to ``label_heatmap`` to enable you to \
+exclude drawing any labels equal to zero.
 
 ---
 
