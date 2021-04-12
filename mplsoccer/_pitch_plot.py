@@ -384,7 +384,7 @@ class BasePitchPlot(BasePitch):
         mesh = heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
         return mesh
 
-    def label_heatmap(self, stats, str_format=None, ax=None, **kwargs):
+    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
         Parameters
@@ -393,6 +393,8 @@ class BasePitchPlot(BasePitch):
             This should be calculated via bin_statistic_positional() or bin_statistic().
         str_format : str
             A format string passed to str_format.format() to format the labels.
+        exclude_zeros : bool
+            Whether to exclude zeros when labelling the heatmap.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
 
@@ -431,6 +433,8 @@ class BasePitchPlot(BasePitch):
             mask_y_outside1 = bin_stat['cy'] < self.dim.pitch_extent[2]
             mask_y_outside2 = bin_stat['cy'] > self.dim.pitch_extent[3]
             mask_clip = mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
+            if exclude_zeros:
+                mask_clip = mask_clip | (np.isclose(bin_stat['statistic'], 0.))
             mask_clip = np.ravel(mask_clip)
 
             text = np.ravel(bin_stat['statistic'])[~mask_clip]
