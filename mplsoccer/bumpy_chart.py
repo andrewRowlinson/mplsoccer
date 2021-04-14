@@ -209,7 +209,7 @@ class Bumpy:
                 verts = [(i + d, len_y - vij + add_value) for i, vij in enumerate(value) for d in (-self.curviness, 0, self.curviness)][1: -1]
 
             # plot scatter-points
-            if self.scatter == True:
+            if self.scatter:
                 ax.scatter(
                     np.arange(len(value)), y, 
                     marker=marker, 
@@ -234,26 +234,26 @@ class Bumpy:
             ax.add_patch(patch)
 
         # plot labels 
-        if self.plot_labels == True:
-            if upside_down == True:
+        if self.plot_labels:
+            if upside_down:
                 y_list = y_list[::-1]
             self.__add_labels(
-                x_list, y_list, highlight_dict, ax=ax, 
+                x_list, y_list, ax=ax, 
                 x_label=x_label, y_label=y_label, 
                 fontproperties=fontproperties
             )
 
         # xlim and ylim
-        if xlim != None:
+        if xlim is not None:
             ax.set(xlim=xlim)
-        elif ylim != None:
+        elif ylim is not None:
             ax.set(ylim=ylim)
 
         if return_figax:
             return fig, ax
 
     def __add_labels(
-        self, x_list, y_list, highlight_dict, 
+        self, x_list, y_list, 
         ax, x_label, y_label, fontproperties=None
     ):
         """ Function to add labels and titles to the plot.
@@ -264,8 +264,6 @@ class Bumpy:
             xticklabel values(serial-wise order from left to right).
         y_list : sequence of float/str
             yticklabel values(serial-wise order from top to bottom).
-        highlight_dict : dict
-            Containing key as the team-name to be highlighted with their corresponding color.
         ax : axes.Axes object
             axes object on which chart will be plotted.
         x_label, y_label : str
@@ -302,9 +300,11 @@ class Bumpy:
         # remove tick marks
         ax.tick_params(axis='both', which='both', length=0, colors=self.label_color)
 
-        if self.show_right == True:
-            ax.tick_params(direction='out', axis='y', which='both', labelleft=True, labelright=True,
-                    right=True, left=True)
+        if self.show_right:
+            ax.tick_params(
+                direction='out', axis='y', which='both', labelleft=True, labelright=True,
+                right=True, left=True
+            )
 
     # __str__ is the same as __repr__
     __str__ = __repr__

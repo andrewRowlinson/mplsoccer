@@ -13,9 +13,38 @@ Bumpy Charts
 from mplsoccer import Bumpy, FontManager, add_image
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
 import json
 from highlight_text import fig_text
+from PIL import Image
+from urllib.request import urlopen
+
+##############################################################################
+# Load some fonts
+# ---------------
+# We will use mplsoccer's FontManager to load some fonts from Google Fonts.
+# We borrowed the FontManager from the excellent
+# `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
+
+font_normal = FontManager("https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Regular.ttf?raw=true")
+font_italic = FontManager("https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Italic.ttf?raw=true")
+font_bold = FontManager("https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Medium.ttf?raw=true")
+
+##############################################################################
+# Load Files
+# ---------------
+# We will using these images/data in our examples. You can find all the images/data `here <https://github.com/andrewRowlinson/mplsoccer-assets>`_.
+
+epl = Image.open(
+    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/epl.png?raw=true")
+)
+
+season_dict = json.load(
+    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/epl.json?raw=true")
+)
+
+player_dict = json.load(
+    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/percentile.json?raw=true")
+)
 
 ##############################################################################
 # Making A Bumpy Chart
@@ -23,25 +52,6 @@ from highlight_text import fig_text
 # A Bump Chart is a special form of a line plot. This chart is well-suited for exploring changes in rank over time.
 # Using this chart, you can easily compare the position, performance or rankings of multiple observations with 
 # respect to each other rather than the actual values itself. We are going to make use of the weekwise standing data for Premier League 2019/20.
-#
-# `Link To The Data
-# <https://github.com/Slothfulwave612/data/blob/master/football/season_2019_20/Premier_League.json>`__,
-# `Link To The Image
-# <https://github.com/Slothfulwave612/data/blob/master/football/logo/epl.png>`__.
-
-# download fonts
-font_normal = FontManager(
-    "https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Regular.ttf?raw=true"
-)
-font_italic = FontManager(
-    "https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Italic.ttf?raw=true"
-)
-font_bold = FontManager(
-    "https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Medium.ttf?raw=true"
-)
-
-# load the data
-season_dict = json.load(open("epl.json"))
 
 # match-week
 match_day = ["Week " + str(num) for num in range(1, 39)]
@@ -84,26 +94,18 @@ title = "Premier League 2019/20 week-wise standings:"
 sub_title = "A comparison between <Liverpool>, <Manchester City> and <Manchester United>"
 
 # add title
-fig.text(0.09, 0.95, title, size=27, color="#F2F2F2", fontproperties=font_bold.prop)
+fig.text(0.09, 0.95, title, size=29, color="#F2F2F2", fontproperties=font_bold.prop)
 
 # add subtitle
 fig_text(
-    0.09, 0.92, sub_title, color="#F2F2F2",
+    0.09, 0.94, sub_title, color="#F2F2F2",
     highlight_textprops=[{"color": 'crimson'}, {"color": 'skyblue'}, {"color": 'gold'}],
-    size=23, fig=fig, fontproperties=font_bold.prop
-)
-
-# add credits
-fig.text(
-    0.94, 0.01, "graphic: @slothfulwave612", size=13, 
-    color="#F2F2F2", fontstyle="italic", 
-    ha="right", fontproperties=font_italic.prop
+    size=25, fig=fig, fontproperties=font_bold.prop
 )
 
 # add image
-image = Image.open("epl.png")
 fig = add_image(
-     image,
+     epl,
      fig,  # figure
      0.02, 0.9, # left and bottom dimensions
      0.08, 0.08 # height and width values
@@ -151,26 +153,18 @@ title = "Premier League 2019/20 week-wise standings:"
 sub_title = "A comparison between <Liverpool>, <Manchester City> and <Manchester United>"
 
 # add title
-fig.text(0.09, 0.95, title, size=27, color="#F2F2F2", fontproperties=font_bold.prop)
+fig.text(0.09, 0.95, title, size=29, color="#F2F2F2", fontproperties=font_bold.prop)
 
 # add subtitle
 fig_text(
-    0.09, 0.92, sub_title, color="#F2F2F2", 
+    0.09, 0.94, sub_title, color="#F2F2F2",
     highlight_textprops=[{"color": 'crimson'}, {"color": 'skyblue'}, {"color": 'gold'}],
-    size=23, fig=fig, fontproperties=font_bold.prop
-)
-
-# add credits
-fig.text(
-    0.94, 0.01, "graphic: @slothfulwave612", size=13, 
-    color="#F2F2F2", fontstyle="italic", 
-    ha="right", fontproperties=font_italic.prop
+    size=25, fig=fig, fontproperties=font_bold.prop
 )
 
 # add image
-image = Image.open("epl.png")
 fig = add_image(
-     image,
+     epl,
      fig,  # figure
      0.02, 0.9, # left and bottom dimensions
      0.08, 0.08 # height and width values
@@ -228,20 +222,13 @@ title = "Premier League 2019/20 week-wise standings:"
 sub_title = "A comparison between <Manchester United> and <Chelsea>"
 
 # add title
-fig.text(0.03, 0.95, title, size=27, color="#222222", fontproperties=font_bold.prop)
+fig.text(0.03, 0.95, title, size=29, color="#222222", fontproperties=font_bold.prop)
 
 # add subtitle
 fig_text(
-    0.03, 0.92, sub_title, color="#222222", 
+    0.03, 0.94, sub_title, color="#222222", 
     highlight_textprops=[{"color": 'crimson'}, {"color": 'blue'}],
-    size=23, fig=fig, fontproperties=font_bold.prop
-)
-
-# add credits
-fig.text(
-    0.94, 0.01, "graphic: @slothfulwave612", 
-    size=13, color="#222222", fontstyle="italic", 
-    ha="right", fontproperties=font_italic.prop
+    size=25, fig=fig, fontproperties=font_bold.prop
 )
 
 # if space is left in the plot use this
@@ -251,11 +238,6 @@ plt.tight_layout(pad=0.5)
 # Player Percentile Rank Viz
 # ----------------------------
 # Here we will create a bumpy-chart that will compare two players based on their percentile rank.
-# `Link To The Data
-# <https://github.com/Slothfulwave612/data/blob/master/football/percentile.json>`_
-
-# load the data
-player_dict = json.load(open("percentile.json"))
 
 # attributes and highlight dict
 attribute = [
@@ -287,7 +269,7 @@ title = "Comparison Between <Cristián Zapata> and <Francesco Acerbi>"
 
 # add title
 fig_text(
-    0.02, 0.95, title, color="#F2F2F2",
+    0.02, 0.975, title, color="#F2F2F2",
     highlight_textprops=[{"color": 'crimson'}, {"color": 'cornflowerblue'}],
     size=34, fig=fig, fontproperties=font_bold.prop
 )

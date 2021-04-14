@@ -9,14 +9,15 @@ Pizza Plots
 
 * Here we will show some examples of how to use ``mplsoccer`` to plot pizza-charts.
 
-We have re-written the `Soumyajit Bose's <https://twitter.com/Soumyaj15209314>`_  pizza chart code 
+We have re-written `Soumyajit Bose's <https://twitter.com/Soumyaj15209314>`_  pizza chart code 
 to enable greater customisation.
 """
 
 from mplsoccer import PyPizza, add_image, FontManager
 import matplotlib.pyplot as plt
-from PIL import Image
 from highlight_text import fig_text
+from PIL import Image
+from urllib.request import urlopen
 
 ##############################################################################
 # Load some fonts
@@ -28,6 +29,21 @@ from highlight_text import fig_text
 font_normal = FontManager("https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Regular.ttf?raw=true")
 font_italic = FontManager("https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Italic.ttf?raw=true")
 font_bold = FontManager("https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Medium.ttf?raw=true")
+
+##############################################################################
+# Load Images
+# ---------------
+# We will using these images in our examples. You can find all the images `here <https://github.com/andrewRowlinson/mplsoccer-assets>`_.
+
+putellas_cropped = Image.open(
+    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/putellas_cropped.png?raw=true")
+)
+lewa_cropped = Image.open(
+    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/lewa_cropped.png?raw=true")
+)
+fdj_cropped = Image.open(
+    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/fdj_cropped.png?raw=true")
+)
 
 ##############################################################################
 # Plotting A Simple Pizza-Plot
@@ -46,6 +62,7 @@ values = [99, 99, 87, 51, 62, 58, 45, 40, 27, 74, 77, 73]
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     straight_line_color="#000000",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
     last_circle_lw=1,               # linewidth of last circle
@@ -55,7 +72,7 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,     # param and corresponding values
+    values,             # list of values
     figsize=(8,8),      # adjust figsize according to your need
     param_location=110, # where the parameters will be added
     kwargs_slices=dict(
@@ -91,8 +108,11 @@ fig.text(
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.03, "data: statsbomb via fbref", size=10,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#000000",
     ha="right"
 )
@@ -111,6 +131,7 @@ plt.show()
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of params
     straight_line_color="#000000",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
     last_circle_lw=1,               # linewidth of last circle
@@ -121,8 +142,8 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,     # param and corresponding values
-    figsize=(8,8),      # adjust figsize according to your need
+    values,              # list of values
+    figsize=(8,8),       # adjust figsize according to your need
     param_location=110,  # where the parameters will be added
     kwargs_slices=dict(
         facecolor="cornflowerblue", edgecolor="#000000", 
@@ -157,16 +178,18 @@ fig.text(
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.03, "data: statsbomb via fbref", size=10,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#000000",
     ha="right"
 )
 
-# load and add image
-image = Image.open("lewa_cropped.png")
+# add image
 ax_image = add_image(
-    image, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
+    lewa_cropped, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
 )   # these values might differ when you are plotting
 
 plt.show()
@@ -181,6 +204,7 @@ plt.show()
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     straight_line_color="#F2F2F2",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
     last_circle_lw=0,               # linewidth of last circle
@@ -189,7 +213,7 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,             # param and corresponding values
+    values,                     # list of values
     figsize=(8,8),              # adjust figsize according to your need
     color_blank_space="same",   # use same color to fill blank space
     blank_alpha=0.4,            # alpha for blank-space colors
@@ -226,8 +250,11 @@ fig.text(
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.03, "data: statsbomb via fbref", size=10,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#000000",
     ha="right"
 )
@@ -241,6 +268,7 @@ plt.show()
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     straight_line_color="#F2F2F2",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
     last_circle_lw=0,               # linewidth of last circle
@@ -249,7 +277,7 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,                              # param and corresponding values
+    values,                                      # list of values
     figsize=(8,8),                               # adjust figsize according to your need
     color_blank_space=["#C5C5C5"]*len(params),   # use same color to fill blank space
     blank_alpha=0.4,                             # alpha for blank-space colors
@@ -286,8 +314,11 @@ fig.text(
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.03, "data: statsbomb via fbref", size=10,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#000000",
     ha="right"
 )
@@ -322,6 +353,7 @@ text_colors = ["#000000"] * 10 + ["#F2F2F2"] * 5
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     background_color="#EBEBE9",     # background color
     straight_line_color="#EBEBE9",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
@@ -332,8 +364,8 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,                  # param and corresponding values
-    figsize=(8,9),                   # adjust figsize according to your need
+    values,                          # list of values
+    figsize=(8,8.5),                   # adjust figsize according to your need
     color_blank_space="same",        # use same color to fill blank space
     slice_colors=slice_colors,       # color for individual slices 
     value_colors=text_colors,        # color for the value-text
@@ -358,51 +390,53 @@ fig, ax = baker.make_pizza(
 
 # add title
 fig.text(
-    0.515, 0.965, "Frenkie de Jong - FC Barcelona", size=18,
+    0.515, 0.975, "Frenkie de Jong - FC Barcelona", size=16,
     ha="center", fontproperties=font_bold.prop, color="#000000"
 )
 
 # add subtitle
 fig.text(
-    0.515, 0.94, 
+    0.515, 0.955, 
     "Percentile Rank vs Top-Five League Midfielders | Season 2020-21", 
-    size=15,
+    size=13,
     ha="center", fontproperties=font_bold.prop, color="#000000"
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.08, "data: statsbomb via fbref", size=10,
+    0.99, 0.02, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#000000",
     ha="right"
 )
 
 # add text
 fig.text(
-    0.34, 0.915, "Attacking        Possession       Defending", size=14,
+    0.34, 0.93, "Attacking        Possession       Defending", size=14,
     fontproperties=font_bold.prop, color="#000000"
 )
 
 # add rectangles
 fig.patches.extend([
     plt.Rectangle(
-        (0.31,0.9125),0.025,0.021, fill=True, color="#1a78cf",
+        (0.31,0.9225),0.025,0.021, fill=True, color="#1a78cf",
         transform=fig.transFigure, figure=fig
     ),
     plt.Rectangle(
-        (0.462,0.9125),0.025,0.021, fill=True, color="#ff9300",
+        (0.462,0.9225),0.025,0.021, fill=True, color="#ff9300",
         transform=fig.transFigure, figure=fig
     ),
     plt.Rectangle(
-        (0.632,0.9125),0.025,0.021, fill=True, color="#d70232",
+        (0.632,0.9225),0.025,0.021, fill=True, color="#d70232",
         transform=fig.transFigure, figure=fig
     ),
 ])
 
-# load and add image
-image = Image.open("fdj_cropped.png")
+# add image
 ax_image = add_image(
-    image, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
+    fdj_cropped, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
 )   # these values might differ when you are plotting
 
 plt.show()
@@ -424,6 +458,7 @@ values_2 = [83, 75, 55, 62, 72, 92, 92, 79, 64, 92, 68, 31]  # for Mohamed Salah
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     background_color="#EBEBE9",     # background color
     straight_line_color="#222222",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
@@ -435,7 +470,7 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,             # param and corresponding values
+    values,                     # list of values
     compare_values=values_2,    # comparison values
     figsize=(8,8),              # adjust figsize according to your need
     kwargs_slices=dict(
@@ -480,8 +515,11 @@ fig.text(
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.03, "data: statsbomb via fbref", size=10,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#000000",
     ha="right"
 )
@@ -517,6 +555,7 @@ text_colors = ["#000000"] * 10 + ["#F2F2F2"] * 5
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     background_color="#222222",     # background color
     straight_line_color="#000000",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
@@ -528,8 +567,8 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,                  # param and corresponding values
-    figsize=(8,9),                   # adjust figsize according to your need
+    values,                          # list of values
+    figsize=(8,8.5),                   # adjust figsize according to your need
     color_blank_space="same",        # use same color to fill blank space
     slice_colors=slice_colors,       # color for individual slices 
     value_colors=text_colors,        # color for the value-text
@@ -554,51 +593,53 @@ fig, ax = baker.make_pizza(
 
 # add title
 fig.text(
-    0.515, 0.965, "Frenkie de Jong - FC Barcelona", size=18,
+    0.515, 0.975, "Frenkie de Jong - FC Barcelona", size=16,
     ha="center", fontproperties=font_bold.prop, color="#F2F2F2"
 )
 
 # add subtitle
 fig.text(
-    0.515, 0.94, 
+    0.515, 0.955, 
     "Percentile Rank vs Top-Five League Midfielders | Season 2020-21", 
-    size=15,
+    size=13,
     ha="center", fontproperties=font_bold.prop, color="#F2F2F2"
 )
 
 # add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.95, 0.08, "data: statsbomb via fbref", size=10,
+    0.99, 0.02, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#F2F2F2",
     ha="right"
 )
 
 # add text
 fig.text(
-    0.34, 0.915, "Attacking        Possession       Defending", size=14,
+    0.34, 0.93, "Attacking        Possession       Defending", size=14,
     fontproperties=font_bold.prop, color="#F2F2F2"
 )
 
 # add rectangles
 fig.patches.extend([
     plt.Rectangle(
-        (0.31,0.9125),0.025,0.021, fill=True, color="#1a78cf",
+        (0.31,0.9225),0.025,0.021, fill=True, color="#1a78cf",
         transform=fig.transFigure, figure=fig
     ),
     plt.Rectangle(
-        (0.462,0.9125),0.025,0.021, fill=True, color="#ff9300",
+        (0.462,0.9225),0.025,0.021, fill=True, color="#ff9300",
         transform=fig.transFigure, figure=fig
     ),
     plt.Rectangle(
-        (0.632,0.9125),0.025,0.021, fill=True, color="#d70232",
+        (0.632,0.9225),0.025,0.021, fill=True, color="#d70232",
         transform=fig.transFigure, figure=fig
     ),
 ])
 
-# load and add image
-image = Image.open("fdj_cropped.png")
+# add image
 ax_image = add_image(
-    image, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
+    fdj_cropped, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
 )   # these values might differ when you are plotting
 
 plt.show()
@@ -615,6 +656,7 @@ values = [5, 2, 4, 3, 1]
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,                  # list of parameters
     straight_line_color="#F2F2F2",  # color for straight lines
     straight_line_lw=1,             # linewidth for straight lines
     straight_line_limit=5.0,        # max limit of straight lines
@@ -625,7 +667,7 @@ baker = PyPizza(
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,             # param and corresponding values
+    values,                     # list of values
     figsize=(8,8),              # adjust figsize according to your need
     color_blank_space="same",   # use same color to fill blank space
     blank_alpha=0.4,            # alpha for blank-space colors
@@ -686,23 +728,24 @@ max_range = [90, 9.7, 0.20, 0.89, 2.1, 2.7, 0.4, 5.1, 3.7, 2.5]
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params, 
+    min_range=min_range,        # min range values 
+    max_range=max_range,        # max range values
     background_color="#222222", straight_line_color="#000000",
-    last_circle_color="#000000", last_circle_lw=4, other_circle_lw=0,
-    other_circle_color="#000000", inner_circle_size=20,
+    last_circle_color="#000000", last_circle_lw=2.5, straight_line_lw=1,
+    other_circle_lw=0, other_circle_color="#000000", inner_circle_size=20,
 )
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,             # param and corresponding values
-    min_range=min_range,        # min range values 
-    max_range=max_range,        # max range values
+    values,                     # list of values
     figsize=(8,8),              # adjust figsize according to your need
     color_blank_space="same",   # use same color to fill blank space
     blank_alpha=0.4,            # alpha for blank-space colors
     param_location=110,         # where the parameters will be added
     kwargs_slices=dict(
         facecolor="#1A78CF", edgecolor="#000000",
-        zorder=2, linewidth=1
+        zorder=1, linewidth=1
     ),                          # values to be used when plotting slices                
     kwargs_params=dict(
         color="#F2F2F2", fontsize=12, zorder=5,
@@ -732,17 +775,19 @@ fig.text(
     ha="center", fontproperties=font_bold.prop, color="#F2F2F2"
 )
 
-# credits
+# add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.88, 0.04, "data: statsbomb", size=12,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#F2F2F2",
     ha="right"
 )
 
-# load and add image
-image = Image.open("putellas_cropped.png")
+# add image
 ax_image = add_image(
-    image, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
+    putellas_cropped, fig, left=0.4478, bottom=0.4315, width=0.13, height=0.127
 )   # these values might differ when you are plotting
 
 plt.show()
@@ -767,27 +812,28 @@ max_range = [90, 9.7, 0.20, 0.89, 2.1, 2.7, 0.4, 5.1, 3.7, 2.5]
 
 # instantiate PyPizza class
 baker = PyPizza(
+    params=params,
+    min_range=min_range,        # min range values 
+    max_range=max_range,        # max range values
     background_color="#222222", straight_line_color="#000000",
-    last_circle_color="#000000", last_circle_lw=4, other_circle_lw=0,
-    other_circle_color="#000000"
+    last_circle_color="#000000", last_circle_lw=2.5, other_circle_lw=0,
+    other_circle_color="#000000", straight_line_lw=1
 )
 
 # plot pizza
 fig, ax = baker.make_pizza(
-    params, values,             # param and corresponding values
+    values,                     # list of values
     compare_values=values_2,    # passing comparison values
-    min_range=min_range,        # min range values 
-    max_range=max_range,        # max range values
     figsize=(8,8),              # adjust figsize according to your need
     color_blank_space="same",   # use same color to fill blank space
     blank_alpha=0.4,            # alpha for blank-space colors
     param_location=110,         # where the parameters will be added
     kwargs_slices=dict(
         facecolor="#1A78CF", edgecolor="#000000",
-        zorder=2, linewidth=1
+        zorder=1, linewidth=1
     ),                          # values to be used when plotting slices                
     kwargs_compare=dict(
-        facecolor="#ff9300", edgecolor="#222222", zorder=3, linewidth=2,
+        facecolor="#ff9300", edgecolor="#222222", zorder=3, linewidth=1,
     ),                          # values to be used when plotting comparison slices
     kwargs_params=dict(
         color="#F2F2F2", fontsize=12, zorder=5,
@@ -827,9 +873,12 @@ fig.text(
     ha="center", fontproperties=font_bold.prop, color="#F2F2F2"
 )
 
-# credits
+# add credits
+credit_1 = "data: statsbomb viz fbref"
+credit_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
 fig.text(
-    0.88, 0.04, "data: statsbomb", size=12,
+    0.99, 0.005, f"{credit_1}\n{credit_2}", size=9,
     fontproperties=font_italic.prop, color="#F2F2F2",
     ha="right"
 )
