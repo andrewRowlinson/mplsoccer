@@ -46,7 +46,7 @@ fdj_cropped = Image.open(urlopen(URL))
 
 ##############################################################################
 # Multiple Slice Colors
-# ---------------------------------
+# ---------------------
 # Here we show an example where the slice colors are set via lists.
 
 # parameter list

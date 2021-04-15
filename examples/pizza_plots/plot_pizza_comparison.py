@@ -36,7 +36,7 @@ font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robot
 
 ##############################################################################
 # Comparison Chart
-# ---------------------------------
+# ----------------
 # To plot comparison chart one have to pass list of values to ``compare_values`` argument.
 
 # parameter and values list

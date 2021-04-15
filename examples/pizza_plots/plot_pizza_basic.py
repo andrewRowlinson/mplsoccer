@@ -1,7 +1,7 @@
 """
-================
-Basic Pizza Plot
-================
+==============================
+Basic Pizza Plot (Percentiles)
+==============================
 
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
@@ -120,7 +120,7 @@ plt.show()
 
 ##############################################################################
 # Adding Image
-# ----------------------------
+# ------------
 # One can add image to the pizza plot. The process is like this: first increase the size of the
 # center circle by using ``inner_circle_size`` argument inside ``PyPizza``
 # and then using ``add_image`` method to plot the image at the center.
