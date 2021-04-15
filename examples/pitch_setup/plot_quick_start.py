@@ -11,8 +11,8 @@ pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
 fig, ax = pitch.draw()
 
 # plot a basic Radar
-radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0],
-              range_outer=[10, 10, 10])
+radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+              max_range=[10, 10, 10])
 fig, ax = radar.setup_axis()
 rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
 values = [5, 3, 10]
