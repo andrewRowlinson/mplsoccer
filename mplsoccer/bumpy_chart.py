@@ -3,12 +3,13 @@
 Author: Anmol_Durgapal(@slothfulwave612)
 """
 
+import warnings
+
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 # import required packages/modules
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.path import Path
-import matplotlib.patches as patches
-import warnings
 
 from mplsoccer.utils import set_labels
 
@@ -29,14 +30,14 @@ class Bumpy:
         To plot scatter points or not.
         "value" --> scatter point for highlighted attribute.
     scatter_color : str, default "#4F535C"
-        Color value for our scatter points. 
+        Color value for our scatter points.
     line_color : str, default None
         Color value for the connecting lines.
         if None --> takes the same color as scatter_color.
     scatter_points : str, default 'o'
         Type of marker user wants to plot.
     scatter_primary : str, default None
-        Type of marker user wants to plot for highlighted attribute. 
+        Type of marker user wants to plot for highlighted attribute.
     scatter_size : float, default 100
         Size of the scatter_points.
     ticklabel_size : float, default 13
@@ -63,12 +64,11 @@ class Bumpy:
         To plot the labels.
     """
 
-    def __init__(
-        self, background_color="#1B1B1B", scatter=True, scatter_color="#4F535C", line_color=None,
-        scatter_points='o', scatter_primary=None, scatter_size=100, ticklabel_size=13, 
-        curviness=0.85, rotate_xticks=0, rotate_yticks=0, show_right=False, label_size=20, labelpad=20, 
-        alignment_xvalue=0.035, alignment_yvalue=0.16, label_color='#F2F2F2', plot_labels=True
-    ):
+    def __init__(self, background_color="#1B1B1B", scatter=True, scatter_color="#4F535C",
+                 line_color=None, scatter_points='o', scatter_primary=None, scatter_size=100,
+                 ticklabel_size=13,  curviness=0.85, rotate_xticks=0, rotate_yticks=0,
+                 show_right=False, label_size=20, labelpad=20, alignment_xvalue=0.035,
+                 alignment_yvalue=0.16, label_color='#F2F2F2', plot_labels=True):
         self.background_color = background_color
         self.scatter = scatter
         self.scatter_color = scatter_color
@@ -95,7 +95,7 @@ class Bumpy:
             self.scatter_primary = self.scatter_points
         else:
             self.scatter_primary = scatter_primary
-        
+
     def __repr__(self):
         return (f'{self.__class__.__name__}('
                 f'background_color={self.background_color}, '
@@ -115,11 +115,9 @@ class Bumpy:
                 f'label_color={self.label_color}) '
                 f'plot_labels={self.plot_labels}) ')
 
-    def plot(
-        self, x_list, y_list, values, highlight_dict, figsize=(12,8), lw=2,
-        secondary_alpha=1, x_label=None, y_label=None, xlim=None, ylim=None, 
-        ax=None, upside_down=False, fontproperties=None
-        ):
+    def plot(self, x_list, y_list, values, highlight_dict, figsize=(12, 8), lw=2,
+             secondary_alpha=1, x_label=None, y_label=None, xlim=None, ylim=None,
+             ax=None, upside_down=False, fontproperties=None):
         """ Function to plot bumpy-chart.
 
         Parameters
@@ -168,7 +166,7 @@ class Bumpy:
 
         # iterate thorugh the dictionary and plot the chart
         for key, value in values.items():
-            
+
             # find value in highlight_dict
             if highlight_dict.get(key):
                 line_color = highlight_dict[key]     # fetch the required color
@@ -194,25 +192,27 @@ class Bumpy:
                 y = np.array(value) + add_value
 
                 # coordinates for bezier curve
-                verts = [(i + d, vij + add_value) for i, vij in enumerate(value) for d in (-self.curviness, 0, self.curviness)][1: -1]
-            
+                verts = [(i + d, vij + add_value) for i, vij in enumerate(value)
+                         for d in (-self.curviness, 0, self.curviness)][1: -1]
+
             else:
                 if len_y % 2 == 0:
                     add_value = 1
                 else:
                     add_value = 0
-                
+
                 # y-coordinate to plot scatter points
                 y = len_y - np.array(value) + add_value
 
                 # coordinates for bezier curve
-                verts = [(i + d, len_y - vij + add_value) for i, vij in enumerate(value) for d in (-self.curviness, 0, self.curviness)][1: -1]
+                verts = [(i + d, len_y - vij + add_value) for i, vij in enumerate(value)
+                         for d in (-self.curviness, 0, self.curviness)][1: -1]
 
             # plot scatter-points
             if self.scatter:
                 ax.scatter(
-                    np.arange(len(value)), y, 
-                    marker=marker, 
+                    np.arange(len(value)), y,
+                    marker=marker,
                     color=color,
                     s=self.scatter_size,
                     alpha=alpha,
@@ -220,26 +220,27 @@ class Bumpy:
                 )
             elif self.scatter == "value" and highlight_dict.get(key):
                 ax.scatter(
-                    np.arange(len(value)), y, 
-                    marker=marker, 
+                    np.arange(len(value)), y,
+                    marker=marker,
                     color=color,
                     s=self.scatter_size,
                     zorder=zorder
                 )
 
-            # create bezier curves 
+            # create bezier curves
             codes = [Path.MOVETO] + [Path.CURVE4] * (len(verts) - 1)
             path = Path(verts, codes)
-            patch = patches.PathPatch(path, facecolor='none', lw=lw, edgecolor=line_color, zorder=zorder, alpha=alpha)
+            patch = patches.PathPatch(path, facecolor='none', lw=lw, edgecolor=line_color,
+                                      zorder=zorder, alpha=alpha)
             ax.add_patch(patch)
 
-        # plot labels 
+        # plot labels
         if self.plot_labels:
             if upside_down:
                 y_list = y_list[::-1]
             self.__add_labels(
-                x_list, y_list, ax=ax, 
-                x_label=x_label, y_label=y_label, 
+                x_list, y_list, ax=ax,
+                x_label=x_label, y_label=y_label,
                 fontproperties=fontproperties
             )
 
@@ -251,11 +252,9 @@ class Bumpy:
 
         if return_figax:
             return fig, ax
+        return None
 
-    def __add_labels(
-        self, x_list, y_list, 
-        ax, x_label, y_label, fontproperties=None
-    ):
+    def __add_labels(self, x_list, y_list, ax, x_label, y_label, fontproperties=None):
         """ Function to add labels and titles to the plot.
 
         Parameters
@@ -270,7 +269,7 @@ class Bumpy:
             x-label and y-label name
         fontproperties : FontManager, default None
             Fontproperties for labels and ticks.
-        """        
+        """
         # remove spines
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -282,8 +281,10 @@ class Bumpy:
         y_labels = set_labels(ax=ax, label_value=y_list, label_axis='y')
 
         # set ticklabels
-        ax.set_xticklabels(x_labels, fontsize=self.ticklabel_size, rotation=self.rotate_xticks, fontproperties=fontproperties)
-        ax.set_yticklabels(y_labels, fontsize=self.ticklabel_size, rotation=self.rotate_yticks, fontproperties=fontproperties)
+        ax.set_xticklabels(x_labels, fontsize=self.ticklabel_size,
+                           rotation=self.rotate_xticks, fontproperties=fontproperties)
+        ax.set_yticklabels(y_labels, fontsize=self.ticklabel_size,
+                           rotation=self.rotate_yticks, fontproperties=fontproperties)
 
         # set x and y axis labels
         ax.set_xlabel(

@@ -18,7 +18,7 @@ class PyPizza:
     ----------
     params : sequence of str
         The name of parameters (e.g. 'Key Passes')
-    min_range, max_range : sequence of floats, deafult None
+    min_range, max_range : sequence of floats, default None
         Minimum and maximum range for each parameter
     background_color : str, default "#F2F2F2"
         The background-color of the plot.
@@ -46,13 +46,11 @@ class PyPizza:
         Linestyle for other circle.
     """
 
-    def __init__(
-        self, params, min_range=None, max_range=None,
-        background_color="#F2F2F2", inner_circle_size=5.0, straight_line_limit=100.0,
-        straight_line_color="#808080", straight_line_lw=2.0, straight_line_ls='-',
-        last_circle_color="#000000", last_circle_lw=2.0, last_circle_ls='-', 
-        other_circle_color="#808080", other_circle_lw=2.0, other_circle_ls="--"
-    ):
+    def __init__(self, params, min_range=None, max_range=None,
+                 background_color="#F2F2F2", inner_circle_size=5.0, straight_line_limit=100.0,
+                 straight_line_color="#808080", straight_line_lw=2.0, straight_line_ls='-',
+                 last_circle_color="#000000", last_circle_lw=2.0, last_circle_ls='-',
+                 other_circle_color="#808080", other_circle_lw=2.0, other_circle_ls="--"):
         self.params = params
         self.min_range = min_range
         self.max_range = max_range
@@ -69,7 +67,7 @@ class PyPizza:
         self.other_circle_lw = other_circle_lw
         self.other_circle_ls = other_circle_ls
 
-    def __repr__(self):        
+    def __repr__(self):
         return (f'{self.__class__.__name__}('
                 f'params={self.params}, '
                 f'min_range={self.min_range}, '
@@ -87,15 +85,12 @@ class PyPizza:
                 f'other_circle_lw={self.other_circle_lw}, '
                 f'other_circle_ls={self.other_circle_ls}, ')
 
-    def make_pizza(
-        self, values, compare_values=None,
-        bottom=0.0, figsize=(24,16), ax=None, param_location=108, 
-        slice_colors=None, value_colors=None, compare_colors=None,
-        value_bck_colors=None, compare_value_colors=None, 
-        compare_value_bck_colors=None, color_blank_space=None, blank_alpha=0.5,
-        kwargs_slices=None, kwargs_compare=None, kwargs_params=None, kwargs_values=None,
-        kwargs_compare_values=None
-    ):
+    def make_pizza(self, values, compare_values=None, bottom=0.0, figsize=(24, 16),
+                   ax=None, param_location=108, slice_colors=None, value_colors=None,
+                   compare_colors=None, value_bck_colors=None, compare_value_colors=None,
+                   compare_value_bck_colors=None, color_blank_space=None, blank_alpha=0.5,
+                   kwargs_slices=None, kwargs_compare=None, kwargs_params=None, kwargs_values=None,
+                   kwargs_compare_values=None):
         """To make the pizza plot.
 
             Parameters
@@ -130,13 +125,17 @@ class PyPizza:
                         if "same" --> same color as main-slices
                         if sequence of str --> colors from the defined sequence
             blank_alpha : float, default 0.5
-                Alpha value for blank-spce-colors
+                Alpha value for blank-space-colors
 
             **kwargs_slices : All keyword arguments are passed on to axes.Axes.bar for slices.
-            **kwargs_compare : All keyword arguments are passed on to axes.Axes.bar for comparison-slices.
-            **kwargs_params : All keyword arguments are passed on to axes.Axes.text for adding parameters.
-            **kwargs_values : All keyword arguments are passed on to axes.Axes.text for adding values.
-            **kwargs_compare_values : All keyword arguments are passed on to axes.Axes.text for adding comparison-values.
+            **kwargs_compare : All keyword arguments are passed on to axes.Axes.bar
+                               for comparison-slices.
+            **kwargs_params : All keyword arguments are passed on to axes.Axes.text
+                              for adding parameters.
+            **kwargs_values : All keyword arguments are passed on to axes.Axes.text
+                              for adding values.
+            **kwargs_compare_values : All keyword arguments are passed on to axes.Axes.text
+                              for adding comparison-values.
 
             Returns
             -------
@@ -144,7 +143,7 @@ class PyPizza:
             Else the settings are applied on an existing axis and returns None.
         """
         if len(self.params) != len(values):
-            raise Exception("Length of parmas and values are not equal!!!")
+            raise Exception("Length of params and values are not equal!!!")
         if slice_colors is not None and len(slice_colors) != len(self.params):
             raise Exception("Length of slice_colors and params are not equal!!!")
         if value_colors is not None and len(value_colors) != len(self.params):
@@ -184,24 +183,24 @@ class PyPizza:
             return_fig_ax = True
         else:
             return_fig_ax = False
-        
+
         # total number of attributes
-        total_parms = len(self.params)
+        total_params = len(self.params)
 
         # calculate theta value and width of the bar
         theta, width = np.linspace(
-            0.0, 2 * np.pi, total_parms, endpoint=False, retstep=True
+            0.0, 2 * np.pi, total_params, endpoint=False, retstep=True
         )
 
         if self.min_range is not None and self.max_range is not None:
-            self.min_range = np.array(self.min_range) 
+            self.min_range = np.array(self.min_range)
             self.max_range = np.array(self.max_range)
             temp_values = self.__get_value(values)
         else:
             temp_values = values
 
         # plot slice for values
-        main_slice = ax.bar( 
+        main_slice = ax.bar(
             x=theta, height=temp_values, width=width,
             bottom=bottom, **kwargs_slices
         )
@@ -213,7 +212,7 @@ class PyPizza:
 
         # color blank area
         if color_blank_space is not None:
-            blank_space = ax.bar(   
+            blank_space = ax.bar(
                 theta, height=self.straight_line_limit,
                 width=width,
                 bottom=bottom,
@@ -231,7 +230,7 @@ class PyPizza:
 
         # add comparison values
         if compare_values is not None:
-            
+
             if self.min_range is not None and self.max_range is not None:
                 temp_compare_values = self.__get_value(compare_values)
             else:
@@ -247,12 +246,12 @@ class PyPizza:
                     slice_c.set_zorder(slice_m.get_zorder() - 0.1)
                 if temp_values[idx] > temp_compare_values[idx]:
                     slice_c.set_zorder(slice_m.get_zorder() + 0.1)
-            
+
             # color individual slices
             if compare_colors is not None:
                 for index, slices in enumerate(compare_slice):
                     slices.set_facecolor(compare_colors[index])
-        
+
         else:
             temp_compare_values = None
 
@@ -261,9 +260,9 @@ class PyPizza:
 
         # add text
         self.__add_texts(
-            ax, values, param_location, theta, main_slice, 
+            ax, values, param_location, theta,
             value_colors=value_colors, value_bck_colors=value_bck_colors,
-            compare_values=compare_values, compare_value_colors=compare_value_colors, 
+            compare_values=compare_values, compare_value_colors=compare_value_colors,
             temp_values=temp_values, temp_compare_values=temp_compare_values,
             compare_value_bck_colors=compare_value_bck_colors,
             kwargs_params=kwargs_params, kwargs_values=kwargs_values,
@@ -272,10 +271,9 @@ class PyPizza:
 
         if return_fig_ax:
             return fig, ax
+        return None
 
-    def __setup_pizza(
-        self, ax, theta, width
-    ):
+    def __setup_pizza(self, ax, theta, width):
         """To setup the pizza plot.
 
             Parameters
@@ -302,7 +300,7 @@ class PyPizza:
         ax.set_theta_direction(-1)
 
         # set up line for each bar
-        ax.set_thetagrids((theta+width/2)* 180 / np.pi)
+        ax.set_thetagrids((theta+width/2) * 180 / np.pi)
 
         # last circle off
         ax.spines['polar'].set_visible(False)
@@ -322,21 +320,19 @@ class PyPizza:
             i.set_color(self.other_circle_color)
             i.set_linewidth(self.other_circle_lw)
             i.set_linestyle(self.other_circle_ls)
-        
+
         # for other straight-line
         for i in list(ax.xaxis.get_gridlines()):
             i.set_color(self.straight_line_color)
             i.set_linewidth(self.straight_line_lw)
             i.set_linestyle(self.straight_line_ls)
 
-    def __add_texts(
-        self, ax, values, param_location, theta, main_slice, 
-        temp_values=None, temp_compare_values=None,
-        value_colors=None, value_bck_colors=None,
-        compare_values=None, compare_value_colors=None,
-        compare_value_bck_colors=None,
-        kwargs_params=None, kwargs_values=None, kwargs_compare_values=None
-    ):
+    def __add_texts(self, ax, values, param_location, theta,
+                    temp_values=None, temp_compare_values=None,
+                    value_colors=None, value_bck_colors=None,
+                    compare_values=None, compare_value_colors=None,
+                    compare_value_bck_colors=None,
+                    kwargs_params=None, kwargs_values=None, kwargs_compare_values=None):
         """To make the pizza plot.
 
             Parameters
@@ -349,8 +345,6 @@ class PyPizza:
                 Location where params will be added.
             theta : sequence of float.
                 theta values.
-            main_slice : information about bar.
-                matplotlib.container.BarContainer
             temp_values : sequence of floats/int
                 Values for each parameter (if ranges are specified)
             temp_compare_values : sequence of floats/int
@@ -366,9 +360,12 @@ class PyPizza:
             compare_value_bck_colors : sequence of str, default None
                 Color for background text-box for individual comparison-value-text.
 
-            **kwargs_params : All keyword arguments are passed on to axes.Axes.text for adding parameters.
-            **kwargs_values : All keyword arguments are passed on to axes.Axes.text for adding values.
-            **kwargs_compare_values : All keyword arguments are passed on to axes.Axes.text for adding comparison-values.
+            **kwargs_params : All keyword arguments are passed on to axes.Axes.text
+                              for adding parameters.
+            **kwargs_values : All keyword arguments are passed on to axes.Axes.text
+                              for adding values.
+            **kwargs_compare_values : All keyword arguments are passed on to axes.Axes.text
+                              for adding comparison-values.
 
             Returns
             -------
@@ -384,10 +381,10 @@ class PyPizza:
             kwargs_compare_values = dict()
 
         # total length of parameters
-        total_parms = len(self.params)
+        total_params = len(self.params)
 
         # get the rotation angles
-        rotation = (2 * np.pi / total_parms) * np.arange(total_parms)
+        rotation = (2 * np.pi / total_params) * np.arange(total_params)
 
         # flip the rotation if the label is in lower half
         mask_flip_label = (rotation > np.pi / 2) & (rotation < np.pi / 2 * 3)
@@ -395,9 +392,9 @@ class PyPizza:
         rotation_degrees = -np.rad2deg(rotation)
 
         # plot params
-        for x, bar, rotation, label in zip(theta, main_slice, rotation_degrees, self.params):
+        for x, rotation, label in zip(theta, rotation_degrees, self.params):
             ax.text(
-                x, param_location, label, 
+                x, param_location, label,
                 rotation=rotation, rotation_mode="anchor",
                 ha="center", **kwargs_params
             )
@@ -408,7 +405,7 @@ class PyPizza:
                 kwargs_values["color"] = value_colors[i]
             if value_bck_colors is not None and kwargs_values.get("bbox") is not None:
                 kwargs_values["bbox"]["facecolor"] = value_bck_colors[i]
-            
+
             ax.text(
                 x, temp_values[i], value, ha="center", **kwargs_values
             )
@@ -416,11 +413,11 @@ class PyPizza:
         # plot comparison values
         if compare_values is not None:
             for i, (x, value, rotation) in enumerate(zip(theta, compare_values, rotation_degrees)):
-                if compare_value_bck_colors is not None:
-                    kwargs_compare_values["color"] = compare_value_bck_colors[i]
+                if compare_value_colors is not None:
+                    kwargs_compare_values["color"] = compare_value_colors[i]
                 if compare_value_bck_colors is not None and kwargs_values.get("bbox") is not None:
                     kwargs_compare_values["bbox"]["facecolor"] = compare_value_bck_colors[i]
-                
+
                 if temp_compare_values is not None:
                     value_1 = temp_compare_values[i]
                     value_2 = value
@@ -430,7 +427,7 @@ class PyPizza:
                 ax.text(
                     x, value_1, value_2, ha="center", **kwargs_compare_values
                 )
-    
+
     def __get_value(self, values):
         """To get values if ranges are passed."""
         label_range = np.abs(self.max_range - self.min_range)
@@ -441,6 +438,6 @@ class PyPizza:
         vertices = (proportion * 100)
 
         return vertices
-    
+
     # __str__ is the same as __repr__
     __str__ = __repr__
