@@ -61,6 +61,7 @@ fig, axs = pitch.jointgrid(figheight=10,  # the figure is 10 inches high
                            space=0,  # 0% of the grid height reserved for space between axes
                            grid_width=0.9,  # the grid width takes up 90% of the figure width
                            title_height=0,  # plot without a title axes
+                           axis=False,  # turn off title/ endnote/ marginal axes
                            endnote_height=0,  # plot without an endnote axes
                            grid_height=0.8)  # grid takes up 80% of the figure height
 # we plot a usual scatter plot but the scatter size is based on expected goals
@@ -79,10 +80,6 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
                          ha='center', va='center', fontsize=30)
-# the spine closest to the pitch shows by default, we can remove the axes here so it doesn't
-_ = axs['top'].axis('off')
-_ = axs['left'].axis('off')
-_ = axs['right'].axis('off')
 
 ##############################################################################
 # Plotting a standard shot map with rug plots
@@ -91,6 +88,7 @@ _ = axs['right'].axis('off')
 # decreased the marginal height as rug plots are only lines,
 # we don't need as much space taken up by the marginal axes
 fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, marginal=0.02,
+                           axis=False,  # turn off title/ endnote/ marginal axes
                            # plot without title/ endnote axes
                            endnote_height=0, title_height=0)
 sc_team1 = pitch.scatter(df_team1.x, df_team1.y, s=df_team1.shot_statsbomb_xg * 700,
@@ -106,9 +104,6 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color='#ba
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#697cd4',
                          ha='center', va='center', fontsize=30)
-_ = axs['left'].axis('off')
-_ = axs['top'].axis('off')
-_ = axs['right'].axis('off')
 
 ##############################################################################
 # Get more shot data for additional games
@@ -144,6 +139,7 @@ blue = get_cmap('Blues')(np.linspace(0, 1, 100))[60]
 # ------------------------------------------
 
 fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
+                           axis=False,  # turn off title/ endnote/ marginal axes
                            # plot without endnote/ title axes
                            endnote_height=0, title_height=0)
 # plot the hexbins
@@ -166,15 +162,13 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
                          ha='center', va='center', fontsize=30)
-_ = axs['left'].axis('off')
-_ = axs['top'].axis('off')
-_ = axs['right'].axis('off')
 
 ##############################################################################
 # Heatmap shot map with histogram/ kdeplot on the marginal axes
 # -------------------------------------------------------------
 
 fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
+                           axis=False,  # turn off title/ endnote/ marginal axes
                            # plot without endnote/ title axes
                            title_height=0, endnote_height=0)
 bs1 = pitch.bin_statistic(df_team1.x, df_team1.y, bins=(18, 12))
@@ -198,15 +192,13 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
                          ha='center', va='center', fontsize=30)
-_ = axs['left'].axis('off')
-_ = axs['top'].axis('off')
-_ = axs['right'].axis('off')
 
 ##############################################################################
 # Kdeplot shot map with kdeplot on the marginal axes
 # --------------------------------------------------
 
 fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.8,
+                           axis=False,  # turn off title/ endnote/ marginal axes
                            # plot without endnote/ title axes
                            title_height=0, endnote_height=0)
 # increase number of levels for a smoother looking heatmap
@@ -221,9 +213,6 @@ txt1 = axs['pitch'].text(x=15, y=70, s=team1, fontproperties=fm.prop, color=red,
                          ha='center', va='center', fontsize=30)
 txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color=blue,
                          ha='center', va='center', fontsize=30)
-_ = axs['left'].axis('off')
-_ = axs['top'].axis('off')
-_ = axs['right'].axis('off')
 
 ##############################################################################
 # Vertical shot map with kdeplot marginals
@@ -236,6 +225,7 @@ fig, axs = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
                                     grid_height=0.7, marginal=0.1,
                                     # plot without endnote/ title axes
                                     endnote_height=0, title_height=0,
+                                    axis=False,  # turn off title/ endnote/ marginal axes
                                     # here we filter out the left and top marginal axes
                                     ax_top=False, ax_bottom=True,
                                     ax_left=False, ax_right=True)
@@ -249,8 +239,6 @@ team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade
 team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
 txt1 = axs['pitch'].text(x=40, y=80, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
                          ha='center', va='center', fontsize=60)
-_ = axs['right'].axis('off')
-_ = axs['bottom'].axis('off')
 
 ##############################################################################
 # Crop the pitch
@@ -267,6 +255,7 @@ fig, axs = vertical_pitch.jointgrid(figheight=10, left=None, bottom=0.15,
                                     grid_height=0.7, marginal=0.1,
                                     # plot without an endnote/ title axes
                                     title_height=0, endnote_height=0,
+                                    axis=False,  # turn off title/ endnote/ marginal axes
                                     # here we filter out the left and top marginal axes
                                     ax_top=False, ax_bottom=True,
                                     ax_left=False, ax_right=True)
@@ -280,8 +269,6 @@ team2_hist_x = sns.kdeplot(y=df_team2.x, ax=axs['right'], color='#697cd4', shade
 team2_hist_y = sns.kdeplot(x=df_team2.y, ax=axs['bottom'], color='#697cd4', shade=True)
 txt1 = axs['pitch'].text(x=40, y=85, s=team2, fontproperties=fm_rubik.prop, color=pitch.line_color,
                          ha='center', va='center', fontsize=60)
-_ = axs['right'].axis('off')
-_ = axs['bottom'].axis('off')
 
 ##############################################################################
 # Add a title and endnote
@@ -299,6 +286,7 @@ fig, axs = vertical_pitch.jointgrid(figheight=10, left=None, bottom=None,  # cen
                                     grid_height=0.80,
                                     title_height=0.1, endnote_height=0.03,
                                     title_space=0.01, endnote_space=0.01,
+                                    axis=False,  # turn off title/ endnote/ marginal axes
                                     # here we filter out the left and top marginal axes
                                     ax_top=False, ax_bottom=True,
                                     ax_left=False, ax_right=True)
@@ -320,11 +308,5 @@ axs['title'].text(0.5, 0.3, "2014/15 to 2019/20", color=pitch.line_color,
                   fontproperties=fm_rubik.prop, fontsize=12, ha='center', va='center')
 axs['endnote'].text(1, 0.5, '@your_amazing_tag', ha='right', va='center',
                     color=pitch.line_color, fontproperties=fm_rubik.prop)
-
-# turn of axes
-_ = axs['right'].axis('off')
-_ = axs['bottom'].axis('off')
-_ = axs['title'].axis('off')
-_ = axs['endnote'].axis('off')
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
