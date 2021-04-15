@@ -56,6 +56,7 @@ params = [
 ]
 
 # values for corresponding parameters
+# The values are taken from the excellent fbref website (supplied by StatsBomb)
 values = [99, 99, 87, 51, 62, 58, 45, 40, 27, 74, 77, 73]
 
 # instantiate PyPizza class

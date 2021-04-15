@@ -40,6 +40,7 @@ font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robot
 # To plot comparison chart one have to pass list of values to ``compare_values`` argument.
 
 # parameter and values list
+# The values are taken from the excellent fbref website (supplied by StatsBomb)
 params = [
     "Non-Penalty Goals", "npxG", "npxG per Shot", "xA",
     "Open Play\nShot Creating Actions", "\nPenalty Area\nEntries",

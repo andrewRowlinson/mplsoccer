@@ -55,6 +55,7 @@ putellas_cropped = Image.open(urlopen(URL))
 # We will pass min-range-value and max-range-value for each parameter.
 
 # parameter and value list
+# The values are taken from the excellent fbref website (supplied by StatsBomb)
 params = [
     "Passing %", "Deep Progression", "xG Assisted", "xG Buildup",
     "Successful Dribbles", "Fouls Won", "Turnovers", "Pressure Regains",

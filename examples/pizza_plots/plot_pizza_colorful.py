@@ -60,6 +60,7 @@ params = [
 ]
 
 # value list
+# The values are taken from the excellent fbref website (supplied by StatsBomb)
 values = [
     70, 77, 74, 68, 60,
     96, 89, 97, 92, 94,

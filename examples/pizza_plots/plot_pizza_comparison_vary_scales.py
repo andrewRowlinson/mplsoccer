@@ -43,6 +43,7 @@ font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robot
 # that the scale varies for each parameter.
 
 # parameter and value list
+# The values are taken from the excellent fbref website (supplied by StatsBomb)
 params = [
     "Passing %", "Deep Progression", "xG Assisted", "xG Buildup",
     "Successful Dribbles", "Fouls Won", "Turnovers", "Pressure Regains",

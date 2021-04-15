@@ -1,7 +1,7 @@
 """
-======
-Basics
-======
+============
+Pitch Basics
+============
 
 First we import the Pitch classes and matplotlib
 """
