@@ -123,7 +123,7 @@ _ = ax_text(34, 73, TEXT2, va='center', ha='center', fontproperties=fm.prop,
 
 # I have prepared a table of match ids that are the same between the StatsBomb and Wyscout
 # open data. Here we get the 50th of the 100 overlapping games (from La Liga / World Cup.)
-df_overlap = pd.read_csv(('https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/master/'
+df_overlap = pd.read_csv(('https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/'
                           'wyscout_statsbomb_overlap.csv'))
 IDX = 50
 
