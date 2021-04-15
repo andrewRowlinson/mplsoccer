@@ -101,7 +101,7 @@ class BasePitch(ABC):
     layout : deprecated, default None
         Layout is deprecated. Please use nrows and ncols arguments of the draw method instead.
     view : deprecated, default None
-        View is deprecated. Please use half=True or half=False arguements instead.
+        View is deprecated. Please use half=True or half=False arguments instead.
     orientation : deprecated, default None
         Orientation is deprecated. Please use the VerticalPitch class instead:
         from mplsoccer import VerticalPitch.
@@ -654,34 +654,29 @@ class BasePitch(ABC):
             figwidth = figheight * grid_height / grid_width * (((1 - space) * self.ax_aspect *
                                                                 ncols / nrows) +
                                                                (space * (ncols - 1) / (nrows - 1)))
+            individual_space_height = grid_height * space / (nrows - 1)
+            individual_space_width = individual_space_height * figheight / figwidth
+            individual_pitch_height = grid_height * (1 - space) / nrows
+
         elif (nrows > 1) and (ncols == 1):
             figwidth = grid_height * figheight / grid_width * (1 - space) * self.ax_aspect / nrows
+            individual_space_height = grid_height * space / (nrows - 1)
+            individual_space_width = 0
+            individual_pitch_height = grid_height * (1 - space) / nrows
+
         elif (nrows == 1) and (ncols > 1):
             figwidth = grid_height * figheight / grid_width * (space + self.ax_aspect * ncols)
-        else:
+            individual_space_height = 0
+            individual_space_width = grid_height * space * figheight / figwidth / (ncols - 1)
+            individual_pitch_height = grid_height
+
+        else:  # nrows=1, ncols=1
             figwidth = grid_height * self.ax_aspect * figheight / grid_width
-
-        figsize = (figwidth, figheight)
-        fig_aspect = figwidth / figheight
-
-        if (nrows > 1) and (ncols > 1):
-            individual_space_height = grid_height * space / (nrows - 1)
-            individual_space_width = individual_space_height / fig_aspect
-            individual_pitch_height = grid_height * (1 - space) / nrows
-        elif (nrows > 1) and (ncols == 1):
-            individual_space_height = grid_height * space / (nrows - 1)
-            individual_space_width = 0
-            individual_pitch_height = grid_height * (1 - space) / nrows
-        elif (nrows == 1) and (ncols > 1):
-            individual_space_height = 0
-            individual_space_width = grid_height * space / fig_aspect / (ncols - 1)
-            individual_pitch_height = grid_height
-        else:
             individual_space_height = 0
             individual_space_width = 0
             individual_pitch_height = grid_height
 
-        individual_pitch_width = individual_pitch_height * self.ax_aspect / fig_aspect
+        individual_pitch_width = individual_pitch_height * self.ax_aspect * figheight / figwidth
 
         bottom_coordinates = np.tile(individual_space_height + individual_pitch_height,
                                      reps=nrows - 1).cumsum()
@@ -697,7 +692,7 @@ class BasePitch(ABC):
         left_coordinates = np.tile(left_coordinates, nrows)
         left_coordinates = left_coordinates + left
 
-        fig = plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=(figwidth, figheight))
         axs = []
         for idx, bottom_coord in enumerate(bottom_coordinates):
             axs.append(fig.add_axes((left_coordinates[idx], bottom_coord,
@@ -760,29 +755,23 @@ class BasePitch(ABC):
                                                                       nrows=1, ncols=1, \
                                                                       max_grid=1,  space=0)
         """
-        # calculate the grid_width given the max_grid as grid_height
+        # grid1 = calculate the grid_width given the max_grid as grid_height
+        # grid2 = calculate grid_height given the max_grid as grid_width
         if (nrows > 1) and (ncols > 1):
             grid1 = max_grid * figheight / figwidth * (((1 - space) * self.ax_aspect *
                                                         ncols / nrows) +
                                                        (space * (ncols - 1) / (nrows - 1)))
-        elif (nrows > 1) and (ncols == 1):
-            grid1 = max_grid * figheight / figwidth * (1 - space) * self.ax_aspect / nrows
-        elif (nrows == 1) and (ncols > 1):
-            grid1 = max_grid * figheight / figwidth * (space + self.ax_aspect * ncols)
-        else:
-            grid1 = max_grid * figheight / figwidth * self.ax_aspect
-
-        # calculate grid_height given the max_grid as grid_width
-        if (nrows > 1) and (ncols > 1):
             grid2 = max_grid / figheight * figwidth / (((1 - space) * self.ax_aspect *
                                                         ncols / nrows) +
                                                        (space * (ncols - 1) / (nrows - 1)))
         elif (nrows > 1) and (ncols == 1):
+            grid1 = max_grid * figheight / figwidth * (1 - space) * self.ax_aspect / nrows
             grid2 = max_grid / figheight * figwidth / (1 - space) * self.ax_aspect / nrows
-
         elif (nrows == 1) and (ncols > 1):
+            grid1 = max_grid * figheight / figwidth * (space + self.ax_aspect * ncols)
             grid2 = max_grid / figheight * figwidth / (space + self.ax_aspect * ncols)
         else:
+            grid1 = max_grid * figheight / figwidth * self.ax_aspect
             grid2 = max_grid / figheight * figwidth / self.ax_aspect
 
         # decide whether the max_grid is the grid_width or grid_height and set the other value
@@ -793,7 +782,9 @@ class BasePitch(ABC):
     def jointgrid(self, figheight=9, left=None, grid_width=0.95,
                   bottom=None, endnote_height=0.065, endnote_space=0.01,
                   grid_height=0.715, title_space=0.01, title_height=0.15,
-                  space=0, marginal=0.1, ax_left=True, ax_top=True, ax_right=True, ax_bottom=False):
+                  space=0, marginal=0.1,
+                  ax_left=True, ax_top=True, ax_right=True, ax_bottom=False,
+                  axis=True):
         """ Create a grid with a pitch at the center and (marginal) axes at the sides of the pitch.
 
         Parameters
@@ -841,6 +832,8 @@ class BasePitch(ABC):
             Whether to include a Matplotlib Axes on the left/top/right side of the pitch.
         ax_bottom : bool, default False
             Whether to include a Matplotlib Axes on the bottom side of the pitch.
+        axis : bool, default True
+            Whether the endnote, title, and the marginal axes are 'on'.
 
         Returns
         -------
@@ -953,11 +946,15 @@ class BasePitch(ABC):
         if title_height > 0:
             ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
                                      title_width, title_height))
+            if axis is False:
+                ax_title.axis('off')
             axs['title'] = ax_title
 
         if endnote_height > 0:
             ax_endnote = fig.add_axes((title_left, bottom,
                                        title_width, endnote_height))
+            if axis is False:
+                ax_endnote.axis('off')
             axs['endnote'] = ax_endnote
 
         if ax_left:
@@ -967,7 +964,10 @@ class BasePitch(ABC):
                                  pitch_height - bottom_pad - top_pad))
             ax_0.set_ylim(y0, y1)
             ax_0.invert_xaxis()
-            set_visible(ax_0, spine_right=True)
+            if axis is False:
+                ax_0.axis('off')
+            else:
+                set_visible(ax_0, spine_right=True)
             axs['left'] = ax_0
 
         if ax_top:
@@ -977,7 +977,10 @@ class BasePitch(ABC):
                                  pitch_width - left_pad - right_pad,
                                  marginal_top))
             ax_1.set_xlim(x0, x1)
-            set_visible(ax_1, spine_bottom=True)
+            if axis is False:
+                ax_1.axis('off')
+            else:
+                set_visible(ax_1, spine_bottom=True)
             axs['top'] = ax_1
 
         if ax_right:
@@ -986,7 +989,10 @@ class BasePitch(ABC):
                                  marginal_right,
                                  pitch_height - bottom_pad - top_pad))
             ax_2.set_ylim(y0, y1)
-            set_visible(ax_2, spine_left=True)
+            if axis is False:
+                ax_2.axis('off')
+            else:
+                set_visible(ax_2, spine_left=True)
             axs['right'] = ax_2
 
         if ax_bottom:
@@ -996,7 +1002,10 @@ class BasePitch(ABC):
                                  marginal_bottom))
             ax_3.set_xlim(x0, x1)
             ax_3.invert_yaxis()
-            set_visible(ax_3, spine_top=True)
+            if axis is False:
+                ax_3.axis('off')
+            else:
+                set_visible(ax_3, spine_top=True)
             axs['bottom'] = ax_3
 
         # create the pitch axes
@@ -1096,7 +1105,8 @@ class BasePitch(ABC):
         """ Implement a wrapper for matplotlib.axes.Axes.annotate."""
 
     @abstractmethod
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
+                      normalize=False, standardized=False):
         """ Calculate 2d binned statistics for arbritary shaped bins."""
 
     @abstractmethod
@@ -1104,7 +1114,8 @@ class BasePitch(ABC):
         """ Implement drawing heatmaps for arbritary shaped bins."""
 
     @abstractmethod
-    def bin_statistic_positional(self, x, y, values=None, positional='full', normalize=False, statistic='count'):
+    def bin_statistic_positional(self, x, y, values=None, positional='full',
+                                 normalize=False, statistic='count'):
         """ Calculate the binned statistics for Juegos de posición zones."""
 
     @abstractmethod
