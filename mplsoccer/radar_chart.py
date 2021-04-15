@@ -24,8 +24,8 @@ class Radar:
     ----------
     params : sequence of str
         The name of parameters (e.g. 'Key Passes')
-    range_inner, range_outer : sequence of floats
-         The values at the inner and outer edge of the Radar for each parameter.
+    min_range, max_range : sequence of floats
+        Minimum and maximum range for each parameter (inner and outer edge of the Radar).
     round_int : sequence of bool, default None
         Whether to round the respective range values to integers (if True) or floats (if False).
         The default (None) sets all range values to floats.
@@ -39,11 +39,11 @@ class Radar:
         the same size as the center circle radius. If the center_circle_radius is increased to
         more than the ring_width then the center circle radius is wider than the rings.
     """
-    def __init__(self, params, range_inner, range_outer, round_int=None,
+    def __init__(self, params, min_range, max_range, round_int=None,
                  num_rings=4, ring_width=1, center_circle_radius=1):
         self.params = np.asarray(params)
-        self.range_inner = np.asarray(range_inner)
-        self.range_outer = np.asarray(range_outer)
+        self.min_range = np.asarray(min_range)
+        self.max_range = np.asarray(max_range)
         if round_int is None:
             self.round_int = np.array([False] * self.params.size)
         else:
@@ -55,11 +55,11 @@ class Radar:
         self.num_labels = len(self.params)
 
         # validation checks
-        if self.params.size != self.range_inner.size:
-            msg = 'The size of params and range_inner must match'
+        if self.params.size != self.min_range.size:
+            msg = 'The size of params and min_range must match'
             raise ValueError(msg)
-        if self.params.size != self.range_outer.size:
-            msg = 'The size of params and range_outer must match'
+        if self.params.size != self.max_range.size:
+            msg = 'The size of params and max_range must match'
             raise ValueError(msg)
         if self.params.size != self.round_int.size:
             msg = 'The size of params and round_int must match'
@@ -87,8 +87,8 @@ class Radar:
                 f'center_circle_radius={self.center_circle_radius!r}, '
                 f'num_rings={self.num_rings!r}, '
                 f'params={self.params!r}, '
-                f'range_inner={self.range_inner!r}, '
-                f'range_outer={self.range_outer!r}, '
+                f'min_range={self.min_range!r}, '
+                f'max_range={self.max_range!r}, '
                 f'round_int={self.round_int!r})')
 
     def _setup_axis(self, facecolor='#FFFFFF', ax=None):
@@ -122,14 +122,14 @@ class Radar:
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
 
         >>> from mplsoccer import Radar
         >>> import matplotlib.pyplot as plt
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+max_range=[10, 10, 10])
         >>> fig, ax = plt.subplots(figsize=(12, 12))
         >>> radar.setup_axis(ax=ax)
         """
@@ -159,8 +159,8 @@ range_outer=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         """
@@ -187,11 +187,11 @@ range_outer=[10, 10, 10])
 
     def _draw_radar(self, values, ax=None, **kwargs):
         # calculate vertices via the proportion of the way the value is between the low/high range
-        label_range = np.abs(self.range_outer - self.range_inner)
-        range_min = np.minimum(self.range_inner, self.range_outer)
-        range_max = np.maximum(self.range_inner, self.range_outer)
+        label_range = np.abs(self.max_range - self.min_range)
+        range_min = np.minimum(self.min_range, self.max_range)
+        range_max = np.maximum(self.min_range, self.max_range)
         values_clipped = np.minimum(np.maximum(values, range_min), range_max)
-        proportion = np.abs(values_clipped - self.range_inner) / label_range
+        proportion = np.abs(values_clipped - self.min_range) / label_range
         vertices = (proportion * self.num_rings * self.ring_width) + self.center_circle_radius
         vertices = np.c_[self.rotation_sin * vertices, self.rotation_cos * vertices]
         # create radar patch from the vertices
@@ -223,8 +223,8 @@ range_outer=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
@@ -248,7 +248,7 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         rings.set_clip_path(radar)
         return radar, rings, vertices
 
-    def draw_radar_compare(self, values, values_compare, ax=None,
+    def draw_radar_compare(self, values, compare_values, ax=None,
                            kwargs_radar=None, kwargs_compare=None):
         """ Draw a radar comparison chart showing two radars.
 
@@ -256,7 +256,7 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         ----------
         values : sequence of floats
             A sequence of float values for each parameter for the first radar.
-        values_compare : sequence of floats
+        compare_values : sequence of floats
             A sequence of float values for each parameter for the second radar.
         ax : matplotlib axis, default None
             The axis to plot on.
@@ -277,13 +277,13 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
-        >>> values_compare = [10, 4, 3]
-        >>> radar_output = radar.draw_radar_compare(values, values_compare, ax=ax, \
+        >>> compare_values = [10, 4, 3]
+        >>> radar_output = radar.draw_radar_compare(values, compare_values, ax=ax, \
 kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6}, \
 kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         """
@@ -293,23 +293,23 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
             kwargs_compare = {}
         # to arrays
         values = np.asarray(values)
-        values_compare = np.asarray(values_compare)
+        compare_values = np.asarray(compare_values)
         # validate array size
         if values.size != self.params.size:
             msg = 'The size of params and values must match'
             raise ValueError(msg)
-        if values_compare.size != self.params.size:
-            msg = 'The size of params and values_compare must match'
+        if compare_values.size != self.params.size:
+            msg = 'The size of params and compare_values must match'
             raise ValueError(msg)
         # plot radars
         radar, vertices = self._draw_radar(values, ax=ax, **kwargs_radar)
-        radar2, vertices2 = self._draw_radar(values_compare, ax=ax, **kwargs_compare)
+        radar2, vertices2 = self._draw_radar(compare_values, ax=ax, **kwargs_compare)
         return radar, radar2, vertices, vertices2
 
     def draw_range_labels(self, ax=None, offset=0, **kwargs):
         """ Draw the range labels.
-        These labels are linearly interpolated between range_inner and
-        range_outer on the ring edges.
+        These labels are linearly interpolated between min_range and
+        max_range on the ring edges.
 
         The range labels are formatted to 1 or 2, decimal places (dp),
         depending on whether the maximum of the range is less than or equal to one
@@ -331,8 +331,8 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-                          range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+                          max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
@@ -344,14 +344,14 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         """
         # create the label values - linearly interpolate between the low and high for each circle
-        label_values = np.linspace(self.range_inner.reshape(-1, 1), self.range_outer.reshape(-1, 1),
+        label_values = np.linspace(self.min_range.reshape(-1, 1), self.max_range.reshape(-1, 1),
                                    num=self.num_rings + 1, axis=1).ravel()
         # remove the first entry so we do not label the inner circle
         mask = np.ones_like(label_values, dtype=bool)
         mask[0::self.num_rings + 1] = 0
         label_values = label_values[mask]
         # if the range is under 1, round to 2 decimal places (2dp) else 1dp
-        mask_round_to_2dp = np.repeat(np.maximum(self.range_inner, self.range_outer) <= 1,
+        mask_round_to_2dp = np.repeat(np.maximum(self.min_range, self.max_range) <= 1,
                                       self.num_rings)
         round_format = np.where(mask_round_to_2dp, '%.2f', '%.1f')
         # if the round_int array is True format as an integer rather than a float
@@ -397,8 +397,8 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], \
-                          range_outer=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+                          max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]

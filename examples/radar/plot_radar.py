@@ -207,7 +207,7 @@ title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
 
 ##############################################################################
 # Comparison Radar with Titles
-# ----------------------++++++
+# ----------------------------
 # Here we will make a very simple radar chart using ``mplsoccer`` module ``radar_chart``.
 # We will only change the default facecolors.
 
@@ -343,13 +343,13 @@ fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
 
 # we are creating a new radar object with more rings, integer rounding, and a larger center circle
 radar2 = Radar(params=['Speed', 'Agility', 'Strength', 'Passing', 'Dribbles'],
-               range_inner=[0, 0, 0, 0, 0],
-               range_outer=[5, 5, 5, 5, 5],
+               min_range=[0, 0, 0, 0, 0],
+               max_range=[5, 5, 5, 5, 5],
                # here we make the labels integers instead of floats
                round_int=[True, True, True, True, True],
                # make the center circle x2 larger than the concentric circles
                center_circle_radius=2,
-               # the number of rings has been chosen to divide the range_outer evenly
+               # the number of rings has been chosen to divide the max_range evenly
                num_rings=5)
 
 # plot the radar
