@@ -12,6 +12,7 @@
 #
 import sphinx_gallery
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import ExampleTitleSortKey
 import os
 import sys
 import mplsoccer
@@ -73,6 +74,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': ['gallery'],
 	'image_scrapers': ('matplotlib'),
     'matplotlib_animations': True,
+	'within_subsection_order': ExampleTitleSortKey,
     'subsection_order': ExplicitOrder(['../../examples/radar',
                                        '../../examples/pizza_plots',
                                        '../../examples/bumpy_charts',
