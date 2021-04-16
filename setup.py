@@ -21,9 +21,9 @@ CLASSIFIERS = ['Development Status :: 3 - Alpha',
                'Intended Audience :: Science/Research',
                'License :: OSI Approved :: MIT License',
                'Operating System :: OS Independent',
-               'Framework :: Matplotlib',
+			   'Framework :: Matplotlib',
                'Programming Language :: Python :: 3 :: Only',
-               'Topic :: Scientific/Engineering :: Visualization'],
+               'Topic :: Scientific/Engineering :: Visualization']
 
 setup(name='mplsoccer',
       version=VERSION,

@@ -1,5 +1,5 @@
 <p align="center">
-<img src="docs/source/logo.png" width="235px" alt="mplsoccer logo"/>
+<img src="https://github.com/andrewRowlinson/mplsoccer/blob/master/docs/source/logo.png?raw=true" width="235px" alt="mplsoccer logo"/>
 </p>
 
 **mplsoccer is a Python library for plotting soccer/football charts in Matplotlib 
@@ -42,7 +42,7 @@ Plot a Radar
 ```python
 from mplsoccer import Radar
 import matplotlib.pyplot as plt
-radar = Radar(params=['Agility', 'Speed', 'Strength'], range_inner=[0, 0, 0], range_outer=[10, 10, 10])
+radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], max_range=[10, 10, 10])
 fig, ax = radar.setup_axis()
 rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
 values = [5, 3, 10]
