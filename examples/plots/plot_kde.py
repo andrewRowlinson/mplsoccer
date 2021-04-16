@@ -1,141 +1,81 @@
 """
 ================================
-Event distribution using kdeplot
+Event distribution using kdeplot 
 ================================
 
-This example shows how to plot the location of events occurring in a match
+This example shows how to plot the location of events occurring in a match 
 using kernel density estimation (KDE).
 """
 
-from urllib.request import urlopen
-
-from matplotlib.colors import LinearSegmentedColormap
-import matplotlib.pyplot as plt
-from PIL import Image
-from highlight_text import ax_text
-
-from mplsoccer import VerticalPitch, add_image, FontManager
+from mplsoccer.pitch import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
 ##############################################################################
-# Load the first game that Messi played as a false-9 and the match before.
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
+# load first game that Messi played as a false-9 and the match before as dataframes
+
+kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False, 'tactics_lineup_df': False}
 df_false9 = read_event(f'{EVENT_SLUG}/69249.json', **kwargs)['event']
 df_before_false9 = read_event(f'{EVENT_SLUG}/69251.json', **kwargs)['event']
-# filter messi's actions (starting positions)
+
+##############################################################################
+# Filter the dataframes to only include Messi's events and the starting positions
+
 df_false9 = df_false9.loc[df_false9.player_id == 5503, ['x', 'y']]
 df_before_false9 = df_before_false9.loc[df_before_false9.player_id == 5503, ['x', 'y']]
 
 ##############################################################################
-# Create a custom colormap.
-# Note see the `custom colormaps
-# <https://mplsoccer.readthedocs.io/en/latest/gallery/pitch_plots/plot_cmap.html>`_
-# example for more ideas.
-flamingo_cmap = LinearSegmentedColormap.from_list("Flamingo - 100 colors",
-                                                  ['#e3aca7', '#c03a1d'], N=100)
+# View a dataframe
+
+df_false9.head()
 
 ##############################################################################
-# Plot Messi's first game as a false-9.
-pitch = VerticalPitch(line_color='#000009', line_zorder=2)
-fig, ax = pitch.draw(figsize=(4.4, 6.4))
-kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=ax,
-                    # shade using 100 levels so it looks smooth
-                    shade=True, levels=100,
-                    # shade the lowest area so it looks smooth
-                    # so even if there are no events it gets some color
-                    shade_lowest=True,
-                    cut=4,  # extended the cut so it reaches the bottom edge
-                    cmap=flamingo_cmap)
+# Plotting Messi's first game as a False-9
+
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 11),
+              pitch_color='grass', stripe=True, constrained_layout=False)
+fig, ax = pitch.draw()
+
+# plotting
+ax.set_title('The first Game Messi played in the false 9 role', fontsize=30, pad=20)
+
+# plot the kernel density estimation
+pitch.kdeplot(df_false9.x, df_false9.y, ax=ax, cmap='plasma', linewidths=3)
+
+# annotate
+pitch.annotate('6-2 thrashing \nof Real Madrid', (25, 10), color='white',
+               fontsize=25, ha='center', va='center', ax=ax)
+pitch.annotate('more events', (70, 30), (20, 30), ax=ax, color='white', ha='center', va='center',
+               fontsize=20, arrowprops=dict(facecolor='white', edgecolor='None'))
+pitch.annotate('fewer events', (51, 20), (20, 20), ax=ax, color='white', ha='center', va='center',
+               fontsize=20, arrowprops=dict(facecolor='white', edgecolor='None'))
+
+fig.tight_layout()
 
 ##############################################################################
-# Load a custom font.
-URL = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Regular.ttf?raw=true'
-URL2 = 'https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Bold.ttf?raw=true'
-robotto_regular = FontManager(URL)
-robboto_bold = FontManager(URL2)
+# Plotting both Messi's first game as a False-9 and the game directly before
 
-##############################################################################
-# Load images.
+# Setup the pitches
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 7), layout=(1, 2),
+              pitch_color='grass', stripe=True, constrained_layout=False)
+fig, ax = pitch.draw()
 
-# Load the StatsBomb logo and Messi picture
-MESSI_URL = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-messi_image = Image.open(urlopen(MESSI_URL))
-SB_LOGO_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'
-sb_logo = Image.open(urlopen(SB_LOGO_URL))
+# set the titles
+ax[0].set_title('Messi in the game directly before \n playing in the false 9 role', fontsize=25, pad=20)
+ax[1].set_title('The first Game Messi \nplayed in the false 9 role', fontsize=25, pad=20)
 
-##############################################################################
-# Plot the chart again with a title.
-# We will use mplsoccer's grid function to plot a pitch with a title and endnote axes.
+# plot the kernel density estimation
+pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax=ax[0], cmap='plasma', linewidths=3)
+pitch.kdeplot(df_false9.x, df_false9.y, ax=ax[1], cmap='plasma', linewidths=3)
 
-fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0, title_space=0,
-                      # Turn off the endnote/title axis. I usually do this after
-                      # I am happy with the chart layout and text placement
-                      axis=False,
-                      grid_height=0.82, endnote_height=0.05)
-kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'],
-                    # shade using 100 levels so it looks smooth
-                    shade=True, levels=100,
-                    # shade the lowest area so it looks smooth
-                    # so even if there are no events it gets some color
-                    shade_lowest=True,
-                    cut=4,  # extended the cut so it reaches the bottom edge
-                    cmap=flamingo_cmap)
-axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
-                    fontproperties=robotto_regular.prop)
-axs['title'].text(0.5, 0.7, "Lionel Messi's Actions", color='#000009',
-                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=30)
-axs['title'].text(0.5, 0.25, "First game as a false nine", color='#000009',
-                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=20)
-ax_sb_logo = add_image(sb_logo, fig,
-                       # set the left, bottom and height to align with the endnote
-                       left=axs['endnote'].get_position().x0,
-                       bottom=axs['endnote'].get_position().y0,
-                       height=axs['endnote'].get_position().height)
+# annotations
+pitch.annotate('6-2 thrashing \nof Real Madrid', (25, 10), color='white',
+               fontsize=25, ha='center', va='center', ax=ax[1])
+pitch.annotate('2-2 draw \nagainst Valencia', (25, 10), color='white',
+               fontsize=25, ha='center', va='center', ax=ax[0])
+pitch.annotate('more events', (90, 68), (30, 68), ax=ax[0], color='white', ha='center', va='center',
+               fontsize=20, arrowprops=dict(facecolor='white', edgecolor='None'))
+pitch.annotate('fewer events', (80, 17), (80, 5), ax=ax[0], color='white', ha='center', va='center',
+               fontsize=20, arrowprops=dict(facecolor='white', edgecolor='None'))
 
-##############################################################################
-# Plot Messi's actions in the matches before and after becoming a false-9.
-# We will use mplsoccer's grid function, which is a convenient way to plot a grid
-# of pitches with a title and endnote axes.
+fig.tight_layout()
 
-fig, axs = pitch.grid(ncols=2, axis=False)
-
-kde_before = pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax=axs['pitch'][0],
-                           shade=True, levels=100, shade_lowest=True,
-                           cut=4, cmap='Reds')
-
-kde_after = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'][1],
-                          shade=True, levels=100, shade_lowest=True,
-                          cut=4, cmap='Blues')
-
-ax_sb_logo = add_image(sb_logo, fig,
-                       # set the left, bottom and height to align with the endnote
-                       left=axs['endnote'].get_position().x0,
-                       bottom=axs['endnote'].get_position().y0,
-                       height=axs['endnote'].get_position().height)
-ax_messi = add_image(messi_image, fig, interpolation='hanning',
-                     # set the left, bottom and height to align with the title
-                     left=axs['title'].get_position().x0,
-                     bottom=axs['title'].get_position().y0,
-                     height=axs['title'].get_position().height)
-
-# titles using highlight_text and a google font (Robotto)
-
-TITLE_STR1 = 'The Evolution of Lionel Messi'
-TITLE_STR2 = 'Actions in the match <before> and\n<after> becoming a False-9'
-title1_text = axs['title'].text(0.5, 0.7, TITLE_STR1, fontsize=28, color='#000009',
-                                fontproperties=robotto_regular.prop,
-                                ha='center', va='center')
-highlight_text = [{'color': '#800610', 'fontproperties': robboto_bold.prop},
-                  {'color': '#08306b', 'fontproperties': robboto_bold.prop}]
-ax_text(0.5, 0.3, TITLE_STR2, ha='center', va='center', fontsize=18, color='#000009',
-        fontproperties=robotto_regular.prop,
-        highlight_textprops=highlight_text, ax=axs['title'])
-
-# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_kde_003.png'
-
-# Messi Photo from: https://en.wikipedia.org/wiki/Lionel_Messi#/media/File:Messi_vs_Nigeria_2018.jpg
-# License: https://creativecommons.org/licenses/by-sa/3.0/;
-# Creator: Кирилл Венедиктов
-
-plt.show()  # If you are using a Jupyter notebook you do not need this line

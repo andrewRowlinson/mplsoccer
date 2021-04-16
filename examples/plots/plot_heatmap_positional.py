@@ -2,86 +2,43 @@
 =========================
 Heatmap Juego de Posición
 =========================
-This example shows how to plot all pressure events from three matches as
-a Juego de Posición heatmap.
+
+This example shows how to plot all pressure events from three matches as a Juego de Posición heatmap.
 See: https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanation/
 """
 
-import matplotlib.patheffects as path_effects
-import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.colors import LinearSegmentedColormap
-
-from mplsoccer import VerticalPitch, FontManager
+from mplsoccer.pitch import Pitch
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
+import os
+import pandas as pd
+import numpy as np
 
 # get data
 match_files = ['19789.json', '19794.json', '19805.json']
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
+kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False, 'tactics_lineup_df': False, 'warn': False}
 df = pd.concat([read_event(f'{EVENT_SLUG}/{file}', **kwargs)['event'] for file in match_files])
 # filter chelsea pressure events
 mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pressure')
 df = df.loc[mask_chelsea_pressure, ['x', 'y']]
 
 ##############################################################################
-# Custom colormap, font, and path effects
-
-# see the custom colormaps example for more ideas on setting colormaps
-pearl_earring_cmap = LinearSegmentedColormap.from_list("Pearl Earring - 10 colors",
-                                                       ['#15242e', '#4393c4'], N=10)
-
-# fontmanager for google font (robotto)
-robotto_regular = FontManager()
-
-path_eff = [path_effects.Stroke(linewidth=3, foreground='black'),
-            path_effects.Normal()]
-
-##############################################################################
-# Plot positional heatmap
-# -----------------------
+# Plot the heatmaps
 
 # setup pitch
-pitch = VerticalPitch(pitch_type='statsbomb', line_zorder=2,
-                      pitch_color='#22312b', line_color='white')
+pitch = Pitch(pitch_type='statsbomb', figsize=(16, 9), layout=(1, 3), line_zorder=2,
+              pitch_color='#22312b', line_color='white', orientation='vertical')
 # draw
-fig, ax = pitch.draw(figsize=(4.125, 6))
-bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count',
-                                               positional='full', normalize=True)
-pitch.heatmap_positional(bin_statistic, ax=ax, cmap='coolwarm', edgecolors='#22312b')
-pitch.scatter(df.x, df.y, c='white', s=2, ax=ax)
-labels = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
-                             ax=ax, ha='center', va='center',
-                             str_format='{:.0%}', path_effects=path_eff)
-
-##############################################################################
-# Plot the chart again with a title
-# ---------------------------------
-# We will use mplsoccer's grid function to plot a pitch with a title and endnote axes.
-pitch = VerticalPitch(pitch_type='statsbomb', line_zorder=2, pitch_color='#1e4259')
-fig, axs = pitch.grid(endnote_height=0.03, endnote_space=0,
-                      title_height=0.08, title_space=0,
-                      # Turn off the endnote/title axis. I usually do this after
-                      # I am happy with the chart layout and text placement
-                      axis=False,
-                      grid_height=0.84)
-fig.set_facecolor('#1e4259')
-
-# heatmap and labels
-bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count',
-                                               positional='full', normalize=True)
-pitch.heatmap_positional(bin_statistic, ax=axs['pitch'],
-                         cmap=pearl_earring_cmap, edgecolors='#22312b')
-labels = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
-                             ax=axs['pitch'], ha='center', va='center',
-                             str_format='{:.0%}', path_effects=path_eff)
-
-# endnote and title
-axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
-                    fontproperties=robotto_regular.prop, color='#dee6ea')
-axs['title'].text(0.5, 0.5, "Pressure applied by\n Chelsea FC Women", color='#dee6ea',
-                  va='center', ha='center', path_effects=path_eff,
-                  fontproperties=robotto_regular.prop, fontsize=25)
-# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_heatmap_positional_002.png'
-
-plt.show()  # If you are using a Jupyter notebook you do not need this line
+fig, ax = pitch.draw()
+positions = ['full', 'horizontal', 'vertical']
+for i, pos in enumerate(positions):
+    bin_statistic = pitch.bin_statistic_positional(df.x, df.y, statistic='count', positional=pos)
+    pitch.heatmap_positional(bin_statistic, ax=ax[i], cmap='coolwarm', edgecolors='#22312b')
+    pitch.scatter(df.x, df.y, c='white', s=2, ax=ax[i])
+    total = np.array([bs['statistic'].sum() for bs in bin_statistic]).sum()
+    # replace raw counts with percentages and add percentage sign (note immutable named tuple so used _replace)
+    for bs in bin_statistic:
+        bs['statistic'] = (pd.DataFrame(bs['statistic'] / total)
+                           .applymap(lambda x: '{:.0%}'.format(x))
+                           .values)
+    pitch.label_heatmap(bin_statistic, color='white', fontsize=18, ax=ax[i], ha='center', va='bottom')
+title = fig.suptitle('Location of pressure events - 3 home games for Chelsea FC Women', x=0.5, y=0.98, fontsize=30,)
