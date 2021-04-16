@@ -1,1 +1,11 @@
-__version__ = '0.0.23'
+__version__ = "1.0.0"
+from mplsoccer import statsbomb
+from mplsoccer.cm import *
+from mplsoccer.linecollection import *
+from mplsoccer.pitch import *
+from mplsoccer.quiver import *
+from mplsoccer.radar_chart import *
+from mplsoccer.scatterutils import *
+from mplsoccer.utils import *
+from mplsoccer.bumpy_chart import *
+from mplsoccer.py_pizza import *

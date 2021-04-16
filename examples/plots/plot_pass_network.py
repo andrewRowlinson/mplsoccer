@@ -4,21 +4,24 @@ Pass Network
 ============
 
 This example shows how to plot passes between players in a set formation.
+This is written by `@DymondFormation <https://twitter.com/DymondFormation>`_
 """
 
-import pandas as pd
-from mplsoccer.pitch import Pitch
-from matplotlib.colors import to_rgba
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
+
+from mplsoccer import Pitch, FontManager
 from mplsoccer.statsbomb import read_event, EVENT_SLUG
 
 ##############################################################################
 # Set team and match info, and get event and tactics dataframes for the defined match_id
 
-match_id = 15946
-team = 'Barcelona'
-opponent = 'Alavés (A), 2018/19 La Liga'
-event_dict = read_event(f'{EVENT_SLUG}/{match_id}.json', warn=False)
+MATCH_ID = 15946
+TEAM = 'Barcelona'
+OPPONENT = 'versus Alavés (A), 2018/19 La Liga'
+event_dict = read_event(f'{EVENT_SLUG}/{MATCH_ID}.json', warn=False)
 players = event_dict['tactics_lineup']
 events = event_dict['event']
 
@@ -72,24 +75,28 @@ events.groupby('team_name').tactics_formation.unique()
 # Filter passes by chosen formation, then group all passes and receipts to
 # calculate avg x, avg y, count of events for each slot in the formation
 
-formation = 433
-passes_formation = events.loc[(events.team_name == team) & (events.type_name == 'Pass') &
-                              (events.tactics_formation == formation) &
-                              (events.position_abbreviation_receipt.notnull()),
-                              ['id', 'position_abbreviation', 'position_abbreviation_receipt']].copy()
-location_formation = events.loc[(events.team_name == team) & (events.type_name.isin(['Pass', 'Ball Receipt'])) &
-                                (events.tactics_formation == formation),
-                                ['position_abbreviation', 'x', 'y']]
+FORMATION = 433
+pass_cols = ['id', 'position_abbreviation', 'position_abbreviation_receipt']
+passes_formation = events.loc[(events.team_name == TEAM) & (events.type_name == 'Pass') &
+                              (events.tactics_formation == FORMATION) &
+                              (events.position_abbreviation_receipt.notnull()), pass_cols].copy()
+location_cols = ['position_abbreviation', 'x', 'y']
+location_formation = events.loc[(events.team_name == TEAM) &
+                                (events.type_name.isin(['Pass', 'Ball Receipt'])) &
+                                (events.tactics_formation == FORMATION), location_cols].copy()
 
 # average locations
-average_locs_and_count = location_formation.groupby('position_abbreviation').agg({'x': ['mean'], 'y': ['mean', 'count']})
+average_locs_and_count = (location_formation.groupby('position_abbreviation')
+                          .agg({'x': ['mean'], 'y': ['mean', 'count']}))
 average_locs_and_count.columns = ['x', 'y', 'count']
 
 # calculate the number of passes between each position (using min/ max so we get passes both ways)
-passes_formation['pos_max'] = passes_formation[['position_abbreviation',
-                                                'position_abbreviation_receipt']].max(axis='columns')
-passes_formation['pos_min'] = passes_formation[['position_abbreviation',
-                                                'position_abbreviation_receipt']].min(axis='columns')
+passes_formation['pos_max'] = (passes_formation[['position_abbreviation',
+                                                'position_abbreviation_receipt']]
+                               .max(axis='columns'))
+passes_formation['pos_min'] = (passes_formation[['position_abbreviation',
+                                                'position_abbreviation_receipt']]
+                               .min(axis='columns'))
 passes_between = passes_formation.groupby(['pos_min', 'pos_max']).id.count().reset_index()
 passes_between.rename({'id': 'pass_count'}, axis='columns', inplace=True)
 
@@ -101,35 +108,73 @@ passes_between = passes_between.merge(average_locs_and_count, left_on='pos_max',
 ##############################################################################
 # Calculate the line width and marker sizes relative to the largest counts
 
-max_line_width = 18
-max_marker_size = 3000
-passes_between['width'] = passes_between.pass_count / passes_between.pass_count.max() * max_line_width
+MAX_LINE_WIDTH = 18
+MAX_MARKER_SIZE = 3000
+passes_between['width'] = (passes_between.pass_count / passes_between.pass_count.max() *
+                           MAX_LINE_WIDTH)
 average_locs_and_count['marker_size'] = (average_locs_and_count['count']
-                                         / average_locs_and_count['count'].max() * max_marker_size)
+                                         / average_locs_and_count['count'].max() * MAX_MARKER_SIZE)
 
 ##############################################################################
 # Set color to make the lines more transparent when fewer passes are made
 
-min_transparency = 0.3
+MIN_TRANSPARENCY = 0.3
 color = np.array(to_rgba('white'))
 color = np.tile(color, (len(passes_between), 1))
 c_transparency = passes_between.pass_count / passes_between.pass_count.max()
-c_transparency = (c_transparency * (1 - min_transparency)) + min_transparency
+c_transparency = (c_transparency * (1 - MIN_TRANSPARENCY)) + MIN_TRANSPARENCY
 color[:, 3] = c_transparency
 
 ##############################################################################
 # Plotting
 
-pitch = Pitch(pitch_type='statsbomb', orientation='horizontal',
-              pitch_color='#22312b', line_color='#c7d5cc', figsize=(16, 11),
-              constrained_layout=True, tight_layout=False)
-fig, ax = pitch.draw()
+pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
+fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
+fig.set_facecolor("#22312b")
 pass_lines = pitch.lines(passes_between.x, passes_between.y,
                          passes_between.x_end, passes_between.y_end, lw=passes_between.width,
                          color=color, zorder=1, ax=ax)
-pass_nodes = pitch.scatter(average_locs_and_count.x, average_locs_and_count.y, s=average_locs_and_count.marker_size,
+pass_nodes = pitch.scatter(average_locs_and_count.x, average_locs_and_count.y,
+                           s=average_locs_and_count.marker_size,
                            color='red', edgecolors='black', linewidth=1, alpha=1, ax=ax)
 for index, row in average_locs_and_count.iterrows():
-    pitch.annotate(row.name, xy=(row.x, row.y), c='white', va='center', ha='center', size=16, weight='bold', ax=ax)
-title = ax.set_title("{} {} Formation vs {}".format(team, formation, opponent), size=28, y=0.97, color='#c7d5cc')
+    pitch.annotate(row.name, xy=(row.x, row.y), c='white', va='center',
+                   ha='center', size=16, weight='bold', ax=ax)
+
+##############################################################################
+# Plot the chart again with a title.
+# We will use mplsoccer's grid function to plot a pitch with a title and endnote axes.
+
+fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0,
+                      # Turn off the endnote/title axis. I usually do this after
+                      # I am happy with the chart layout and text placement
+                      axis=False,
+                      title_space=0, grid_height=0.82, endnote_height=0.05)
 fig.set_facecolor("#22312b")
+pass_lines = pitch.lines(passes_between.x, passes_between.y,
+                         passes_between.x_end, passes_between.y_end, lw=passes_between.width,
+                         color=color, zorder=1, ax=axs['pitch'])
+pass_nodes = pitch.scatter(average_locs_and_count.x, average_locs_and_count.y,
+                           s=average_locs_and_count.marker_size,
+                           color='red', edgecolors='black', linewidth=1, alpha=1, ax=axs['pitch'])
+for index, row in average_locs_and_count.iterrows():
+    pitch.annotate(row.name, xy=(row.x, row.y), c='white', va='center',
+                   ha='center', size=16, weight='bold', ax=axs['pitch'])
+
+# Load a custom font.
+URL = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Regular.ttf?raw=true'
+robotto_regular = FontManager(URL)
+
+# endnote /title
+axs['endnote'].text(1, 0.5, '@your_twitter_handle', color='#c7d5cc',
+                    va='center', ha='right', fontsize=15,
+                    fontproperties=robotto_regular.prop)
+TITLE_TEXT = f'{TEAM}, {FORMATION} formation'
+axs['title'].text(0.5, 0.7, TITLE_TEXT, color='#c7d5cc',
+                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=30)
+axs['title'].text(0.5, 0.25, OPPONENT, color='#c7d5cc',
+                  va='center', ha='center', fontproperties=robotto_regular.prop, fontsize=18)
+
+# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_pass_network_002.png'
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line

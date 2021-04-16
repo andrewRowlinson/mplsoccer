@@ -5,5 +5,11 @@ API
    :maxdepth: 2
 
    mplsoccer.pitch
-   mplsoccer.scatterutils
+   mplsoccer.radar_chart
    mplsoccer.statsbomb
+   mplsoccer.bumpy_chart
+   mplsoccer.py_pizza
+   mplsoccer.utils
+   mplsoccer.quiver
+   mplsoccer.linecollection  
+   

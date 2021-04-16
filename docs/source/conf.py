@@ -12,6 +12,7 @@
 #
 import sphinx_gallery
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import ExampleTitleSortKey
 import os
 import sys
 import mplsoccer
@@ -21,8 +22,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'mplsoccer'
-copyright = '2020, Andrew Rowlinson'
-author = 'Andrew Rowlinson'
+copyright = '2021, Anmol Durgapal & Andrew Rowlinson'
+author = 'Anmol Durgapal & Andrew Rowlinson'
 
 # The full version, including alpha/beta/rc tags
 VERSION = mplsoccer.__version__
@@ -48,10 +49,11 @@ master_doc = 'index'
 # this is needed for some reason...
 # see https://github.com/numpy/numpydoc/issues/69
 numpydoc_class_members_toctree = False
-
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+# format examples correctly
+napoleon_use_admonition_for_examples = True
 
 # generate autosummary even if no references
 autosummary_generate = True
@@ -72,7 +74,11 @@ sphinx_gallery_conf = {
     'gallery_dirs': ['gallery'],
 	'image_scrapers': ('matplotlib'),
     'matplotlib_animations': True,
-    'subsection_order': ExplicitOrder(['../../examples/plots',
+	'within_subsection_order': ExampleTitleSortKey,
+    'subsection_order': ExplicitOrder(['../../examples/radar',
+                                       '../../examples/pizza_plots',
+                                       '../../examples/bumpy_charts',
+									   '../../examples/pitch_plots',
                                        '../../examples/statsbomb',
                                        '../../examples/pitch_setup', ])}
 
@@ -92,4 +98,9 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
+
+# add logo
+html_logo = "logo-white.png"
+html_theme_options = {'logo_only': True,
+                      'display_version': False}

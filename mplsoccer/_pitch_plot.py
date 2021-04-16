@@ -1,0 +1,781 @@
+""" Module adds the plotting methods to the BasePitch abstract class."""
+
+from collections import namedtuple
+
+import matplotlib.docstring as docstring
+import matplotlib.patches as patches
+import numpy as np
+import seaborn as sns
+from matplotlib import rcParams
+from matplotlib.collections import PatchCollection
+from scipy.spatial import Voronoi
+from scipy.stats import circmean
+
+from mplsoccer._pitch_base import BasePitch
+from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
+from mplsoccer.linecollection import lines
+from mplsoccer.quiver import arrows
+from mplsoccer.scatterutils import scatter_football, scatter_rotation
+from mplsoccer.utils import validate_ax
+
+_BinnedStatisticResult = namedtuple('BinnedStatisticResult',
+                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
+
+
+class BasePitchPlot(BasePitch):
+
+    def plot(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.plot,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.plot.
+
+        Returns
+        -------
+        lines : A list of Line2D objects representing the plotted data.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.plot([30, 35, 20], [30, 19, 40], ax=ax)
+        """
+        validate_ax(ax)
+        x, y = self._reverse_if_vertical(x, y)
+        return ax.plot(x, y, **kwargs)
+
+    def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.scatter,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+        You can optionally use a football marker with marker='football' and rotate markers with
+        rotation_degrees.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        rotation_degrees: array-like or scalar, default None.
+            Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play.
+            In a horizontal pitch, 0 degrees is this way →, in a vertical pitch,
+            0 degrees is this way ↑
+        marker: MarkerStyle, optional
+            The marker style. marker can be either an instance of the class or the
+            text shorthand for a particular marker. Defaults to None, in which case it takes
+            the value of rcParams["scatter.marker"] (default: 'o') = 'o'.
+            If marker='football' plots a football shape with the pentagons the color
+            of the edgecolors and hexagons the color of the 'c' argument; 'linewidths'
+            also sets the linewidth of the football marker.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
+
+        Returns
+        -------
+        paths : matplotlib.collections.PathCollection
+                or a tuple of (paths, paths) if marker='football'
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, ax=ax)
+
+        >>> from mplsoccer import Pitch
+        >>> from mplsoccer import arrowhead_marker
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, rotation_degrees=45, marker=arrowhead_marker, ax=ax)
+
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, marker='football', ax=ax)
+        """
+        validate_ax(ax)
+
+        x = np.ma.ravel(x)
+        y = np.ma.ravel(y)
+
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+
+        x, y = self._reverse_if_vertical(x, y)
+
+        if marker is None:
+            marker = rcParams['scatter.marker']
+
+        if marker == 'football' and rotation_degrees is not None:
+            raise NotImplementedError("rotated football markers are not implemented.")
+
+        if marker == 'football':
+            scatter_plot = scatter_football(x, y, ax=ax, **kwargs)
+        elif rotation_degrees is not None:
+            scatter_plot = scatter_rotation(x, y, rotation_degrees, marker=marker,
+                                            vertical=self.vertical, ax=ax, **kwargs)
+        else:
+            scatter_plot = ax.scatter(x, y, marker=marker, **kwargs)
+        return scatter_plot
+
+    def _reflect_2d(self, x, y, standardized=False):
+        """ Reflect data in the pitch lines."""
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if standardized:
+            x_limits, y_limits = [0, 105], [0, 68]
+        else:
+            x_limits, y_limits = [self.dim.left, self.dim.right], [self.dim.bottom, self.dim.top]
+        reflected_data_x = np.r_[x, 2 * x_limits[0] - x, 2 * x_limits[1] - x, x, x]
+        reflected_data_y = np.r_[y, y, y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
+        return reflected_data_x, reflected_data_y
+
+    def kdeplot(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around seaborn.kdeplot,
+        which automatically flips the x and y coordinates
+        if the pitch is vertical and clips to the pitch boundaries.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to seaborn.kdeplot.
+
+        Returns
+        -------
+        contour : matplotlib.contour.ContourSet
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> y = np.random.uniform(low=0, high=80, size=100)
+        >>> pitch.kdeplot(x, y, cmap='Reds', shade=True, levels=100, ax=ax)
+        """
+        validate_ax(ax)
+
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+
+        x, y = self._reverse_if_vertical(x, y)
+
+        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
+        return contour_plot
+
+    def hexbin(self, x, y, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.hexbin,
+        which automatically flips the x and y coordinates if the pitch is vertical and
+        clips to the pitch boundaries.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        mincnt : int > 0, default: 1
+            If not None, only display cells with more than mincnt number of points in the cell.
+        gridsize : int or (int, int), default: (17, 8) for Pitch/ (17, 17) for VerticalPitch
+            If a single int, the number of hexagons in the x-direction. The number of hexagons
+            in the y-direction is chosen such that the hexagons are approximately regular.
+            Alternatively, if a tuple (nx, ny), the number of hexagons in the x-direction
+            and the y-direction.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.hexbin.
+
+        Returns
+        -------
+        polycollection : matplotlib.collections.PolyCollection
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> y = np.random.uniform(low=0, high=80, size=100)
+        >>> pitch.hexbin(x, y, edgecolors='black', gridsize=(11, 5), cmap='Reds', ax=ax)
+        """
+        validate_ax(ax)
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        # according to seaborn hexbin isn't nan safe so filter out nan
+        mask = np.isnan(x) | np.isnan(y)
+        x = x[~mask]
+        y = y[~mask]
+
+        x, y = self._reverse_if_vertical(x, y)
+        mincnt = kwargs.pop('mincnt', 1)
+        gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
+        extent = kwargs.pop('extent', self.hex_extent)
+        hexbin = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
+        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                 self.visible_pitch[1] - self.visible_pitch[0],
+                                 self.visible_pitch[3] - self.visible_pitch[2],
+                                 fill=False)
+        ax.add_patch(rect)
+        hexbin.set_clip_path(rect)
+        return hexbin
+
+    def polygon(self, verts, ax=None, **kwargs):
+        """ Plot polygons using a PatchCollection.
+        See: https://matplotlib.org/stable/api/collections_api.html.
+        Automatically flips the x and y vertices if the pitch is vertical.
+
+        Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
+        transOffset, norm, cmap
+
+        To use cmap use set_array as per this example:
+        https://matplotlib.org/stable/gallery/shapes_and_collections/patch_collection.html.
+
+        Parameters
+        ----------
+        verts: verts is a sequence of (verts0, verts1, ...)
+            where verts_i is a numpy array of shape (number of vertices, 2).
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to
+            matplotlib.collections.PatchCollection.
+
+        Returns
+        -------
+        PatchCollection : matplotlib.collections.PatchCollection
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(label=True, axis=True)
+        >>> fig, ax = pitch.draw()
+        >>> shape1 = np.array([[50, 2], [80, 30], [40, 30], [40, 20]])
+        >>> shape2 = np.array([[70, 70], [60, 50], [40, 40]])
+        >>> verts = [shape1, shape2]
+        >>> pitch.polygon(verts, color='red', alpha=0.3, ax=ax)
+        """
+        validate_ax(ax)
+        patch_list = []
+        for vert in verts:
+            vert = np.asarray(vert)
+            vert = self._reverse_vertices_if_vertical(vert)
+            polygon = patches.Polygon(vert, closed=True)
+            patch_list.append(polygon)
+        patch_collection = PatchCollection(patch_list, **kwargs)
+        patch_collection = ax.add_collection(patch_collection)
+        return patch_collection
+
+    def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
+        """ Plot a polygon with the angle to the goal using PatchCollection.
+        See: https://matplotlib.org/stable/api/collections_api.html.
+        Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
+        transOffset, norm, cmap
+
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+        goal: str default 'right'.
+            The goal to plot, either 'left' or 'right'.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to
+             matplotlib.collections.PathCollection.
+
+        Returns
+        -------
+        PatchCollection : matplotlib.collections.PatchCollection
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.goal_angle(100, 30, alpha=0.5, color='red', ax=ax)
+        """
+        validate_ax(ax)
+        valid_goal = ['left', 'right']
+        if goal not in valid_goal:
+            raise TypeError(f'Invalid argument: goal should be in {valid_goal}')
+        x = np.ravel(x)
+        y = np.ravel(y)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        if goal == 'right':
+            goal_coordinates = self.goal_right
+        else:
+            goal_coordinates = self.goal_left
+        verts = np.zeros((x.size, 3, 2))
+        verts[:, 0, 0] = x
+        verts[:, 0, 1] = y
+        verts[:, 1:, :] = np.expand_dims(goal_coordinates, 0)
+        patch_collection = self.polygon(verts, ax=ax, **kwargs)
+        return patch_collection
+
+    def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
+        """ Utility wrapper around ax.annotate
+        which automatically flips the xy and xytext coordinates if the pitch is vertical.
+
+        Annotate the point xy with text.
+        See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html
+
+        Parameters
+        ----------
+        text : str
+            The text of the annotation.
+        xy : (float, float)
+            The point (x, y) to annotate.
+        xytext : (float, float), optional
+            The position (x, y) to place the text at. If None, defaults to xy.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
+
+        Returns
+        -------
+        annotation : matplotlib.text.Annotation
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.annotate(text='center', xytext=(50, 50), xy=(60, 40), ha='center', va='center', \
+                           ax=ax, arrowprops=dict(facecolor='black'))
+        """
+        validate_ax(ax)
+        xy = self._reverse_annotate_if_vertical(xy)
+        if xytext is not None:
+            xytext = self._reverse_annotate_if_vertical(xytext)
+        return ax.annotate(text, xy, xytext, **kwargs)
+
+    @docstring.copy(bin_statistic)
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
+        stats = bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
+                              bins=bins, normalize=normalize, standardized=standardized)
+        return stats
+
+    @docstring.copy(heatmap)
+    def heatmap(self, stats, ax=None, **kwargs):
+        mesh = heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
+        return mesh
+
+    @docstring.copy(bin_statistic_positional)
+    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count', normalize=False):
+        stats = bin_statistic_positional(x, y, values=values,
+                                         dim=self.dim, positional=positional, statistic=statistic, normalize=normalize)
+        return stats
+
+    @docstring.copy(heatmap_positional)
+    def heatmap_positional(self, stats, ax=None, **kwargs):
+        mesh = heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
+        return mesh
+
+    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, ax=None, **kwargs):
+        """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
+
+        Parameters
+        ----------
+        stats : A dictionary or list of dictionaries.
+            This should be calculated via bin_statistic_positional() or bin_statistic().
+        str_format : str
+            A format string passed to str_format.format() to format the labels.
+        exclude_zeros : bool
+            Whether to exclude zeros when labelling the heatmap.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
+
+        Returns
+        -------
+        annotations : A list of matplotlib.text.Annotation.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> import matplotlib.patheffects as path_effects
+        >>> pitch = Pitch(line_zorder=2, pitch_color='black')
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=100)
+        >>> y = np.random.uniform(low=0, high=80, size=100)
+        >>> stats = pitch.bin_statistic(x, y)
+        >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
+        >>> stats['statistic'] = stats['statistic'].astype(int)
+        >>> path_eff = [path_effects.Stroke(linewidth=0.5, foreground='#22312b')]
+        >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center', \
+                                       va='center', path_effects=path_eff)
+        """
+        validate_ax(ax)
+
+        if not isinstance(stats, list):
+            stats = [stats]
+
+        annotation_list = []
+        for bin_stat in stats:
+            # remove labels outside the plot extents
+            mask_x_outside1 = bin_stat['cx'] < self.dim.pitch_extent[0]
+            mask_x_outside2 = bin_stat['cx'] > self.dim.pitch_extent[1]
+            mask_y_outside1 = bin_stat['cy'] < self.dim.pitch_extent[2]
+            mask_y_outside2 = bin_stat['cy'] > self.dim.pitch_extent[3]
+            mask_clip = mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
+            if exclude_zeros:
+                mask_clip = mask_clip | (np.isclose(bin_stat['statistic'], 0.))
+            mask_clip = np.ravel(mask_clip)
+
+            text = np.ravel(bin_stat['statistic'])[~mask_clip]
+            cx = np.ravel(bin_stat['cx'])[~mask_clip]
+            cy = np.ravel(bin_stat['cy'])[~mask_clip]
+            for idx, text_str in enumerate(text):
+                if str_format is not None:
+                    text_str = str_format.format(text_str)
+                annotation = self.annotate(text_str, (cx[idx], cy[idx]), ax=ax, **kwargs)
+                annotation_list.append(annotation)
+
+        return annotation_list
+
+    @docstring.copy(arrows)
+    def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
+        validate_ax(ax)
+        quiver = arrows(xstart, ystart, xend, yend, *args, ax=ax, vertical=self.vertical, **kwargs)
+        return quiver
+
+    @docstring.copy(lines)
+    def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
+              comet=False, transparent=False, alpha_start=0.01,
+              alpha_end=1, cmap=None, ax=None, **kwargs):
+        validate_ax(ax)
+        linecollection = lines(xstart, ystart, xend, yend, color=color, n_segments=n_segments,
+                               comet=comet, transparent=transparent, alpha_start=alpha_start,
+                               alpha_end=alpha_end, cmap=cmap, ax=ax, vertical=self.vertical,
+                               reverse_cmap=self.reverse_cmap, **kwargs)
+        return linecollection
+
+    def voronoi(self, x, y, teams):
+        """ Get Voronoi vertices for a set of coordinates.
+        Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
+        before calculating the Voronoi. This means that the Voronoi extends to
+        the edges of the pitch. See:
+        https://github.com/ProformAnalytics/tutorial_nbs/blob/master/notebooks/Voronoi%20Reflection%20Trick.ipynb
+
+        Players outside of the pitch dimensions are assumed to be standing on the pitch edge.
+        This means that their coordinates are clipped to the pitch edges
+        before calculating the Voronoi.
+
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+
+        teams: array-like or scalar.
+            This splits the results into the Voronoi vertices for each team.
+            This can either have integer (1/0) values or boolean (True/False) values.
+            team1 is where team==1 or team==True
+            team2 is where team==0 or team==False
+
+        Returns
+        -------
+        team1 : a 1d numpy array (length number of players in team 1) of 2d arrays
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
+
+        team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=22)
+        >>> y = np.random.uniform(low=0, high=80, size=22)
+        >>> teams = np.array([0] * 11 + [1] * 11)
+        >>> pitch.scatter(x[teams == 0], y[teams == 0], color='red', ax=ax)
+        >>> pitch.scatter(x[teams == 1], y[teams == 1], color='blue', ax=ax)
+        >>> team1, team2 = pitch.voronoi(x, y, teams)
+        >>> team1_poly = pitch.polygon(team1, ax=ax, color='blue', alpha=0.3)
+        >>> team2_poly = pitch.polygon(team2, ax=ax, color='red', alpha=0.3)
+        """
+        x = np.ravel(x)
+        y = np.ravel(y)
+        teams = np.ravel(teams)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        if teams.size != x.size:
+            raise ValueError("x and team must be the same size")
+
+        if self.dim.aspect != 1:
+            standardized = True
+            x, y = self.standardizer.transform(x, y)
+            extent = np.array([0, 105, 0, 68])
+        else:
+            standardized = False
+            extent = self.dim.pitch_extent
+
+        # clip outside to pitch extents
+        x = x.clip(min=extent[0], max=extent[1])
+        y = y.clip(min=extent[2], max=extent[3])
+
+        # reflect in pitch lines
+        reflect_x, reflect_y = self._reflect_2d(x, y, standardized=standardized)
+        reflect = np.vstack([reflect_x, reflect_y]).T
+
+        # create Voronoi
+        vor = Voronoi(reflect)
+
+        # get region vertices
+        regions = vor.point_region[:x.size]
+        regions = np.array(vor.regions, dtype='object')[regions]
+        region_vertices = []
+        for region in regions:
+            verts = vor.vertices[region]
+            verts[:, 0] = np.clip(verts[:, 0], a_min=extent[0], a_max=extent[1])
+            verts[:, 1] = np.clip(verts[:, 1], a_min=extent[2], a_max=extent[3])
+            # convert back to coordinates if previously standardized
+            if standardized:
+                x_std, y_std = self.standardizer.transform(verts[:, 0], verts[:, 1], reverse=True)
+                verts[:, 0] = x_std
+                verts[:, 1] = y_std
+            region_vertices.append(verts)
+        region_vertices = np.array(region_vertices, dtype='object')
+
+        # seperate team1/ team2 vertices
+        team1 = region_vertices[teams == 1]
+        team2 = region_vertices[teams == 0]
+
+        return team1, team2
+
+    def calculate_angle_and_distance(self, xstart, ystart, xend, yend,
+                                     standardized=False, degrees=False):
+        """ Calculates the angle in radians counter-clockwise and the distance
+        between a start and end location. Where the angle 0 is this way →
+        (the straight line from left to right) in a horizontally orientated pitch
+        and this way ↑ in a vertically orientated pitch.
+        The angle goes from 0 to 2pi. To convert the angle to degrees clockwise use degrees=True.
+
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+            These should be the start and end coordinates to calculate the angle between.
+        standardized : bool, default False
+            Whether the x, y values have been standardized to the 'uefa'
+            pitch coordinates (105m x 68m)
+        degrees : bool, default False
+            If False, the angle is returned in radians counter-clockwise in the range [0, 2pi]
+            If True, the angle is returned in degrees clockwise in the range [0, 360].
+
+        Returns
+        -------
+        angle: ndarray
+            The default is an array of angles in radians counter-clockwise in the range [0, 2pi].
+            Where 0 is the straight line left to right in a horizontally orientated pitch
+            and the straight line bottom to top in a vertically orientated pitch.
+            If degrees = True, then the angle is returned in degrees clockwise in the range [0, 360]
+        distance: ndarray
+            Array of distances.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> pitch.calculate_angle_and_distance(0, 40, 30, 20, degrees=True)
+        (array([326.30993247]), array([36.05551275]))
+        """
+        xstart = np.ravel(xstart)
+        ystart = np.ravel(ystart)
+        xend = np.ravel(xend)
+        yend = np.ravel(yend)
+
+        if xstart.size != ystart.size:
+            raise ValueError("xstart and ystart must be the same size")
+        if xstart.size != xend.size:
+            raise ValueError("xstart and xend must be the same size")
+        if ystart.size != yend.size:
+            raise ValueError("ystart and yend must be the same size")
+
+        x_dist = xend - xstart
+        if self.dim.invert_y and standardized is False:
+            y_dist = ystart - yend
+        else:
+            y_dist = yend - ystart
+
+        angle = np.arctan2(y_dist, x_dist)
+        # if negative angle make positive angle, so goes from 0 to 2 * pi
+        angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+
+        if degrees:
+            # here we convert to degrees and take the negative for clockwise angles
+            # the modulus is not strictly necessary for plotting purposes,
+            # but gives the postive angle in degrees
+            angle = np.mod(-np.degrees(angle), 360)
+
+        distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
+
+        return angle, distance
+
+    def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5,
+             color=None, ax=None, **kwargs):
+        """ Create a flow map by binning the data into cells and calculating the average
+        angles and distances.
+
+        Parameters
+        ----------
+        xstart, ystart, xend, yend: array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+            These should be the start and end coordinates to calculate the angle between.
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification for binning the data to calculate the angles/ distances.
+              * the number of bins for the two dimensions (nx = ny = bins),
+              * the number of bins in each dimension (nx, ny = bins),
+              * the bin edges for the two dimensions (x_edge = y_edge = bins),
+              * the bin edges in each dimension (x_edge, y_edge = bins).
+                If the bin edges are specified, the number of bins will be,
+                (nx = len(x_edge)-1, ny = len(y_edge)-1).
+        arrow_type : str, default 'same'
+            The supported arrow types are: 'same', 'scale', and 'average'.
+            'same' makes the arrows the same size (arrow_length).
+            'scale' scales the arrow length by the average distance
+            in the cell (up to a max of arrow_length).
+            'average' makes the arrow size the average distance in the cell.
+        arrow_length : float, default 5
+            The arrow_length for the flow map. If the arrow_type='same',
+            all the arrows will be arrow_length. If the arrow_type='scale',
+            the arrows will be scaled by the average distance.
+            If the arrow_type='average', the arrows_length is ignored
+            This is automatically multipled by 100 if using a 'tracab' pitch
+            (i.e. the default is 500).
+        color : A matplotlib color, defaults to None.
+            Defaults to None. In that case the marker color is
+            determined by the cmap (default 'viridis').
+            and the counts of the starting positions in each bin.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.quiver.
+
+        Returns
+        -------
+        PolyCollection : matplotlib.quiver.Quiver
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> from mplsoccer.statsbomb import read_event, EVENT_SLUG
+        >>> df = read_event(f'{EVENT_SLUG}/7478.json', related_event_df=False, \
+                            shot_freeze_frame_df=False, tactics_lineup_df=False)['event']
+        >>> team1, team2 = df.team_name.unique()
+        >>> mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1)
+        >>> df = df[mask_team1].copy()
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> bs_heatmap = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 4))
+        >>> hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Blues')
+        >>> fm = pitch.flow(df.x, df.y, df.end_x, df.end_y, color='black', arrow_type='same', \
+                            arrow_length=6, bins=(6, 4), headwidth=2, headlength=2, \
+                            headaxislength=2, ax=ax)
+        """
+        validate_ax(ax)
+        if self.dim.aspect != 1:
+            standardized = True
+            xstart, ystart = self.standardizer.transform(xstart, ystart)
+            xend, yend = self.standardizer.transform(xend, yend)
+        else:
+            standardized = False
+
+        # calculate  the binned statistics
+        angle, distance = self.calculate_angle_and_distance(xstart, ystart, xend, yend,
+                                                            standardized=standardized)
+        bs_distance = self.bin_statistic(xstart, ystart, values=distance,
+                                         statistic='mean', bins=bins, standardized=standardized)
+        bs_angle = self.bin_statistic(xstart, ystart, values=angle,
+                                      statistic=circmean, bins=bins, standardized=standardized)
+
+        # calculate the arrow length
+        if self.pitch_type == 'tracab':
+            arrow_length = arrow_length * 100
+        if arrow_type == 'scale':
+            new_d = (bs_distance['statistic'] * arrow_length /
+                     np.nan_to_num(bs_distance['statistic']).max(initial=None))
+        elif arrow_type == 'same':
+            new_d = arrow_length
+        elif arrow_type == 'average':
+            new_d = bs_distance['statistic']
+        else:
+            valid_arrows = ['scale', 'same', 'average']
+            raise TypeError(f'Invalid argument: arrow_type should be in {valid_arrows}')
+
+        # calculate the end positions of the arrows
+        endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d)
+        if self.dim.invert_y and standardized is False:
+            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d)  # invert_y
+        else:
+            endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
+
+        # get coordinates and convert back to the pitch coordinates if necessary
+        cx, cy = bs_angle['cx'], bs_angle['cy']
+        if standardized:
+            cx, cy = self.standardizer.transform(cx, cy, reverse=True)
+            endx, endy = self.standardizer.transform(endx, endy, reverse=True)
+
+        # plot arrows
+        if color is None:
+            bs_count = self.bin_statistic(xstart, ystart, statistic='count',
+                                          bins=bins, standardized=standardized)
+            flow = self.arrows(cx, cy, endx, endy, bs_count['statistic'], ax=ax, **kwargs)
+        else:
+            flow = self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)
+
+        return flow
+
+    # The methods below for drawing/ setting attributes for some of the pitch elements
+    # are defined in pitch.py (Pitch/ VerticalPitch classes)
+    # as they differ for horizontal/ vertical pitches
+    def _scale_pad(self):
+        pass
+
+    def _set_extent(self):
+        pass
+
+    def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
+        pass
+
+    def _draw_line(self, ax, x, y, **kwargs):
+        pass
+
+    def _draw_ellipse(self, ax, x, y, width, height, **kwargs):
+        pass
+
+    def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
+        pass
+
+    def _draw_stripe(self, ax, i):
+        pass
+
+    def _draw_stripe_grass(self, pitch_color):
+        pass
+
+    @staticmethod
+    def _reverse_if_vertical(x, y):
+        pass
+
+    @staticmethod
+    def _reverse_vertices_if_vertical(vert):
+        pass
+
+    @staticmethod
+    def _reverse_annotate_if_vertical(annotate):
+        pass
