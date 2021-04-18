@@ -86,6 +86,8 @@ class BasePitch(ABC):
         Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
     goal_alpha : float, default 0.7
         The transparency of the goal. This is used when the goal_type='box'
+    pitch_alpha : float, default 1
+        The transparency of the pitch and the markings.
     axis : bool, default False
         Whether to set the axis spines to visible.
     label : bool, default False
@@ -470,28 +472,26 @@ class BasePitch(ABC):
                      'color': self.line_color, 'zorder': self.line_zorder}
         line_prop = {'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
-        # right six yard
+        # right six yard and penalty area
         self._draw_line(ax, [self.dim.six_yard_right, self.dim.six_yard_right],
                         [self.dim.six_yard_top, self.dim.six_yard_bottom], **line_prop)
         self._draw_line(ax, [self.dim.six_yard_right, self.dim.right],
                         [self.dim.six_yard_top, self.dim.six_yard_top], **line_prop)
         self._draw_line(ax, [self.dim.six_yard_right, self.dim.right],
                         [self.dim.six_yard_bottom, self.dim.six_yard_bottom], **line_prop)
-        # right penalty area
         self._draw_line(ax, [self.dim.penalty_area_right, self.dim.penalty_area_right],
                         [self.dim.penalty_area_top, self.dim.penalty_area_bottom], **line_prop)
         self._draw_line(ax, [self.dim.penalty_area_right, self.dim.right],
                         [self.dim.penalty_area_top, self.dim.penalty_area_top], **line_prop)
         self._draw_line(ax, [self.dim.penalty_area_right, self.dim.right],
                         [self.dim.penalty_area_bottom, self.dim.penalty_area_bottom], **line_prop)
-        # left six yard
+        # left six yard and penalty area
         self._draw_line(ax, [self.dim.six_yard_left, self.dim.six_yard_left],
                         [self.dim.six_yard_top, self.dim.six_yard_bottom], **line_prop)
         self._draw_line(ax, [self.dim.six_yard_left, self.dim.left],
                         [self.dim.six_yard_top, self.dim.six_yard_top], **line_prop)
         self._draw_line(ax, [self.dim.six_yard_left, self.dim.left],
                         [self.dim.six_yard_bottom, self.dim.six_yard_bottom], **line_prop)
-        # left penalty area
         self._draw_line(ax, [self.dim.penalty_area_left, self.dim.penalty_area_left],
                         [self.dim.penalty_area_top, self.dim.penalty_area_bottom], **line_prop)
         self._draw_line(ax, [self.dim.penalty_area_left, self.dim.left],
