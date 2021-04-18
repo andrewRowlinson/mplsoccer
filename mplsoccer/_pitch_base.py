@@ -115,7 +115,7 @@ class BasePitch(ABC):
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=0.7,
-                 axis=False, label=False, tick=False,
+                 pitch_alpha=1, axis=False, label=False, tick=False,
                  figsize=None, tight_layout=None, constrained_layout=None,
                  layout=None, view=None, orientation=None):
 
@@ -152,6 +152,7 @@ class BasePitch(ABC):
         self.pitch_width = pitch_width
         self.goal_type = goal_type
         self.goal_alpha = goal_alpha
+        self.pitch_alpha = pitch_alpha
         self.axis = axis
         self.label = label
         self.tick = tick
@@ -259,8 +260,8 @@ class BasePitch(ABC):
                 f'shade_color={self.shade_color!r}, shade_zorder={self.shade_zorder!r}, '
                 f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
-                f'label={self.label!r}, tick={self.tick!r}, axis={self.axis!r}, '
-                f'spot_scale={self.spot_scale!r})')
+                f'pitch_alpha={self.pitch_alpha!r}, label={self.label!r}, '
+                f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r})')
 
     def _validation_checks(self):
         # pitch validation
@@ -465,19 +466,38 @@ class BasePitch(ABC):
                 self._draw_stripe(ax, i)
 
     def _draw_pitch_markings(self, ax):
-        rect_prop = {'fill': False, 'linewidth': self.linewidth,
+        rect_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
-        line_prop = {'linewidth': self.linewidth,
+        line_prop = {'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
-        self._draw_rectangle(ax, self.dim.left, self.dim.six_yard_bottom,
-                             self.dim.six_yard_length, self.dim.six_yard_width, **rect_prop)
-        self._draw_rectangle(ax, self.dim.six_yard_right, self.dim.six_yard_bottom,
-                             self.dim.six_yard_length, self.dim.six_yard_width, **rect_prop)
-        self._draw_rectangle(ax, self.dim.left, self.dim.penalty_area_bottom,
-                             self.dim.penalty_area_length, self.dim.penalty_area_width, **rect_prop)
-        self._draw_rectangle(ax, self.dim.penalty_area_right, self.dim.penalty_area_bottom,
-                             self.dim.penalty_area_length, self.dim.penalty_area_width, **rect_prop)
-
+        # right six yard
+        self._draw_line(ax, [self.dim.six_yard_right, self.dim.six_yard_right],
+                        [self.dim.six_yard_top, self.dim.six_yard_bottom], **line_prop)
+        self._draw_line(ax, [self.dim.six_yard_right, self.dim.right],
+                        [self.dim.six_yard_top, self.dim.six_yard_top], **line_prop)
+        self._draw_line(ax, [self.dim.six_yard_right, self.dim.right],
+                        [self.dim.six_yard_bottom, self.dim.six_yard_bottom], **line_prop)
+        # right penalty area
+        self._draw_line(ax, [self.dim.penalty_area_right, self.dim.penalty_area_right],
+                        [self.dim.penalty_area_top, self.dim.penalty_area_bottom], **line_prop)
+        self._draw_line(ax, [self.dim.penalty_area_right, self.dim.right],
+                        [self.dim.penalty_area_top, self.dim.penalty_area_top], **line_prop)
+        self._draw_line(ax, [self.dim.penalty_area_right, self.dim.right],
+                        [self.dim.penalty_area_bottom, self.dim.penalty_area_bottom], **line_prop)
+        # left six yard
+        self._draw_line(ax, [self.dim.six_yard_left, self.dim.six_yard_left],
+                        [self.dim.six_yard_top, self.dim.six_yard_bottom], **line_prop)
+        self._draw_line(ax, [self.dim.six_yard_left, self.dim.left],
+                        [self.dim.six_yard_top, self.dim.six_yard_top], **line_prop)
+        self._draw_line(ax, [self.dim.six_yard_left, self.dim.left],
+                        [self.dim.six_yard_bottom, self.dim.six_yard_bottom], **line_prop)
+        # left penalty area
+        self._draw_line(ax, [self.dim.penalty_area_left, self.dim.penalty_area_left],
+                        [self.dim.penalty_area_top, self.dim.penalty_area_bottom], **line_prop)
+        self._draw_line(ax, [self.dim.penalty_area_left, self.dim.left],
+                        [self.dim.penalty_area_top, self.dim.penalty_area_top], **line_prop)
+        self._draw_line(ax, [self.dim.penalty_area_left, self.dim.left],
+                        [self.dim.penalty_area_bottom, self.dim.penalty_area_bottom], **line_prop)
         # pitch
         self._draw_rectangle(ax, self.dim.left, self.dim.bottom,
                              self.dim.length, self.dim.width, **rect_prop)
@@ -488,7 +508,7 @@ class BasePitch(ABC):
         self._draw_circles_and_arcs(ax)
 
     def _draw_circles_and_arcs(self, ax):
-        circ_prop = {'fill': False, 'linewidth': self.linewidth,
+        circ_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
 
         # draw center cicrle and penalty area arcs
@@ -541,7 +561,8 @@ class BasePitch(ABC):
 
     def _draw_juego_de_posicion(self, ax):
         line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
-                     'linestyle': self.positional_linestyle, 'zorder': self.positional_zorder}
+                     'alpha': self.pitch_alpha, 'linestyle': self.positional_linestyle,
+                     'zorder': self.positional_zorder}
         # x lines for Juego de Posición
         for coord in self.dim.positional_x[1:-1]:
             self._draw_line(ax, [coord, coord], [self.dim.bottom, self.dim.top], **line_prop)
@@ -556,7 +577,8 @@ class BasePitch(ABC):
                         [self.dim.positional_y[4], self.dim.positional_y[4]], **line_prop)
 
     def _draw_shade_middle(self, ax):
-        shade_prop = {'fill': True, 'facecolor': self.shade_color, 'zorder': self.shade_zorder}
+        shade_prop = {'fill': True, 'facecolor': self.shade_color, 
+                      'alpha': self.pitch_alpha, 'zorder': self.shade_zorder}
         self._draw_rectangle(ax, self.dim.positional_x[2], self.dim.bottom,
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
