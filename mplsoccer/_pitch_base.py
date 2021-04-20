@@ -86,7 +86,7 @@ class BasePitch(ABC):
         Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
     goal_alpha : float, default 0.7
         The transparency of the goal. This is used when the goal_type='box'
-    pitch_alpha : float, default 1
+    line_alpha : float, default 1
         The transparency of the pitch and the markings.
     axis : bool, default False
         Whether to set the axis spines to visible.
@@ -117,7 +117,7 @@ class BasePitch(ABC):
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=0.7,
-                 pitch_alpha=1, axis=False, label=False, tick=False,
+                 line_alpha=1, axis=False, label=False, tick=False,
                  figsize=None, tight_layout=None, constrained_layout=None,
                  layout=None, view=None, orientation=None):
 
@@ -154,7 +154,7 @@ class BasePitch(ABC):
         self.pitch_width = pitch_width
         self.goal_type = goal_type
         self.goal_alpha = goal_alpha
-        self.pitch_alpha = pitch_alpha
+        self.line_alpha = line_alpha
         self.axis = axis
         self.label = label
         self.tick = tick
@@ -262,7 +262,7 @@ class BasePitch(ABC):
                 f'shade_color={self.shade_color!r}, shade_zorder={self.shade_zorder!r}, '
                 f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
-                f'pitch_alpha={self.pitch_alpha!r}, label={self.label!r}, '
+                f'line_alpha={self.line_alpha!r}, label={self.label!r}, '
                 f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r})')
 
     def _validation_checks(self):
@@ -468,9 +468,9 @@ class BasePitch(ABC):
                 self._draw_stripe(ax, i)
 
     def _draw_pitch_markings(self, ax):
-        rect_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
+        rect_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
-        line_prop = {'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
+        line_prop = {'linewidth': self.linewidth, 'alpha': self.line_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
         # right six yard and penalty area
         self._draw_line(ax, [self.dim.six_yard_right, self.dim.six_yard_right],
@@ -508,7 +508,7 @@ class BasePitch(ABC):
         self._draw_circles_and_arcs(ax)
 
     def _draw_circles_and_arcs(self, ax):
-        circ_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.pitch_alpha,
+        circ_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
 
         # draw center cicrle and penalty area arcs
@@ -561,7 +561,7 @@ class BasePitch(ABC):
 
     def _draw_juego_de_posicion(self, ax):
         line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
-                     'alpha': self.pitch_alpha, 'linestyle': self.positional_linestyle,
+                     'alpha': self.line_alpha, 'linestyle': self.positional_linestyle,
                      'zorder': self.positional_zorder}
         # x lines for Juego de Posición
         for coord in self.dim.positional_x[1:-1]:
@@ -578,7 +578,7 @@ class BasePitch(ABC):
 
     def _draw_shade_middle(self, ax):
         shade_prop = {'fill': True, 'facecolor': self.shade_color, 
-                      'alpha': self.pitch_alpha, 'zorder': self.shade_zorder}
+                      'alpha': self.line_alpha, 'zorder': self.shade_zorder}
         self._draw_rectangle(ax, self.dim.positional_x[2], self.dim.bottom,
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
