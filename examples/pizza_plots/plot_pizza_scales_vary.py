@@ -3,6 +3,8 @@
 Different Scales Pizza
 ======================
 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_
+
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
 * The design idea is inspired by `Tom Worville <https://twitter.com/Worville>`_, \
@@ -13,7 +15,7 @@ Different Scales Pizza
 to enable greater customisation.
 
 Here we plot a pizza chart where each parameters has a different
-maximum and minimum value.
+maximum and minimum value. 
 """
 
 from urllib.request import urlopen

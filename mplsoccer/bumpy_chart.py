@@ -117,7 +117,7 @@ class Bumpy:
 
     def plot(self, x_list, y_list, values, highlight_dict, figsize=(12, 8), lw=2,
              secondary_alpha=1, x_label=None, y_label=None, xlim=None, ylim=None,
-             ax=None, upside_down=False, fontproperties=None):
+             ax=None, upside_down=False, **kwargs):
         """ Function to plot bumpy-chart.
 
         Parameters
@@ -144,8 +144,7 @@ class Bumpy:
             axes object on which chart will be plotted.
         upside_down : bool, default False
             To plot chart upside down.
-        fontproperties : FontManager, default None
-            Fontproperties for labels and ticks.
+        **kwargs : All other keyword arguments are passed for setting ticklabels and labels.
 
         Returns
         -------
@@ -209,7 +208,7 @@ class Bumpy:
                          for d in (-self.curviness, 0, self.curviness)][1: -1]
 
             # plot scatter-points
-            if self.scatter:
+            if self.scatter != "value":
                 ax.scatter(
                     np.arange(len(value)), y,
                     marker=marker,
@@ -241,7 +240,7 @@ class Bumpy:
             self.__add_labels(
                 x_list, y_list, ax=ax,
                 x_label=x_label, y_label=y_label,
-                fontproperties=fontproperties
+                **kwargs
             )
 
         # xlim and ylim
@@ -254,7 +253,7 @@ class Bumpy:
             return fig, ax
         return None
 
-    def __add_labels(self, x_list, y_list, ax, x_label, y_label, fontproperties=None):
+    def __add_labels(self, x_list, y_list, ax, x_label, y_label, **kwargs):
         """ Function to add labels and titles to the plot.
 
         Parameters
@@ -267,8 +266,7 @@ class Bumpy:
             axes object on which chart will be plotted.
         x_label, y_label : str
             x-label and y-label name
-        fontproperties : FontManager, default None
-            Fontproperties for labels and ticks.
+        **kwargs : All other keyword arguments are passed on to set ticklabels and labels.
         """
         # remove spines
         ax.spines['top'].set_visible(False)
@@ -282,18 +280,18 @@ class Bumpy:
 
         # set ticklabels
         ax.set_xticklabels(x_labels, fontsize=self.ticklabel_size,
-                           rotation=self.rotate_xticks, fontproperties=fontproperties)
+                           rotation=self.rotate_xticks, **kwargs)
         ax.set_yticklabels(y_labels, fontsize=self.ticklabel_size,
-                           rotation=self.rotate_yticks, fontproperties=fontproperties)
+                           rotation=self.rotate_yticks, **kwargs)
 
         # set x and y axis labels
         ax.set_xlabel(
             x_label, fontsize=self.label_size, labelpad=self.labelpad, x=self.align_xval,
-            fontproperties=fontproperties
+            **kwargs
         )
         ax.set_ylabel(
             y_label, fontsize=self.label_size, labelpad=self.labelpad, y=self.align_yval,
-            fontproperties=fontproperties
+            **kwargs
         )
         ax.xaxis.label.set_color(self.label_color)
         ax.yaxis.label.set_color(self.label_color)

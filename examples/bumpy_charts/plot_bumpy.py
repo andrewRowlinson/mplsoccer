@@ -3,6 +3,8 @@
 Bumpy Charts
 ============
 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_
+
 * ``mplsoccer``, ``bumpy_chart`` module helps one to plot bumpy charts in a few lines of code.
 
 * Inspired By `CJ Mayes <https://public.tableau.com/profile/cj.mayes#!/ \
@@ -30,8 +32,6 @@ from mplsoccer import Bumpy, FontManager, add_image
 
 font_normal = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
                            "static/Roboto-Regular.ttf?raw=true"))
-font_italic = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
-                           "static/Roboto-Italic.ttf?raw=true"))
 font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
                          "static/Roboto-Medium.ttf?raw=true"))
 
@@ -97,7 +97,7 @@ fig, ax = bumpy.plot(
     x_label='Week', y_label='Position',  # label name
     ylim=(-0.1, 23),  # y-axis limit
     lw=2.5,   # linewidth of the connecting lines
-    fontproperties=font_normal.prop,   # fontproperties for labels
+    fontproperties=font_normal.prop,   # fontproperties for ticklables/labels
 )
 
 # title and subtitle
@@ -141,7 +141,7 @@ bumpy = Bumpy(
     show_right=True,  # show position on the rightside
     plot_labels=True,  # plot the labels
     alignment_yvalue=0.1,  # y label alignment
-    alignment_xvalue=0.065  # x label alignment
+    alignment_xvalue=0.065,  # x label alignment
 )
 
 # plot bumpy chart
@@ -155,8 +155,8 @@ fig, ax = bumpy.plot(
     x_label='Week', y_label='Position',  # label name
     ylim=(-0.1, 23),  # y-axis limit
     lw=2.5,   # linewidth of the connecting lines
-    fontproperties=font_normal.prop,   # fontproperties for labels
     upside_down=True,    # <--- to flip the y-axis
+    fontproperties=font_normal.prop,   # fontproperties for ticklables/labels
 )
 
 # title and subtitle
@@ -225,7 +225,7 @@ fig, ax = bumpy.plot(
     x_label='Week', y_label='Position',  # label name
     ylim=(-0.1, 23),  # y-axis limit
     lw=2.5,   # linewidth of the connecting lines
-    fontproperties=font_normal.prop,   # fontproperties for labels
+    fontproperties=font_normal.prop,   # fontproperties for ticklabels/labels
 )
 
 # title and subtitle
@@ -262,7 +262,7 @@ highlight_dict = {
 
 # instantiate object
 bumpy = Bumpy(
-    rotate_xticks=0, ticklabel_size=17, label_size=25, scatter="value",
+    rotate_xticks=0, ticklabel_size=23, label_size=28, scatter="value",
     show_right=True, alignment_yvalue=0.15, alignment_xvalue=0.06
 )
 
@@ -272,8 +272,8 @@ fig, ax = bumpy.plot(
     secondary_alpha=0.05, highlight_dict=highlight_dict,
     figsize=(20, 12),
     x_label="Attributes", y_label="Percentile Rank", ylim=(0.5, 12),
-    fontproperties=font_normal.prop,
-    upside_down=True
+    upside_down=True,
+    fontfamily="Liberation Serif"
 )
 
 # title and subtitle
@@ -281,17 +281,9 @@ TITLE = "Comparison Between <Cristián Zapata> and <Francesco Acerbi>"
 
 # add title
 fig_text(
-    0.02, 0.975, TITLE, color="#F2F2F2",
+    0.02, 0.98, TITLE, color="#F2F2F2",
     highlight_textprops=[{"color": 'crimson'}, {"color": 'cornflowerblue'}],
-    size=34, fig=fig, fontproperties=font_bold.prop
+    size=34, fig=fig, fontfamily="Liberation Serif"
 )
-
-# add credits
-fig.text(
-    0.99, 0.01, "graphic: @slothfulwave612",
-    size=15, color="#F2F2F2", fontstyle="italic",
-    ha="right", fontproperties=font_italic.prop
-)
-
 # if space is left in the plot use this
 plt.tight_layout(pad=0.5)

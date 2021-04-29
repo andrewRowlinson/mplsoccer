@@ -3,6 +3,8 @@
 Comparison Pizza (scales vary)
 ==============================
 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_ 
+
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
 * The design idea is inspired by `Tom Worville <https://twitter.com/Worville>`_, \
@@ -121,6 +123,132 @@ fig.text(
 
 # add credits
 CREDIT_1 = "data: statsbomb viz fbref"
+CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
+fig.text(
+    0.99, 0.005, f"{CREDIT_1}\n{CREDIT_2}", size=9,
+    fontproperties=font_italic.prop, color="#F2F2F2",
+    ha="right"
+)
+
+plt.show()
+
+##############################################################################
+# Adjust Overlapping Values
+# -------------------------
+# To adjust overlapping values one can use ``get_compare_value_texts()`` or ``get_value_texts()``
+# to fetch a list of `axes.text` object for comparison-values-text and values-text repectively.
+# Using these method one can adjust the required text. Below is an example code.
+
+def adjust_value_text(params_offset, offset, baker):
+    """ Function to adjust the value texts. (for first player)
+    <<You can make your own function>>
+
+    Parameters
+    ----------
+    params_offset : sequence of bool, default None
+        Pass True for parameter whose value are to be adjusted
+    offset : float, default 0.0
+        Value will define how much adjustment to be made.
+    baker : PyPizza object
+    """
+    # get index value where value is True
+    idx_value = [i for i, x in enumerate(params_offset) if x]
+
+    # similarly one can use baker.get_compare_value_texts() for second player value-texts
+    for count, (temp_text, theta) in enumerate(
+        zip(baker.get_value_texts(), baker.get_theta())
+    ):
+        # fetch the value
+        adj_val = offset if count in idx_value else 0.0
+
+        # adjust the position
+        # add some value to x-coordinate and keep y-coordinate same
+        temp_text.set_position((
+            theta+adj_val, temp_text.get_position()[1]
+        ))
+
+
+# parameter and values list
+params = [
+    "Passing %", "Deep Progression", "xG Assisted", "xG Buildup",
+    "Successful Dribbles", "Fouls Won", "Turnovers", "Pressure Regains",
+    "pAdj Tackles", "pAdj Interceptions"
+]
+values = [85, 6.94, 0.15, 0.58, 1.74, 1.97, 2.43, 4.27, 2.88, 0.92]    # player 1
+values_2 = [76, 4.56, 0.09, 0.46, 1.08, 1.28, 1.84, 4.16, 2.66, 1.51]  # player 2
+
+# minimum range value and maximum range value for parameters
+min_range = [74, 3.3, 0.03, 0.28, 0.4, 0.7, 2.6, 2.4, 1.1, 0.7]
+max_range = [90, 9.7, 0.20, 0.89, 2.1, 2.7, 0.4, 5.1, 3.7, 2.5]
+
+# instantiate PyPizza class
+baker = PyPizza(
+    params=params,
+    min_range=min_range,        # min range values
+    max_range=max_range,        # max range values
+    background_color="#222222", straight_line_color="#000000",
+    last_circle_color="#000000", last_circle_lw=2.5, other_circle_lw=0,
+    other_circle_color="#000000", straight_line_lw=1
+)
+
+# plot pizza
+fig, ax = baker.make_pizza(
+    values,                     # list of values
+    compare_values=values_2,    # passing comparison values
+    figsize=(8, 8),             # adjust figsize according to your need
+    color_blank_space="same",   # use same color to fill blank space
+    blank_alpha=0.4,            # alpha for blank-space colors
+    param_location=110,         # where the parameters will be added
+    kwargs_slices=dict(
+        facecolor="#1A78CF", edgecolor="#000000",
+        zorder=1, linewidth=1
+    ),                          # values to be used when plotting slices
+    kwargs_compare=dict(
+        facecolor="#ff9300", edgecolor="#222222", zorder=3, linewidth=1,
+    ),                          # values to be used when plotting comparison slices
+    kwargs_params=dict(
+        color="#F2F2F2", fontsize=12, zorder=5,
+        fontproperties=font_normal.prop, va="center"
+    ),                          # values to be used when adding parameter
+    kwargs_values=dict(
+        color="#000000", fontsize=12,
+        fontproperties=font_normal.prop, zorder=3,
+        bbox=dict(
+            edgecolor="#000000", facecolor="#1A78CF",
+            boxstyle="round,pad=0.2", lw=1
+        )
+    ),                           # values to be used when adding parameter-values
+    kwargs_compare_values=dict(
+        color="#000000", fontsize=12,
+        fontproperties=font_normal.prop, zorder=3,
+        bbox=dict(
+            edgecolor="#000000", facecolor="#FF9300",
+            boxstyle="round,pad=0.2", lw=1
+        )
+    )                            # values to be used when adding comparison-values
+)
+
+# pass True in that parameter-index whose values are to be adjusted
+# here True values are passed for "Pressure Regains", "pAdj Tackles" params
+params_offset = [
+    False, False, False, False, False, 
+    False, False, True, True, False
+]
+
+# adjust the texts --> calling the function here <--
+adjust_value_text(params_offset, offset=-0.17, baker=baker)
+
+# add title
+fig_text(
+    0.515, 0.99, "<Player 1> vs <Player 2>",
+    size=16, fig=fig,
+    highlight_textprops=[{"color": '#1A78CF'}, {"color": '#FF9300'}],
+    ha="center", fontproperties=font_bold.prop, color="#F2F2F2"
+)
+
+# add credits
+CREDIT_1 = "dummy data"
 CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
 
 fig.text(

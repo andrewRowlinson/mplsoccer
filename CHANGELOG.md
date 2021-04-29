@@ -1,3 +1,17 @@
+:rocket: Version 1.0.3
+----------------------
+
+### Added
+* Added ``**kwargs`` to ``Bumpy.plot()`` method. \
+All the keyword arguments are passed for setting ticklabels and labels.
+
+* Added four new methods to ``PyPizza``.\
+  * ``get_param_texts()`` : To fetch list of ``axes.text`` for params.
+  * ``get_value_texts()`` : To fetch list of ``axes.text`` for values. 
+  * ``get_compare_value_texts()`` : To fetch list of ``axes.text`` for comparison-values.
+  * ``get_theta()`` : To fetch list containing theta values (``float``) (x-coordinate for each text).
+
+
 :rocket: Version 1.0.0
 ----------------------
 

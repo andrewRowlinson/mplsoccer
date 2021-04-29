@@ -3,6 +3,8 @@
 Colorful Pizza (Percentiles)
 ============================
 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_
+
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
 * The design idea is inspired by `Tom Worville <https://twitter.com/Worville>`_, \
@@ -12,7 +14,7 @@ Colorful Pizza (Percentiles)
 * We have re-written `Soumyajit Bose's <https://twitter.com/Soumyaj15209314>`_  pizza chart code \
 to enable greater customisation.
 
-Here we plot a pizza chart with different colors for each slice.
+Here we plot a pizza chart with different colors for each slice. 
 """
 
 from urllib.request import urlopen
@@ -116,7 +118,7 @@ fig.text(
 
 # add subtitle
 fig.text(
-    0.515, 0.955,
+    0.515, 0.953,
     "Percentile Rank vs Top-Five League Midfielders | Season 2020-21",
     size=13,
     ha="center", fontproperties=font_bold.prop, color="#000000"
@@ -134,7 +136,7 @@ fig.text(
 
 # add text
 fig.text(
-    0.34, 0.93, "Attacking        Possession       Defending", size=14,
+    0.34, 0.925, "Attacking        Possession       Defending", size=14,
     fontproperties=font_bold.prop, color="#000000"
 )
 
