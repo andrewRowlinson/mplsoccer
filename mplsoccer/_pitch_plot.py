@@ -8,7 +8,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import rcParams
 from matplotlib.collections import PatchCollection
-from scipy.spatial import Voronoi
+from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
@@ -465,6 +465,35 @@ class BasePitchPlot(BasePitch):
                                reverse_cmap=self.reverse_cmap, **kwargs)
         return linecollection
 
+    def convexhull(self, x, y):
+        """ Get lines of Convex Hull for a set of coordinates
+
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+
+        Returns
+        -------
+        lines : a 1d numpy array of coordinates [x1, y1, x2, y2] of all lines that make up the Convex Hull.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=11)
+        >>> y = np.random.uniform(low=0, high=80, size=11)
+        >>> hull = pitch.convexhull(x, y)
+        >>> team1_poly = pitch.polygon(team1, ax=ax, color='blue', alpha=0.3)
+        >>> pitch.polygon(hull, ax=ax, color='red', alpha=0.3)
+        """
+        points = np.vstack([x, y]).T
+        hull = ConvexHull(points)
+        lines = np.array([points[s] for s in hull.simplices])
+        return lines
+
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
         Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
@@ -492,8 +521,6 @@ class BasePitchPlot(BasePitch):
         team1 : a 1d numpy array (length number of players in team 1) of 2d arrays
             Where the individual 2d arrays are coordinates of the Voronoi vertices.
 
-        team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
-            Where the individual 2d arrays are coordinates of the Voronoi vertices.
 
         Examples
         --------
