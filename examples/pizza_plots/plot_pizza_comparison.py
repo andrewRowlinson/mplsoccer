@@ -125,37 +125,10 @@ plt.show()
 ##############################################################################
 # Adjust Overlapping Values
 # -------------------------
-# To adjust overlapping values one can use ``get_compare_value_texts()`` or ``get_value_texts()``
-# to fetch a list of `axes.text` object for comparison-values-text and values-text repectively.
-# Using these method one can adjust the required text. Below is an example code.
-
-def adjust_value_text(params_offset, offset, baker):
-    """ Function to adjust the value texts. (for second player)
-    <<You can make your own function>>
-
-    Parameters
-    ----------
-    params_offset : sequence of bool, default None
-        Pass True for parameter whose value are to be adjusted
-    offset : float, default 0.0
-        Value will define how much adjustment to be made.
-    baker : PyPizza object
-    """
-    # get index value where value is True
-    idx_value = [i for i, x in enumerate(params_offset) if x]
-
-    # similarly one can use baker.get_value_texts() for first player value-texts
-    for count, (temp_text, theta) in enumerate(
-        zip(baker.get_compare_value_texts(), baker.get_theta())
-    ):
-        # fetch the adjustment-value
-        adj_val = offset if count in idx_value else 0.0
-
-        # adjust the position
-        # add some value to x-coordinate and keep y-coordinate same
-        temp_text.set_position((
-            theta+adj_val, temp_text.get_position()[1]
-        ))
+# To adjust overlapping values one can use ``adjust_texts()`` method. The user have to pass ``params_offset`` list
+# which will contain bool values denoting which parameter's text is to be adjusted, an ``offset`` value denoting
+# how much adjustment will be made, and if the user wants to adjust the comparison-text then can pass 
+# ``adj_comp_values=True`` to the ``adjust_texts()`` method. Below is an example code.
 
 # parameter and values list
 params = [
@@ -168,6 +141,13 @@ params = [
 # dummy values
 values = [15, 7, 57, 86, 63, 51, 11, 32, 85, 69, 90, 54]    # for Player 1
 values_2 = [31, 41, 43, 42, 47, 24, 60, 60, 28, 70, 92, 64]  # for Player 2
+
+# pass True in that parameter-index whose values are to be adjusted
+# here True values are passed for "\nTouches\nper Turnover" and "pAdj\nPress Regains" params
+params_offset = [
+    False, False, False, False, False, False, 
+    False, False, False, True, True, False
+]
 
 # instantiate PyPizza class
 baker = PyPizza(
@@ -212,15 +192,9 @@ fig, ax = baker.make_pizza(
     ),                          # values to be used when adding parameter-values labels
 )
 
-# pass True in that parameter-index whose values are to be adjusted
-# here True values are passed for "\nTouches\nper Turnover" and "pAdj\nPress Regains" params
-params_offset = [
-    False, False, False, False, False, False, 
-    False, False, False, True, True, False
-]
 
-# adjust the texts --> calling the function here <--
-adjust_value_text(params_offset, offset=0.13, baker=baker)
+# adjust text for comparison-values-text
+baker.adjust_texts(params_offset, offset=-0.17, adj_comp_values=True)
 
 # add title
 fig_text(

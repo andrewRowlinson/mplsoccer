@@ -445,6 +445,42 @@ class PyPizza:
 
         return vertices
 
+    def adjust_texts(self, params_offset, offset=0.0, adj_comp_values=False):
+        """ To adjust the value-texts. (if they are overlapping)
+
+        Parameters
+        ----------
+        params_offset : sequence of bool
+            Pass True for parameter whose value are to be adjusted.
+        offset : float, default 0.0
+            The value will define how much adjustment will be made.
+        adj_comp_values : bool, defaults False
+            To make adjustment for comparison-values-text.
+        """
+        if len(params_offset) != len(self.params):
+            raise Exception("Length of params_offset and params are not equal!!!")
+
+        # fetch index where value is True
+        idx_value = [i for i, x in enumerate(params_offset) if x]
+
+        if adj_comp_values:
+            texts = self.get_compare_value_texts()
+        else:
+            texts = self.get_value_texts()
+
+        # iterate over text objects and adjust the text for which params_offset is True
+        for count, (temp_text, theta) in enumerate(
+            zip(texts, self.get_theta())
+        ):
+            # fetch the value
+            adj_val = offset if count in idx_value else 0.0
+
+            # adjust the position
+            # add some value to x-coordinate and keep y-coordinate same
+            temp_text.set_position((
+                theta+adj_val, temp_text.get_position()[1]
+            ))
+
     def get_param_texts(self):
         """To fetch list of axes.text for params."""
         return self.param_texts

@@ -136,38 +136,10 @@ plt.show()
 ##############################################################################
 # Adjust Overlapping Values
 # -------------------------
-# To adjust overlapping values one can use ``get_compare_value_texts()`` or ``get_value_texts()``
-# to fetch a list of `axes.text` object for comparison-values-text and values-text repectively.
-# Using these method one can adjust the required text. Below is an example code.
-
-def adjust_value_text(params_offset, offset, baker):
-    """ Function to adjust the value texts. (for first player)
-    <<You can make your own function>>
-
-    Parameters
-    ----------
-    params_offset : sequence of bool, default None
-        Pass True for parameter whose value are to be adjusted
-    offset : float, default 0.0
-        Value will define how much adjustment to be made.
-    baker : PyPizza object
-    """
-    # get index value where value is True
-    idx_value = [i for i, x in enumerate(params_offset) if x]
-
-    # similarly one can use baker.get_compare_value_texts() for second player value-texts
-    for count, (temp_text, theta) in enumerate(
-        zip(baker.get_value_texts(), baker.get_theta())
-    ):
-        # fetch the value
-        adj_val = offset if count in idx_value else 0.0
-
-        # adjust the position
-        # add some value to x-coordinate and keep y-coordinate same
-        temp_text.set_position((
-            theta+adj_val, temp_text.get_position()[1]
-        ))
-
+# To adjust overlapping values one can use ``adjust_texts()`` method. The user have to pass ``params_offset`` list
+# which will contain bool values denoting which parameter's text is to be adjusted, an ``offset`` value denoting
+# how much adjustment will be made, and if the user wants to adjust the comparison-text then can pass 
+# ``adj_comp_values=True`` to the ``adjust_texts()`` method. Below is an example code.
 
 # parameter and values list
 params = [
@@ -181,6 +153,13 @@ values_2 = [76, 4.56, 0.09, 0.46, 1.08, 1.28, 1.84, 4.16, 2.66, 1.51]  # player 
 # minimum range value and maximum range value for parameters
 min_range = [74, 3.3, 0.03, 0.28, 0.4, 0.7, 2.6, 2.4, 1.1, 0.7]
 max_range = [90, 9.7, 0.20, 0.89, 2.1, 2.7, 0.4, 5.1, 3.7, 2.5]
+
+# pass True in that parameter-index whose values are to be adjusted
+# here True values are passed for "Pressure Regains", "pAdj Tackles" params
+params_offset = [
+    False, False, False, False, False, 
+    False, False, True, True, False
+]
 
 # instantiate PyPizza class
 baker = PyPizza(
@@ -229,15 +208,10 @@ fig, ax = baker.make_pizza(
     )                            # values to be used when adding comparison-values
 )
 
-# pass True in that parameter-index whose values are to be adjusted
-# here True values are passed for "Pressure Regains", "pAdj Tackles" params
-params_offset = [
-    False, False, False, False, False, 
-    False, False, True, True, False
-]
 
-# adjust the texts --> calling the function here <--
-adjust_value_text(params_offset, offset=-0.17, baker=baker)
+# adjust the texts
+# to adjust text for comparison-values-text pass adj_comp_values=True
+baker.adjust_texts(params_offset, offset=-0.17)
 
 # add title
 fig_text(
