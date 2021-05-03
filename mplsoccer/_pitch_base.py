@@ -84,8 +84,8 @@ class BasePitch(ABC):
         'skillcorner', 'secondspectrum' and 'custom' pitch_type
     goal_type : str, default 'line'
         Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
-    goal_alpha : float, default 0.7
-        The transparency of the goal. This is used when the goal_type='box'
+    goal_alpha : float, default 1
+        The transparency of the goal.
     line_alpha : float, default 1
         The transparency of the pitch and the markings.
     axis : bool, default False
@@ -116,7 +116,7 @@ class BasePitch(ABC):
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
-                 pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=0.7,
+                 pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=1,
                  line_alpha=1, axis=False, label=False, tick=False,
                  figsize=None, tight_layout=None, constrained_layout=None,
                  layout=None, view=None, orientation=None):
@@ -525,13 +525,13 @@ class BasePitch(ABC):
         if self.spot_scale > 0:
             self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
                                self.diameter_spot1, self.diameter_spot2,
-                               color=self.line_color, zorder=self.line_zorder)
+                               alpha=self.line_alpha, color=self.line_color, zorder=self.line_zorder)
             self._draw_ellipse(ax, self.dim.penalty_left, self.dim.center_width,
                                self.diameter_spot1, self.diameter_spot2,
-                               color=self.line_color, zorder=self.line_zorder)
+                               alpha=self.line_alpha, color=self.line_color, zorder=self.line_zorder)
             self._draw_ellipse(ax, self.dim.penalty_right, self.dim.center_width,
                                self.diameter_spot1, self.diameter_spot2,
-                               color=self.line_color, zorder=self.line_zorder)
+                               alpha=self.line_alpha, color=self.line_color, zorder=self.line_zorder)
 
     def _draw_goals(self, ax):
         if self.goal_type == 'box':
@@ -546,7 +546,7 @@ class BasePitch(ABC):
         elif self.goal_type == 'line':
             goal_linewidth = self.linewidth * 2
             line_prop = {'linewidth': goal_linewidth, 'color': self.line_color,
-                         'zorder': self.line_zorder}
+                         'alpha': self.goal_alpha, 'zorder': self.line_zorder}
             self._draw_line(ax, [self.dim.right, self.dim.right],
                             [self.dim.goal_top, self.dim.goal_bottom], **line_prop)
             self._draw_line(ax, [self.dim.left, self.dim.left],
@@ -557,7 +557,7 @@ class BasePitch(ABC):
                      [self.dim.left, self.dim.goal_bottom], [self.dim.left, self.dim.goal_top]]
             for post in posts:
                 self._draw_ellipse(ax, post[0], post[1], self.diameter_spot1, self.diameter_spot2,
-                                   color=self.line_color, zorder=self.line_zorder)
+                                   alpha=self.goal_alpha, color=self.line_color, zorder=self.line_zorder)
 
     def _draw_juego_de_posicion(self, ax):
         line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
