@@ -468,43 +468,23 @@ class BasePitch(ABC):
                 self._draw_stripe(ax, i)
 
     def _draw_pitch_markings(self, ax):
-        rect_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
-                     'color': self.line_color, 'zorder': self.line_zorder}
         line_prop = {'linewidth': self.linewidth, 'alpha': self.line_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
-        # right six yard and penalty area
-        self._draw_line(ax, [self.dim.six_yard_right, self.dim.six_yard_right],
-                        [self.dim.six_yard_top, self.dim.six_yard_bottom], **line_prop)
-        self._draw_line(ax, [self.dim.six_yard_right, self.dim.right],
-                        [self.dim.six_yard_top, self.dim.six_yard_top], **line_prop)
-        self._draw_line(ax, [self.dim.six_yard_right, self.dim.right],
-                        [self.dim.six_yard_bottom, self.dim.six_yard_bottom], **line_prop)
-        self._draw_line(ax, [self.dim.penalty_area_right, self.dim.penalty_area_right],
-                        [self.dim.penalty_area_top, self.dim.penalty_area_bottom], **line_prop)
-        self._draw_line(ax, [self.dim.penalty_area_right, self.dim.right],
-                        [self.dim.penalty_area_top, self.dim.penalty_area_top], **line_prop)
-        self._draw_line(ax, [self.dim.penalty_area_right, self.dim.right],
-                        [self.dim.penalty_area_bottom, self.dim.penalty_area_bottom], **line_prop)
-        # left six yard and penalty area
-        self._draw_line(ax, [self.dim.six_yard_left, self.dim.six_yard_left],
-                        [self.dim.six_yard_top, self.dim.six_yard_bottom], **line_prop)
-        self._draw_line(ax, [self.dim.six_yard_left, self.dim.left],
-                        [self.dim.six_yard_top, self.dim.six_yard_top], **line_prop)
-        self._draw_line(ax, [self.dim.six_yard_left, self.dim.left],
-                        [self.dim.six_yard_bottom, self.dim.six_yard_bottom], **line_prop)
-        self._draw_line(ax, [self.dim.penalty_area_left, self.dim.penalty_area_left],
-                        [self.dim.penalty_area_top, self.dim.penalty_area_bottom], **line_prop)
-        self._draw_line(ax, [self.dim.penalty_area_left, self.dim.left],
-                        [self.dim.penalty_area_top, self.dim.penalty_area_top], **line_prop)
-        self._draw_line(ax, [self.dim.penalty_area_left, self.dim.left],
-                        [self.dim.penalty_area_bottom, self.dim.penalty_area_bottom], **line_prop)
-        # pitch
-        self._draw_rectangle(ax, self.dim.left, self.dim.bottom,
-                             self.dim.length, self.dim.width, **rect_prop)
-        # mid-line
-        self._draw_line(ax, [self.dim.center_length, self.dim.center_length],
-                        [self.dim.bottom, self.dim.top], **line_prop)
-        # circles and arcs
+        # draw lines as one-continous loop so that alpha (transparency) values do not overlap
+        xs = [self.dim.center_length, self.dim.center_length, self.dim.right, self.dim.right,
+              self.dim.penalty_area_right, self.dim.penalty_area_right, self.dim.right,
+              self.dim.right, self.dim.six_yard_right, self.dim.six_yard_right, self.dim.right,
+              self.dim.right, self.dim.left, self.dim.left, self.dim.penalty_area_left,
+              self.dim.penalty_area_left, self.dim.left, self.dim.left, self.dim.six_yard_left,
+              self.dim.six_yard_left, self.dim.left, self.dim.left, self.dim.center_length,]
+        ys = [self.dim.bottom, self.dim.top, self.dim.top, self.dim.penalty_area_bottom,
+              self.dim.penalty_area_bottom, self.dim.penalty_area_top, self.dim.penalty_area_top,
+              self.dim.six_yard_bottom, self.dim.six_yard_bottom, self.dim.six_yard_top,
+              self.dim.six_yard_top, self.dim.bottom, self.dim.bottom, self.dim.penalty_area_top,
+              self.dim.penalty_area_top, self.dim.penalty_area_bottom, self.dim.penalty_area_bottom,
+              self.dim.six_yard_top, self.dim.six_yard_top, self.dim.six_yard_bottom,
+              self.dim.six_yard_bottom, self.dim.top, self.dim.top,]
+        self._draw_line(ax, xs, ys, **line_prop)
         self._draw_circles_and_arcs(ax)
 
     def _draw_circles_and_arcs(self, ax):
@@ -585,7 +565,7 @@ class BasePitch(ABC):
 
     def grid(self, figheight=9, nrows=1, ncols=1, left=None, grid_width=0.95,
              bottom=None, endnote_height=0.065, endnote_space=0.01,
-             grid_height=0.715, title_space=0.01, title_height=0.15, space=0.05, axis=False):
+             grid_height=0.715, title_space=0.01, title_height=0.15, space=0.05, axis=True):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
