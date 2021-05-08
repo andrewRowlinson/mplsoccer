@@ -4,16 +4,21 @@
 ### Added
 * Added ``**kwargs`` to ``Bumpy.plot()`` method. \
 All the keyword arguments are passed for setting ticklabels and labels.
-* Added four new methods to ``PyPizza``.\
+* It is now possible to adjust the text in Pizza comparison charts if \
+the the text overlaps through ``get_compare_value_texts``. \
+Four new methods have been added to ``PyPizza`` to enable this:
   * ``get_param_texts()`` : To fetch list of ``axes.text`` for params.
   * ``get_value_texts()`` : To fetch list of ``axes.text`` for values. 
   * ``get_compare_value_texts()`` : To fetch list of ``axes.text`` for comparison-values.
   * ``get_theta()`` : To fetch list containing theta values (``float``) (x-coordinate for each text).
 * added line_alpha to control the transparency of the pitch lines.
+* added cyberpunk example with glowing pitch lines.
   
 ### Changes
-* increased goal_alpha default to 1. goal_alpha can now be used with all goal_types.
+* increased the ``goal_alpha`` default to 1. ``goal_alpha`` can now be used with all goal_types.
 
+### Fixes
+* fixed the grid ``axis`` argument default to True to match the docstrings.
 
 :rocket: Version 1.0.2
 ----------------------
