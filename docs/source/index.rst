@@ -69,7 +69,7 @@ Inspiration
 
 mplsoccer was inspired by:
 
-- `Peter McKeever <http://petermckeever.com/2019/01/plotting-pitches-in-python/>`_
+- `Peter McKeever <http://petermckeever.com/2020/10/how-to-draw-a-football-pitch/>`_
   heavily inspired the API design
 - `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ influenced the design and Standardizer
 - `lastrow's <https://twitter.com/lastrowview>`_ legendary animations

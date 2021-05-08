@@ -3,25 +3,33 @@
 Statsbomb
 =========
 
-In the words of @Torvaney `"I did The Bad Thing and started writing another
-API wrapper for Statsbomb data" <https://twitter.com/Torvaney/status/1251435801407184896>`_
-
-Why?
-
-Well, in my opinion, all of the existing ones don't return a flat, tidy dataframe
-useful for analysis.
-
-Here are some alternatives
-
-- `statsbombapi <https://github.com/Torvaney/statsbombapi>`_
-- `statsbombpy <https://github.com/statsbomb/statsbombpy>`_
-- `statsbomb-parser <https://github.com/imrankhan17/statsbomb-parser>`_
-
-I hope to inspire others to make a better one, so this one can become obsolete.
+mplsoccer contains functions to return StatsBomb data in a flat, tidy dataframe.
 
 Please be responsible with Statsbomb data.
 `Register your details <https://www.statsbomb.com/resource-centre>`_ and
 read the user agreement carefully (on the same page).
+
+It can be used with the StatBomb `open-data <https://github.com/statsbomb/open-data>`_
+or the StatsBomb API if you are lucky enough to have access:
+
+.. code-block:: python
+
+    # this only works if you have access to the StatsBomb API
+    import requests
+    from mplsoccer.statsbomb import EVENT_SLUG, read_event
+    username = 'CHANGEME'
+    password = 'CHANGEME'
+    auth = requests.auth.HTTPBasicAuth(username, password)
+    URL = 'CHANGEME'
+    response = requests.get(URL, auth=auth)
+    df_dict = read_event(response)
+
+
+Here are some alternatives to mplsoccer's statsbomb module:
+
+- `statsbombapi <https://github.com/Torvaney/statsbombapi>`_
+- `statsbombpy <https://github.com/statsbomb/statsbombpy>`_
+- `statsbomb-parser <https://github.com/imrankhan17/statsbomb-parser>`_
 """
 
 import glob

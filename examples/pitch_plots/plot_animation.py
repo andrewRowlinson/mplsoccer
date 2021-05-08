@@ -3,8 +3,8 @@
 Animation
 =========
 
-This example shows how to animate tracking data from metricasports
-(https://github.com/metrica-sports/sample-data).
+This example shows how to animate tracking data from
+`metricasports <https://github.com/metrica-sports/sample-data>`_.
 """
 
 import numpy as np
