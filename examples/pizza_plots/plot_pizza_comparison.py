@@ -3,7 +3,7 @@
 Comparison Pizza (Percentiles)
 ==============================
 
-* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_ 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_
 
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
@@ -125,9 +125,11 @@ plt.show()
 ##############################################################################
 # Adjust Overlapping Values
 # -------------------------
-# To adjust overlapping values one can use ``adjust_texts()`` method. The user have to pass ``params_offset`` list
-# which will contain bool values denoting which parameter's text is to be adjusted, an ``offset`` value denoting
-# how much adjustment will be made, and if the user wants to adjust the comparison-text then can pass 
+# To adjust overlapping values one can use ``adjust_texts()`` method.
+# The user have to pass ``params_offset`` list
+# which will contain bool values denoting which parameter's text is to be adjusted,
+# an ``offset`` value denoting how much adjustment will be made,
+# and if the user wants to adjust the comparison-text then can pass
 # ``adj_comp_values=True`` to the ``adjust_texts()`` method. Below is an example code.
 
 # parameter and values list
@@ -145,7 +147,7 @@ values_2 = [31, 41, 43, 42, 47, 24, 60, 60, 28, 70, 92, 64]  # for Player 2
 # pass True in that parameter-index whose values are to be adjusted
 # here True values are passed for "\nTouches\nper Turnover" and "pAdj\nPress Regains" params
 params_offset = [
-    False, False, False, False, False, False, 
+    False, False, False, False, False, False,
     False, False, False, True, True, False
 ]
 
@@ -211,7 +213,7 @@ fig.text(
     ha="center", fontproperties=font_bold.prop, color="#000000"
 )
 
-# add credits 
+# add credits
 CREDIT_1 = "dummy-data"
 CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
 

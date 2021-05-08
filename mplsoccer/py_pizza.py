@@ -70,6 +70,7 @@ class PyPizza:
         self.param_texts = []
         self.value_texts = []
         self.compare_value_texts = []
+        self.theta = None  # filled-in by make_pizza method
 
     def __repr__(self):
         return (f'{self.__class__.__name__}('
@@ -416,7 +417,8 @@ class PyPizza:
 
         # plot comparison values
         if compare_values is not None:
-            for i, (x, value, rotation) in enumerate(zip(self.theta, compare_values, rotation_degrees)):
+            for i, (x, value, rotation) in enumerate(zip(self.theta, compare_values,
+                                                         rotation_degrees)):
                 if compare_value_colors is not None:
                     kwargs_compare_values["color"] = compare_value_colors[i]
                 if compare_value_bck_colors is not None and kwargs_values.get("bbox") is not None:
@@ -484,11 +486,11 @@ class PyPizza:
     def get_param_texts(self):
         """To fetch list of axes.text for params."""
         return self.param_texts
-    
+
     def get_value_texts(self):
         """To fetch list of axes.text for values."""
         return self.value_texts
-    
+
     def get_compare_value_texts(self):
         """To fetch list of axes.text for comparison-values."""
         return self.compare_value_texts

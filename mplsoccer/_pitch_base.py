@@ -476,14 +476,14 @@ class BasePitch(ABC):
               self.dim.right, self.dim.six_yard_right, self.dim.six_yard_right, self.dim.right,
               self.dim.right, self.dim.left, self.dim.left, self.dim.penalty_area_left,
               self.dim.penalty_area_left, self.dim.left, self.dim.left, self.dim.six_yard_left,
-              self.dim.six_yard_left, self.dim.left, self.dim.left, self.dim.center_length,]
+              self.dim.six_yard_left, self.dim.left, self.dim.left, self.dim.center_length, ]
         ys = [self.dim.bottom, self.dim.top, self.dim.top, self.dim.penalty_area_bottom,
               self.dim.penalty_area_bottom, self.dim.penalty_area_top, self.dim.penalty_area_top,
               self.dim.six_yard_bottom, self.dim.six_yard_bottom, self.dim.six_yard_top,
               self.dim.six_yard_top, self.dim.bottom, self.dim.bottom, self.dim.penalty_area_top,
               self.dim.penalty_area_top, self.dim.penalty_area_bottom, self.dim.penalty_area_bottom,
               self.dim.six_yard_top, self.dim.six_yard_top, self.dim.six_yard_bottom,
-              self.dim.six_yard_bottom, self.dim.top, self.dim.top,]
+              self.dim.six_yard_bottom, self.dim.top, self.dim.top, ]
         self._draw_line(ax, xs, ys, **line_prop)
         self._draw_circles_and_arcs(ax)
 
@@ -505,13 +505,16 @@ class BasePitch(ABC):
         if self.spot_scale > 0:
             self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
                                self.diameter_spot1, self.diameter_spot2,
-                               alpha=self.line_alpha, color=self.line_color, zorder=self.line_zorder)
+                               alpha=self.line_alpha, color=self.line_color,
+                               zorder=self.line_zorder)
             self._draw_ellipse(ax, self.dim.penalty_left, self.dim.center_width,
                                self.diameter_spot1, self.diameter_spot2,
-                               alpha=self.line_alpha, color=self.line_color, zorder=self.line_zorder)
+                               alpha=self.line_alpha, color=self.line_color,
+                               zorder=self.line_zorder)
             self._draw_ellipse(ax, self.dim.penalty_right, self.dim.center_width,
                                self.diameter_spot1, self.diameter_spot2,
-                               alpha=self.line_alpha, color=self.line_color, zorder=self.line_zorder)
+                               alpha=self.line_alpha, color=self.line_color,
+                               zorder=self.line_zorder)
 
     def _draw_goals(self, ax):
         if self.goal_type == 'box':
@@ -537,7 +540,8 @@ class BasePitch(ABC):
                      [self.dim.left, self.dim.goal_bottom], [self.dim.left, self.dim.goal_top]]
             for post in posts:
                 self._draw_ellipse(ax, post[0], post[1], self.diameter_spot1, self.diameter_spot2,
-                                   alpha=self.goal_alpha, color=self.line_color, zorder=self.line_zorder)
+                                   alpha=self.goal_alpha, color=self.line_color,
+                                   zorder=self.line_zorder)
 
     def _draw_juego_de_posicion(self, ax):
         line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
@@ -557,7 +561,7 @@ class BasePitch(ABC):
                         [self.dim.positional_y[4], self.dim.positional_y[4]], **line_prop)
 
     def _draw_shade_middle(self, ax):
-        shade_prop = {'fill': True, 'facecolor': self.shade_color, 
+        shade_prop = {'fill': True, 'facecolor': self.shade_color,
                       'alpha': self.line_alpha, 'zorder': self.shade_zorder}
         self._draw_rectangle(ax, self.dim.positional_x[2], self.dim.bottom,
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,

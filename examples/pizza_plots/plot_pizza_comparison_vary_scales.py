@@ -3,7 +3,7 @@
 Comparison Pizza (scales vary)
 ==============================
 
-* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_ 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_
 
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
@@ -136,10 +136,12 @@ plt.show()
 ##############################################################################
 # Adjust Overlapping Values
 # -------------------------
-# To adjust overlapping values one can use ``adjust_texts()`` method. The user have to pass ``params_offset`` list
-# which will contain bool values denoting which parameter's text is to be adjusted, an ``offset`` value denoting
-# how much adjustment will be made, and if the user wants to adjust the comparison-text then can pass 
-# ``adj_comp_values=True`` to the ``adjust_texts()`` method. Below is an example code.
+# To adjust overlapping values one can use ``adjust_texts()`` method.
+# The user have to pass ``params_offset`` list which will contain bool values denoting
+# which parameter's text is to be adjusted, an ``offset`` value denoting
+# how much adjustment will be made, and if the user wants to adjust
+# the comparison-text then can pass  ``adj_comp_values=True`` to the ``adjust_texts()`` method.
+# Below is an example code.
 
 # parameter and values list
 params = [
@@ -157,7 +159,7 @@ max_range = [90, 9.7, 0.20, 0.89, 2.1, 2.7, 0.4, 5.1, 3.7, 2.5]
 # pass True in that parameter-index whose values are to be adjusted
 # here True values are passed for "Pressure Regains", "pAdj Tackles" params
 params_offset = [
-    False, False, False, False, False, 
+    False, False, False, False, False,
     False, False, True, True, False
 ]
 

@@ -136,7 +136,7 @@ df_competition.info()
 match_path = os.path.join(DATA_FOLDER, 'match.parquet')
 if os.path.exists(match_path):
     df_match_copy = pd.read_parquet(match_path).copy()
-    UPDATE_FILES= True
+    UPDATE_FILES = True
 else:
     UPDATE_FILES = False
 

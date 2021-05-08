@@ -14,7 +14,7 @@ Colorful Pizza (Percentiles)
 * We have re-written `Soumyajit Bose's <https://twitter.com/Soumyaj15209314>`_  pizza chart code \
 to enable greater customisation.
 
-Here we plot a pizza chart with different colors for each slice. 
+Here we plot a pizza chart with different colors for each slice.
 """
 
 from urllib.request import urlopen

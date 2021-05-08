@@ -15,7 +15,7 @@ Different Scales Pizza
 to enable greater customisation.
 
 Here we plot a pizza chart where each parameters has a different
-maximum and minimum value. 
+maximum and minimum value.
 """
 
 from urllib.request import urlopen
