@@ -56,7 +56,8 @@ fig, ax = pitch.grid(grid_height=0.9, title_height=0.06, axis=False,
                      endnote_height=0.04, title_space=0, endnote_space=0)
 fig.set_facecolor(background_color)
 pitch.lines(df_pass.x, df_pass.y,
-             df_pass.end_x, df_pass.end_y, capstyle='butt',
+             df_pass.end_x, df_pass.end_y,
+             capstyle='butt',  # cut-off the line at the end-location.
              linewidth=linewidth, color=pass_color, comet=True, ax=ax['pitch'])
 
 # plotting the titles and endnote
@@ -80,6 +81,7 @@ for i in range(1, num_glow_lines + 1):
     pitch.draw(ax=ax['pitch'])  # we plot on-top of our previous axis from pitch.grid
     pitch.lines(df_pass.x, df_pass.y,
                 df_pass.end_x, df_pass.end_y, 
-                linewidth=linewidth + (diff_linewidth * i), capstyle='round',
+                linewidth=linewidth + (diff_linewidth * i),
+                capstyle='round',  # capstyle round so the glow extends past the line
                 alpha=alpha_pass_line / num_glow_lines,
                 color=pass_color, comet=True, ax=ax['pitch'])
