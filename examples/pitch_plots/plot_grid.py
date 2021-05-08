@@ -14,7 +14,7 @@ I also added the option of including a title_ax and endnote_ax, which align to t
 
 This example takes you through the basics of how the grid method works and then
 shows a more complicated example copied
-from `Brad @DymondFormation <https://twitter.com/DymondFormation>`_ and using
+from `Brad (@DymondFormation) <https://twitter.com/DymondFormation>`_ and using
 the `highlight_text package <https://github.com/znstrider/highlight_text>`_
 by `@danzn1 <https://twitter.com/danzn1>`_.
 """
@@ -97,7 +97,7 @@ fig, axs = pitch.grid(nrows=3, ncols=4,  # number of rows/ columns
 # ---------
 # The following example plots pass maps for each player on a team.
 # The plot design is copied from
-# `Brad @DymondFormation <https://twitter.com/DymondFormation>`_.
+# `Brad (@DymondFormation) <https://twitter.com/DymondFormation>`_.
 #
 # First we need to get the StatsBomb events, tactics, and lineup data
 JSON = '15946.json'

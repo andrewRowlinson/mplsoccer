@@ -1,4 +1,4 @@
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 from mplsoccer import statsbomb
 from mplsoccer.cm import *
 from mplsoccer.linecollection import *

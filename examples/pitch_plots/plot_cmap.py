@@ -37,7 +37,7 @@ df = df.loc[mask_chelsea_pressure, ['x', 'y']]
 #
 # Let's first get a dictionary of all the colormaps
 #
-# See the docs for more info: https://cmasher.readthedoavorite cs.io/.
+# See the docs for more info: https://cmasher.readthedocs.io/.
 cmap_dict = cmr.cm.cmap_cd
 all_cmap_dict = {}
 for cmap_type_key in cmap_dict:

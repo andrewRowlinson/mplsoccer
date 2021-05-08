@@ -67,6 +67,11 @@ class PyPizza:
         self.other_circle_lw = other_circle_lw
         self.other_circle_ls = other_circle_ls
 
+        self.param_texts = []
+        self.value_texts = []
+        self.compare_value_texts = []
+        self.theta = None  # filled-in by make_pizza method
+
     def __repr__(self):
         return (f'{self.__class__.__name__}('
                 f'params={self.params}, '
@@ -188,7 +193,7 @@ class PyPizza:
         total_params = len(self.params)
 
         # calculate theta value and width of the bar
-        theta, width = np.linspace(
+        self.theta, width = np.linspace(
             0.0, 2 * np.pi, total_params, endpoint=False, retstep=True
         )
 
@@ -201,7 +206,7 @@ class PyPizza:
 
         # plot slice for values
         main_slice = ax.bar(
-            x=theta, height=temp_values, width=width,
+            x=self.theta, height=temp_values, width=width,
             bottom=bottom, **kwargs_slices
         )
 
@@ -213,7 +218,7 @@ class PyPizza:
         # color blank area
         if color_blank_space is not None:
             blank_space = ax.bar(
-                theta, height=self.straight_line_limit,
+                self.theta, height=self.straight_line_limit,
                 width=width,
                 bottom=bottom,
                 zorder=main_slice[0].get_zorder()-1
@@ -237,7 +242,7 @@ class PyPizza:
                 temp_compare_values = compare_values
 
             compare_slice = ax.bar(
-                x=theta, height=temp_compare_values, width=width,
+                x=self.theta, height=temp_compare_values, width=width,
                 bottom=bottom, **kwargs_compare
             )
 
@@ -256,11 +261,11 @@ class PyPizza:
             temp_compare_values = None
 
         # setup-pizza
-        self.__setup_pizza(ax, theta, width)
+        self.__setup_pizza(ax, width)
 
         # add text
         self.__add_texts(
-            ax, values, param_location, theta,
+            ax, values, param_location,
             value_colors=value_colors, value_bck_colors=value_bck_colors,
             compare_values=compare_values, compare_value_colors=compare_value_colors,
             temp_values=temp_values, temp_compare_values=temp_compare_values,
@@ -273,15 +278,13 @@ class PyPizza:
             return fig, ax
         return None
 
-    def __setup_pizza(self, ax, theta, width):
+    def __setup_pizza(self, ax, width):
         """To setup the pizza plot.
 
             Parameters
             ----------
             ax : matplotlib axis.
                 matplotlib.axes.Axes.
-            theta : sequence of float.
-                theta values.
             width : sequence of float.
                 width of the slices.
         """
@@ -300,7 +303,7 @@ class PyPizza:
         ax.set_theta_direction(-1)
 
         # set up line for each bar
-        ax.set_thetagrids((theta+width/2) * 180 / np.pi)
+        ax.set_thetagrids((self.theta+width/2) * 180 / np.pi)
 
         # last circle off
         ax.spines['polar'].set_visible(False)
@@ -327,7 +330,7 @@ class PyPizza:
             i.set_linewidth(self.straight_line_lw)
             i.set_linestyle(self.straight_line_ls)
 
-    def __add_texts(self, ax, values, param_location, theta,
+    def __add_texts(self, ax, values, param_location,
                     temp_values=None, temp_compare_values=None,
                     value_colors=None, value_bck_colors=None,
                     compare_values=None, compare_value_colors=None,
@@ -343,8 +346,6 @@ class PyPizza:
                 Values for each parameter.
             param_location : float, default 108
                 Location where params will be added.
-            theta : sequence of float.
-                theta values.
             temp_values : sequence of floats/int
                 Values for each parameter (if ranges are specified)
             temp_compare_values : sequence of floats/int
@@ -392,27 +393,32 @@ class PyPizza:
         rotation_degrees = -np.rad2deg(rotation)
 
         # plot params
-        for x, rotation, label in zip(theta, rotation_degrees, self.params):
-            ax.text(
+        for x, rotation, label in zip(self.theta, rotation_degrees, self.params):
+            temp_text = ax.text(
                 x, param_location, label,
                 rotation=rotation, rotation_mode="anchor",
                 ha="center", **kwargs_params
             )
 
+            self.param_texts.append(temp_text)
+
         # plot values
-        for i, (x, value, rotation) in enumerate(zip(theta, values, rotation_degrees)):
+        for i, (x, value, rotation) in enumerate(zip(self.theta, values, rotation_degrees)):
             if value_colors is not None:
                 kwargs_values["color"] = value_colors[i]
             if value_bck_colors is not None and kwargs_values.get("bbox") is not None:
                 kwargs_values["bbox"]["facecolor"] = value_bck_colors[i]
 
-            ax.text(
+            temp_text = ax.text(
                 x, temp_values[i], value, ha="center", **kwargs_values
             )
 
+            self.value_texts.append(temp_text)
+
         # plot comparison values
         if compare_values is not None:
-            for i, (x, value, rotation) in enumerate(zip(theta, compare_values, rotation_degrees)):
+            for i, (x, value, rotation) in enumerate(zip(self.theta, compare_values,
+                                                         rotation_degrees)):
                 if compare_value_colors is not None:
                     kwargs_compare_values["color"] = compare_value_colors[i]
                 if compare_value_bck_colors is not None and kwargs_values.get("bbox") is not None:
@@ -424,9 +430,11 @@ class PyPizza:
                 else:
                     value_1 = value_2 = value
 
-                ax.text(
+                temp_text = ax.text(
                     x, value_1, value_2, ha="center", **kwargs_compare_values
                 )
+
+                self.compare_value_texts.append(temp_text)
 
     def __get_value(self, values):
         """To get values if ranges are passed."""
@@ -438,6 +446,58 @@ class PyPizza:
         vertices = (proportion * 100)
 
         return vertices
+
+    def adjust_texts(self, params_offset, offset=0.0, adj_comp_values=False):
+        """ To adjust the value-texts. (if they are overlapping)
+
+        Parameters
+        ----------
+        params_offset : sequence of bool
+            Pass True for parameter whose value are to be adjusted.
+        offset : float, default 0.0
+            The value will define how much adjustment will be made.
+        adj_comp_values : bool, defaults False
+            To make adjustment for comparison-values-text.
+        """
+        if len(params_offset) != len(self.params):
+            raise Exception("Length of params_offset and params are not equal!!!")
+
+        # fetch index where value is True
+        idx_value = [i for i, x in enumerate(params_offset) if x]
+
+        if adj_comp_values:
+            texts = self.get_compare_value_texts()
+        else:
+            texts = self.get_value_texts()
+
+        # iterate over text objects and adjust the text for which params_offset is True
+        for count, (temp_text, theta) in enumerate(
+            zip(texts, self.get_theta())
+        ):
+            # fetch the value
+            adj_val = offset if count in idx_value else 0.0
+
+            # adjust the position
+            # add some value to x-coordinate and keep y-coordinate same
+            temp_text.set_position((
+                theta+adj_val, temp_text.get_position()[1]
+            ))
+
+    def get_param_texts(self):
+        """To fetch list of axes.text for params."""
+        return self.param_texts
+
+    def get_value_texts(self):
+        """To fetch list of axes.text for values."""
+        return self.value_texts
+
+    def get_compare_value_texts(self):
+        """To fetch list of axes.text for comparison-values."""
+        return self.compare_value_texts
+
+    def get_theta(self):
+        """To fetch list containing theta values (x-coordinate for each text)."""
+        return self.theta
 
     # __str__ is the same as __repr__
     __str__ = __repr__

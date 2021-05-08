@@ -125,7 +125,7 @@ mask_goal = df_pass.outcome_name == 'Goal'
 pitch = VerticalPitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc',
                       half=True, pad_top=2)
 fig, axs = pitch.grid(endnote_height=0.03, endnote_space=0, figheight=12,
-                      title_height=0.08, title_space=0,
+                      title_height=0.08, title_space=0, axis=False,
                       grid_height=0.82)
 fig.set_facecolor('#22312b')
 

@@ -3,8 +3,8 @@
 Heatmap Juego de Posición
 =========================
 This example shows how to plot all pressure events from three matches as
-a Juego de Posición heatmap.
-See: https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanation/
+a `Juego de Posición
+<https://spielverlagerung.com/2014/11/26/juego-de-posicion-a-short-explanation>`_ heatmap.
 """
 
 import matplotlib.patheffects as path_effects

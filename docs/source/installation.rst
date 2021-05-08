@@ -8,4 +8,8 @@ To install the latest version via ``pip`` ::
 
     pip install mplsoccer
 
+To upgrade to the latest version from a previous version via ``pip`` ::
 
+    pip install -U mplsoccer
+
+You may also need to upgrade mplsoccer dependencies such as seaborn.

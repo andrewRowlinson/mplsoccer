@@ -93,7 +93,7 @@ for a full list of the recent changes to mplsoccer.
 ## Inspiration
 
 mplsoccer was inspired by:
-- [Peter McKeever](http://petermckeever.com/2019/01/plotting-pitches-in-python/) heavily 
+- [Peter McKeever](http://petermckeever.com/2020/10/how-to-draw-a-football-pitch/) heavily 
 inspired the API design
 - [ggsoccer](https://github.com/Torvaney/ggsoccer) influenced the design and Standardizer
 - [lastrow's](https://twitter.com/lastrowview) legendary animations

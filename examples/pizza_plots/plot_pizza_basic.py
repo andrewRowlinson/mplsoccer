@@ -3,6 +3,8 @@
 Basic Pizza Plot (Percentiles)
 ==============================
 
+* Author: `slothfulwave612 <https://twitter.com/slothfulwave612>`_
+
 * ``mplsoccer``, ``py_pizza`` module helps one to plot pizza charts in a few lines of code.
 
 * The design idea is inspired by `Tom Worville <https://twitter.com/Worville>`_, \
