@@ -478,8 +478,7 @@ class BasePitchPlot(BasePitch):
 
         Returns
         -------
-        hull_lines : a numpy array of coordinates [num_lines, [x1, y1], [x2, y2]] of all lines
-        that make up the Convex Hull.
+        hull_vertices: a numpy array of vertoces [1, num_vertices, [x, y]] of the Convex Hull.
 
         Examples
         --------
@@ -490,13 +489,12 @@ class BasePitchPlot(BasePitch):
         >>> x = np.random.uniform(low=0, high=120, size=11)
         >>> y = np.random.uniform(low=0, high=80, size=11)
         >>> hull = pitch.convexhull(x, y)
-        >>> team1_poly = pitch.polygon(hull, ax=ax, color='blue', alpha=0.3)
-        >>> pitch.polygon(hull, ax=ax, color='red', alpha=0.3)
+        >>> poly = pitch.polygon(hull, ax=ax, facecolor='cornflowerblue', alpha=0.3)
         """
         points = np.vstack([x, y]).T
         hull = ConvexHull(points)
-        hull_lines = np.array([points[s] for s in hull.simplices])
-        return hull_lines
+        hull_vertices = points[hull.vertices].reshape(1, -1, 2)
+        return hull_vertices
 
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
