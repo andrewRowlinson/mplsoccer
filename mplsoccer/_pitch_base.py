@@ -1143,6 +1143,10 @@ class BasePitch(ABC):
         """ Implement a method to plot lines."""
 
     @abstractmethod
+    def convexhull(self, x, y):
+        """ Calculate a Convex Hull from set of coordinates."""
+
+    @abstractmethod
     def voronoi(self, x, y, teams):
         """ Calculate the Voronoi polygons for each team."""
 

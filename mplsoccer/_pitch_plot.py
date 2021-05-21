@@ -8,7 +8,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import rcParams
 from matplotlib.collections import PatchCollection
-from scipy.spatial import Voronoi
+from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
@@ -363,7 +363,8 @@ class BasePitchPlot(BasePitch):
         return ax.annotate(text, xy, xytext, **kwargs)
 
     @docstring.copy(bin_statistic)
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
+                      normalize=False, standardized=False):
         stats = bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
                               bins=bins, normalize=normalize, standardized=standardized)
         return stats
@@ -374,9 +375,11 @@ class BasePitchPlot(BasePitch):
         return mesh
 
     @docstring.copy(bin_statistic_positional)
-    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count', normalize=False):
+    def bin_statistic_positional(self, x, y, values=None, positional='full',
+                                 statistic='count', normalize=False):
         stats = bin_statistic_positional(x, y, values=values,
-                                         dim=self.dim, positional=positional, statistic=statistic, normalize=normalize)
+                                         dim=self.dim, positional=positional,
+                                         statistic=statistic, normalize=normalize)
         return stats
 
     @docstring.copy(heatmap_positional)
@@ -464,6 +467,34 @@ class BasePitchPlot(BasePitch):
                                alpha_end=alpha_end, cmap=cmap, ax=ax, vertical=self.vertical,
                                reverse_cmap=self.reverse_cmap, **kwargs)
         return linecollection
+
+    def convexhull(self, x, y):
+        """ Get lines of Convex Hull for a set of coordinates
+
+        Parameters
+        ----------
+        x, y: array-like or scalar.
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+
+        Returns
+        -------
+        hull_vertices: a numpy array of vertoces [1, num_vertices, [x, y]] of the Convex Hull.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=11)
+        >>> y = np.random.uniform(low=0, high=80, size=11)
+        >>> hull = pitch.convexhull(x, y)
+        >>> poly = pitch.polygon(hull, ax=ax, facecolor='cornflowerblue', alpha=0.3)
+        """
+        points = np.vstack([x, y]).T
+        hull = ConvexHull(points)
+        hull_vertices = points[hull.vertices].reshape(1, -1, 2)
+        return hull_vertices
 
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.

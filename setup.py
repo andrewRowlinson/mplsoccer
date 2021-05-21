@@ -2,7 +2,7 @@ from setuptools import setup
 
 import mplsoccer
 
-VERSION = mplsoccer.__version__
+exec(open('mplsoccer/_version.py').read())
 
 with open('README.md') as readme_file:
     README = readme_file.read()
@@ -26,7 +26,7 @@ CLASSIFIERS = ['Development Status :: 3 - Alpha',
                'Topic :: Scientific/Engineering :: Visualization']
 
 setup(name='mplsoccer',
-      version=VERSION,
+      version=__version__,
       description='A Python package for data visualization for football/ soccer analytics.',
       long_description_content_type="text/markdown",
       long_description=README,
