@@ -363,7 +363,8 @@ class BasePitchPlot(BasePitch):
         return ax.annotate(text, xy, xytext, **kwargs)
 
     @docstring.copy(bin_statistic)
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
+    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
+                      normalize=False, standardized=False):
         stats = bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
                               bins=bins, normalize=normalize, standardized=standardized)
         return stats
@@ -374,9 +375,11 @@ class BasePitchPlot(BasePitch):
         return mesh
 
     @docstring.copy(bin_statistic_positional)
-    def bin_statistic_positional(self, x, y, values=None, positional='full', statistic='count', normalize=False):
+    def bin_statistic_positional(self, x, y, values=None, positional='full',
+                                 statistic='count', normalize=False):
         stats = bin_statistic_positional(x, y, values=values,
-                                         dim=self.dim, positional=positional, statistic=statistic, normalize=normalize)
+                                         dim=self.dim, positional=positional,
+                                         statistic=statistic, normalize=normalize)
         return stats
 
     @docstring.copy(heatmap_positional)
@@ -475,7 +478,8 @@ class BasePitchPlot(BasePitch):
 
         Returns
         -------
-        lines : a 1d numpy array of coordinates [x1, y1, x2, y2] of all lines that make up the Convex Hull.
+        hull_lines : a numpy array of coordinates [num_lines, [x1, y1], [x2, y2]] of all lines
+        that make up the Convex Hull.
 
         Examples
         --------
@@ -486,13 +490,13 @@ class BasePitchPlot(BasePitch):
         >>> x = np.random.uniform(low=0, high=120, size=11)
         >>> y = np.random.uniform(low=0, high=80, size=11)
         >>> hull = pitch.convexhull(x, y)
-        >>> team1_poly = pitch.polygon(team1, ax=ax, color='blue', alpha=0.3)
+        >>> team1_poly = pitch.polygon(hull, ax=ax, color='blue', alpha=0.3)
         >>> pitch.polygon(hull, ax=ax, color='red', alpha=0.3)
         """
         points = np.vstack([x, y]).T
         hull = ConvexHull(points)
-        lines = np.array([points[s] for s in hull.simplices])
-        return lines
+        hull_lines = np.array([points[s] for s in hull.simplices])
+        return hull_lines
 
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
@@ -521,6 +525,8 @@ class BasePitchPlot(BasePitch):
         team1 : a 1d numpy array (length number of players in team 1) of 2d arrays
             Where the individual 2d arrays are coordinates of the Voronoi vertices.
 
+        team2 : a 1d numpy array (length number of players in team 2) of 2d arrays
+            Where the individual 2d arrays are coordinates of the Voronoi vertices.
 
         Examples
         --------
