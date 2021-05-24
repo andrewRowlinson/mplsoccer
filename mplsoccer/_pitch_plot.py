@@ -9,7 +9,7 @@ import seaborn as sns
 from matplotlib import rcParams
 from matplotlib.collections import PatchCollection
 from scipy.spatial import Voronoi, ConvexHull
-from scipy.stats import circmean
+from scipy.stats import circmean, gaussian_kde
 
 from mplsoccer._pitch_base import BasePitch
 from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
@@ -495,6 +495,44 @@ class BasePitchPlot(BasePitch):
         hull = ConvexHull(points)
         hull_vertices = points[hull.vertices].reshape(1, -1, 2)
         return hull_vertices
+
+    def scatterdensity(self, x, y, ax, cmap='viridis', **kwargs):
+        """ Generate scatter density plot - a scatter plot where point colour represents 2D density at that point.
+        Inspired by https://github.com/LKremer/ggpointdensity
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+
+        cmap : str or matplotlib Colormap, default 'viridis'
+             A Colormap instance or registered colormap name to use for density colouring
+
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
+
+        Returns
+        -------
+        paths : matplotlib.collections.PathCollection
+                or a tuple of (paths, paths) if marker='football'
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=1500)
+        >>> y = np.random.uniform(low=0, high=80, size=1500)
+        >>> scatter = pitch.scatterdensity(x,y, ax=ax, cmap='magma')
+        """
+
+        points = np.vstack([x, y])
+        density = gaussian_kde(points)(points)
+        scatter = self.scatter(x, y, c=density, cmap=cmap, ax=ax, **kwargs)
+        return scatter
 
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
