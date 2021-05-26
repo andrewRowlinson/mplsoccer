@@ -26,8 +26,6 @@ df = df[(df.team_name == 'Houston Dash') & (df.type_name == 'Ball Receipt')].cop
 
 pitch = Pitch(pitch_color='lightgrey', line_color='white')
 fig, ax = pitch.draw(figsize=(8, 6))
-scatter = pitch.scatterdensity(df.x, df.y, ax=ax, edgecolors='darkgrey', s=100)
+scatter = pitch.scatterdensity(df.x, df.y, ax=ax, sort=True, cmap='Purples', edgecolors='darkgrey', s=200)
 fig.suptitle('Houston Dash Pass Receipts vs Seattle Reign')
 plt.show()  # if you are not using a Jupyter notebook this is necessary to show the plot
-
-
