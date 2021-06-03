@@ -1,14 +1,16 @@
+:rocket: Version 1.0.5
+----------------------
+  
+### Fixes
+* Fixed the install process (setup.py) so it does not import mplsoccer. The version number is now \
+contained in the _version.py file.
+
 :rocket: Version 1.0.4
 ----------------------
 
 ### Added
 * Added ``convexhull`` method to the Pitch classes. This creates a polygon with the smallest \
 shape that contains the points.
-  
-### Fixes
-* Fixed the install process (setup.py) so it does not import mplsoccer. The version number is now \
-contained in the _version.py file.
-
 
 :rocket: Version 1.0.3
 ----------------------

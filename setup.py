@@ -1,7 +1,5 @@
 from setuptools import setup
 
-import mplsoccer
-
 exec(open('mplsoccer/_version.py').read())
 
 with open('README.md') as readme_file:
