@@ -772,6 +772,53 @@ class BasePitchPlot(BasePitch):
 
         return flow
 
+    def delaunay(self, x, y):
+        """ Get Delaunay tessellation for a set of coordinates
+
+        Parameters
+        ----------
+        x, y: array-like or scalar
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+
+        Returns
+        -------
+        simplices: a 1d numpy array of 2d arrays
+            Where the individual 2d arrays are coordinates of the triangle vertices.
+
+        Examples
+        --------
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from mplsoccer import VerticalPitch
+        >>> from mplsoccer.statsbomb import read_event, EVENT_SLUG
+        >>> dict_event = read_event(f'{EVENT_SLUG}/7478.json', related_event_df=False,
+                        tactics_lineup_df=False, warn=False)
+        >>> df_event = dict_event['event']
+        >>> df_freeze = dict_event['shot_freeze_frame']
+        >>> SHOT_ID = '8bb8bbc2-68a6-4c01-93de-53a194e7a1cf'
+        >>> df_freeze_frame = df_freeze[df_freeze.id == SHOT_ID].copy()
+        >>> df_shot_event = df_event[df_event.id ==
+                         SHOT_ID].dropna(axis=1, how='all').copy()
+        >>> df = pd.concat([df_shot_event[['x', 'y']], df_freeze_frame[['x', 'y']]])
+        >>> x = df.x.values
+        >>> y = df.y.values
+        >>> teams = np.concatenate([[True], df_freeze_frame.player_teammate.values])
+        >>> pitch = VerticalPitch(half=True, pitch_color='w', line_color='k')
+        >>> fig, ax = pitch.draw(figsize=(8, 6.2))
+        >>> simplices = pitch.delaunay(x[teams == False], y[teams == False])
+        >>> t1 = pitch.polygon(simplices, ax=ax, ec='grey', fc='w', linewidth=2, zorder=0)
+        >>> sc1 = pitch.scatter(x[teams], y[teams], ax=ax, c='#c34c45', s=150)
+        >>> sc2 = pitch.scatter(x[~teams], y[~teams], ax=ax, c='#6f63c5', s=150)
+        """
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+
+        coordinates = np.vstack([x, y]).T
+        delaunay = Delaunay(coordinates)
+        simplices = coordinates[delaunay.simplices]
+        return simplices
+
     # The methods below for drawing/ setting attributes for some of the pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
     # as they differ for horizontal/ vertical pitches
