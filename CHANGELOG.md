@@ -1,3 +1,10 @@
+:rocket: Version 1.1.0
+----------------------
+
+### Added
+* Added a turbine chart, which is a Radar plot with multiple kernel density estimators \
+plotted in the center. Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314)
+
 :rocket: Version 1.0.7
 ----------------------
 
@@ -7,7 +14,7 @@
 
 :rocket: Version 1.0.6
 ----------------------
-  
+
 ### Fixes
 * Removed deprecated set indexer in statsbomb event reader.
 * Fixes for docs: simplified StatsBomb section, fixed broken StatsBomb logos, \
