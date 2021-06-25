@@ -1050,3 +1050,7 @@ class BasePitch(ABC):
     @abstractmethod
     def delaunay(self, x, y):
         """ Calculate the Delauney Tesselation from a set of coordinates."""
+
+    @abstractmethod
+    def triplot(self, x, y, triangles=None, ax=None, **kwargs):
+        """ Implement a wrapper for matplotlib.axes.Axes.triplot."""
