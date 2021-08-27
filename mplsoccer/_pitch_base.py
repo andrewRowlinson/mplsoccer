@@ -107,6 +107,8 @@ class BasePitch(ABC):
     orientation : deprecated, default None
         Orientation is deprecated. Please use the VerticalPitch class instead:
         from mplsoccer import VerticalPitch.
+    corner_arcs : bool, default None
+        Whether to draw corner arcs
     """
 
     def __init__(self, pitch_type='statsbomb', half=False,
@@ -119,7 +121,7 @@ class BasePitch(ABC):
                  pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=1,
                  line_alpha=1, axis=False, label=False, tick=False,
                  figsize=None, tight_layout=None, constrained_layout=None,
-                 layout=None, view=None, orientation=None):
+                 layout=None, view=None, orientation=None, corner_arcs=False):
 
         # initialize attributes
         self.pitch_type = pitch_type
@@ -158,6 +160,7 @@ class BasePitch(ABC):
         self.axis = axis
         self.label = label
         self.tick = tick
+        self.corner_arcs = corner_arcs
 
         # other attributes for plotting circles - completed by
         # _init_circles_and_arcs / _init_circles_and_arcs_equal_aspect
@@ -500,6 +503,21 @@ class BasePitch(ABC):
         self._draw_arc(ax, self.dim.penalty_right, self.dim.center_width,
                        self.diameter1, self.diameter2,
                        theta1=self.arc2_theta1, theta2=self.arc2_theta2, **circ_prop)
+
+        if self.corner_arcs:
+            c_arc_width = self.dim.six_yard_length/6
+            thetas = [(x, x+90) for x in np.arange(0, 360, 90)]
+            if self.vertical:
+                thetas = np.flip(thetas, axis=0)
+            corner_points = [(self.dim.left, self.dim.top),
+                             (self.dim.right, self.dim.top),
+                             (self.dim.right, self.dim.bottom),
+                             (self.dim.left, self.dim.bottom)]
+            for i, (x, y) in enumerate(corner_points):
+                t1, t2 = thetas[i]
+                self._draw_arc(ax, x, y, c_arc_width, c_arc_width,
+                               theta1=t1, theta2=t2, **circ_prop)
+
 
         # draw center and penalty spots
         if self.spot_scale > 0:
