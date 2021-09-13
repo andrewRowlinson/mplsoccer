@@ -215,19 +215,3 @@ stream = event_stream()
 
 # example
 stream(df_relevant[840:850].copy())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
