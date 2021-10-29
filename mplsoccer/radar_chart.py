@@ -27,6 +27,11 @@ class Radar:
         The name of parameters (e.g. 'Key Passes')
     min_range, max_range : sequence of floats
         Minimum and maximum range for each parameter (inner and outer edge of the Radar).
+    greater_is_better : sequence of bool, default None
+        If greater_is_better is False for a respective parameter then the radar object
+        will flip the statistic. In soccer, this is useful for parameters like miss-controls
+        where fewer miss-controls is better than more.
+        The default (None) sets all values to True (i.e. no flips).
     round_int : sequence of bool, default None
         Whether to round the respective range values to integers (if True) or floats (if False).
         The default (None) sets all range values to floats.
@@ -40,11 +45,15 @@ class Radar:
         the same size as the center circle radius. If the center_circle_radius is increased to
         more than the ring_width then the center circle radius is wider than the rings.
     """
-    def __init__(self, params, min_range, max_range, round_int=None,
+    def __init__(self, params, min_range, max_range, greater_is_better=None, round_int=None,
                  num_rings=4, ring_width=1, center_circle_radius=1):
         self.params = np.asarray(params)
         self.min_range = np.asarray(min_range)
         self.max_range = np.asarray(max_range)
+        if greater_is_better is None:
+            self.greater_is_better = np.array([True] * self.params.size)
+        else:
+            self.greater_is_better = np.asarray(greater_is_better)
         if round_int is None:
             self.round_int = np.array([False] * self.params.size)
         else:
@@ -65,6 +74,10 @@ class Radar:
         if self.params.size != self.max_range.size:
             msg = 'The size of params and max_range must match'
             raise ValueError(msg)
+        if (max_range < min_range).sum() > 0:
+            msg = ('The maximum range should be greater than the minimum range '
+                   f'to flip the statistic(s) set the argument greater_is_better={max_range >= min_range}')
+            raise TypeError(msg)
         if self.params.size != self.round_int.size:
             msg = 'The size of params and round_int must match'
             raise ValueError(msg)
@@ -72,8 +85,17 @@ class Radar:
             msg = 'num_rings must be an integer'
             raise TypeError(msg)
         if self.params.size < 3:
-            msg = "You are not making a pretty chart. Increase the number of params to 3 or more."
+            msg = 'You are not making a pretty chart. Increase the number of params to 3 or more.'
             raise ValueError(msg)
+        
+        # flip the min_range and max_range if the argument greater_is_better is False for a parameter
+        # typically in soccer this would be for parameters like miscontrols where
+        # it is better to have fewer miscontrols
+        if (~self.greater_is_better).sum() > 0:
+            max_range_copy = self.max_range.copy()
+            min_range_copy = self.min_range.copy()
+            self.min_range = np.where(greater_is_better, min_range_copy, max_range_copy)
+            self.max_range = np.where(greater_is_better, max_range_copy, min_range_copy)
 
         # get the rotation angles
         self.rotation = (2 * np.pi / self.num_labels) * np.arange(self.num_labels)
@@ -103,6 +125,7 @@ class Radar:
                 f'params={self.params!r}, '
                 f'min_range={self.min_range!r}, '
                 f'max_range={self.max_range!r}, '
+                f'greater_is_better={self.greater_is_better!r}, '
                 f'round_int={self.round_int!r})')
 
     def _setup_axis(self, facecolor='#FFFFFF', ax=None):
