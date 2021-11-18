@@ -3,6 +3,7 @@
 StatsBomb 360
 =============
 This example shows how to plot the StatsBomb 360 data.
+Code by `@abhisheksh_98 <https://twitter.com/abhisheksh_98>`_
 """
 
 import json
