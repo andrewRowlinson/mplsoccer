@@ -1,3 +1,10 @@
+"""
+=============
+StatsBomb 360
+=============
+This example shows how to plot the StatsBomb 360 data.
+"""
+
 import json
 import matplotlib.pyplot as plt
 from mplsoccer.pitch import Pitch
