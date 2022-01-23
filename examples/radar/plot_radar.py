@@ -15,7 +15,7 @@ to enable greater customisation of the Radar. You can now set the edge color, de
 concentric circles, and use hatching or path_effects.
 """
 
-from mplsoccer import Radar, FontManager
+from mplsoccer import Radar, FontManager, grid
 import matplotlib.pyplot as plt
 
 ##############################################################################
@@ -40,7 +40,7 @@ high = [0.37, 0.6, 0.6, 4, 1.2, 10, 8, 1.3, 1.5, 5.5, 5]
 ##############################################################################
 # Instantiate the Radar Class
 # ---------------------------
-# We will instantiate a radar object with the above parameters so we can re-use it
+# We will instantiate a radar object with the above parameters so that we can re-use it
 # several times.
 
 radar = Radar(params, low, high,
@@ -129,53 +129,14 @@ radar_output = radar.draw_radar(bruno_values, ax=ax,
 radar_poly, rings_outer, vertices = radar_output
 
 ##############################################################################
-# Sub Plot Mosaic
-# ---------------
-# Here we create a function to plot a radar flanked with a title and an endnote axes.
-
-
-def radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14):
-    """ Create a Radar chart flanked by a title and endnote axes.
-
-    Parameters
-    ----------
-    radar_height: float, default 0.915
-        The height of the radar axes in fractions of the figure height (default 91.5%).
-    title_height: float, default 0.06
-        The height of the title axes in fractions of the figure height (default 6%).
-    figheight: float, default 14
-        The figure height in inches.
-
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-    axs : dict[label, Axes]
-    """
-    if title_height + radar_height > 1:
-        error_msg = 'Reduce one of the radar_height or title_height so the total is ≤ 1.'
-        raise ValueError(error_msg)
-    endnote_height = 1 - title_height - radar_height
-    figwidth = figheight * radar_height
-    figure, axes = plt.subplot_mosaic([['title'], ['radar'], ['endnote']],
-                                      gridspec_kw={'height_ratios': [title_height, radar_height,
-                                                                     endnote_height],
-                                                   # the grid takes up the whole of the figure 0-1
-                                                   'bottom': 0, 'left': 0, 'top': 1,
-                                                   'right': 1, 'hspace': 0},
-                                      figsize=(figwidth, figheight))
-    axes['title'].axis('off')
-    axes['endnote'].axis('off')
-    return figure, axes
-
-
-##############################################################################
 # Adding a title and endnote
 # --------------------------
-# Here we will add an endnote and title to the Radar. We will use a subplot_mosaic to create
+# Here we will add an endnote and title to the Radar. We will use the grid function to create
 # the figure and pass the axs['radar'] axes to the Radar's methods.
 
-# creating the figure using the function defined above:
-fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
+# creating the figure using the grid function from mplsoccer:
+fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                title_space=0, endnote_space=0, ax_key='radar', axis=False)
 
 # plot the radar
 radar.setup_axis(ax=axs['radar'])
@@ -211,8 +172,9 @@ title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
 # Here we will make a very simple radar chart using ``mplsoccer`` module ``radar_chart``.
 # We will only change the default facecolors.
 
-# creating the figure using the function defined above:
-fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
+# creating the figure using the grid function from mplsoccer:
+fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                title_space=0, endnote_space=0, ax_key='radar', axis=False)
 
 # plot radar
 radar.setup_axis(ax=axs['radar'])  # format axis as a radar
@@ -250,8 +212,9 @@ title4_text = axs['title'].text(0.99, 0.25, 'Manchester City', fontsize=20,
 # Dark Theme
 # ----------
 
-# creating the figure using the function defined above:
-fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
+# creating the figure using the grid function from mplsoccer:
+fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                title_space=0, endnote_space=0, ax_key='radar', axis=False)
 
 # plot the radar
 radar.setup_axis(ax=axs['radar'], facecolor='None')
@@ -291,8 +254,9 @@ fig.set_facecolor('#121212')
 # The theme below is inspired by the artist
 # `Ben Eine <https://beneine.co.uk/>`_.
 
-# creating the figure using the function defined above:
-fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
+# creating the figure using the grid function from mplsoccer:
+fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                title_space=0, endnote_space=0, ax_key='radar', axis=False)
 
 # plot the radar
 radar.setup_axis(ax=axs['radar'], facecolor='None')
@@ -338,8 +302,9 @@ fig.set_facecolor('#070707')
 # `Camille Walala <https://www.camillewalala.com/>`_. It uses two types of
 # hatching to create the radar.
 
-# creating the figure using the function defined above:
-fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
+# creating the figure using the grid function from mplsoccer:
+fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                title_space=0, endnote_space=0, ax_key='radar', axis=False)
 
 # we are creating a new radar object with more rings, integer rounding, and a larger center circle
 radar2 = Radar(params=['Speed', 'Agility', 'Strength', 'Passing', 'Dribbles'],
@@ -360,7 +325,7 @@ radar_output = radar2.draw_radar(values=[5, 2, 4, 3, 1], ax=axs['radar'],
                                  kwargs_rings={'facecolor': '#e6dedc', 'edgecolor': '#1a1414',
                                                'hatch': '/', 'alpha': 1})
 # draw the radar again but without a facecolor ('None') and an edgecolor
-# we draw it again so we can choose a different edgecolor from the radar
+# we draw it again so that we can choose a different edgecolor from the radar
 radar_output2 = radar2.draw_radar(values=[5, 2, 4, 3, 1], ax=axs['radar'],
                                   kwargs_radar={'facecolor': 'None', 'edgecolor': '#646366'},
                                   kwargs_rings={'facecolor': 'None'})
