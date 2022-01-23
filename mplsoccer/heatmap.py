@@ -11,7 +11,8 @@ _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
 
-def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), normalize=False, standardized=False):
+def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
+                  normalize=False, standardized=False):
     """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
 
     This method automatically sets the range, changes some of the scipy defaults,
@@ -76,7 +77,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), n
         x = x[~mask]
         y = y[~mask]
         values = values[~mask]
-        
+
     if (values is None) & (statistic == 'count'):
         values = x
     if (values is None) & (statistic != 'count'):
@@ -103,7 +104,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), n
     # then the statistic is flipped back here
     if dim.invert_y and standardized is False:
         statistic = np.flip(statistic, axis=0)
-        
+
     if normalize:
         statistic = statistic / statistic.sum()
 
@@ -159,7 +160,8 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     return mesh
 
 
-def bin_statistic_positional(x, y, values=None, dim=None, positional='full', statistic='count', normalize=False):
+def bin_statistic_positional(x, y, values=None, dim=None, positional='full',
+                             statistic='count', normalize=False):
     """ Calculates binned statistics for the Juego de posición (position game) concept.
     It uses scipy.stats.binned_statistic_2d.
 
@@ -292,7 +294,7 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         stats = [stats]
     else:
         raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
-        
+
     if normalize:
         total = np.array([stat['statistic'].sum() for stat in stats]).sum()
         for stat in stats:
