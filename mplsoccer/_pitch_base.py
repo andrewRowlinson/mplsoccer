@@ -11,6 +11,7 @@ from matplotlib import rcParams
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
 from mplsoccer.utils import Standardizer, set_visible
+from mplsoccer.grid import grid_dimensions, draw_grid, calculate_grid_dimensions
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -94,19 +95,6 @@ class BasePitch(ABC):
         Whether to include the axis labels.
     tick : bool, default False
         Whether to include the axis ticks.
-    figsize : deprecated, default None
-        The figsize argument has been moved to the draw method.
-    tight_layout : deprecated, default None
-        The tight_layout argument has been moved to the draw method.
-    constrained_layout : deprecated, default None
-        The constrained_layout argument has been moved to the draw method.
-    layout : deprecated, default None
-        Layout is deprecated. Please use nrows and ncols arguments of the draw method instead.
-    view : deprecated, default None
-        View is deprecated. Please use half=True or half=False arguments instead.
-    orientation : deprecated, default None
-        Orientation is deprecated. Please use the VerticalPitch class instead:
-        from mplsoccer import VerticalPitch.
     corner_arcs : bool, default None
         Whether to draw corner arcs
     """
@@ -119,9 +107,8 @@ class BasePitch(ABC):
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=1,
-                 line_alpha=1, axis=False, label=False, tick=False,
-                 figsize=None, tight_layout=None, constrained_layout=None,
-                 layout=None, view=None, orientation=None, corner_arcs=False):
+                 line_alpha=1, axis=False, label=False, tick=False, corner_arcs=False):
+                 ):
 
         # initialize attributes
         self.pitch_type = pitch_type
@@ -185,32 +172,12 @@ class BasePitch(ABC):
         self.hex_extent = None
         self.vertical = None
         self.reverse_cmap = None
-        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
-                                         length_from=pitch_length, pitch_to='uefa')
-
-        # deprecation warnings
-        if figsize is not None:
-            msg = "figsize has moved to the draw method."
-            warnings.warn(msg)
-        if tight_layout is not None:
-            msg = "tight_layout has moved to the draw method."
-            warnings.warn(msg)
-        if constrained_layout is not None:
-            msg = "constrained_layout has moved to the draw method."
-            warnings.warn(msg)
-        if layout is not None:
-            msg = "layout is deprecated. Please use nrows and ncols arguments instead."
-            warnings.warn(msg)
-        if view is not None:
-            msg = "view is deprecated. Please use half=True or half=False arguements instead."
-            warnings.warn(msg)
-        if orientation is not None:
-            msg = ("orientation is deprecated. Please use the VerticalPitch class instead: "
-                   "from mplsoccer import VerticalPitch.")
-            warnings.warn(msg)
 
         # data checks
         self._validation_checks()
+        
+        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
+                                         length_from=pitch_length, pitch_to='uefa')
 
         # set pitch dimensions
         self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
@@ -268,7 +235,9 @@ class BasePitch(ABC):
                 f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
                 f'line_alpha={self.line_alpha!r}, label={self.label!r}, '
-                f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r})')
+                f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r}, '
+                f'corner_arcs={self.corner_arcs!r})'
+               )
 
     def _validation_checks(self):
         # pitch validation
@@ -598,9 +567,9 @@ class BasePitch(ABC):
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
 
-    def grid(self, figheight=9, nrows=1, ncols=1, left=None, grid_width=0.95,
-             bottom=None, endnote_height=0.065, endnote_space=0.01,
-             grid_height=0.715, title_space=0.01, title_height=0.15, space=0.05, axis=True):
+    def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
+             left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,
+             title_height=0.15, title_space=0.01, axis=True):
         """ A helper to create a grid of pitches in a specified location
 
         Parameters
@@ -609,12 +578,19 @@ class BasePitch(ABC):
             The figure height in inches.
         nrows, ncols : int, default 1
             Number of rows/columns of pitches in the grid.
-        left : float, default None
-            The location of the left hand side of the axes in fractions of the figure width.
-            The default of None places the axes in the middle of the figure.
+        grid_height : float, default 0.715
+            The height of the pitch grid in fractions of the figure height.
+            The default is the grid height is 71.5% of the figure height.
         grid_width : float, default 0.95
             The width of the pitch grid in fractions of the figure width.
             The default is the grid is 95% of the figure width.
+        space : float, default 0.05
+            The total amount of the grid height reserved for spacing between the pitch axes.
+            Expressed as a fraction of the grid_height. The default is 5% of the grid height.
+            The spacing across the grid width is automatically calculated to maintain even spacing.
+        left : float, default None
+            The location of the left-hand side of the axes in fractions of the figure width.
+            The default of None places the axes in the middle of the figure.
         bottom : float, default None
             The location of the bottom endnote axes in fractions of the figure height.
             The default of None places the axes in the middle of the figure.
@@ -627,21 +603,14 @@ class BasePitch(ABC):
             The space between the pitch grid and endnote axis in fractions of the figure height.
             The default space is 1% of the figure height.
             If endnote_height=0, then the endnote_space is set to zero.
-        grid_height : float, default 0.715
-            The height of the pitch grid in fractions of the figure height.
-            The default is the grid height is 71.5% of the figure height.
-        title_space : float, default 0.01
-            The space between the pitch grid and title axis in fractions of the figure height.
-            The default space is 1% of the figure height.
-            If title_height=0, then the title_space is set to zero.
         title_height : float, default 0.15
             The height of the title axis in fractions of the figure height.
             The default is the title axis is 15% of the figure height.
             If title_height=0, then the title axes is not plotted.
-        space : float, default 0.05
-            The total amount of the grid height reserved for spacing between the pitch axes.
-            Expressed as a fraction of the grid_height. The default is 5% of the grid height.
-            The spacing across the grid width is automatically calculated to maintain even spacing.
+        title_space : float, default 0.01
+            The space between the pitch grid and title axis in fractions of the figure height.
+            The default space is 1% of the figure height.
+            If title_height=0, then the title_space is set to zero.
         axis : bool, default True
             Whether the endnote and title axes are 'on'.
 
@@ -658,111 +627,20 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figheight=14)
         """
-        if left is None:
-            left = (1 - grid_width) / 2
-
-        if title_height == 0:
-            title_space = 0
-
-        if endnote_height == 0:
-            endnote_space = 0
-
-        error_msg_height = ('The axes extends past the figure height. '
-                            'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
-                            'title_space or title_height so the total is ≤ 1.')
-        error_msg_width = ('The grid axes extends past the figure width. '
-                           'Reduce one of the grid_width or left so the total is ≤ 1.')
-
-        axes_height = endnote_height + endnote_space + grid_height + title_space + title_height
-        if axes_height > 1:
-            raise ValueError(error_msg_height)
-
-        if bottom is None:
-            bottom = (1 - axes_height) / 2
-
-        if bottom + axes_height > 1:
-            raise ValueError(error_msg_height)
-
-        if grid_width + left > 1:
-            raise ValueError(error_msg_width)
-
-        # calculate the figure width
-        if (nrows > 1) and (ncols > 1):
-            figwidth = figheight * grid_height / grid_width * (((1 - space) * self.ax_aspect *
-                                                                ncols / nrows) +
-                                                               (space * (ncols - 1) / (nrows - 1)))
-            individual_space_height = grid_height * space / (nrows - 1)
-            individual_space_width = individual_space_height * figheight / figwidth
-            individual_pitch_height = grid_height * (1 - space) / nrows
-
-        elif (nrows > 1) and (ncols == 1):
-            figwidth = grid_height * figheight / grid_width * (1 - space) * self.ax_aspect / nrows
-            individual_space_height = grid_height * space / (nrows - 1)
-            individual_space_width = 0
-            individual_pitch_height = grid_height * (1 - space) / nrows
-
-        elif (nrows == 1) and (ncols > 1):
-            figwidth = grid_height * figheight / grid_width * (space + self.ax_aspect * ncols)
-            individual_space_height = 0
-            individual_space_width = grid_height * space * figheight / figwidth / (ncols - 1)
-            individual_pitch_height = grid_height
-
-        else:  # nrows=1, ncols=1
-            figwidth = grid_height * self.ax_aspect * figheight / grid_width
-            individual_space_height = 0
-            individual_space_width = 0
-            individual_pitch_height = grid_height
-
-        individual_pitch_width = individual_pitch_height * self.ax_aspect * figheight / figwidth
-
-        bottom_coordinates = np.tile(individual_space_height + individual_pitch_height,
-                                     reps=nrows - 1).cumsum()
-        bottom_coordinates = np.insert(bottom_coordinates, 0, 0.)
-        bottom_coordinates = np.repeat(bottom_coordinates, ncols)
-        grid_bottom = bottom + endnote_height + endnote_space
-        bottom_coordinates = bottom_coordinates + grid_bottom
-        bottom_coordinates = bottom_coordinates[::-1]
-
-        left_coordinates = np.tile(individual_space_width + individual_pitch_width,
-                                   reps=ncols - 1).cumsum()
-        left_coordinates = np.insert(left_coordinates, 0, 0.)
-        left_coordinates = np.tile(left_coordinates, nrows)
-        left_coordinates = left_coordinates + left
-
-        fig = plt.figure(figsize=(figwidth, figheight))
-        axs = []
-        for idx, bottom_coord in enumerate(bottom_coordinates):
-            axs.append(fig.add_axes((left_coordinates[idx], bottom_coord,
-                                     individual_pitch_width, individual_pitch_height)))
-            self.draw(ax=axs[idx])
-        axs = np.squeeze(np.array(axs).reshape((nrows, ncols)))
-        if axs.size == 1:
-            axs = axs.item()
-
+        dim = grid_dimensions(ax_aspect=self.ax_aspect, figheight=figheight, nrows=nrows,
+                              ncols=ncols, grid_height=grid_height, grid_width=grid_width,
+                              space=space, left=left, bottom=bottom,
+                              endnote_height=endnote_height, endnote_space=endnote_space,
+                              title_height=title_height, title_space=title_space)
         left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
-                    np.abs(self.extent[1] - self.extent[0])) * individual_pitch_width
+                    np.abs(self.extent[1] - self.extent[0])) * dim['axwidth']
         right_pad = (np.abs(self.visible_pitch - self.extent)[1] /
-                     np.abs(self.extent[1] - self.extent[0])) * individual_pitch_width
-        title_left = left + left_pad
-        title_width = grid_width - left_pad - right_pad
-
-        result_axes = {'pitch': axs}
-
-        if title_height > 0:
-            ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
-                                     title_width, title_height))
-            if axis is False:
-                ax_title.axis('off')
-            result_axes['title'] = ax_title
-
-        if endnote_height > 0:
-            ax_endnote = fig.add_axes((title_left, bottom,
-                                       title_width, endnote_height))
-            if axis is False:
-                ax_endnote.axis('off')
-            result_axes['endnote'] = ax_endnote
-
-        return fig, result_axes
+                     np.abs(self.extent[1] - self.extent[0])) * dim['axwidth']
+        fig, axs = draw_grid(dimensions=dim, left_pad=left_pad, right_pad=right_pad,
+                             axis=axis, ax_key='pitch')
+        for ax in np.asarray(axs['pitch']).flat:
+            self.draw(ax=ax)
+        return fig, axs
 
     def calculate_grid_dimensions(self, figwidth, figheight, nrows, ncols, max_grid, space):
         """ A helper method to propose a grid_width and grid_height for grid based on the inputs.
@@ -792,29 +670,11 @@ class BasePitch(ABC):
                                                                       nrows=1, ncols=1, \
                                                                       max_grid=1,  space=0)
         """
-        # grid1 = calculate the grid_width given the max_grid as grid_height
-        # grid2 = calculate grid_height given the max_grid as grid_width
-        if (nrows > 1) and (ncols > 1):
-            grid1 = max_grid * figheight / figwidth * (((1 - space) * self.ax_aspect *
-                                                        ncols / nrows) +
-                                                       (space * (ncols - 1) / (nrows - 1)))
-            grid2 = max_grid / figheight * figwidth / (((1 - space) * self.ax_aspect *
-                                                        ncols / nrows) +
-                                                       (space * (ncols - 1) / (nrows - 1)))
-        elif (nrows > 1) and (ncols == 1):
-            grid1 = max_grid * figheight / figwidth * (1 - space) * self.ax_aspect / nrows
-            grid2 = max_grid / figheight * figwidth / (1 - space) * self.ax_aspect / nrows
-        elif (nrows == 1) and (ncols > 1):
-            grid1 = max_grid * figheight / figwidth * (space + self.ax_aspect * ncols)
-            grid2 = max_grid / figheight * figwidth / (space + self.ax_aspect * ncols)
-        else:
-            grid1 = max_grid * figheight / figwidth * self.ax_aspect
-            grid2 = max_grid / figheight * figwidth / self.ax_aspect
-
-        # decide whether the max_grid is the grid_width or grid_height and set the other value
-        if (grid1 > 1) | ((grid2 >= grid1) & (grid2 <= 1)):
-            return max_grid, grid2
-        return grid1, max_grid
+        grid_width, grid_height = calculate_grid_dimensions(self.ax_aspect, figwidth=figwidth,
+                                                            figheight=figheight,
+                                                            nrows=nrows, ncols=ncols,
+                                                            max_grid=max_grid, space=space)
+        return grid_width, grid_height
 
     def jointgrid(self, figheight=9, left=None, grid_width=0.95,
                   bottom=None, endnote_height=0.065, endnote_space=0.01,
@@ -829,7 +689,7 @@ class BasePitch(ABC):
         figheight : float, default 9
             The figure height in inches.
         left : float, default None
-            The location of the left hand side of the grid in fractions of the figure width.
+            The location of the left-hand side of the grid in fractions of the figure width.
             The default of None places the axes in the middle of the figure.
         grid_width : float, default 0.95
             The width of the grid area in fractions of the figure width.
@@ -1054,7 +914,7 @@ class BasePitch(ABC):
 
         return fig, axs
 
-    # The methods below for drawing/ setting attributes for some of the pitch elements
+    # The methods below for drawing/ setting attributes for some pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
     # as they differ for horizontal/ vertical pitches
     @abstractmethod
@@ -1064,23 +924,23 @@ class BasePitch(ABC):
     @abstractmethod
     def _set_extent(self):
         """ Implement a method to set the pitch extents, stripe locations,
-         and attributes to help plotting on differnt orientations."""
+         and attributes to help plot on different orientations."""
 
     @abstractmethod
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
-        """ Implement a method to draw rectangles on a axes."""
+        """ Implement a method to draw rectangles on an axes."""
 
     @abstractmethod
     def _draw_line(self, ax, x, y, **kwargs):
-        """ Implement a method to draw lines on a axes."""
+        """ Implement a method to draw lines on an axes."""
 
     @abstractmethod
     def _draw_ellipse(self, ax, x, y, width, height, **kwargs):
-        """ Implement a method to draw ellipses (circles) on a axes."""
+        """ Implement a method to draw ellipses (circles) on an axes."""
 
     @abstractmethod
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
-        """ Implement a method to draw arcs on a axes."""
+        """ Implement a method to draw arcs on an axes."""
 
     @abstractmethod
     def _draw_stripe(self, ax, i):
@@ -1152,7 +1012,7 @@ class BasePitch(ABC):
 
     @abstractmethod
     def bin_statistic_positional(self, x, y, values=None, positional='full',
-                                 normalize=False, statistic='count'):
+                                 statistic='count', normalize=False):
         """ Calculate the binned statistics for Juegos de posición zones."""
 
     @abstractmethod
@@ -1160,7 +1020,7 @@ class BasePitch(ABC):
         """ Implement a heatmap for the Juegos de posición zones."""
 
     @abstractmethod
-    def label_heatmap(self, stats, ax=None, **kwargs):
+    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, ax=None, **kwargs):
         """ Implement a heatmap labeller."""
 
     @abstractmethod

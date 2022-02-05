@@ -1,3 +1,10 @@
+:rocket: Version 1.0.6
+----------------------
+  
+### Added
+* Added a turbine chart, which is a Radar plot with multiple kernel density estimators \
+plotted in the center. Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314) 
+
 :rocket: Version 1.0.5
 ----------------------
   
