@@ -168,6 +168,8 @@ class BasePitch(ABC):
         self.diameter2 = None
         self.diameter_spot1 = None
         self.diameter_spot2 = None
+        self.diameter_corner1 = None
+        self.diameter_corner2 = None
         self.arc1_theta1 = None
         self.arc1_theta2 = None
         self.arc2_theta1 = None
@@ -311,6 +313,8 @@ class BasePitch(ABC):
         self.diameter2 = self.dim.circle_diameter
         self.diameter_spot1 = self.spot_scale * self.dim.length * 2
         self.diameter_spot2 = self.spot_scale * self.dim.length * 2
+        self.diameter_corner1 = self.dim.corner_diameter
+        self.diameter_corner2 = self.dim.corner_diameter
         self.arc1_theta1 = -self.dim.arc
         self.arc1_theta2 = self.dim.arc
         self.arc2_theta1 = 180 - self.dim.arc
@@ -354,6 +358,7 @@ class BasePitch(ABC):
 
     def _init_circles_and_arcs_equal_aspect(self, ax):
         radius_center = self.dim.circle_diameter / 2
+        radius_corner = self.dim.corner_diameter / 2
         radius_spot = self.spot_scale * self.dim.pitch_length
 
         (self.diameter1,
@@ -364,6 +369,12 @@ class BasePitch(ABC):
          self.diameter_spot2) = self._diameter_circle_equal_aspect(self.dim.penalty_left,
                                                                    self.dim.center_width,
                                                                    ax, radius_spot)
+        
+        (self.diameter_corner1,
+         self.diameter_corner2) = self._diameter_circle_equal_aspect(self.dim.left,
+                                                                     self.dim.bottom,
+                                                                     ax, radius_corner)
+        
         self._arc_angles_equal_aspect(ax, radius_center)
 
     @staticmethod
@@ -505,8 +516,10 @@ class BasePitch(ABC):
                        theta1=self.arc2_theta1, theta2=self.arc2_theta2, **circ_prop)
 
         if self.corner_arcs:
-            c_arc_width = self.dim.six_yard_length/6
-            thetas = [(x, x+90) for x in np.arange(0, 360, 90)]
+            if self.dim.invert_y:
+                thetas = [(x, x+90) for x in np.arange(0, 360, 90)]
+            else:
+                thetas = [(270, 0), (180, 270), (90, 180), (0, 90)]
             if self.vertical:
                 thetas = np.flip(thetas, axis=0)
             corner_points = [(self.dim.left, self.dim.top),
@@ -515,7 +528,7 @@ class BasePitch(ABC):
                              (self.dim.left, self.dim.bottom)]
             for i, (x, y) in enumerate(corner_points):
                 t1, t2 = thetas[i]
-                self._draw_arc(ax, x, y, c_arc_width, c_arc_width,
+                self._draw_arc(ax, x, y, self.diameter_corner1, self.diameter_corner2,
                                theta1=t1, theta2=t2, **circ_prop)
 
 
