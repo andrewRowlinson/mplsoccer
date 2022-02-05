@@ -95,6 +95,8 @@ class BasePitch(ABC):
         Whether to include the axis labels.
     tick : bool, default False
         Whether to include the axis ticks.
+    corner_arcs : bool, default None
+        Whether to draw corner arcs
     """
 
     def __init__(self, pitch_type='statsbomb', half=False,
@@ -105,7 +107,7 @@ class BasePitch(ABC):
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
                  pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=1,
-                 line_alpha=1, axis=False, label=False, tick=False,
+                 line_alpha=1, axis=False, label=False, tick=False, corner_arcs=False):
                  ):
 
         # initialize attributes
@@ -145,6 +147,7 @@ class BasePitch(ABC):
         self.axis = axis
         self.label = label
         self.tick = tick
+        self.corner_arcs = corner_arcs
 
         # other attributes for plotting circles - completed by
         # _init_circles_and_arcs / _init_circles_and_arcs_equal_aspect
@@ -152,6 +155,8 @@ class BasePitch(ABC):
         self.diameter2 = None
         self.diameter_spot1 = None
         self.diameter_spot2 = None
+        self.diameter_corner1 = None
+        self.diameter_corner2 = None
         self.arc1_theta1 = None
         self.arc1_theta2 = None
         self.arc2_theta1 = None
@@ -167,11 +172,12 @@ class BasePitch(ABC):
         self.hex_extent = None
         self.vertical = None
         self.reverse_cmap = None
-        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
-                                         length_from=pitch_length, pitch_to='uefa')
 
         # data checks
         self._validation_checks()
+        
+        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
+                                         length_from=pitch_length, pitch_to='uefa')
 
         # set pitch dimensions
         self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
@@ -229,7 +235,9 @@ class BasePitch(ABC):
                 f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
                 f'line_alpha={self.line_alpha!r}, label={self.label!r}, '
-                f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r})')
+                f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r}, '
+                f'corner_arcs={self.corner_arcs!r})'
+               )
 
     def _validation_checks(self):
         # pitch validation
@@ -274,6 +282,8 @@ class BasePitch(ABC):
         self.diameter2 = self.dim.circle_diameter
         self.diameter_spot1 = self.spot_scale * self.dim.length * 2
         self.diameter_spot2 = self.spot_scale * self.dim.length * 2
+        self.diameter_corner1 = self.dim.corner_diameter
+        self.diameter_corner2 = self.dim.corner_diameter
         self.arc1_theta1 = -self.dim.arc
         self.arc1_theta2 = self.dim.arc
         self.arc2_theta1 = 180 - self.dim.arc
@@ -317,6 +327,7 @@ class BasePitch(ABC):
 
     def _init_circles_and_arcs_equal_aspect(self, ax):
         radius_center = self.dim.circle_diameter / 2
+        radius_corner = self.dim.corner_diameter / 2
         radius_spot = self.spot_scale * self.dim.pitch_length
 
         (self.diameter1,
@@ -327,6 +338,12 @@ class BasePitch(ABC):
          self.diameter_spot2) = self._diameter_circle_equal_aspect(self.dim.penalty_left,
                                                                    self.dim.center_width,
                                                                    ax, radius_spot)
+        
+        (self.diameter_corner1,
+         self.diameter_corner2) = self._diameter_circle_equal_aspect(self.dim.left,
+                                                                     self.dim.bottom,
+                                                                     ax, radius_corner)
+        
         self._arc_angles_equal_aspect(ax, radius_center)
 
     @staticmethod
@@ -466,6 +483,23 @@ class BasePitch(ABC):
         self._draw_arc(ax, self.dim.penalty_right, self.dim.center_width,
                        self.diameter1, self.diameter2,
                        theta1=self.arc2_theta1, theta2=self.arc2_theta2, **circ_prop)
+
+        if self.corner_arcs:
+            if self.dim.invert_y:
+                thetas = [(x, x+90) for x in np.arange(0, 360, 90)]
+            else:
+                thetas = [(270, 0), (180, 270), (90, 180), (0, 90)]
+            if self.vertical:
+                thetas = np.flip(thetas, axis=0)
+            corner_points = [(self.dim.left, self.dim.top),
+                             (self.dim.right, self.dim.top),
+                             (self.dim.right, self.dim.bottom),
+                             (self.dim.left, self.dim.bottom)]
+            for i, (x, y) in enumerate(corner_points):
+                t1, t2 = thetas[i]
+                self._draw_arc(ax, x, y, self.diameter_corner1, self.diameter_corner2,
+                               theta1=t1, theta2=t2, **circ_prop)
+
 
         # draw center and penalty spots
         if self.spot_scale > 0:
