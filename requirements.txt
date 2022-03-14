@@ -5,3 +5,10 @@ scipy
 pandas
 beautifulsoup4
 Pillow
+highlight-text==0.2
+matplotlib==3.3.0
+mplsoccer==1.0.6
+numpy==1.19.4
+pandas==1.2.5
+seaborn==0.11.1
+streamlit==0.84.1
