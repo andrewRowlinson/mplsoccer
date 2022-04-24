@@ -183,10 +183,10 @@ def read_event(path_or_buf, related_event_df=True, shot_freeze_frame_df=True,
                                                        'goalkeeper_type_name', 'shot_type_name'])
     # technique id/names are not always present so have to take this into account
     technique_id_cols = ['pass_technique_id', 'goalkeeper_technique_id', 'shot_technique_id']
-    technique_id_cols = set(technique_id_cols).intersection(set(df.columns))
+    technique_id_cols = list(set(technique_id_cols).intersection(set(df.columns)))
     technique_name_cols = ['pass_technique_name', 'goalkeeper_technique_name',
                            'shot_technique_name']
-    technique_name_cols = set(technique_name_cols).intersection(set(df.columns))
+    technique_name_cols = list(set(technique_name_cols).intersection(set(df.columns)))
     df = _simplify_cols_and_drop(df, 'technique_id', technique_id_cols)
     df = _simplify_cols_and_drop(df, 'technique_name', technique_name_cols)
 

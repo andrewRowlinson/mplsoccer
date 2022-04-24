@@ -209,7 +209,8 @@ BARCA_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/en/thumb/4/47/'
 DEPORTIVO_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/en/thumb/f/f8/'
                       'Deportivo_Alaves_logo_%282020%29.svg/'
                       '300px-Deportivo_Alaves_logo_%282020%29.svg.png')
-SB_LOGO_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'
+SB_LOGO_URL = ('https://raw.githubusercontent.com/statsbomb/open-data/'
+               'master/img/SB%20-%20Icon%20Lockup%20-%20Colour%20positive.png')
 barca_logo = Image.open(urlopen(BARCA_LOGO_URL))
 deportivo_logo = Image.open(urlopen(DEPORTIVO_LOGO_URL))
 sb_logo = Image.open(urlopen(SB_LOGO_URL))
@@ -298,7 +299,7 @@ axs['endnote'].text(0, 0.5, 'The format is copied from @DymondFormation',
 # bbox_sb = ax_sb_logo.get_position()
 # bbox_endnote = axs['endnote'].get_position()
 # left = bbox_endnote.x1 - bbox_sb.width
-ax_sb_logo = add_image(sb_logo, fig, left=0.7970,
+ax_sb_logo = add_image(sb_logo, fig, left=0.701126,
                        # set the bottom and height to align with the endnote
                        bottom=axs['endnote'].get_position().y0,
                        height=axs['endnote'].get_position().height)

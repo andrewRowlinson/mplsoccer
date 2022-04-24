@@ -1,3 +1,11 @@
+:rocket: Version 1.0.6
+----------------------
+  
+### Fixes
+* Removed deprecated set indexer in statsbomb event reader.
+* Fixes for docs: simplified StatsBomb section, fixed broken StatsBomb logos, \
+and fixed the standardizer example so that it works with the lastest version of kloppy.
+
 :rocket: Version 1.0.5
 ----------------------
   

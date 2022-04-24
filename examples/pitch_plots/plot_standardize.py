@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import requests
-from kloppy import WyscoutSerializer, to_pandas
+from kloppy import wyscout
 from adjustText import adjust_text
 from highlight_text import ax_text
 
@@ -121,57 +121,28 @@ _ = ax_text(34, 73, TEXT2, va='center', ha='center', fontproperties=fm.prop,
 # Here we will get the event data from both a Wyscout and StatsBomb
 # game and standardize to the same coordinates to compare.
 
-# I have prepared a table of match ids that are the same between the StatsBomb and Wyscout
-# open data. Here we get the 50th of the 100 overlapping games (from La Liga / World Cup.)
-df_overlap = pd.read_csv(('https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/'
-                          'wyscout_statsbomb_overlap.csv'))
-IDX = 50
-
-# Get the Wyscout data. Here we use @mr_le_fox's (https://twitter.com/mr_le_fox)
-# version of the Wyscout open-data available at
-# https://github.com/koenvo/wyscout-soccer-match-event-dataset
-wyscout_id = df_overlap.iloc[IDX].wyscout_json
-WYSCOUT_URL = (f'https://raw.githubusercontent.com/koenvo/wyscout-soccer-match-event-dataset/'
-               f'main/processed/files/{wyscout_id}')
-
-# Here we get the url of the cooresponding statsbomb match
-statsbomb_id = df_overlap.iloc[IDX].statsbomb_json
-STATSBOMB_URL = f'{EVENT_SLUG}/{statsbomb_id}'
-
-##############################################################################
-# Get the StatsBomb data as a dataframe
-# -------------------------------------
-
-df_statsbomb = read_event(STATSBOMB_URL, related_event_df=False, shot_freeze_frame_df=False,
+# Get the StatsBomb data
+df_statsbomb = read_event(f'{EVENT_SLUG}/7579.json',
+                          related_event_df=False, shot_freeze_frame_df=False,
                           tactics_lineup_df=False)['event']
 
-##############################################################################
-# Get the Wyscout data as a dataframe using Kloppy
-# ------------------------------------------------
-# We first save the file locally and then load it in Kloppy as a dataframe
+# saving the file locally as readthedocs won't allow me to load it directly with kloppy
+# normally can skip this and do: dataset = wyscout.load_open_data(match_id=2058002, coordinates='wyscout')
+WYSCOUT_URL = (f'https://raw.githubusercontent.com/koenvo/wyscout-soccer-match-event-dataset/'
+               f'main/processed/files/2058002.json')
+response = requests.get(url=WYSCOUT_URL)
+response.encoding = 'unicode-escape'  # to make sure the encoding for é etc. is correct
+data = response.json()
+with open('2058002.json', 'w') as file:
+    json.dump(data, file)
 
-# create the data/wyscout directories to store the file if they don't exist
-WYSCOUT_PATH = os.path.join('data', 'wyscout')
-if os.path.exists(WYSCOUT_PATH) is False:
-    os.makedirs(WYSCOUT_PATH)
-
-# Save the Wyscout json in the data/wyscout directory
-WYSCOUT_JSON_PATH = os.path.join(WYSCOUT_PATH, wyscout_id)
-if os.path.exists(WYSCOUT_JSON_PATH) is False:  # only download it if it doesn't exist
-    with open(WYSCOUT_JSON_PATH, 'w') as f:
-        response = requests.get(url=WYSCOUT_URL)
-        response.encoding = 'unicode-escape'  # to make sure the encoding for é etc. is correct
-        json.dump(response.json(), f)
-
-# load the wyscout events as a dataframe using Kloppy
-serializer = WyscoutSerializer()
-
-with open(WYSCOUT_JSON_PATH) as event_data:
-    wyscout_dataset = serializer.deserialize(inputs={'event_data': event_data})
-
-df_wyscout = to_pandas(wyscout_dataset,
-                       additional_columns={'player_name': lambda event: str(event.player),
-                                           'team_name': lambda event: str(event.player.team)})
+dataset = wyscout.load(event_data='2058002.json', coordinates='wyscout')
+df_wyscout = dataset.to_pandas(
+        additional_columns={
+            'player_name': lambda event: str(event.player),
+            'team_name': lambda event: str(event.player.team)
+        },
+    ) 
 
 ##############################################################################
 # Standardize the Wyscout data to StatsBomb coordinates
