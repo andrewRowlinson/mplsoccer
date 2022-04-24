@@ -41,8 +41,9 @@ df.sort_values(['Att 3rd', 'Def 3rd'], ascending=[True, False], inplace=True)
 ##############################################################################
 # Get the StatsBomb logo and Fonts
 
-LOGO_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'
-sb_logo = Image.open(urlopen(LOGO_URL))
+SB_LOGO_URL = ('https://raw.githubusercontent.com/statsbomb/open-data/'
+               'master/img/SB%20-%20Icon%20Lockup%20-%20Colour%20positive.png')
+sb_logo = Image.open(urlopen(SB_LOGO_URL))
 
 # a FontManager object for using a google font (default Robotto)
 fm = FontManager()
@@ -67,7 +68,7 @@ CBAR_WIDTH = 0.03
 fig, axs = pitch.grid(nrows=4, ncols=5, figheight=20,
                       # leaves some space on the right hand side for the colorbar
                       grid_width=0.88, left=0.025,
-                      endnote_height=0.06, endnote_space=0,
+                      endnote_height=0.03, endnote_space=0,
                       # Turn off the endnote/title axis. I usually do this after
                       # I am happy with the chart layout and text placement
                       axis=False,
@@ -125,7 +126,7 @@ GRID_HEIGHT = 0.76
 fig, axs = pitch.grid(nrows=4, ncols=5, figheight=20,
                       # leaves some space on the right hand side for the colorbar
                       grid_width=0.88, left=0.025,
-                      endnote_height=0.06, endnote_space=0,
+                      endnote_height=0.03, endnote_space=0,
                       # Turn off the endnote/title axis. I usually do this after
                       # I am happy with the chart layout and text placement
                       axis=False,

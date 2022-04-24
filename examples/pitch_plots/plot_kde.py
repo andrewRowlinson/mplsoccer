@@ -61,7 +61,8 @@ robboto_bold = FontManager(URL2)
 # Load the StatsBomb logo and Messi picture
 MESSI_URL = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
 messi_image = Image.open(urlopen(MESSI_URL))
-SB_LOGO_URL = 'https://raw.githubusercontent.com/statsbomb/open-data/master/img/statsbomb-logo.jpg'
+SB_LOGO_URL = ('https://raw.githubusercontent.com/statsbomb/open-data/'
+               'master/img/SB%20-%20Icon%20Lockup%20-%20Colour%20positive.png')
 sb_logo = Image.open(urlopen(SB_LOGO_URL))
 
 ##############################################################################
@@ -72,7 +73,7 @@ fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0, title_sp
                       # Turn off the endnote/title axis. I usually do this after
                       # I am happy with the chart layout and text placement
                       axis=False,
-                      grid_height=0.82, endnote_height=0.05)
+                      grid_height=0.82, endnote_height=0.03)
 kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'],
                     # shade using 100 levels so it looks smooth
                     shade=True, levels=100,
@@ -98,7 +99,7 @@ ax_sb_logo = add_image(sb_logo, fig,
 # We will use mplsoccer's grid function, which is a convenient way to plot a grid
 # of pitches with a title and endnote axes.
 
-fig, axs = pitch.grid(ncols=2, axis=False)
+fig, axs = pitch.grid(ncols=2, axis=False, endnote_height=0.05)
 
 kde_before = pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax=axs['pitch'][0],
                            shade=True, levels=100, shade_lowest=True,
