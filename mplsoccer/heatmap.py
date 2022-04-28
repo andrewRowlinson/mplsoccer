@@ -8,14 +8,15 @@ from scipy.stats import binned_statistic_2d
 from mplsoccer.utils import validate_ax
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
-                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
+                                    ('statistic', 'x_grid', 'y_grid',
+                                     'cx', 'cy', 'binnumber'))
 
 
 def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
                   normalize=False, standardized=False):
     """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
 
-    This method automatically sets the range, changes some of the scipy defaults,
+    This method automatically sets the range, changes the scipy defaults,
     and outputs the grids and centers for plotting.
 
     The default statistic has been changed to count instead of mean.
@@ -52,7 +53,10 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     -------
     bin_statistic : dict.
         The keys are 'statistic' (the calculated statistic),
-        'x_grid' and 'y_grid (the bin's edges), and cx and cy (the bin centers).
+        'x_grid' and 'y_grid (the bin's edges), cx and cy (the bin centers)
+        and 'binnumber' (the bin indices each point belongs to).
+        'binnumber' is a (2, N) array that represents the bin in which the observation falls
+        if the observations falls outside the pitch the value is -1 for the dimension.
 
     Examples
     --------
@@ -94,26 +98,43 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
         else:
             pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top]]
 
-    statistic, x_edge, y_edge, _ = binned_statistic_2d(x, y, values, statistic=statistic,
-                                                       bins=bins, range=pitch_range)
+    (statistic, x_edge,
+     y_edge, binnumber) = binned_statistic_2d(x, y, values, statistic=statistic,
+                                              bins=bins, range=pitch_range,
+                                              expand_binnumbers=True)
 
     statistic = statistic.T
     # this ensures that all the heatmaps are created consistently at the heatmap edges
     # i.e. grid cells are created from the bottom to the top of the pitch, where the top edge
     # always belongs to the cell above. First the raw coordinates have been flipped above
     # then the statistic is flipped back here
+    num_y, num_x = statistic.shape
     if dim.invert_y and standardized is False:
         statistic = np.flip(statistic, axis=0)
+        # we do not need to also flip the binnumber
+        # as unlike statistic we do not plot the binnumber on an inverted axis
+        # binnumber[1, :] = num_y - binnumber[1, :] + 1  # equivalent to flipping
 
     if normalize:
         statistic = statistic / statistic.sum()
 
     x_grid, y_grid = np.meshgrid(x_edge, y_edge)
-
     cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
                          y_edge[:-1] + 0.5 * np.diff(y_edge))
-
-    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)._asdict()
+    
+    # if outside the pitch set the bin number to minus one
+    # else zero index the results by removing one
+    mask_x_out = np.logical_or(binnumber[0, :] == 0,
+                               binnumber[0, :] == num_x + 1)
+    binnumber[0, mask_x_out] = -1
+    binnumber[0, ~mask_x_out] = binnumber[0, ~mask_x_out] - 1
+    
+    mask_y_out = np.logical_or(binnumber[1, :] == 0,
+                               binnumber[1, :] == num_y + 1)
+    binnumber[1, mask_y_out] = -1
+    binnumber[1, ~mask_y_out] = binnumber[1, ~mask_y_out] - 1
+    
+    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber)._asdict()
 
     return stats
 
@@ -211,71 +232,52 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full',
     if positional == 'full':
         # top and bottom row - we create a grid with three rows and then
         # ignore the middle row when slicing
-        xedge = dim.positional_x
-        yedge = dim.positional_y[[0, 1, 4, 5]]
+        xedge1 = dim.positional_x
+        yedge1 = dim.positional_y[[0, 1, 4, 5]]
         bin_statistic1 = bin_statistic(x, y, values, dim=dim, statistic=statistic,
-                                       bins=(xedge, yedge))
-        stat1 = bin_statistic1['statistic']
-        x_grid1 = bin_statistic1['x_grid']
-        y_grid1 = bin_statistic1['y_grid']
-        cx1 = bin_statistic1['cx']
-        cy1 = bin_statistic1['cy']
-        # slicing second row
-        stat2 = stat1[2, :].reshape(1, -1).copy()
-        x_grid2 = x_grid1[2:, :].copy()
-        y_grid2 = y_grid1[2:, :].copy()
-        cx2 = cx1[2, :].copy()
-        cy2 = cy1[2, :].copy()
-        # slice first row
-        stat1 = stat1[0, :].reshape(1, -1).copy()
-        x_grid1 = x_grid1[:2, :].copy()
-        y_grid1 = y_grid1[:2, :].copy()
-        cx1 = cx1[0, :].copy()
-        cy1 = cy1[0, :].copy()
+                                       bins=(xedge1, yedge1))
+        result1 = _BinnedStatisticResult(bin_statistic1['statistic'][:1, :],
+                                         bin_statistic1['x_grid'][:2, :],
+                                         bin_statistic1['y_grid'][:2, :],
+                                         bin_statistic1['cx'][0, :],
+                                         bin_statistic1['cy'][0, :],
+                                         None)._asdict()
+        result2 = _BinnedStatisticResult(bin_statistic1['statistic'][2:, :],
+                                         bin_statistic1['x_grid'][2:, :],
+                                         bin_statistic1['y_grid'][2:, :],
+                                         bin_statistic1['cx'][2, :],
+                                         bin_statistic1['cy'][2, :],
+                                         None)._asdict()
 
-        # middle of pitch
-        xedge = dim.positional_x[[0, 1, 3, 5, 6]]
-        yedge = dim.positional_y
+        # middle of the pitch
+        xedge3 = dim.positional_x[[0, 1, 3, 5, 6]]
+        yedge3 = dim.positional_y
         bin_statistic3 = bin_statistic(x, y, values, dim=dim, statistic=statistic,
-                                       bins=(xedge, yedge))
-        stat3 = bin_statistic3['statistic']
-        x_grid3 = bin_statistic3['x_grid']
-        y_grid3 = bin_statistic3['y_grid']
-        cx3 = bin_statistic3['cx']
-        cy3 = bin_statistic3['cy']
-        stat3 = stat3[1:-1, 1:-1]
-        x_grid3 = x_grid3[1:-1:, 1:-1].copy()
-        y_grid3 = y_grid3[1:-1, 1:-1].copy()
-        cx3 = cx3[1:-1, 1:-1].copy()
-        cy3 = cy3[1:-1, 1:-1].copy()
+                                       bins=(xedge3, yedge3))
+        result3 = _BinnedStatisticResult(bin_statistic3['statistic'][1:-1, 1:-1],
+                                         bin_statistic3['x_grid'][1:-1:, 1:-1],
+                                         bin_statistic3['y_grid'][1:-1, 1:-1],
+                                         bin_statistic3['cx'][1:-1, 1:-1],
+                                         bin_statistic3['cy'][1:-1, 1:-1],
+                                         None)._asdict()
 
         # penalty areas
-        xedge = dim.positional_x[[0, 1, 2, 5, 6]]
-        yedge = dim.positional_y[[0, 1, 4, 5]]
+        xedge4 = dim.positional_x[[0, 1, 2, 5, 6]]
+        yedge4 = dim.positional_y[[0, 1, 4, 5]]
         bin_statistic4 = bin_statistic(x, y, values, dim=dim, statistic=statistic,
-                                       bins=(xedge, yedge))
-        stat4 = bin_statistic4['statistic']
-        x_grid4 = bin_statistic4['x_grid']
-        y_grid4 = bin_statistic4['y_grid']
-        cx4 = bin_statistic4['cx']
-        cy4 = bin_statistic4['cy']
-        # slicing each penalty box
-        stat5 = stat4[1:-1, -1:]
-        stat4 = stat4[1:-1, :1]
-        y_grid5 = y_grid4[1:-1, -2:]
-        y_grid4 = y_grid4[1:-1, 0:2]
-        x_grid5 = x_grid4[1:-1, -2:]
-        x_grid4 = x_grid4[1:-1, 0:2]
-        cx5 = cx4[1:-1, -1:]
-        cx4 = cx4[1:-1, :1]
-        cy5 = cy4[1:-1, -1:]
-        cy4 = cy4[1:-1, :1]
-
-        result1 = _BinnedStatisticResult(stat1, x_grid1, y_grid1, cx1, cy1)._asdict()
-        result2 = _BinnedStatisticResult(stat2, x_grid2, y_grid2, cx2, cy2)._asdict()
-        result3 = _BinnedStatisticResult(stat3, x_grid3, y_grid3, cx3, cy3)._asdict()
-        result4 = _BinnedStatisticResult(stat4, x_grid4, y_grid4, cx4, cy4)._asdict()
-        result5 = _BinnedStatisticResult(stat5, x_grid5, y_grid5, cx5, cy5)._asdict()
+                                       bins=(xedge4, yedge4))
+        result4 = _BinnedStatisticResult(bin_statistic4['statistic'][1:-1, :1],
+                                         bin_statistic4['x_grid'][1:-1, 0:2],
+                                         bin_statistic4['y_grid'][1:-1, 0:2],
+                                         bin_statistic4['cx'][1:-1, :1],
+                                         bin_statistic4['cy'][1:-1, :1],
+                                         None)._asdict()
+        result5 = _BinnedStatisticResult(bin_statistic4['statistic'][1:-1, -1:],
+                                         bin_statistic4['x_grid'][1:-1, -2:],
+                                         bin_statistic4['y_grid'][1:-1, -2:],
+                                         bin_statistic4['cx'][1:-1, -1:],
+                                         bin_statistic4['cy'][1:-1, -1:],
+                                         None)._asdict()
 
         stats = [result1, result2, result3, result4, result5]
 
