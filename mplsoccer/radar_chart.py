@@ -74,7 +74,7 @@ class Radar:
         if self.params.size != self.max_range.size:
             msg = 'The size of params and max_range must match'
             raise ValueError(msg)
-        if (max_range < min_range).sum() > 0:
+        if (self.max_range < self.min_range).sum() > 0:
             msg = ('The maximum range should be greater than the minimum range '
                    f'to flip the statistic(s) set the argument greater_is_better={max_range >= min_range}')
             raise TypeError(msg)
