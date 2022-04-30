@@ -1,7 +1,7 @@
 name: mplsoccer-docs
 channels:
-  - anaconda
   - conda-forge
+  - defaults
 dependencies:
   - pandas
   - scipy
