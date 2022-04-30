@@ -470,7 +470,7 @@ class BasePitch(ABC):
         circ_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
                      'color': self.line_color, 'zorder': self.line_zorder}
 
-        # draw center cicrle and penalty area arcs
+        # draw center circle and penalty area arcs
         self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
                            self.diameter1, self.diameter2, **circ_prop)
         self._draw_arc(ax, self.dim.penalty_left, self.dim.center_width,
