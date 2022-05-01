@@ -8,7 +8,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import rcParams
 from matplotlib.collections import PatchCollection
-from scipy.spatial import Voronoi, ConvexHull
+from scipy.spatial import Voronoi, ConvexHull, Delaunay
 from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
@@ -771,6 +771,58 @@ class BasePitchPlot(BasePitch):
             flow = self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)
 
         return flow
+
+    def delaunay(self, x, y):
+        """ Get Delaunay tessellation for a set of coordinates
+
+        Parameters
+        ----------
+        x, y: array-like or scalar
+            Commonly, these parameters are 1D arrays. These should be the coordinates on the pitch.
+
+        Returns
+        -------
+        simplices: a 1d numpy array of 2d arrays
+            Where the individual 2d arrays contain the indexes of the points to connect.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> x = np.random.uniform(low=0, high=120, size=22)
+        >>> y = np.random.uniform(low=0, high=80, size=22)
+        >>> teams = np.array([0] * 11 + [1] * 11)
+        >>> pitch.scatter(x[teams == 0], y[teams == 0], color='red', ax=ax, zorder=2)
+        >>> pitch.scatter(x[teams == 1], y[teams == 1], color='blue', ax=ax, zorder=2)
+        >>> triangles = pitch.delaunay(x[teams == 0], y[teams == 0])
+        >>> team1_plot = pitch.triplot(x[teams == 0], y[teams == 0], triangles, ax)
+        """
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+
+        coordinates = np.vstack([x, y]).T
+        delaunay = Delaunay(coordinates)
+        return delaunay.simplices
+
+    def triplot(self, x, y, triangles=None, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.triplot
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        triangles: array-like of int, default None
+            For each triangle, the indices of the three points that make up the triangle, ordered
+            in an an anticlockwise manner. If not specified, the Delaunay triangulation is calculated
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.triplot.
+        """
+        validate_ax(ax)
+        x, y = self._reverse_if_vertical(x, y)
+        return ax.triplot(x, y, triangles=triangles, **kwargs)
 
     # The methods below for drawing/ setting attributes for some of the pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)

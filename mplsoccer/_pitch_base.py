@@ -1046,3 +1046,11 @@ class BasePitch(ABC):
              color=None, ax=None, **kwargs):
         """ Implement a flow diagram with arrows showing the average direction and
         a heatmap showing the counts in each bin."""
+
+    @abstractmethod
+    def delaunay(self, x, y):
+        """ Calculate the Delauney Tesselation from a set of coordinates."""
+
+    @abstractmethod
+    def triplot(self, x, y, triangles=None, ax=None, **kwargs):
+        """ Implement a wrapper for matplotlib.axes.Axes.triplot."""
