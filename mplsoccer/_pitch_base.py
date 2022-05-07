@@ -482,9 +482,9 @@ class BasePitch(ABC):
 
         if self.corner_arcs:
             if self.dim.invert_y:
-                thetas = [(x, x+90) for x in np.arange(0, 360, 90)]
+                thetas = [(0, 90), (90, 180), (180, 270), (270, 360)]
             else:
-                thetas = [(270, 0), (180, 270), (90, 180), (0, 90)]
+                thetas = [(270, 360), (180, 270), (90, 180), (0, 90)]
             if self.vertical:
                 thetas = np.flip(thetas, axis=0)
             corner_points = [(self.dim.left, self.dim.top),

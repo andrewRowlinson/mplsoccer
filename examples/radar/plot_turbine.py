@@ -14,7 +14,7 @@ If you like this idea give `Soumyajit Bose <https://twitter.com/Soumyaj15209314>
 on Twitter, as I borrowed some of his ideas for this chart.
 """
 import pandas as pd
-from mplsoccer import Radar, FontManager
+from mplsoccer import Radar, FontManager, grid
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 # Creating some random data
 # -------------------------
 # Here we create some random data from a truncated normal distribution
+# In real life the values would be an array or dataframe of shape number of players * number of skills
 lower, upper, mu, sigma = 0, 1, 0.35, 0.25
 X = stats.truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
 # for 1000 people and 11 skills
@@ -81,53 +82,14 @@ range_labels = radar.draw_range_labels(ax=ax, fontsize=15, fontproperties=fm.pro
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15, fontproperties=fm.prop, zorder=2)
 
 ##############################################################################
-# Sub Plot Mosaic
-# ---------------
-# Here we create a function to plot a radar flanked with a title and an endnote axes.
-
-
-def radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14):
-    """ Create a Radar chart flanked by a title and endnote axes.
-
-    Parameters
-    ----------
-    radar_height: float, default 0.915
-        The height of the radar axes in fractions of the figure height (default 91.5%).
-    title_height: float, default 0.06
-        The height of the title axes in fractions of the figure height (default 6%).
-    figheight: float, default 14
-        The figure height in inches.
-
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-    axs : dict[label, Axes]
-    """
-    if title_height + radar_height > 1:
-        error_msg = 'Reduce one of the radar_height or title_height so the total is ≤ 1.'
-        raise ValueError(error_msg)
-    endnote_height = 1 - title_height - radar_height
-    figwidth = figheight * radar_height
-    figure, axes = plt.subplot_mosaic([['title'], ['radar'], ['endnote']],
-                                      gridspec_kw={'height_ratios': [title_height, radar_height,
-                                                                     endnote_height],
-                                                   # the grid takes up the whole of the figure 0-1
-                                                   'bottom': 0, 'left': 0, 'top': 1,
-                                                   'right': 1, 'hspace': 0},
-                                      figsize=(figwidth, figheight))
-    axes['title'].axis('off')
-    axes['endnote'].axis('off')
-    return figure, axes
-
-
-##############################################################################
 # Adding a title and endnote
 # --------------------------
-# Here we will add an endnote and title to the Radar. We will use a subplot_mosaic to create
+# Here we will add an endnote and title to the Radar. We will use the grid function to create
 # the figure and pass the axs['radar'] axes to the Radar's methods.
 
-# creating the figure using the function defined above:
-fig, axs = radar_mosaic(radar_height=0.915, title_height=0.06, figheight=14)
+# creating the figure using the grid function from mplsoccer:
+fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                title_space=0, endnote_space=0, ax_key='radar', axis=False)
 
 # plot the turbine plot
 radar.setup_axis(ax=axs['radar'])

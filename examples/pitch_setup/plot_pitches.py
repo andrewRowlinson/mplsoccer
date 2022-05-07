@@ -132,6 +132,14 @@ pitch = Pitch(pitch_color='#aabb97', line_color='white',
 fig, ax = pitch.draw()
 
 ##############################################################################
+# Corner arcs
+# -----------
+# You can add corner arcs to the pitch by setting ``corner_arcs`` = True
+
+pitch = VerticalPitch(corner_arcs=True, half=True)
+fig, ax = pitch.draw(figsize=(10, 7.727))
+
+##############################################################################
 # Juego de Posición
 # -----------------
 # You can add the Juego de Posición pitch lines and shade the middle third
