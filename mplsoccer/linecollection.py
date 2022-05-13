@@ -151,10 +151,9 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
     else:
         handler_first_lw = True
 
-    if (transparent is False) and (comet is False) and (cmap is None):
-        multi_segment = False
-    else:
-        multi_segment = True
+    multi_segment = (
+        transparent is not False or comet is not False or cmap is not None
+    )
 
     if transparent:
         cmap = create_transparent_cmap(color, cmap, n_segments, alpha_start, alpha_end)

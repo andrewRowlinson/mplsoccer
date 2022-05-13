@@ -86,11 +86,7 @@ class Bumpy:
         self.label_color = label_color
         self.plot_labels = plot_labels
 
-        if line_color is None:
-            self.line_color = scatter_color
-        else:
-            self.line_color = line_color
-
+        self.line_color = scatter_color if line_color is None else line_color
         if scatter_primary is None:
             self.scatter_primary = self.scatter_points
         else:
@@ -182,11 +178,7 @@ class Bumpy:
 
             # to plot upside down bumpy chart
             if upside_down:
-                if len_y % 2 == 0:
-                    add_value = 0
-                else:
-                    add_value = 1
-
+                add_value = 0 if len_y % 2 == 0 else 1
                 # y-coordinate to plot scatter points
                 y = np.array(value) + add_value
 
@@ -195,11 +187,7 @@ class Bumpy:
                          for d in (-self.curviness, 0, self.curviness)][1: -1]
 
             else:
-                if len_y % 2 == 0:
-                    add_value = 1
-                else:
-                    add_value = 0
-
+                add_value = 1 if len_y % 2 == 0 else 0
                 # y-coordinate to plot scatter points
                 y = len_y - np.array(value) + add_value
 

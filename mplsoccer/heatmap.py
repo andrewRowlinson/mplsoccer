@@ -76,7 +76,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), n
         x = x[~mask]
         y = y[~mask]
         values = values[~mask]
-        
+
     if (values is None) & (statistic == 'count'):
         values = x
     if (values is None) & (statistic != 'count'):
@@ -86,12 +86,11 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), n
 
     if standardized:
         pitch_range = [[0, 105], [0, 68]]
+    elif dim.invert_y:
+        pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom]]
+        y = dim.bottom - y  # for inverted axis flip the coordinates
     else:
-        if dim.invert_y:
-            pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom]]
-            y = dim.bottom - y  # for inverted axis flip the coordinates
-        else:
-            pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top]]
+        pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top]]
 
     statistic, x_edge, y_edge, _ = binned_statistic_2d(x, y, values, statistic=statistic,
                                                        bins=bins, range=pitch_range)
@@ -103,7 +102,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), n
     # then the statistic is flipped back here
     if dim.invert_y and standardized is False:
         statistic = np.flip(statistic, axis=0)
-        
+
     if normalize:
         statistic = statistic / statistic.sum()
 
@@ -112,9 +111,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4), n
     cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
                          y_edge[:-1] + 0.5 * np.diff(y_edge))
 
-    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)._asdict()
-
-    return stats
+    return _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy)._asdict()
 
 
 def heatmap(stats, ax=None, vertical=False, **kwargs):
@@ -151,12 +148,15 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     validate_ax(ax)
-    if vertical:
-        mesh = ax.pcolormesh(stats['y_grid'], stats['x_grid'], stats['statistic'], **kwargs)
-    else:
-        mesh = ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
-
-    return mesh
+    return (
+        ax.pcolormesh(
+            stats['y_grid'], stats['x_grid'], stats['statistic'], **kwargs
+        )
+        if vertical
+        else ax.pcolormesh(
+            stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs
+        )
+    )
 
 
 def bin_statistic_positional(x, y, values=None, dim=None, positional='full', statistic='count', normalize=False):

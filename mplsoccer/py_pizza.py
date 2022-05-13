@@ -168,15 +168,15 @@ class PyPizza:
 
         # set empty dict if None
         if kwargs_slices is None:
-            kwargs_slices = dict()
+            kwargs_slices = {}
         if kwargs_compare is None:
-            kwargs_compare = dict()
+            kwargs_compare = {}
         if kwargs_params is None:
-            kwargs_params = dict()
+            kwargs_params = {}
         if kwargs_values is None:
-            kwargs_values = dict()
+            kwargs_values = {}
         if kwargs_compare_values is None:
-            kwargs_compare_values = dict()
+            kwargs_compare_values = {}
 
         if ax is None:
             fig, ax = plt.subplots(
@@ -225,7 +225,7 @@ class PyPizza:
             )
 
             if color_blank_space == "same":
-                for index, (blank, slice_) in enumerate(zip(blank_space, main_slice)):
+                for blank, slice_ in zip(blank_space, main_slice):
                     blank.set_facecolor(slice_.get_facecolor())
                     blank.set_alpha(blank_alpha)
             else:
@@ -375,11 +375,11 @@ class PyPizza:
         """
         # set to empty dict if None
         if kwargs_params is None:
-            kwargs_params = dict()
+            kwargs_params = {}
         if kwargs_values is None:
-            kwargs_values = dict()
+            kwargs_values = {}
         if kwargs_compare_values is None:
-            kwargs_compare_values = dict()
+            kwargs_compare_values = {}
 
         # total length of parameters
         total_params = len(self.params)
@@ -443,9 +443,7 @@ class PyPizza:
         range_max = np.maximum(self.min_range, self.max_range)
         values_clipped = np.minimum(np.maximum(values, range_min), range_max)
         proportion = np.abs(values_clipped - self.min_range) / label_range
-        vertices = (proportion * 100)
-
-        return vertices
+        return (proportion * 100)
 
     def adjust_texts(self, params_offset, offset=0.0, adj_comp_values=False):
         """ To adjust the value-texts. (if they are overlapping)

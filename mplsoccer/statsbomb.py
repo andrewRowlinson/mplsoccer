@@ -445,8 +445,7 @@ def _get_links(url):
     response = urllib.request.urlopen(url)
     soup = BeautifulSoup(response, 'html.parser',
                          from_encoding=response.info().get_param('charset'))
-    links = soup.find_all('a', href=True)
-    return links
+    return soup.find_all('a', href=True)
 
 
 def get_match_links():
@@ -477,6 +476,8 @@ def get_lineup_links():
     """ Returns a list of links to the StatsBomb open-data lineup jsons."""
     url = 'https://github.com/statsbomb/open-data/tree/master/data/lineups'
     links = _get_links(url)
-    event_files = [f'{LINEUP_SLUG}/{link["title"]}' for link in links
-                   if link['href'][-4:] == 'json']
-    return event_files
+    return [
+        f'{LINEUP_SLUG}/{link["title"]}'
+        for link in links
+        if link['href'][-4:] == 'json'
+    ]

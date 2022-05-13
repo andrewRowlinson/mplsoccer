@@ -19,6 +19,7 @@ the `highlight_text package <https://github.com/znstrider/highlight_text>`_
 by `@danzn1 <https://twitter.com/danzn1>`_.
 """
 
+
 from urllib.request import urlopen
 import warnings
 
@@ -154,8 +155,11 @@ lineup['position_abbreviation'] = lineup.position_id.map(formation_dict)
 # add on a short name
 mask_name = lineup.player_nickname.isnull()
 lineup.loc[mask_name, 'player_nickname'] = lineup.loc[mask_name, 'player_name']
-lineup['short_name'] = (lineup.player_nickname.str[0] + '. ' +
-                        lineup.player_nickname.str.split(' ').str[-1])
+lineup['short_name'] = (
+    f'{lineup.player_nickname.str[0]}. '
+    + lineup.player_nickname.str.split(' ').str[-1]
+)
+
 
 # sort the dataframe so the players are
 # in the order of their position (if started), otherwise in the order they came on

@@ -299,9 +299,12 @@ class BasePitch(ABC):
             raise ValueError("pad_left/pad_right too negative for pitch length")
         if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.dim.width:
             raise ValueError("pad_top/pad_bottom too negative for pitch width")
-        if self.half:
-            if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length / 2:
-                raise ValueError("pad_left/pad_right too negative for pitch length")
+        if (
+            self.half
+            and abs(min(self.pad_left, 0) + min(self.pad_right, 0))
+            >= self.dim.length / 2
+        ):
+            raise ValueError("pad_left/pad_right too negative for pitch length")
 
     def _init_circles_and_arcs(self):
         self.diameter1 = self.dim.circle_diameter
@@ -639,9 +642,6 @@ class BasePitch(ABC):
         error_msg_height = ('The axes extends past the figure height. '
                             'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
                             'title_space or title_height so the total is ≤ 1.')
-        error_msg_width = ('The grid axes extends past the figure width. '
-                           'Reduce one of the grid_width or left so the total is ≤ 1.')
-
         axes_height = endnote_height + endnote_space + grid_height + title_space + title_height
         if axes_height > 1:
             raise ValueError(error_msg_height)
@@ -653,6 +653,9 @@ class BasePitch(ABC):
             raise ValueError(error_msg_height)
 
         if grid_width + left > 1:
+            error_msg_width = ('The grid axes extends past the figure width. '
+                               'Reduce one of the grid_width or left so the total is ≤ 1.')
+
             raise ValueError(error_msg_width)
 
         # calculate the figure width
@@ -872,9 +875,6 @@ class BasePitch(ABC):
         error_msg_height = ('The axes extends past the figure height. '
                             'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
                             'title_space or title_height so the total is ≤ 1.')
-        error_msg_width = ('The grid axes extends past the figure width. '
-                           'Reduce one of the grid_width or left so the total is ≤ 1.')
-
         axes_height = endnote_height + endnote_space + grid_height + title_space + title_height
         if axes_height > 1:
             raise ValueError(error_msg_height)
@@ -886,6 +886,9 @@ class BasePitch(ABC):
             raise ValueError(error_msg_height)
 
         if grid_width + left > 1:
+            error_msg_width = ('The grid axes extends past the figure width. '
+                               'Reduce one of the grid_width or left so the total is ≤ 1.')
+
             raise ValueError(error_msg_width)
 
         # calculate the marginal and space heights for the bottom/ top of the grid

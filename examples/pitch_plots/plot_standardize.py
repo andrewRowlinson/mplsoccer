@@ -12,6 +12,7 @@ it stays that way after conversion. During conversion, coordinates outside the p
 side-lines are clipped to the pitch shape, while missing values are maintained.
 """
 
+
 import os
 import json
 
@@ -128,8 +129,8 @@ df_statsbomb = read_event(f'{EVENT_SLUG}/7579.json',
 
 # saving the file locally as readthedocs won't allow me to load it directly with kloppy
 # normally can skip this and do: dataset = wyscout.load_open_data(match_id=2058002, coordinates='wyscout')
-WYSCOUT_URL = (f'https://raw.githubusercontent.com/koenvo/wyscout-soccer-match-event-dataset/'
-               f'main/processed/files/2058002.json')
+WYSCOUT_URL = 'https://raw.githubusercontent.com/koenvo/wyscout-soccer-match-event-dataset/'
+
 response = requests.get(url=WYSCOUT_URL)
 response.encoding = 'unicode-escape'  # to make sure the encoding for é etc. is correct
 data = response.json()

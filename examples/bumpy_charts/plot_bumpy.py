@@ -13,6 +13,7 @@ vizhome/PremierLeagueStandings201920/PREMIERLEAGUE201920>`_
 * Here we will show some examples of how to use ``mplsoccer`` to plot bumpy charts.
 """
 
+
 import json
 from urllib.request import urlopen
 
@@ -65,7 +66,7 @@ player_dict = json.load(
 # We are going to make use of the weekwise standing data for Premier League 2019/20.
 
 # match-week
-match_day = ["Week " + str(num) for num in range(1, 39)]
+match_day = [f"Week {str(num)}" for num in range(1, 39)]
 
 # highlight dict --> team to highlight and their corresponding colors
 highlight_dict = {
