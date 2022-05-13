@@ -168,7 +168,7 @@ max_range=[10, 10, 10])
         radius = np.insert(radius, 0, self.center_circle_radius)
         radius = radius.cumsum()
         if (inner and self.even_num_rings) or (inner is False and self.even_num_rings is False):
-            ax_circles = radius[0::2]
+            ax_circles = radius[::2]
             first_center = True
         else:
             ax_circles = radius[1::2]

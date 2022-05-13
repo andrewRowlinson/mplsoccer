@@ -135,11 +135,7 @@ def set_labels(ax, label_value, label_axis):
     labels = [items.get_text() for items in axis]
 
     # init a count variable
-    if label_axis == 'x':
-        count = 0
-    else:
-        count = len(label_value) - 1
-
+    count = 0 if label_axis == 'x' else len(label_value) - 1
     # iterate through all the labels and change the label name
     for i in range(len(labels)):
         labels[i] = label_value[count]

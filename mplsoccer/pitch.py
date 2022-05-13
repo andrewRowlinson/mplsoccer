@@ -91,15 +91,26 @@ class Pitch(BasePitchPlot):
     def _draw_stripe_grass(self, pitch_color):
         total_width = self.extent[1] - self.extent[0]
         for i in range(len(self.dim.stripe_locations) - 1):
-            if i % 2 == 0:
-                if ((self.extent[0] <= self.dim.stripe_locations[i] <= self.extent[1]) or
-                        (self.extent[0] <= self.dim.stripe_locations[i + 1] <= self.extent[1])):
-                    start = (int((max(self.dim.stripe_locations[i], self.extent[0]) -
-                                  self.extent[0]) / total_width * 1000))
-                    end = (int((min(self.dim.stripe_locations[i+1], self.extent[1]) -
-                                self.extent[0]) / total_width * 1000))
-                    pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] = \
-                        pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
+            if i % 2 == 0 and (
+                (
+                    (
+                        self.extent[0]
+                        <= self.dim.stripe_locations[i]
+                        <= self.extent[1]
+                    )
+                    or (
+                        self.extent[0]
+                        <= self.dim.stripe_locations[i + 1]
+                        <= self.extent[1]
+                    )
+                )
+            ):
+                start = (int((max(self.dim.stripe_locations[i], self.extent[0]) -
+                              self.extent[0]) / total_width * 1000))
+                end = (int((min(self.dim.stripe_locations[i+1], self.extent[1]) -
+                            self.extent[0]) / total_width * 1000))
+                pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] = \
+                    pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
         return pitch_color
 
     @staticmethod
@@ -134,8 +145,8 @@ class VerticalPitch(BasePitchPlot):
             extent[2] = self.dim.center_length  # pitch starts at center line
             visible_pad[2] = - self.pad_bottom  # do not want clipped values if half
         if self.dim.invert_y:  # when inverted the padding is negative
-            pad[0:2] = -pad[0:2]
-            visible_pad[0:2] = - visible_pad[0:2]
+            pad[0:2] = -pad[:2]
+            visible_pad[0:2] = -visible_pad[:2]
         self.extent = extent + pad
         self.dim.aspect = 1 / self.dim.aspect
         self.ax_aspect = (abs(self.extent[1] - self.extent[0]) /
@@ -198,17 +209,28 @@ class VerticalPitch(BasePitchPlot):
     def _draw_stripe_grass(self, pitch_color):
         total_width = self.extent[3] - self.extent[2]
         for i in range(len(self.dim.stripe_locations) - 1):
-            if i % 2 == 0:
-                if ((self.extent[2] <= self.dim.stripe_locations[i] <= self.extent[3]) or
-                        (self.extent[2] <= self.dim.stripe_locations[i + 1] <= self.extent[3])):
-                    start = (1000 - int((min(self.dim.stripe_locations[i+1],
-                                             self.extent[3]) - self.extent[2])
-                                        / total_width * 1000))
-                    end = (1000 - int((max(self.dim.stripe_locations[i],
-                                           self.extent[2]) - self.extent[2])
-                                      / total_width * 1000))
-                    pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
-                        pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2
+            if i % 2 == 0 and (
+                (
+                    (
+                        self.extent[2]
+                        <= self.dim.stripe_locations[i]
+                        <= self.extent[3]
+                    )
+                    or (
+                        self.extent[2]
+                        <= self.dim.stripe_locations[i + 1]
+                        <= self.extent[3]
+                    )
+                )
+            ):
+                start = (1000 - int((min(self.dim.stripe_locations[i+1],
+                                         self.extent[3]) - self.extent[2])
+                                    / total_width * 1000))
+                end = (1000 - int((max(self.dim.stripe_locations[i],
+                                       self.extent[2]) - self.extent[2])
+                                  / total_width * 1000))
+                pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
+                    pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2
         return pitch_color
 
     @staticmethod

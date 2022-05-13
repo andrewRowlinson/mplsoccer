@@ -3,6 +3,7 @@
 Pitch comparison
 ================
 """
+
 from mplsoccer import Pitch
 import matplotlib.pyplot as plt
 plt.style.use('dark_background')
@@ -49,10 +50,10 @@ for idx, pt in enumerate(pitch_types):
                 '\n ends at len/2 and width/2.')
         if pt == 'tracab':
             xytext = (0, -1000)
-            TEXT = TEXT + '\n dimensions in centimeters'
+            TEXT += '\n dimensions in centimeters'
         else:
             xytext = (0, -10)
-            TEXT = TEXT + '\n dimensions in meters'
+            TEXT += '\n dimensions in meters'
         axes[idx].annotate(TEXT, xy=(xmin, ymin), xytext=xytext,
                            arrowprops=arrowprops, **font_kwargs)
         axes[idx].annotate(TEXT, xy=(xmax, ymin), xytext=xytext,

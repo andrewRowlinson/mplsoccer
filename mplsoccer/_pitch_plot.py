@@ -116,13 +116,20 @@ class BasePitchPlot(BasePitch):
             raise NotImplementedError("rotated football markers are not implemented.")
 
         if marker == 'football':
-            scatter_plot = scatter_football(x, y, ax=ax, **kwargs)
+            return scatter_football(x, y, ax=ax, **kwargs)
         elif rotation_degrees is not None:
-            scatter_plot = scatter_rotation(x, y, rotation_degrees, marker=marker,
-                                            vertical=self.vertical, ax=ax, **kwargs)
+            return scatter_rotation(
+                x,
+                y,
+                rotation_degrees,
+                marker=marker,
+                vertical=self.vertical,
+                ax=ax,
+                **kwargs
+            )
+
         else:
-            scatter_plot = ax.scatter(x, y, marker=marker, **kwargs)
-        return scatter_plot
+            return ax.scatter(x, y, marker=marker, **kwargs)
 
     def _reflect_2d(self, x, y, standardized=False):
         """ Reflect data in the pitch lines."""
@@ -172,8 +179,7 @@ class BasePitchPlot(BasePitch):
 
         x, y = self._reverse_if_vertical(x, y)
 
-        contour_plot = sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
-        return contour_plot
+        return sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
 
     def hexbin(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.hexbin,
@@ -314,16 +320,12 @@ class BasePitchPlot(BasePitch):
         y = np.ravel(y)
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
-        if goal == 'right':
-            goal_coordinates = self.goal_right
-        else:
-            goal_coordinates = self.goal_left
+        goal_coordinates = self.goal_right if goal == 'right' else self.goal_left
         verts = np.zeros((x.size, 3, 2))
         verts[:, 0, 0] = x
         verts[:, 0, 1] = y
         verts[:, 1:, :] = np.expand_dims(goal_coordinates, 0)
-        patch_collection = self.polygon(verts, ax=ax, **kwargs)
-        return patch_collection
+        return self.polygon(verts, ax=ax, **kwargs)
 
     def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
         """ Utility wrapper around ax.annotate
@@ -365,27 +367,37 @@ class BasePitchPlot(BasePitch):
     @docstring.copy(bin_statistic)
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
                       normalize=False, standardized=False):
-        stats = bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
-                              bins=bins, normalize=normalize, standardized=standardized)
-        return stats
+        return bin_statistic(
+            x,
+            y,
+            values=values,
+            dim=self.dim,
+            statistic=statistic,
+            bins=bins,
+            normalize=normalize,
+            standardized=standardized,
+        )
 
     @docstring.copy(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
-        mesh = heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
-        return mesh
+        return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
     @docstring.copy(bin_statistic_positional)
     def bin_statistic_positional(self, x, y, values=None, positional='full',
                                  statistic='count', normalize=False):
-        stats = bin_statistic_positional(x, y, values=values,
-                                         dim=self.dim, positional=positional,
-                                         statistic=statistic, normalize=normalize)
-        return stats
+        return bin_statistic_positional(
+            x,
+            y,
+            values=values,
+            dim=self.dim,
+            positional=positional,
+            statistic=statistic,
+            normalize=normalize,
+        )
 
     @docstring.copy(heatmap_positional)
     def heatmap_positional(self, stats, ax=None, **kwargs):
-        mesh = heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
-        return mesh
+        return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
 
     def label_heatmap(self, stats, str_format=None, exclude_zeros=False, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
@@ -454,19 +466,39 @@ class BasePitchPlot(BasePitch):
     @docstring.copy(arrows)
     def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
         validate_ax(ax)
-        quiver = arrows(xstart, ystart, xend, yend, *args, ax=ax, vertical=self.vertical, **kwargs)
-        return quiver
+        return arrows(
+            xstart,
+            ystart,
+            xend,
+            yend,
+            *args,
+            ax=ax,
+            vertical=self.vertical,
+            **kwargs
+        )
 
     @docstring.copy(lines)
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
               comet=False, transparent=False, alpha_start=0.01,
               alpha_end=1, cmap=None, ax=None, **kwargs):
         validate_ax(ax)
-        linecollection = lines(xstart, ystart, xend, yend, color=color, n_segments=n_segments,
-                               comet=comet, transparent=transparent, alpha_start=alpha_start,
-                               alpha_end=alpha_end, cmap=cmap, ax=ax, vertical=self.vertical,
-                               reverse_cmap=self.reverse_cmap, **kwargs)
-        return linecollection
+        return lines(
+            xstart,
+            ystart,
+            xend,
+            yend,
+            color=color,
+            n_segments=n_segments,
+            comet=comet,
+            transparent=transparent,
+            alpha_start=alpha_start,
+            alpha_end=alpha_end,
+            cmap=cmap,
+            ax=ax,
+            vertical=self.vertical,
+            reverse_cmap=self.reverse_cmap,
+            **kwargs
+        )
 
     def convexhull(self, x, y):
         """ Get lines of Convex Hull for a set of coordinates
@@ -493,8 +525,7 @@ class BasePitchPlot(BasePitch):
         """
         points = np.vstack([x, y]).T
         hull = ConvexHull(points)
-        hull_vertices = points[hull.vertices].reshape(1, -1, 2)
-        return hull_vertices
+        return points[hull.vertices].reshape(1, -1, 2)
 
     def voronoi(self, x, y, teams):
         """ Get Voronoi vertices for a set of coordinates.
@@ -751,7 +782,7 @@ class BasePitchPlot(BasePitch):
 
         # calculate the end positions of the arrows
         endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d)
-        if self.dim.invert_y and standardized is False:
+        if self.dim.invert_y and not standardized:
             endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d)  # invert_y
         else:
             endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
@@ -762,15 +793,12 @@ class BasePitchPlot(BasePitch):
             cx, cy = self.standardizer.transform(cx, cy, reverse=True)
             endx, endy = self.standardizer.transform(endx, endy, reverse=True)
 
-        # plot arrows
-        if color is None:
-            bs_count = self.bin_statistic(xstart, ystart, statistic='count',
-                                          bins=bins, standardized=standardized)
-            flow = self.arrows(cx, cy, endx, endy, bs_count['statistic'], ax=ax, **kwargs)
-        else:
-            flow = self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)
+        if color is not None:
+            return self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)
 
-        return flow
+        bs_count = self.bin_statistic(xstart, ystart, statistic='count',
+                                      bins=bins, standardized=standardized)
+        return self.arrows(cx, cy, endx, endy, bs_count['statistic'], ax=ax, **kwargs)
 
     # The methods below for drawing/ setting attributes for some of the pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
