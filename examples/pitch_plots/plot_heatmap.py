@@ -21,9 +21,11 @@ match_files = ['19789.json', '19794.json', '19805.json']
 kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
           'tactics_lineup_df': False, 'warn': False}
 df = pd.concat([read_event(f'{EVENT_SLUG}/{file}', **kwargs)['event'] for file in match_files])
-# filter chelsea pressure events
+# filter chelsea pressure and pass events
 mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pressure')
-df = df.loc[mask_chelsea_pressure, ['x', 'y']]
+df_pressure = df.loc[mask_chelsea_pressure, ['x', 'y']]
+mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pass')
+df_pass = df.loc[mask_chelsea_pressure, ['x', 'y', 'end_x', 'end_y']]
 
 ##############################################################################
 # Plot a gaussian smoothed heatmap
@@ -39,7 +41,7 @@ pitch = Pitch(pitch_type='statsbomb', line_zorder=2,
 # draw
 fig, ax = pitch.draw(figsize=(6.6, 4.125))
 fig.set_facecolor('#22312b')
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(25, 25))
+bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count', bins=(25, 25))
 bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], 1)
 pcm = pitch.heatmap(bin_statistic, ax=ax, cmap='hot', edgecolors='#22312b')
 # Add the colorbar and format off-white
@@ -77,7 +79,7 @@ fig, axs = pitch.grid(endnote_height=0.03, endnote_space=0,
 fig.set_facecolor('#22312b')
 
 # plot heatmap
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(25, 25))
+bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count', bins=(25, 25))
 bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], 1)
 pcm = pitch.heatmap(bin_statistic, ax=axs['pitch'], cmap='hot', edgecolors='#22312b')
 
@@ -106,7 +108,7 @@ axs['title'].text(0.5, 0.5, "Pressure applied by Chelsea FC Women", color='white
 pitch = VerticalPitch(pitch_type='statsbomb', line_zorder=2, pitch_color='#f4edf0')
 fig, ax = pitch.draw(figsize=(4.125, 6))
 fig.set_facecolor('#f4edf0')
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 5), normalize=True)
+bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count', bins=(6, 5), normalize=True)
 pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9')
 labels = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
                              ax=ax, ha='center', va='center',
@@ -124,7 +126,7 @@ fig.set_facecolor('#f4edf0')
 bin_x = np.linspace(pitch.dim.left, pitch.dim.right, num=7)
 bin_y = np.sort(np.array([pitch.dim.bottom, pitch.dim.six_yard_bottom,
                           pitch.dim.six_yard_top, pitch.dim.top]))
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count',
+bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count',
                                     bins=(bin_x, bin_y), normalize=True)
 pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9')
 labels2 = pitch.label_heatmap(bin_statistic, color='#f4edf0', fontsize=18,
@@ -147,7 +149,7 @@ fig.set_facecolor('#1e4259')
 bin_x = np.linspace(pitch.dim.left, pitch.dim.right, num=7)
 bin_y = np.sort(np.array([pitch.dim.bottom, pitch.dim.six_yard_bottom,
                           pitch.dim.six_yard_top, pitch.dim.top]))
-bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count',
+bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count',
                                     bins=(bin_x, bin_y), normalize=True)
 pitch.heatmap(bin_statistic, ax=axs['pitch'], cmap=pearl_earring_cmap, edgecolor='#f9f9f9')
 labels3 = pitch.label_heatmap(bin_statistic, color='#dee6ea', fontsize=18,
