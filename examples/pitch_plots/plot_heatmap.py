@@ -161,4 +161,37 @@ axs['title'].text(0.5, 0.5, "Pressure applied by\n Chelsea FC Women", color='#de
                   va='center', ha='center', path_effects=path_eff,
                   fontproperties=robotto_regular.prop, fontsize=25)
 
+
+##############################################################################
+# Get bin numbers
+# ---------------
+# We can also use the bin_statistic method to get the binnumbers. For example,
+# to identify which cell each pass or pressure event was located in. In this example,
+# we use bin_statistic to get both the start and end location cells for the passes.
+# We then identify passes that began in one cell and ended in another cell close to
+# the goal. Note that the bin numbers are zero indexed so the first cell on the left
+# is zero and the first cell at the bottom is zero. Any event that happened outside
+# the pitch for a dimension is given the value -1.
+
+pitch = Pitch(line_zorder=2)
+fig, ax = pitch.draw()
+bin_statistic = pitch.bin_statistic(df_pass.x, df_pass.y, bins=(6, 5))
+bin_statistic_end = pitch.bin_statistic(df_pass.end_x, df_pass.end_y, bins=(6, 5))
+
+# let's get a mask for all passes that started in one grid cell and ended in another
+mask_start = np.logical_and(bin_statistic['binnumber'][0] == 4,  # xs 5th box from left (zero indexed)
+                            bin_statistic['binnumber'][1] == 1)  # ys 2nd from bottom (zero indexed)
+mask_end = np.logical_and(bin_statistic_end['binnumber'][0] == 5,  # xs 6th box from left (zero indexed)
+                          bin_statistic_end['binnumber'][1] == 2)  # ys 3rd box from bottom (zero indexed)
+mask = np.logical_and(mask_start, mask_end)
+
+# plot the passes that started in one grid cell and ended in another
+pitch.scatter(df_pass.x[mask], df_pass.y[mask], ax=ax, fc='hotpink',
+              marker='o', s=100, ec='darkslategrey', lw=3, alpha=0.6, zorder=4)
+pitch.arrows(df_pass.x[mask], df_pass.y[mask], df_pass.end_x[mask], df_pass.end_y[mask],
+             ax=ax, zorder=10, color='midnightblue')
+
+# plot all of the starting locations as a heatmap
+pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9', alpha=0.5)
+
 plt.show()  # If you are using a Jupyter notebook you do not need this line

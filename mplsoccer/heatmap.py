@@ -56,7 +56,8 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
         'x_grid' and 'y_grid (the bin's edges), cx and cy (the bin centers)
         and 'binnumber' (the bin indices each point belongs to).
         'binnumber' is a (2, N) array that represents the bin in which the observation falls
-        if the observations falls outside the pitch the value is -1 for the dimension.
+        if the observations falls outside the pitch the value is -1 for the dimension. The
+        binnumber are zero indexed and start from the bottom and left handside of the pitch.
 
     Examples
     --------
