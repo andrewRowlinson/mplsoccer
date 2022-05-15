@@ -49,11 +49,8 @@ fig, ax = pitch.draw(figsize=(8, 6.2))
 team_b_x = x[~teams]
 team_b_y = y[~teams]
 
-# Get triangles
-simplices = pitch.delaunay(team_b_x, team_b_y)
-
 # Plot triangles
-t1 = pitch.triplot(team_b_x, team_b_y, simplices, ax=ax, color='dimgrey', linewidth=2)
+t1 = pitch.triplot(team_b_x, team_b_y, ax=ax, color='dimgrey', linewidth=2)
 
 # Plot players
 sc1 = pitch.scatter(x[teams], y[teams], ax=ax, c='#c34c45', s=150, zorder=10)
