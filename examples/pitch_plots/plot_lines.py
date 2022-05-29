@@ -9,16 +9,13 @@ This example shows how to plot all passes from a team in a match as lines.
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
-from mplsoccer import Pitch, VerticalPitch, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import Pitch, VerticalPitch, FontManager, Sbopen
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
-# get event dataframe for game 7478, create a dataframe of the passes,
-# and a boolean mask for the outcome
-df = read_event(f'{EVENT_SLUG}/7478.json',
-                related_event_df=False, shot_freeze_frame_df=False,
-                tactics_lineup_df=False)['event']
+# get event dataframe for game 7478
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
 
 ##############################################################################
 # Boolean mask for filtering the dataset by team
@@ -105,7 +102,7 @@ axs['title'].text(0.5, 0.5, f'{team1} passes vs {team2}', color='#dee6ea',
 ##############################################################################
 # Filter datasets to only include passes leading to shots, and goals
 
-TEAM1 = 'Seattle Reign'
+TEAM1 = 'OL Reign'
 TEAM2 = 'Houston Dash'
 df_pass = df.loc[(df.pass_assisted_shot_id.notnull()) & (df.team_name == TEAM1),
                  ['x', 'y', 'end_x', 'end_y', 'pass_assisted_shot_id']]
