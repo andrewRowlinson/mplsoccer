@@ -8,14 +8,12 @@ This example shows how to plot a convex hull around a player's events.
 Thanks to `Devin Pleuler <https://twitter.com/devinpleuler>`_ for adding this to mplsoccer.
 """
 
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
-from mplsoccer import Pitch
+from mplsoccer import Pitch, Sbopen
 import matplotlib.pyplot as plt
 
 # read data
-df = read_event(f'{EVENT_SLUG}/7478.json',
-                related_event_df=False, shot_freeze_frame_df=False,
-                tactics_lineup_df=False)['event']
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
 
 ##############################################################################
 # Filter passes by Jodie Taylor

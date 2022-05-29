@@ -13,14 +13,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from mplsoccer import VerticalPitch
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import VerticalPitch, Sbopen
 
-# get event and greeze frame data for game 7478
-dict_event = read_event(f'{EVENT_SLUG}/7478.json', related_event_df=False,
-                        tactics_lineup_df=False, warn=False)
-df_event = dict_event['event']
-df_freeze = dict_event['shot_freeze_frame']
+# get event and freeze frame data for game 7478
+parser = Sbopen()
+df_event, related, df_freeze, tactics = parser.event(7478)
 
 #############################################################################
 # Subset a shot
@@ -36,7 +33,7 @@ df = pd.concat([df_shot_event[['x', 'y']], df_freeze_frame[['x', 'y']]])
 
 x = df.x.values
 y = df.y.values
-teams = np.concatenate([[True], df_freeze_frame.player_teammate.values])
+teams = np.concatenate([[True], df_freeze_frame.teammate.values])
 
 #############################################################################
 # Plotting

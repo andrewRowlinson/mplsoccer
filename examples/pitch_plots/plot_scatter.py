@@ -11,16 +11,12 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-from mplsoccer import VerticalPitch, Pitch
-from mplsoccer.cm import create_transparent_cmap
-from mplsoccer.scatterutils import arrowhead_marker
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
-from mplsoccer.utils import FontManager
+from mplsoccer import (VerticalPitch, Pitch, create_transparent_cmap,
+                       FontManager, arrowhead_marker, Sbopen)
 
 # get data for a Sevilla versus Barcelona match with a high amount of shots
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
-df = read_event(f'{EVENT_SLUG}/9860.json', **kwargs)['event']
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(9860)
 
 # subset the barcelona shots
 df_shots_barca = df[(df.type_name == 'Shot') & (df.team_name == 'Barcelona')].copy()

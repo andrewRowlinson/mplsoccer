@@ -10,15 +10,13 @@ It copies the technique of plotting the line once and adding glow effects.
 The glow effects are a loop of transparent lines increasing in linewidth
 so the center is more opaque than the outside.
 """
-from mplsoccer import Pitch, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import Pitch, FontManager, Sbopen
 import matplotlib.patheffects as path_effects
 
+# read data
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
 
-# get data
-df = read_event(f'{EVENT_SLUG}/7478.json',
-                related_event_df=False, shot_freeze_frame_df=False,
-                tactics_lineup_df=False)['event']
 # get the team names
 team1, team2 = df.team_name.unique()
 # filter the dataset to completed passes for team 1
