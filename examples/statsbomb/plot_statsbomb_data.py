@@ -4,7 +4,7 @@ Statsbomb
 =========
 
 mplsoccer contains functions to return StatsBomb data in a flat, tidy dataframe.
-If you just want to flatten the dictionaries, set Sbopen(dataframe=False) or Sbapi(dataframe=False).
+However, if you want to flatten the json into a dictionary you can also set ``dataframe=False``.
 
 Please be responsible with Statsbomb data.
 `Register your details <https://www.statsbomb.com/resource-centre>`_ and

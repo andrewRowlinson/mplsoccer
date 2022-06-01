@@ -132,6 +132,24 @@ pitch = Pitch(pitch_color='#aabb97', line_color='white',
 fig, ax = pitch.draw()
 
 ##############################################################################
+# Line style
+# ----------
+# The pitch line style is adjustable.
+# Use ``linestyle`` and ``goal_linestyle`` to adjust the colors.
+
+pitch = Pitch(linestyle='--', linewidth=1, goal_linestyle='-')
+fig, ax = pitch.draw()
+
+##############################################################################
+# Line alpha
+# ----------
+# The pitch transparency is adjustable.
+# Use ``pitch_alpha`` and ``goal_alpha`` to adjust the colors.
+
+pitch = Pitch(line_alpha=0.5, goal_alpha=0.3)
+fig, ax = pitch.draw()
+
+##############################################################################
 # Corner arcs
 # -----------
 # You can add corner arcs to the pitch by setting ``corner_arcs`` = True
