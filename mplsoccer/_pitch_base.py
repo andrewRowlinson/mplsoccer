@@ -10,8 +10,8 @@ from matplotlib import rcParams
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
-from mplsoccer.utils import Standardizer, set_visible
 from mplsoccer.grid import grid_dimensions, draw_grid, calculate_grid_dimensions
+from mplsoccer.utils import Standardizer, set_visible
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -34,11 +34,17 @@ class BasePitch(ABC):
         To remove the background set to "None" or 'None'.
     line_color : any Matplotlib color, default None
         The line color for the pitch markings. If None, defaults to rcParams["grid.color"].
+    line_alpha : float, default 1
+        The transparency of the pitch and the markings.
     linewidth : float, default 2
         The line width for the pitch markings.
+    linestyle : str or typle
+        Linestyle for the pitch lines:
+        {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}
+        see: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
     line_zorder : float, default 0.9
         Set the zorder for the pitch lines (a matplotlib artist).
-         Artists with lower zorder values are drawn first.
+        Artists with lower zorder values are drawn first.
     spot_scale : float, default 0.002
         The size of the penalty and center spots relative to the pitch length.
     stripe : bool, default False
@@ -87,25 +93,31 @@ class BasePitch(ABC):
         Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
     goal_alpha : float, default 1
         The transparency of the goal.
-    line_alpha : float, default 1
-        The transparency of the pitch and the markings.
+    goal_linestyle : str or typle
+        Linestyle for the pitch lines:
+        {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}
+        see: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
     axis : bool, default False
         Whether to set the axis spines to visible.
     label : bool, default False
         Whether to include the axis labels.
     tick : bool, default False
         Whether to include the axis ticks.
+    corner_arcs : bool, default False
+        Whether to include corner arcs.
     """
 
     def __init__(self, pitch_type='statsbomb', half=False,
-                 pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9, spot_scale=0.002,
+                 pitch_color=None, line_color=None, line_alpha=1, linewidth=2,
+                 linestyle=None, line_zorder=0.9, spot_scale=0.002,
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
                  positional_linestyle=None, positional_color='#eadddd',
                  shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
-                 pitch_length=None, pitch_width=None, goal_type='line', goal_alpha=1,
-                 line_alpha=1, axis=False, label=False, tick=False, corner_arcs=False):
+                 pitch_length=None, pitch_width=None,
+                 goal_type='line', goal_alpha=1, goal_linestyle=None,
+                 axis=False, label=False, tick=False, corner_arcs=False):
 
         # initialize attributes
         self.pitch_type = pitch_type
@@ -117,6 +129,7 @@ class BasePitch(ABC):
         if self.line_color is None:
             self.line_color = rcParams["grid.color"]
         self.linewidth = linewidth
+        self.linestyle = linestyle
         self.spot_scale = spot_scale
         self.line_zorder = line_zorder
         self.stripe = stripe
@@ -140,6 +153,7 @@ class BasePitch(ABC):
         self.pitch_width = pitch_width
         self.goal_type = goal_type
         self.goal_alpha = goal_alpha
+        self.goal_linestyle = goal_linestyle
         self.line_alpha = line_alpha
         self.axis = axis
         self.label = label
@@ -169,12 +183,12 @@ class BasePitch(ABC):
         self.hex_extent = None
         self.vertical = None
         self.reverse_cmap = None
-        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
-                                         length_from=pitch_length, pitch_to='uefa')
 
         # data checks
         self._validation_checks()
 
+        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
+                                         length_from=pitch_length, pitch_to='uefa')
         # set pitch dimensions
         self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
 
@@ -219,6 +233,7 @@ class BasePitch(ABC):
                 f'pitch_type={self.pitch_type!r}, half={self.half!r}, '
                 f'pitch_color={self.pitch_color!r}, line_color={self.line_color!r}, '
                 f'linewidth={self.linewidth!r}, line_zorder={self.line_zorder!r}, '
+                f'linestyle={self.linestyle!r}, '
                 f'stripe={self.stripe!r}, stripe_color={self.stripe_color!r}, '
                 f'stripe_zorder={self.stripe_zorder!r}, '
                 f'pad_left={self.pad_left!r}, pad_right={self.pad_right!r}, '
@@ -304,9 +319,9 @@ class BasePitch(ABC):
         radius_length = radius * self.dim.length / self.dim.pitch_length
         radius_width = radius * self.dim.width / self.dim.pitch_width
         intersection = self.dim.center_width - ((radius_width * radius_length *
-                                                (radius_length ** 2 -
-                                                 (self.dim.penalty_area_length -
-                                                  self.dim.penalty_left) ** 2) ** 0.5) /
+                                                 (radius_length ** 2 -
+                                                  (self.dim.penalty_area_length -
+                                                   self.dim.penalty_left) ** 2) ** 0.5) /
                                                 radius_length ** 2)
         arc_pen_top1 = (self.dim.penalty_area_length, intersection)
         spot_xy = (self.dim.penalty_left, self.dim.center_width)
@@ -334,12 +349,12 @@ class BasePitch(ABC):
          self.diameter_spot2) = self._diameter_circle_equal_aspect(self.dim.penalty_left,
                                                                    self.dim.center_width,
                                                                    ax, radius_spot)
-        
+
         (self.diameter_corner1,
          self.diameter_corner2) = self._diameter_circle_equal_aspect(self.dim.left,
                                                                      self.dim.bottom,
                                                                      ax, radius_corner)
-        
+
         self._arc_angles_equal_aspect(ax, radius_center)
 
     @staticmethod
@@ -447,28 +462,52 @@ class BasePitch(ABC):
                 self._draw_stripe(ax, i)
 
     def _draw_pitch_markings(self, ax):
+        # if we use rectangles here then the linestyle isn't consistent around the pitch
+        # as sometimes the rectangles overlap with each other and the gaps between
+        # lines can when they overlap can look like a solid line even with -. linestyles.
         line_prop = {'linewidth': self.linewidth, 'alpha': self.line_alpha,
-                     'color': self.line_color, 'zorder': self.line_zorder}
-        # draw lines as one-continous loop so that alpha (transparency) values do not overlap
-        xs = [self.dim.center_length, self.dim.center_length, self.dim.right, self.dim.right,
-              self.dim.penalty_area_right, self.dim.penalty_area_right, self.dim.right,
-              self.dim.right, self.dim.six_yard_right, self.dim.six_yard_right, self.dim.right,
-              self.dim.right, self.dim.left, self.dim.left, self.dim.penalty_area_left,
-              self.dim.penalty_area_left, self.dim.left, self.dim.left, self.dim.six_yard_left,
-              self.dim.six_yard_left, self.dim.left, self.dim.left, self.dim.center_length, ]
-        ys = [self.dim.bottom, self.dim.top, self.dim.top, self.dim.penalty_area_bottom,
-              self.dim.penalty_area_bottom, self.dim.penalty_area_top, self.dim.penalty_area_top,
-              self.dim.six_yard_bottom, self.dim.six_yard_bottom, self.dim.six_yard_top,
-              self.dim.six_yard_top, self.dim.bottom, self.dim.bottom, self.dim.penalty_area_top,
-              self.dim.penalty_area_top, self.dim.penalty_area_bottom, self.dim.penalty_area_bottom,
-              self.dim.six_yard_top, self.dim.six_yard_top, self.dim.six_yard_bottom,
-              self.dim.six_yard_bottom, self.dim.top, self.dim.top, ]
-        self._draw_line(ax, xs, ys, **line_prop)
+                     'color': self.line_color, 'zorder': self.line_zorder,
+                     'linestyle': self.linestyle,
+                     }
+        # main markings (outside of pitch and center line)
+        xs_main = [self.dim.center_length, self.dim.center_length, self.dim.right,
+                   self.dim.right, self.dim.left, self.dim.left, self.dim.center_length,
+                   ]
+        ys_main = [self.dim.bottom, self.dim.top, self.dim.top,
+                   self.dim.bottom, self.dim.bottom, self.dim.top, self.dim.top,
+                   ]
+        self._draw_line(ax, xs_main, ys_main, **line_prop)
+        # penalty boxs
+        xs_pbox_right = [self.dim.right, self.dim.penalty_area_right,
+                         self.dim.penalty_area_right, self.dim.right,
+                         ]
+        xs_pbox_left = [self.dim.left, self.dim.penalty_area_left,
+                        self.dim.penalty_area_left, self.dim.left,
+                        ]
+        ys_pbox = [self.dim.penalty_area_bottom, self.dim.penalty_area_bottom,
+                   self.dim.penalty_area_top, self.dim.penalty_area_top,
+                   ]
+        self._draw_line(ax, xs_pbox_right, ys_pbox, **line_prop)
+        self._draw_line(ax, xs_pbox_left, ys_pbox, **line_prop)
+        # six-yard box
+        xs_sixbox_right = [self.dim.right, self.dim.six_yard_right,
+                           self.dim.six_yard_right, self.dim.right,
+                           ]
+        xs_sixbox_left = [self.dim.left, self.dim.six_yard_left,
+                          self.dim.six_yard_left, self.dim.left,
+                          ]
+        ys_sixbox = [self.dim.six_yard_bottom, self.dim.six_yard_bottom,
+                     self.dim.six_yard_top, self.dim.six_yard_top,
+                     ]
+        self._draw_line(ax, xs_sixbox_right, ys_sixbox, **line_prop)
+        self._draw_line(ax, xs_sixbox_left, ys_sixbox, **line_prop)
         self._draw_circles_and_arcs(ax)
 
     def _draw_circles_and_arcs(self, ax):
         circ_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
-                     'color': self.line_color, 'zorder': self.line_zorder}
+                     'color': self.line_color, 'zorder': self.line_zorder,
+                     'linestyle': self.linestyle,
+                     }
 
         # draw center circle and penalty area arcs
         self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
@@ -513,18 +552,33 @@ class BasePitch(ABC):
 
     def _draw_goals(self, ax):
         if self.goal_type == 'box':
-            rect_prop = {'fill': False, 'linewidth': self.linewidth, 'color': self.line_color,
-                         'alpha': self.goal_alpha, 'zorder': self.line_zorder}
-            self._draw_rectangle(ax, self.dim.right, self.dim.goal_bottom,
-                                 self.dim.goal_length, self.dim.goal_width, **rect_prop)
-            self._draw_rectangle(ax, self.dim.left - self.dim.goal_length,
-                                 self.dim.goal_bottom, self.dim.goal_length,
-                                 self.dim.goal_width, **rect_prop)
+            line_prop = {'linewidth': self.linewidth, 'color': self.line_color,
+                         'alpha': self.goal_alpha, 'zorder': self.line_zorder,
+                         'linestyle': self.goal_linestyle,
+                         }
+            # left goal
+            xs_left = [self.dim.left, self.dim.left - self.dim.goal_length,
+                       self.dim.left - self.dim.goal_length, self.dim.left,
+                       ]
+            ys_left = [self.dim.goal_bottom, self.dim.goal_bottom,
+                       self.dim.goal_top, self.dim.goal_top,
+                       ]
+
+            self._draw_line(ax, xs_left, ys_left, **line_prop)
+            # right goal
+            xs_right = [self.dim.right, self.dim.right + self.dim.goal_length,
+                        self.dim.right + self.dim.goal_length, self.dim.right,
+                        ]
+            ys_right = [self.dim.goal_bottom, self.dim.goal_bottom,
+                        self.dim.goal_top, self.dim.goal_top,
+                        ]
+            self._draw_line(ax, xs_right, ys_right, **line_prop)
 
         elif self.goal_type == 'line':
-            goal_linewidth = self.linewidth * 2
-            line_prop = {'linewidth': goal_linewidth, 'color': self.line_color,
-                         'alpha': self.goal_alpha, 'zorder': self.line_zorder}
+            line_prop = {'linewidth': self.linewidth * 2, 'color': self.line_color,
+                         'alpha': self.goal_alpha, 'zorder': self.line_zorder,
+                         'linestyle': self.goal_linestyle,
+                         }
             self._draw_line(ax, [self.dim.right, self.dim.right],
                             [self.dim.goal_top, self.dim.goal_bottom], **line_prop)
             self._draw_line(ax, [self.dim.left, self.dim.left],
