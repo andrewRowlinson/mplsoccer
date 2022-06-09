@@ -67,7 +67,6 @@ pitch.heatmap(shot_probability, ax=ax)
 fig, ax = pitch.draw()
 pitch.heatmap(goal_probability, ax=ax)
 
-
 ##############################################################################
 # Plot move probability
 # ---------------------
@@ -150,12 +149,7 @@ print('Number of iterations:', iteration)
 ##############################################################################
 # Plot xT grid
 # ------------
-# Another method popularized by `@petermckeever <https://twitter.com/petermckeever>`_.
-# is to use hatch patterns to show where something was not-successful versus successful.
-# There are lots of different hatch patterns.
-# See: matplotlib.org/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_hatch
-# This is typically combined with the highlight-text package
-# by `@danzn1 <https://twitter.com/danzn1>`_.
+# Plot the xT grid
 
 path_eff = [path_effects.Stroke(linewidth=1.5, foreground='black'),
             path_effects.Normal()]
