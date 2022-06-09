@@ -74,21 +74,26 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     y = np.ravel(y)
     if x.size != y.size:
         raise ValueError("x and y must be the same size")
-
+    
+    # make values nan safe
     if values is not None:
-        # make values nan safe
-        values = np.ravel(values)
-        mask = np.isnan(values)
-        x = x[~mask]
-        y = y[~mask]
-        values = values[~mask]
+        if statistic == 'mean':
+            statistic = np.nanmean
+        elif statistic == 'std':
+            statistic = np.nanstd
+        elif statistic == 'median':
+            statistic = np.nanmedian
+        elif statistic == 'sum':
+            statistic = np.nansum
+        elif statistic == 'min':
+            statistic = np.nanmin
+        elif statistic == 'max':
+            statistic = np.nanmax
 
     if (values is None) & (statistic == 'count'):
         values = x
     if (values is None) & (statistic != 'count'):
         raise ValueError("values on which to calculate the statistic are missing")
-    if values.size != x.size:
-        raise ValueError("x and values must be the same size")
 
     if standardized:
         pitch_range = [[0, 105], [0, 68]]
@@ -109,7 +114,10 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     # i.e. grid cells are created from the bottom to the top of the pitch, where the top edge
     # always belongs to the cell above. First the raw coordinates have been flipped above
     # then the statistic is flipped back here
-    num_y, num_x = statistic.shape
+    if statistic.ndim == 3:
+        num_y, num_x, _ = statistic.shape
+    else:
+        num_y, num_x = statistic.shape
     if dim.invert_y and standardized is False:
         statistic = np.flip(statistic, axis=0)
         # we do not need to also flip the binnumber
