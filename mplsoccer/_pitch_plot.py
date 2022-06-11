@@ -9,7 +9,6 @@ import seaborn as sns
 from matplotlib import rcParams
 from matplotlib.collections import PatchCollection
 from scipy.spatial import Voronoi, ConvexHull
-from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
 from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
@@ -733,7 +732,7 @@ class BasePitchPlot(BasePitch):
         bs_distance = self.bin_statistic(xstart, ystart, values=distance,
                                          statistic='mean', bins=bins, standardized=standardized)
         bs_angle = self.bin_statistic(xstart, ystart, values=angle,
-                                      statistic=circmean, bins=bins, standardized=standardized)
+                                      statistic='circmean', bins=bins, standardized=standardized)
 
         # calculate the arrow length
         if self.pitch_type == 'tracab':

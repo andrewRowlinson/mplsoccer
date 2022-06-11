@@ -1,9 +1,10 @@
 """ A module with functions for binning data into 2d bins and plotting heatmaps.´´."""
 
 from collections import namedtuple
+from functools import partial
 
 import numpy as np
-from scipy.stats import binned_statistic_2d
+from scipy.stats import binned_statistic_2d, circmean
 
 from mplsoccer.utils import validate_ax
 
@@ -33,7 +34,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     statistic : string or callable, optional
         The statistic to compute (default is 'count').
         The following statistics are available: 'count' (default),
-        'mean', 'std', 'median', 'sum', 'min', 'max', or a user-defined function. See:
+        'mean', 'std', 'median', 'sum', 'min', 'max', 'circmean' or a user-defined function. See:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
     bins : int or [int, int] or array_like or [array, array], optional
         The bin specification.
@@ -76,19 +77,20 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
         raise ValueError("x and y must be the same size")
     
     # make values nan safe
-    if values is not None:
-        if statistic == 'mean':
-            statistic = np.nanmean
-        elif statistic == 'std':
-            statistic = np.nanstd
-        elif statistic == 'median':
-            statistic = np.nanmedian
-        elif statistic == 'sum':
-            statistic = np.nansum
-        elif statistic == 'min':
-            statistic = np.nanmin
-        elif statistic == 'max':
-            statistic = np.nanmax
+    if statistic == 'mean':
+        statistic = np.nanmean
+    elif statistic == 'std':
+        statistic = np.nanstd
+    elif statistic == 'median':
+        statistic = np.nanmedian
+    elif statistic == 'sum':
+        statistic = np.nansum
+    elif statistic == 'min':
+        statistic = np.nanmin
+    elif statistic == 'max':
+        statistic = np.nanmax
+    elif statistic == 'circmean':
+        statistic = partial(circmean, nan_policy='omit')
 
     if (values is None) & (statistic == 'count'):
         values = x
