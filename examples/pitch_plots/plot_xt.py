@@ -29,12 +29,9 @@ match_ids = df_match.match_id.unique()
 all_events_df = []
 cols = ['match_id', 'id', 'type_name', 'sub_type_name', 'x', 'y', 'end_x', 'end_y', 'outcome_name']
 for match_id in match_ids:
-    # get carries/ passes/ shots from regular play
+    # get carries/ passes/ shots
     event = parser.event(match_id)[0]
-    mask_success_pass = (event['type_name'] == 'Pass') & (event['outcome_name'].isnull())
-    mask_carry_shot = event.type_name.isin(['Carry', 'Shot'])
-    mask_regular_play = event['play_pattern_name'] == 'Regular Play'
-    event = event.loc[(mask_success_pass | mask_carry_shot) & mask_regular_play, cols].copy()
+    event = event.loc[event.type_name.isin(['Carry', 'Shot', 'Pass']), cols].copy()
     
     # boolean columns for working out probabilities
     event['goal'] = event['outcome_name'] == 'Goal'
@@ -76,57 +73,48 @@ pitch.heatmap(move_probability, ax=ax)
 ##############################################################################
 # Calculate the move transition matrix
 # ------------------------------------
+
+# get a dataframe of move events and filter out events starting outside the pitch (-1 binnumber)
 move = event[event['move']].copy()
+bin_start_locations = pitch.bin_statistic(move['x'], move['y'], bins=bins)
+move = move[np.all(bin_start_locations['binnumber'] != -1, axis=0)].copy()
 
-# get bin end location cells as an integer
+# get the successful moves and filter out the events that ended outside the pitch
 bin_end_locations = pitch.bin_statistic(move['end_x'], move['end_y'], bins=bins)
-move['end_bin'] = bin_end_locations['binnumber'][0] * bins[1] + bin_end_locations['binnumber'][1]
+move_success = move[(np.all(bin_end_locations['binnumber'] != -1, axis=0) &
+                     move['outcome_name'].isnull())].copy()
 
-# turn this into dummy columns (1/ 0) for move in the relevant end cell
-move_dummies = pd.get_dummies(move.end_bin, sparse=True)
-all_bins = np.arange(0, bins[0] * bins[1])
-not_included = [col for col in all_bins if col not in move_dummies.columns]
-for col in all_bins:
-    if col not in move_dummies.columns:
-        move_dummies[col] = 0
-move_dummies = move_dummies[all_bins]
+# get a dataframe of the bin start and end locations
+bin_success_start = pitch.bin_statistic(move_success['x'], move_success['y'], bins=bins)
+bin_success_end = pitch.bin_statistic(move_success['end_x'], move_success['end_y'], bins=bins)
+df_bin = pd.DataFrame({'x': bin_success_start['binnumber'][0],
+                       'y': bin_success_start['binnumber'][1],
+                       'end_x': bin_success_end['binnumber'][0],
+                       'end_y': bin_success_end['binnumber'][1]})
 
-move_transition = pitch.bin_statistic(move['x'],
-                                      move['y'],
-                                      move_dummies.values.T.tolist(),
-                                      bins=bins,
-                                      statistic='mean')
+# calculate the bin counts for the succesful moves
+bin_counts = df_bin.value_counts().reset_index(name='bin_counts')
+move_transition_matrix = np.zeros((bins[1], bins[0], bins[1], bins[0]))
+move_transition_matrix[bin_counts['y'], bin_counts['x'],
+                       bin_counts['end_y'], bin_counts['end_x']] = bin_counts.bin_counts.values
+
+# and divide by the starting locations for all moves (including unsuccessful)
+bin_start_locations = pitch.bin_statistic(move['x'], move['y'], bins=bins)
+bin_start_locations = np.expand_dims(bin_start_locations['statistic'], (2, 3))
+move_transition_matrix = np.divide(move_transition_matrix,
+                                   bin_start_locations,
+                                   out=np.zeros_like(move_transition_matrix),
+                                   where=bin_start_locations!=0,
+                                  )
 
 ##############################################################################
 # Get the matrices
 # ----------------
 # Get the matrices from the dictionaries and turn nans into zeros
-move_transition_matrix = np.nan_to_num(move_transition['statistic'])
-move_transition_matrix = np.transpose(move_transition_matrix.reshape(bins[1], bins[0], bins[0], bins[1]), (0, 1, 3, 2))
+move_transition_matrix = np.nan_to_num(move_transition_matrix)
 shot_probability_matrix = np.nan_to_num(shot_probability['statistic'])
 move_probability_matrix = np.nan_to_num(move_probability['statistic'])
 goal_probability_matrix = np.nan_to_num(goal_probability['statistic'])
-
-##############################################################################
-# Bin Start locations
-# -------------------
-# These lines are not needed for xT just for plotting the transition matrix.
-bin_start_locations = pitch.bin_statistic(move['x'], move['y'], bins=bins)
-move['start_bin'] = bin_start_locations['binnumber'][0] * bins[1] + bin_start_locations['binnumber'][1]
-
-##############################################################################
-# Plot transition matrix
-# ----------------------
-# Plotting one cell of the move transition matrix first row (x=0) and 6th cell up (y_idx = 5)
-x_idx = 0
-y_idx = 5
-for_plotting = pitch.bin_statistic(event['x'], event['y'], bins=bins)  # new bin statistic for plotting only
-for_plotting['statistic'] = move_transition_matrix[y_idx, x_idx, :, :]  # changing statistic to relevant start cell
-fig, ax = pitch.draw()
-pitch.heatmap(for_plotting, ax=ax)
-# overlaying a scatter of the end locations so you can see it's working
-mask = move.start_bin == x_idx * bins[1] + y_idx
-pitch.scatter(move[mask].end_x, move[mask].end_y, ax=ax, color='red', alpha=0.1)
 
 ##############################################################################
 # Calculate xT
@@ -153,6 +141,7 @@ print('Number of iterations:', iteration)
 
 path_eff = [path_effects.Stroke(linewidth=1.5, foreground='black'),
             path_effects.Normal()]
+for_plotting = pitch.bin_statistic(event['x'], event['y'], bins=bins)  # new bin statistic for plotting only
 for_plotting['statistic'] = xt
 fig, ax = pitch.draw(figsize=(14, 9.625))
 _ = pitch.heatmap(for_plotting, ax=ax)

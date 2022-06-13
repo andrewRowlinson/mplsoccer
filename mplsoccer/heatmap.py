@@ -122,9 +122,8 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
         num_y, num_x = statistic.shape
     if dim.invert_y and standardized is False:
         statistic = np.flip(statistic, axis=0)
-        # we do not need to also flip the binnumber
-        # as unlike statistic we do not plot the binnumber on an inverted axis
-        # binnumber[1, :] = num_y - binnumber[1, :] + 1  # equivalent to flipping
+        # flip the binnumber so can be used to index a numpy array
+        binnumber[1, :] = num_y - binnumber[1, :] + 1  # equivalent to flipping
 
     if normalize:
         statistic = statistic / statistic.sum()
