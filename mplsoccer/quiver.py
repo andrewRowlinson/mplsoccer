@@ -5,7 +5,7 @@ import matplotlib.patches as patches
 import numpy as np
 from matplotlib.legend import Legend
 from matplotlib.legend_handler import HandlerLine2D
-
+from matplotlib.quiver import Quiver
 from mplsoccer.utils import validate_ax
 
 __all__ = ['arrows']
@@ -110,7 +110,7 @@ def arrows(xstart, ystart, xend, yend, *args, ax=None, vertical=False, **kwargs)
                   scale=scale, width=width, **kwargs)
 
     quiver_handler = HandlerQuiver()
-    Legend.update_default_handler_map({q: quiver_handler})
+    Legend.update_default_handler_map({Quiver: quiver_handler})
 
     return q
 
