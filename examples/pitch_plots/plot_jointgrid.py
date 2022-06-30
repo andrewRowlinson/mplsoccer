@@ -120,8 +120,8 @@ df_shots = df[df.type_name == 'Shot'].copy()
 
 # subset the shots for each team
 team1, team2 = df_shots.team_name.unique()
-df_team1 = df_shots[df_shots.team_name == team1].copy()
-df_team2 = df_shots[df_shots.team_name == team2].copy()
+df_team1 = df_shots[df_shots.team_name == team1].copy().reset_index(drop=True)
+df_team2 = df_shots[df_shots.team_name == team2].copy().reset_index(drop=True)
 
 # move the team1 coordinate to the left hand side
 df_team1['x'] = pitch.dim.right - df_team1.x

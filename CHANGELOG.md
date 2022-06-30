@@ -1,3 +1,10 @@
+:rocket: Version 1.0.7
+----------------------
+
+### Fixes
+* Fixed a memory leak in pitch.lines and pitch.quiver associated with assigning those collections to class-level legend handler map, so they never deallocated.
+* Fixed read_lineup so it works from reading from a local file.
+
 :rocket: Version 1.0.6
 ----------------------
   

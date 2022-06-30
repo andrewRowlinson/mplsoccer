@@ -415,7 +415,7 @@ def read_lineup(path_or_buf, warn=True):
         match_id = int(path_or_buf.url.split('/')[-1].split('.')[0])
     else:
         df_lineup = pd.read_json(path_or_buf, encoding='utf-8')
-        match_id = os.path.basename(path_or_buf[:-5])
+        match_id = int(os.path.basename(path_or_buf)[:-5])
     if df_lineup.empty:
         print(f'Skipping {path_or_buf}: empty json')
         return None
