@@ -175,7 +175,7 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
 
     line_collection_handler = HandlerLines(numpoints=n_segments, invert_y=reverse_cmap,
                                            first_lw=handler_first_lw, use_cmap=handler_cmap)
-    Legend.update_default_handler_map({line_collection: line_collection_handler})
+    Legend.update_default_handler_map({LineCollection: line_collection_handler})
 
     return line_collection
 

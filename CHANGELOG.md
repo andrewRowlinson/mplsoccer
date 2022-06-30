@@ -1,3 +1,9 @@
+:rocket: Version 1.0.7
+----------------------
+
+### Fixes
+* Fixed a memory leak in pitch.lines and pitch.quiver associated with assigning those collections to class-level legend handler map, so they never deallocated.
+
 :rocket: Version 1.0.6
 ----------------------
   
