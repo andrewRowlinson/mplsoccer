@@ -105,7 +105,7 @@ axs['title'].text(0.5, 0.5, f'{team1} passes vs {team2}', color='#dee6ea',
 ##############################################################################
 # Filter datasets to only include passes leading to shots, and goals
 
-TEAM1 = 'Seattle Reign'
+TEAM1 = 'OL Reign'
 TEAM2 = 'Houston Dash'
 df_pass = df.loc[(df.pass_assisted_shot_id.notnull()) & (df.team_name == TEAM1),
                  ['x', 'y', 'end_x', 'end_y', 'pass_assisted_shot_id']]
