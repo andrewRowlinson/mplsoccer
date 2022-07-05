@@ -22,8 +22,9 @@ For Twitter, the following aspect ratios prevent images getting cropped (width t
 * Four images: ``7 by 4``
 
 """
-from mplsoccer import Pitch, VerticalPitch
 import matplotlib.pyplot as plt
+
+from mplsoccer import Pitch, VerticalPitch
 
 ##############################################################################
 # 16 by 9 horizontal
@@ -44,9 +45,9 @@ MAX_GRID = 1
 pitch = Pitch(pad_top=2, pad_bottom=2, pad_left=2, pad_right=2, pitch_color='#22312b')
 
 # calculate the maximum grid_height/ width
-GRID_WIDTH, GRID_HEIGHT = pitch.calculate_grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
-                                                          nrows=NROWS, ncols=NCOLS,
-                                                          max_grid=MAX_GRID, space=0)
+GRID_WIDTH, GRID_HEIGHT = pitch.grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
+                                                nrows=NROWS, ncols=NCOLS,
+                                                max_grid=MAX_GRID, space=0)
 
 # plot using the mplsoccer grid function
 fig, ax = pitch.grid(figheight=FIGHEIGHT, grid_width=GRID_WIDTH, grid_height=GRID_HEIGHT,
@@ -77,9 +78,9 @@ pitch = Pitch(pad_top=PAD_TOP, pad_bottom=PAD_BOTTOM,
               pitch_color='grass', stripe=True, line_color='white')
 
 # calculate the maximum grid_height/ width
-GRID_WIDTH, GRID_HEIGHT = pitch.calculate_grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
-                                                          nrows=NROWS, ncols=NCOLS,
-                                                          max_grid=1, space=0)
+GRID_WIDTH, GRID_HEIGHT = pitch.grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
+                                                nrows=NROWS, ncols=NCOLS,
+                                                max_grid=1, space=0)
 # plot
 fig, ax = pitch.grid(figheight=FIGHEIGHT, grid_width=GRID_WIDTH, grid_height=GRID_HEIGHT,
                      title_height=0, endnote_height=0)
@@ -101,9 +102,9 @@ pitch = VerticalPitch(pad_top=1, pad_bottom=1,
                       pad_left=1, pad_right=1,
                       pitch_color='grass', stripe=True, line_color='white')
 
-GRID_WIDTH, GRID_HEIGHT = pitch.calculate_grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
-                                                          nrows=NROWS, ncols=NCOLS,
-                                                          max_grid=MAX_GRID, space=SPACE)
+GRID_WIDTH, GRID_HEIGHT = pitch.grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
+                                                nrows=NROWS, ncols=NCOLS,
+                                                max_grid=MAX_GRID, space=SPACE)
 
 TITLE_HEIGHT = 0.1
 ENDNOTE_HEIGHT = MAX_GRID - (GRID_HEIGHT + TITLE_HEIGHT)
@@ -129,9 +130,9 @@ pitch = VerticalPitch(pad_top=3, pad_bottom=-15,
                       pad_left=-15, pad_right=-15, linewidth=1, half=True,
                       pitch_color='grass', stripe=True, line_color='white')
 
-GRID_WIDTH, GRID_HEIGHT = pitch.calculate_grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
-                                                          nrows=NROWS, ncols=NCOLS,
-                                                          max_grid=MAX_GRID, space=SPACE)
+GRID_WIDTH, GRID_HEIGHT = pitch.grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
+                                                nrows=NROWS, ncols=NCOLS,
+                                                max_grid=MAX_GRID, space=SPACE)
 TITLE_HEIGHT = 0.08
 ENDNOTE_HEIGHT = 0.04
 
@@ -155,9 +156,9 @@ pitch = Pitch(pad_top=1, pad_bottom=1,
               pad_left=1, pad_right=1, linewidth=1,
               pitch_color='grass', stripe=True, line_color='white')
 
-GRID_WIDTH, GRID_HEIGHT = pitch.calculate_grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
-                                                          nrows=NROWS, ncols=NCOLS,
-                                                          max_grid=MAX_GRID, space=SPACE)
+GRID_WIDTH, GRID_HEIGHT = pitch.grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
+                                                nrows=NROWS, ncols=NCOLS,
+                                                max_grid=MAX_GRID, space=SPACE)
 
 TITLE_HEIGHT = 0.15
 ENDNOTE_HEIGHT = 0.05
@@ -191,9 +192,9 @@ pitch = VerticalPitch(pad_top=PAD_TOP, pad_bottom=PAD_BOTTOM,
                       pad_left=PAD_SIDES, pad_right=PAD_SIDES,
                       pitch_color='grass', stripe=True, line_color='white')
 
-GRID_WIDTH, GRID_HEIGHT = pitch.calculate_grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
-                                                          nrows=NROWS, ncols=NCOLS,
-                                                          max_grid=MAX_GRID, space=SPACE)
+GRID_WIDTH, GRID_HEIGHT = pitch.grid_dimensions(figwidth=FIGWIDTH, figheight=FIGHEIGHT,
+                                                nrows=NROWS, ncols=NCOLS,
+                                                max_grid=MAX_GRID, space=SPACE)
 TITLE_HEIGHT = 0
 ENDNOTE_HEIGHT = 0
 

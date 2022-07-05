@@ -10,7 +10,7 @@ from matplotlib import rcParams
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
-from mplsoccer.grid import grid_dimensions, draw_grid, calculate_grid_dimensions
+from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
 from mplsoccer.utils import Standardizer, set_visible
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
@@ -676,22 +676,28 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figheight=14)
         """
-        dim = grid_dimensions(ax_aspect=self.ax_aspect, figheight=figheight, nrows=nrows,
-                              ncols=ncols, grid_height=grid_height, grid_width=grid_width,
-                              space=space, left=left, bottom=bottom,
-                              endnote_height=endnote_height, endnote_space=endnote_space,
-                              title_height=title_height, title_space=title_space)
+        dim = _grid_dimensions(ax_aspect=self.ax_aspect, figheight=figheight, nrows=nrows,
+                               ncols=ncols, grid_height=grid_height, grid_width=grid_width,
+                               space=space, left=left, bottom=bottom,
+                               endnote_height=endnote_height, endnote_space=endnote_space,
+                               title_height=title_height, title_space=title_space)
         left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
                     np.abs(self.extent[1] - self.extent[0])) * dim['axwidth']
         right_pad = (np.abs(self.visible_pitch - self.extent)[1] /
                      np.abs(self.extent[1] - self.extent[0])) * dim['axwidth']
-        fig, axs = draw_grid(dimensions=dim, left_pad=left_pad, right_pad=right_pad,
-                             axis=axis, ax_key='pitch')
-        for ax in np.asarray(axs['pitch']).flat:
-            self.draw(ax=ax)
+        fig, axs = _draw_grid(dimensions=dim, left_pad=left_pad, right_pad=right_pad,
+                              axis=axis, grid_key='pitch')
+
+        if endnote_height > 0 or title_height > 0:
+            for ax in np.asarray(axs['pitch']).flat:
+                self.draw(ax=ax)
+        else:
+            for ax in np.asarray(axs).flat:
+                self.draw(ax=ax)
+
         return fig, axs
 
-    def calculate_grid_dimensions(self, figwidth, figheight, nrows, ncols, max_grid, space):
+    def grid_dimensions(self, figwidth, figheight, nrows, ncols, max_grid, space):
         """ A helper method to propose a grid_width and grid_height for grid based on the inputs.
 
         Parameters
@@ -715,14 +721,14 @@ class BasePitch(ABC):
         --------
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
-        >>> grid_width, grid_height = pitch.calculate_grid_dimensions(figwidth=16, figheight=9, \
-                                                                      nrows=1, ncols=1, \
-                                                                      max_grid=1,  space=0)
+        >>> grid_width, grid_height = pitch.grid_dimensions(figwidth=16, figheight=9, \
+                                                            nrows=1, ncols=1, \
+                                                            max_grid=1,  space=0)
         """
-        grid_width, grid_height = calculate_grid_dimensions(self.ax_aspect, figwidth=figwidth,
-                                                            figheight=figheight,
-                                                            nrows=nrows, ncols=ncols,
-                                                            max_grid=max_grid, space=space)
+        grid_width, grid_height = grid_dimensions(self.ax_aspect, figwidth=figwidth,
+                                                  figheight=figheight,
+                                                  nrows=nrows, ncols=ncols,
+                                                  max_grid=max_grid, space=space)
         return grid_width, grid_height
 
     def jointgrid(self, figheight=9, left=None, grid_width=0.95,

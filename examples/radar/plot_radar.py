@@ -136,7 +136,7 @@ radar_poly, rings_outer, vertices = radar_output
 
 # creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
-                title_space=0, endnote_space=0, ax_key='radar', axis=False)
+                title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
 # plot the radar
 radar.setup_axis(ax=axs['radar'])
@@ -174,7 +174,7 @@ title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
 
 # creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
-                title_space=0, endnote_space=0, ax_key='radar', axis=False)
+                title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
 # plot radar
 radar.setup_axis(ax=axs['radar'])  # format axis as a radar
@@ -214,7 +214,7 @@ title4_text = axs['title'].text(0.99, 0.25, 'Manchester City', fontsize=20,
 
 # creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
-                title_space=0, endnote_space=0, ax_key='radar', axis=False)
+                title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
 # plot the radar
 radar.setup_axis(ax=axs['radar'], facecolor='None')
@@ -256,7 +256,7 @@ fig.set_facecolor('#121212')
 
 # creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
-                title_space=0, endnote_space=0, ax_key='radar', axis=False)
+                title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
 # plot the radar
 radar.setup_axis(ax=axs['radar'], facecolor='None')
@@ -304,7 +304,7 @@ fig.set_facecolor('#070707')
 
 # creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
-                title_space=0, endnote_space=0, ax_key='radar', axis=False)
+                title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
 # we are creating a new radar object with more rings, integer rounding, and a larger center circle
 radar2 = Radar(params=['Speed', 'Agility', 'Strength', 'Passing', 'Dribbles'],

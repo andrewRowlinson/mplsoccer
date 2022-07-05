@@ -89,7 +89,7 @@ param_labels = radar.draw_param_labels(ax=ax, fontsize=15, fontproperties=fm.pro
 
 # creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
-                title_space=0, endnote_space=0, ax_key='radar', axis=False)
+                title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
 # plot the turbine plot
 radar.setup_axis(ax=axs['radar'])

@@ -54,7 +54,7 @@ fig, axs = pitch.grid(nrows=11, ncols=4, space=0.1, figheight=40,
                       title_height=0, endnote_height=0,  # no title/ endnote
                       grid_width=0.9, grid_height=0.98, bottom=0.01, left=0.05)
 cmap_names = list(all_cmap_dict.keys())
-for idx, ax in enumerate(axs['pitch'].flat):
+for idx, ax in enumerate(axs.flat):
     cmap_name = f'cmr.{cmap_names[idx]}'
     cmap = all_cmap_dict[cmap_names[idx]]
     kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=cmap, shade=True, levels=100)

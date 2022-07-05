@@ -284,6 +284,7 @@ class Sbapi:
             return pd.DataFrame(data)
         return data
 
+
     def frame(self, match_id, version=1):
         """ StatsBomb 360 data from the API.
 
@@ -363,6 +364,8 @@ def _flatten_list_of_lists(list_of_lists, key):
 def _event_dataframe(data):
     """ Transform the event dictionary into a dataframe."""
     df = pd.DataFrame(data)
+    if df.empty:
+        return None
     df['timestamp'] = pd.to_datetime(df['timestamp']).dt.time
     df.sort_values(['period', 'timestamp', 'index'], inplace=True)
     df.reset_index(drop=True, inplace=True)
@@ -377,6 +380,8 @@ def _related_dataframe(data, df_events):
     ensure that both the carry and the related event are related both ways.
     Sometimes another event is not related to the carry event (but it is the other way round)"""
     df = pd.DataFrame(data)
+    if df.empty:
+        return None
     cols = ['id', 'index', 'type_name']
     df = df.merge(df_events[cols].rename({'id': 'id_related'}, axis='columns'),
                   how='left', on='id_related', validate='m:1',
@@ -406,6 +411,8 @@ def _competition_dataframe(data):
 def _match_dataframe(data):
     """ Format the match data as a dataframe."""
     df = pd.DataFrame(data)
+    if df.empty:
+        return None
     df['kick_off'] = pd.to_datetime(df['match_date'] + ' ' + df['kick_off'])
     date_cols = ['match_date', 'last_updated', 'last_updated_360',
                  'home_team_managers_dob', 'away_team_managers_dob']

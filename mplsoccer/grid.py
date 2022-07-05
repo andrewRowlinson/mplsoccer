@@ -3,16 +3,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-__all__ = ['grid_dimensions', 'draw_grid', 'grid', 'calculate_grid_dimensions']
+__all__ = ['_grid_dimensions', '_draw_grid', 'grid', 'grid_dimensions']
 
 
-def grid_dimensions(ax_aspect=1, figheight=9, nrows=1, ncols=1,
-                    grid_height=0.715, grid_width=0.95, space=0.05,
-                    left=None, bottom=None,
-                    endnote_height=0.065, endnote_space=0.01,
-                    title_height=0.15, title_space=0.01,
-                    ):
-    """ A helper to create a grid of axes in a specified location
+def _grid_dimensions(ax_aspect=1, figheight=9, nrows=1, ncols=1,
+                     grid_height=0.715, grid_width=0.95, space=0.05,
+                     left=None, bottom=None,
+                     endnote_height=0, endnote_space=0.01,
+                     title_height=0, title_space=0.01,
+                     ):
+    """ A helper to calculate the grid dimensions.
 
     Parameters
     ----------
@@ -39,18 +39,18 @@ def grid_dimensions(ax_aspect=1, figheight=9, nrows=1, ncols=1,
         The location of the bottom endnote axes in fractions of the figure height.
         The default of None places the axes in the middle of the figure.
         If the endnote_height=0 then the grid is located at the bottom coordinate instead.
-    endnote_height: float, default 0.065
+    endnote_height: float, default 0
         The height of the endnote axes in fractions of the figure height.
-        The default is the endnote is 6.5% of the figure height.
-        If endnote_height=0, then the endnote axes is not plotted.
+        For, example 0.07 means the endnote axis is 7% of the figure height.
+        If endnote_height=0 (default), then the endnote axes is not plotted.
     endnote_space : float, default 0.01
         The space between the grid and endnote axis in fractions of the figure height.
         The default space is 1% of the figure height.
         If endnote_height=0, then the endnote_space is set to zero.
-    title_height : float, default 0.15
+    title_height : float, default 0
         The height of the title axis in fractions of the figure height.
-        The default is the title axis is 15% of the figure height.
-        If title_height=0, then the title axes is not plotted.
+        For, example 0.15 means the title axis is 15% of the figure height.
+        If title_height=0 (default), then the title axes is not plotted.
     title_space : float, default 0.01
         The space between the grid and title axis in fractions of the figure height.
         The default space is 1% of the figure height.
@@ -112,21 +112,21 @@ def grid_dimensions(ax_aspect=1, figheight=9, nrows=1, ncols=1,
         dimensions['axheight'] = grid_height * (1 - space) / nrows
 
     elif (nrows > 1) and (ncols == 1):
-        dimensions['figwidth'] = grid_height * figheight / grid_width * (
+        dimensions['figwidth'] = figheight * grid_height / grid_width * (
                 1 - space) * ax_aspect / nrows
         dimensions['spaceheight'] = grid_height * space / (nrows - 1)
         dimensions['spacewidth'] = 0
         dimensions['axheight'] = grid_height * (1 - space) / nrows
 
     elif (nrows == 1) and (ncols > 1):
-        dimensions['figwidth'] = grid_height * figheight / grid_width * (space + ax_aspect * ncols)
+        dimensions['figwidth'] = figheight * grid_height / grid_width * (space + ax_aspect * ncols)
         dimensions['spaceheight'] = 0
         dimensions['spacewidth'] = grid_height * space * figheight / dimensions['figwidth'] / (
                 ncols - 1)
         dimensions['axheight'] = grid_height
 
     else:  # nrows=1, ncols=1
-        dimensions['figwidth'] = grid_height * ax_aspect * figheight / grid_width
+        dimensions['figwidth'] = figheight * grid_height * ax_aspect / grid_width
         dimensions['spaceheight'] = 0
         dimensions['spacewidth'] = 0
         dimensions['axheight'] = grid_height
@@ -136,14 +136,14 @@ def grid_dimensions(ax_aspect=1, figheight=9, nrows=1, ncols=1,
     return dimensions
 
 
-def draw_grid(dimensions, left_pad=0, right_pad=0, axis=True, ax_key='ax'):
+def _draw_grid(dimensions, left_pad=0, right_pad=0, axis=True, grid_key='grid'):
     """ A helper to create a grid of axes in a specified location
 
     Parameters
     ----------
     dimensions : dict[dimension, value]
         A dictionary holding the axes and figure dimensions.
-        This is created via the grid_dimensions function.
+        This is created via the _grid_dimensions function.
     left_pad, right_pad : float, default 0
         The padding for the title and endnote. Usually the endnote and title
         are flush to the sides of the axes grid. With the padding option you can
@@ -151,7 +151,7 @@ def draw_grid(dimensions, left_pad=0, right_pad=0, axis=True, ax_key='ax'):
         and the title/endnote. The padding units are fractions of the figure width.
     axis : bool, default True
         Whether the endnote and title axes are 'on'.
-    ax_key : str, default ax
+    grid_key : str, default grid
         The dictionary key for the main axes in the grid.
 
     Returns
@@ -183,7 +183,7 @@ def draw_grid(dimensions, left_pad=0, right_pad=0, axis=True, ax_key='ax'):
     axs = np.squeeze(np.array(axs).reshape((dims['nrows'], dims['ncols'])))
     if axs.size == 1:
         axs = axs.item()
-    result_axes = {ax_key: axs}
+    result_axes = {grid_key: axs}
 
     title_left = dims['left'] + left_pad
     title_width = dims['grid_width'] - left_pad - right_pad
@@ -203,15 +203,17 @@ def draw_grid(dimensions, left_pad=0, right_pad=0, axis=True, ax_key='ax'):
             ax_endnote.axis('off')
         result_axes['endnote'] = ax_endnote
 
-    return fig, result_axes
+    if dims['title_height'] == 0 and dims['endnote_height'] == 0:
+        return fig, result_axes[grid_key]  # no dictionary if just grid
+    return fig, result_axes  # else dictionary
 
 
 def grid(ax_aspect=1, figheight=9, nrows=1, ncols=1,
          grid_height=0.715, grid_width=0.95, space=0.05,
          left=None, bottom=None,
-         endnote_height=0.065, endnote_space=0.01,
-         title_height=0.15, title_space=0.01, axis=True, ax_key='ax'):
-    """ A helper to create a grid of axes in a specified location
+         endnote_height=0, endnote_space=0.01,
+         title_height=0, title_space=0.01, axis=True, grid_key='grid'):
+    """ Create a grid of axes in a specified location
 
     Parameters
     ----------
@@ -238,25 +240,25 @@ def grid(ax_aspect=1, figheight=9, nrows=1, ncols=1,
         The location of the bottom endnote axes in fractions of the figure height.
         The default of None places the axes in the middle of the figure.
         If the endnote_height=0 then the grid is located at the bottom coordinate instead.
-    endnote_height: float, default 0.065
+    endnote_height: float, default 0
         The height of the endnote axes in fractions of the figure height.
-        The default is the endnote is 6.5% of the figure height.
-        If endnote_height=0, then the endnote axes is not plotted.
+        For, example 0.07 means the endnote axis is 7% of the figure height.
+        If endnote_height=0 (default), then the endnote axes is not plotted.
     endnote_space : float, default 0.01
         The space between the grid and endnote axis in fractions of the figure height.
         The default space is 1% of the figure height.
         If endnote_height=0, then the endnote_space is set to zero.
-    title_height : float, default 0.15
+    title_height : float, default 0
         The height of the title axis in fractions of the figure height.
-        The default is the title axis is 15% of the figure height.
-        If title_height=0, then the title axes is not plotted.
+        For, example 0.15 means the title axis is 15% of the figure height.
+        If title_height=0 (default), then the title axes is not plotted.
     title_space : float, default 0.01
         The space between the grid and title axis in fractions of the figure height.
         The default space is 1% of the figure height.
         If title_height=0, then the title_space is set to zero.
     axis : bool, default True
         Whether the endnote and title axes are 'on'.
-    ax_key : str, default ax
+    grid_key : str, default grid
         The dictionary key for the main axes in the grid.
 
     Returns
@@ -265,19 +267,19 @@ def grid(ax_aspect=1, figheight=9, nrows=1, ncols=1,
     axs : dict[label, Axes]
         A dictionary mapping the labels to the Axes objects.
     """
-    dimensions = grid_dimensions(ax_aspect=ax_aspect, figheight=figheight, nrows=nrows, ncols=ncols,
-                                 grid_height=grid_height, grid_width=grid_width, space=space,
-                                 left=left, bottom=bottom,
-                                 endnote_height=endnote_height, endnote_space=endnote_space,
-                                 title_height=title_height, title_space=title_space,
-                                 )
-
-    fig, ax = draw_grid(dimensions, axis=axis, ax_key=ax_key)
+    dimensions = _grid_dimensions(ax_aspect=ax_aspect, figheight=figheight, nrows=nrows,
+                                  ncols=ncols,
+                                  grid_height=grid_height, grid_width=grid_width, space=space,
+                                  left=left, bottom=bottom,
+                                  endnote_height=endnote_height, endnote_space=endnote_space,
+                                  title_height=title_height, title_space=title_space,
+                                  )
+    fig, ax = _draw_grid(dimensions, axis=axis, grid_key=grid_key)
     return fig, ax
 
 
-def calculate_grid_dimensions(ax_aspect, figwidth, figheight, nrows, ncols, max_grid, space):
-    """ A helper method to propose a grid_width and grid_height for grid based on the inputs.
+def grid_dimensions(ax_aspect, figwidth, figheight, nrows, ncols, max_grid, space):
+    """ Propose a grid_width and grid_height for grid based on the inputs.
 
     Parameters
     ----------
@@ -300,20 +302,17 @@ def calculate_grid_dimensions(ax_aspect, figwidth, figheight, nrows, ncols, max_
     """
     # grid1 = calculate the grid_width given the max_grid as grid_height
     # grid2 = calculate grid_height given the max_grid as grid_width
-    if (nrows > 1) and (ncols > 1):
-        grid1 = max_grid * figheight / figwidth * (((1 - space) * ax_aspect *
-                                                    ncols / nrows) +
-                                                   (space * (ncols - 1) / (nrows - 1)))
-        grid2 = max_grid / figheight * figwidth / (((1 - space) * ax_aspect *
-                                                    ncols / nrows) +
-                                                   (space * (ncols - 1) / (nrows - 1)))
-    elif (nrows > 1) and (ncols == 1):
-        grid1 = max_grid * figheight / figwidth * (1 - space) * ax_aspect / nrows
-        grid2 = max_grid / figheight * figwidth / (1 - space) * ax_aspect / nrows
-    elif (nrows == 1) and (ncols > 1):
+
+    if ncols > 1 and nrows == 1:
         grid1 = max_grid * figheight / figwidth * (space + ax_aspect * ncols)
         grid2 = max_grid / figheight * figwidth / (space + ax_aspect * ncols)
-    else:
+    elif ncols > 1 or nrows > 1:
+        extra = space * (ncols - 1) / (nrows - 1)
+        grid1 = max_grid * figheight / figwidth * (((1 - space) * ax_aspect *
+                                                    ncols / nrows) + extra)
+        grid2 = max_grid / figheight * figwidth / (((1 - space) * ax_aspect *
+                                                    ncols / nrows) + extra)
+    else:  # nrows=1, ncols=1
         grid1 = max_grid * figheight / figwidth * ax_aspect
         grid2 = max_grid / figheight * figwidth / ax_aspect
 
