@@ -2,7 +2,7 @@
 from mplsoccer import Pitch."""
 
 from ._version import __version__
-from .statsbomb import Sbopen, Sbapi
+from .statsbomb import Sbopen, Sbapi,  Sblocal
 from .cm import *
 from .linecollection import *
 from .pitch import *

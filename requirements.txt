@@ -3,5 +3,5 @@ numpy
 seaborn
 scipy
 pandas
-beautifulsoup4
+requests
 Pillow

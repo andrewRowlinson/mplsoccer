@@ -8,7 +8,7 @@ dependencies:
   - scipy
   - cmasher
   - seaborn
-  - beautifulsoup4
+  - requests
   - pyarrow
   - pillow
   - lxml

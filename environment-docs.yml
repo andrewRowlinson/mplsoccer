@@ -9,7 +9,7 @@ dependencies:
   - sphinx
   - cmasher
   - pyarrow
-  - beautifulsoup4
+  - requests
   - lxml
   - pillow
   - pip

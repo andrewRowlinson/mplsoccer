@@ -2,8 +2,10 @@ import os
 
 import pandas as pd
 import requests
+import json
 
-__all__ = ['Sbopen', 'Sbapi']
+__all__ = ['Sbopen', 'Sbapi', 'Sblocal']
+
 
 class Sbopen:
     """ Class for loading data from the StatsBomb open-data.
@@ -284,7 +286,6 @@ class Sbapi:
             return pd.DataFrame(data)
         return data
 
-
     def frame(self, match_id, version=1):
         """ StatsBomb 360 data from the API.
 
@@ -306,6 +307,147 @@ class Sbapi:
         """
         url = f'{self.url}{version}/360-frames/{match_id}'
         data = self._get_data(url)
+        return flatten_360(data, match_id, self.dataframe)
+
+
+class Sblocal:
+    """ Class for loading local StatsBomb data.
+
+    Parameters
+    ----------
+    dataframe : bool, default True
+        Whether to return dataframes (True) or flattened list of dictionaries (False)
+        from the class methods.
+    """
+
+    def __init__(self, dataframe=True):
+        self.dataframe = dataframe
+
+    @staticmethod
+    def _get_data(path):
+        """ Read the StatsBomb data.
+
+        Parameters
+        ----------
+        path : path to file
+
+        Returns
+        -------
+        For the StatsBomb data this typically returns a list of dictionaries.
+        """
+        with open(path, encoding='utf-8') as file:
+            data = json.load(file)
+        return data
+
+    def event(self, path):
+        """ Read the event data from a local file.
+
+        Parameters
+        ----------
+        path : path to file
+
+        Returns
+        -------
+        events, related, freeze, tactics
+            Either dataframes or flattened list of dictionaries.
+
+        Examples
+        --------
+        >>> from mplsoccer import Sbopen
+        >>> parser = Sbopen(dataframe=True)
+        >>> events, related, freeze, tactics = parser.event(path)
+        """
+        data = self._get_data(path)
+        match_id = int(os.path.basename(path)[:-5])
+        return flatten_event(data, match_id, self.dataframe)
+
+    def lineup(self, path):
+        """ Read the lineup data from a local file.
+
+        Parameters
+        ----------
+        path : path to file
+
+        Returns
+        -------
+        lineups
+            A dataframe or a flattened list of dictionaries.
+
+        Examples
+        --------
+        >>> from mplsoccer import Sbopen
+        >>> parser = Sbopen(dataframe=True)
+        >>> lineups = parser.lineup(path)
+        """
+        data = self._get_data(path)
+        match_id = int(os.path.basename(path)[:-5])
+        return flatten_lineup(data, match_id, self.dataframe)
+
+    def match(self, path):
+        """ Read the match data from a local file.
+
+        Parameters
+        ----------
+        path : path to file
+
+        Returns
+        -------
+        matches
+            A dataframe or a flattened list of dictionaries.
+
+        Examples
+        --------
+        >>> from mplsoccer import Sbopen
+        >>> parser = Sbopen(dataframe=True)
+        >>> matches = parser.match(path)
+        """
+        data = self._get_data(path)
+        return flatten_match(data, self.dataframe)
+
+    def competition(self, path):
+        """ Read the competition data from a local file.
+
+        Parameters
+        ----------
+        path : path to file
+
+        Returns
+        -------
+        competition
+            A dataframe or a flattened list of dictionaries.
+
+        Examples
+        --------
+        >>> from mplsoccer import Sbopen
+        >>> parser = Sbopen(dataframe=True)
+        >>> competition = parser.competition(path)
+        """
+        data = self._get_data(path)
+        if self.dataframe:
+            return pd.DataFrame(data)
+        return data
+
+    def frame(self, path):
+        """ Read the 360 data from a local file.
+
+
+        Parameters
+        ----------
+        path : path to file
+
+        Returns
+        -------
+        frames, visible
+            Either dataframes or flattened list of dictionaries.
+
+        Examples
+        --------
+        >>> from mplsoccer import Sbopen
+        >>> parser = Sbopen(dataframe=True)
+        >>> frames, visible = parser.frame(path)
+        """
+        data = self._get_data(path)
+        match_id = int(os.path.basename(path)[:-5])
         return flatten_360(data, match_id, self.dataframe)
 
 
