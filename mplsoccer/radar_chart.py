@@ -88,7 +88,8 @@ class Radar:
             msg = 'You are not making a pretty chart. Increase the number of params to 3 or more.'
             raise ValueError(msg)
         
-        # flip the min_range and max_range if the argument greater_is_better is False for a parameter
+        # flip the min_range and max_range if the argument greater_is_better is False
+        # for a parameter
         # typically in soccer this would be for parameters like miscontrols where
         # it is better to have fewer miscontrols
         if (~self.greater_is_better).sum() > 0:
@@ -466,6 +467,49 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
                            rotation=self.rotation_degrees[idx], ha='center', va='center', **kwargs)
             label_list.append(text)
         return label_list
+
+    def spoke(self, ax=None, **kwargs):
+        """ Draw lines going from the center of the radar to the edge of the radar.
+
+        Parameters
+        ----------
+        ax : matplotlib axis, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.plot.
+
+        Returns
+        -------
+        A list of Line2D objects representing the plotted data.
+
+        Examples
+        --------
+        >>> from mplsoccer import Radar
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+                          max_range=[10, 10, 10])
+        >>> fig, ax = radar.setup_axis()
+        >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
+        >>> values = [5, 3, 10]
+        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
+                                                           kwargs_radar={'facecolor': '#00f2c1', \
+                                                                         'alpha': 0.6}, \
+                                                           kwargs_rings={'facecolor': '#d80499', \
+                                                                         'alpha': 0.6})
+        >>> range_labels = radar.draw_range_labels(ax=ax)
+        >>> param_labels = radar.draw_param_labels(ax=ax)
+        >>> spokes = radar.spoke(ax=ax)
+        """
+        spoke_x = self.outer_ring * self.rotation_sin
+        spoke_x = np.repeat(spoke_x, 3)
+        spoke_x[0::3] = 0
+        spoke_x[2::3] = np.nan
+
+        spoke_y = self.outer_ring * self.rotation_cos
+        spoke_y = np.repeat(spoke_y, 3)
+        spoke_y[0::3] = 0
+        spoke_y[2::3] = np.nan
+
+        lines = ax.plot(spoke_x, spoke_y, **kwargs)
+        return lines
 
     def _setup_cmap_circle(self):
         x, y = np.meshgrid(np.linspace(-self.lim, self.lim, 1000),
