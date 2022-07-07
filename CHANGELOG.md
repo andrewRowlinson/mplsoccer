@@ -2,55 +2,55 @@
 ----------------------
 
 ### Breaking Changes
-* The statsbomb module is completely overhauled to make it easier to use. \
-The module now contains three classes Sbopen, Sbapi and Sblocal for retrieving data \
+* :x: The ``statsbomb`` module is completely overhauled to make it easier to use. \
+The module now contains three classes ``Sbopen``, ``Sbapi`` and ``Sblocal`` for retrieving data \
 from the StatsBomb open-data, API, and local files.
-* The grid method is changed so if there is no endnote or title then the axes \
+* :x: The ``grid`` method is changed so if there is no endnote or title then the axes \
 (or numpy array of axes) are returned rather than a dictionary.
-* Renamed calculate_grid_dimensions to grid_dimensions.
+* :x: Renamed ``calculate_grid_dimensions`` to ``grid_dimensions``.
 
 ### Added
-* Added a turbine chart, which is a Radar plot with multiple kernel density estimators \
-plotted in the center. Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314)
-* ``corner_arcs`` Boolean argument added to pitches by \
-[Devin Pleuler]( https://twitter.com/devinpleuler).
-* Delaunay triangulation added to Pitch classes by \
+* :heart_eyes: Added a turbine chart, which is a Radar plot with multiple kernel density \
+estimators  plotted in the center. \
+Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314)
+* :heart_eyes: Delaunay triangulation added to Pitch classes by \
 [Matthew Williamson]( https://twitter.com/photomattic) using ``triplot`` method.
 * Binnumbers added to bin_statistic methods to give the bin indices for each event. \
 If the event has a null coordinate or a coordinate outside the pitch the \
 indices are set to negative one.
-* Added ``linestyle``, ``goal_linestyle``, and ``line_alpha`` arguments for styling the pitches.
-* Added ``spoke`` method to the Radar class for drawing lines from the center \
+* :icecream: ``corner_arcs`` Boolean argument added to pitches by \
+[Devin Pleuler]( https://twitter.com/devinpleuler).
+* * :icecream: Added ``linestyle``, ``goal_linestyle``, and ``line_alpha`` \
+arguments for styling the pitches.
+* :icecream: Added ``spoke`` method to the Radar class for drawing lines from the center \
 of the radar to the edges for each plotted statistic.
-* Added the grid module, which allows the ``grid``  function to be \
-used with other types of charts.
-* Added the ``statistic=circmean`` argument to bin_statistic, which uses \
-a nan safe version of scipy circmean.
-* Added the ``greater_is_better`` argument to Radar. If greater_is_better \
+* :new: Added the ``greater_is_better`` argument to Radar. If greater_is_better \
 is False for a respective parameter then the radar object will flip the statistic. \
 In soccer, this is useful for parameters like miss-controls where fewer miss-controls \
 is better than more. The default (None) sets all values to True (i.e. no flips).
-* Added the ``draw_radar_solid`` method to Radar to draw a single radar \
+* :new: Added the grid module, which allows the ``grid``  function to be \
+used with other types of charts.
+* :new: Added the ``statistic=circmean`` argument to bin_statistic, which uses \
+a nan safe version of scipy circmean.
+* :new: Added the ``draw_radar_solid`` method to Radar to draw a single radar \
 without clipping to the radar rings to allow more easily multiple radars \
 to be plotted on the sae chart.
 
 ### Changes
-* ``polygon`` method of the Pitch class changed to plot multiple of \
+* :ok: ``polygon`` method of the Pitch class changed to plot multiple of \
 matplotlib.patches.Polygon rather than one matplotlib.collections.PatchCollection \
 so they can be clipped more easily to the shape of other patches.
-* Removed warnings for ``figsize``, ``tight_layout``, ``contrained_layout``, \
+* :ok: Removed warnings for ``figsize``, ``tight_layout``, ``contrained_layout``, \
 ``layout``, ``view``, and ``orientation`` as deprecated.
-* Changed how pitch lines are drawn from one continuous line to plotting some \
+* :ok:  Changed how pitch lines are drawn from one continuous line to plotting some \
 lines separately. The one continuous line way of plotting caused problems \
 with overlapping lines when using a dotted linestyle.
-* Changed how the box goal is drawn from a rectangle to a line to allow \
+* :ok: Changed how the box goal is drawn from a rectangle to a line to allow \
 goal_linestyle to work without overlapping with the pitch
-
-### Fixes
-* Changed bin statistic to use the nan safe versions of mean, std, median, sum, min, max.
+* :ok: Changed bin statistic to use the nan safe versions of mean, std, median, sum, min, max.
 
 ### Docs
-* Removed sub plot mosaic from the docs and replaced with the grid method, \
+* :page_with_curl: Removed sub plot mosaic from the docs and replaced with the grid method, \
 as many people reported they had problems that sub plot mosaic was not \
 available in their version of matplotlib.
 
