@@ -47,7 +47,7 @@ pcm = pitch.heatmap(bin_statistic, ax=ax, cmap='hot', edgecolors='#22312b')
 cbar = fig.colorbar(pcm, ax=ax, shrink=0.6)
 cbar.outline.set_edgecolor('#efefef')
 cbar.ax.yaxis.set_tick_params(color='#efefef')
-plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='#efefef')
+ticks = plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='#efefef')
 
 ##############################################################################
 # Load some fonts, path effects, and a custom colormap
@@ -156,11 +156,12 @@ labels3 = pitch.label_heatmap(bin_statistic, color='#dee6ea', fontsize=18,
                               str_format='{:.0%}', path_effects=path_eff)
 
 # endnote and title
-axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
-                    fontproperties=robotto_regular.prop, color='#dee6ea')
-axs['title'].text(0.5, 0.5, "Pressure applied by\n Chelsea FC Women", color='#dee6ea',
-                  va='center', ha='center', path_effects=path_eff,
-                  fontproperties=robotto_regular.prop, fontsize=25)
+endnote_text = axs['endnote'].text(1, 0.5, '@your_twitter_handle',
+                                   va='center', ha='right', fontsize=15,
+                                   fontproperties=robotto_regular.prop, color='#dee6ea')
+title_text = axs['title'].text(0.5, 0.5, "Pressure applied by\n Chelsea FC Women",
+                               color='#dee6ea', va='center', ha='center', path_effects=path_eff,
+                               fontproperties=robotto_regular.prop, fontsize=25)
 
 
 ##############################################################################

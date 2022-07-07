@@ -56,7 +56,7 @@ pitch.arrows(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
 ax.legend(facecolor='#22312b', handlelength=5, edgecolor='None', fontsize=20, loc='upper left')
 
 # Set the title
-ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
+ax_title = ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
 
 ##############################################################################
 # Plotting with grid.

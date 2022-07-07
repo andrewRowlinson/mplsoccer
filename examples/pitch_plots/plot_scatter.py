@@ -312,10 +312,10 @@ axs['endnote'].text(1, 0.5, '@your_twitter_handle', color=pitch.line_color,
                     fontproperties=fm_rubik.prop)
 
 # title text
-axs['title'].text(0.5, 0.7, "Barcelona shots", color=pitch.line_color,
-                  va='center', ha='center', fontproperties=fm_rubik.prop, fontsize=30)
-axs['title'].text(0.5, 0.25, "versus Sevilla", color=pitch.line_color,
-                  va='center', ha='center', fontproperties=fm_rubik.prop, fontsize=20)
+title1 = axs['title'].text(0.5, 0.7, "Barcelona shots", color=pitch.line_color,
+                           va='center', ha='center', fontproperties=fm_rubik.prop, fontsize=30)
+title2 = axs['title'].text(0.5, 0.25, "versus Sevilla", color=pitch.line_color,
+                           va='center', ha='center', fontproperties=fm_rubik.prop, fontsize=20)
 
 ##############################################################################
 # Rotated markers

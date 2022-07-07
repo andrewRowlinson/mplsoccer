@@ -1,6 +1,6 @@
 """
 =========
-Statsbomb
+StatsBomb
 =========
 
 mplsoccer contains functions to return StatsBomb data in a flat, tidy dataframe.
@@ -13,14 +13,31 @@ read the user agreement carefully (on the same page).
 It can be used with the StatBomb `open-data <https://github.com/statsbomb/open-data>`_
 or the StatsBomb API if you are lucky enough to have access:
 
+StatsBomb API:
 .. code-block:: python
 
-    # this only works if you have access to the StatsBomb API
-    # and assumes you have set the environmental variables SB_USERNAME and SB_PASSWORD
-    # otherwise pass the arguments: parser = Sbapi(username='changeme', password='changeme')
+    # this only works if you have access
+    # to the StatsBomb API and assumes
+    # you have set the environmental
+    # variables SB_USERNAME
+    # and SB_PASSWORD
+    # otherwise pass the arguments:
+    # parser = Sbapi(username='changeme',
+    # password='changeme')
     from mplsoccer import Sbapi
     parser = Sbapi(dataframe=True)
-    events, related, freeze, tactics = parser.event(3788741)
+    (events, related,
+     freeze, tactics) = parser.event(3788741)
+
+StatsBomb local data:
+.. code-block:: python
+
+    from mplsoccer import Sblocal
+    parser = Sblocal(dataframe=True)
+    (events, related,
+     freeze, tactics) = parser.event(3788741)
+
+
 
 Here are some alternatives to mplsoccer's statsbomb module:
 

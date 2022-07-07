@@ -58,7 +58,7 @@ for idx, ax in enumerate(axs.flat):
     cmap_name = f'cmr.{cmap_names[idx]}'
     cmap = all_cmap_dict[cmap_names[idx]]
     kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=cmap, shade=True, levels=100)
-    ax.set_title(cmap_name, fontsize=15)
+    ax_title = ax.set_title(cmap_name, fontsize=15)
 
 ##############################################################################
 # Cmasher kdeplot
