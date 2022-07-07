@@ -11,48 +11,48 @@ from the StatsBomb open-data, API, and local files.
 
 ### Added
 * :heart_eyes: Added a turbine chart, which is a Radar plot with multiple kernel density \
-estimators  plotted in the center. \
+estimators  plotted to show where in the distribution a person falls. \
 Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314)
 * :heart_eyes: Delaunay triangulation added to Pitch classes by \
-[Matthew Williamson]( https://twitter.com/photomattic) using ``triplot`` method.
-* Binnumbers added to bin_statistic methods to give the bin indices for each event. \
+[Matthew Williamson]( https://twitter.com/photomattic) using the ``triplot`` method.
+* Binnumbers added to the ``bin_statistic`` methods to give the bin indices for each event. \
 If the event has a null coordinate or a coordinate outside the pitch the \
 indices are set to negative one.
 * :icecream: ``corner_arcs`` Boolean argument added to pitches by \
-[Devin Pleuler]( https://twitter.com/devinpleuler).
-* * :icecream: Added ``linestyle``, ``goal_linestyle``, and ``line_alpha`` \
-arguments for styling the pitches.
+[Devin Pleuler]( https://twitter.com/devinpleuler) for plotting corner arcs.
+* :icecream: Added the ``linestyle``, ``goal_linestyle``, and ``line_alpha`` \
+arguments for styling of the pitches.
 * :icecream: Added ``spoke`` method to the Radar class for drawing lines from the center \
 of the radar to the edges for each plotted statistic.
 * :new: Added the ``greater_is_better`` argument to Radar. If greater_is_better \
 is False for a respective parameter then the radar object will flip the statistic. \
 In soccer, this is useful for parameters like miss-controls where fewer miss-controls \
 is better than more. The default (None) sets all values to True (i.e. no flips).
-* :new: Added the grid module, which allows the ``grid``  function to be \
+* :new: Added the ``grid`` module, which allows the ``grid``  function to be \
 used with other types of charts.
 * :new: Added the ``statistic=circmean`` argument to bin_statistic, which uses \
 a nan safe version of scipy circmean.
-* :new: Added the ``draw_radar_solid`` method to Radar to draw a single radar \
-without clipping to the radar rings to allow more easily multiple radars \
-to be plotted on the sae chart.
+* :new: Added the ``draw_radar_solid`` method to ``Radar`` to more easily plot multiple radars \
+on the same chart.
 
 ### Changes
 * :ok: ``polygon`` method of the Pitch class changed to plot multiple of \
 matplotlib.patches.Polygon rather than one matplotlib.collections.PatchCollection \
 so they can be clipped more easily to the shape of other patches.
 * :ok: Removed warnings for ``figsize``, ``tight_layout``, ``contrained_layout``, \
-``layout``, ``view``, and ``orientation`` as deprecated.
+``layout``, ``view``, and ``orientation`` as the arguments are deprecated.
 * :ok:  Changed how pitch lines are drawn from one continuous line to plotting some \
 lines separately. The one continuous line way of plotting caused problems \
-with overlapping lines when using a dotted linestyle.
-* :ok: Changed how the box goal is drawn from a rectangle to a line to allow \
-goal_linestyle to work without overlapping with the pitch
-* :ok: Changed bin statistic to use the nan safe versions of mean, std, median, sum, min, max.
+as the dotted linestyle was plotted incorrectly when the lines overlapped.
+* :ok: Changed how the ``box`` goal is drawn from a rectangle to a line to allow \
+goal_linestyle to work without it overlapping with the pitch
+* :ok: Changed ``bin_statistic`` to use the nan safe versions of mean, std, median, \
+sum, min, and max.
 
 ### Docs
-* :page_with_curl: Removed sub plot mosaic from the docs and replaced with the grid method, \
-as many people reported they had problems that sub plot mosaic was not \
-available in their version of matplotlib.
+* :page_with_curl: Removed the matplotlib sub_plot_mosaic function from the docs. \
+Many people reported that they had problems because it was not available in their \
+version of matplotlib. It has been replaced with the new ``grid`` functions.
 
 :rocket: Version 1.0.7
 ----------------------
