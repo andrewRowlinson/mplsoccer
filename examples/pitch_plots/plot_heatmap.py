@@ -95,9 +95,9 @@ for label in cbar.ax.get_yticklabels():
 # endnote and title
 axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
                     fontproperties=robotto_regular.prop, color='#dee6ea')
-axs['title'].text(0.5, 0.5, "Pressure applied by Chelsea FC Women", color='white',
-                  va='center', ha='center', path_effects=path_eff,
-                  fontproperties=robotto_regular.prop, fontsize=30)
+ax_title = axs['title'].text(0.5, 0.5, "Pressure applied by Chelsea FC Women", color='white',
+                             va='center', ha='center', path_effects=path_eff,
+                             fontproperties=robotto_regular.prop, fontsize=30)
 
 ##############################################################################
 # Plot heatmap with larger cells

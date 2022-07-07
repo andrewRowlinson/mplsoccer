@@ -14,6 +14,7 @@ It can be used with the StatBomb `open-data <https://github.com/statsbomb/open-d
 or the StatsBomb API if you are lucky enough to have access:
 
 StatsBomb API:
+
 .. code-block:: python
 
     # this only works if you have access
@@ -27,17 +28,16 @@ StatsBomb API:
     from mplsoccer import Sbapi
     parser = Sbapi(dataframe=True)
     (events, related,
-     freeze, tactics) = parser.event(3788741)
+    freeze, tactics) = parser.event(3788741)
 
 StatsBomb local data:
+
 .. code-block:: python
 
     from mplsoccer import Sblocal
     parser = Sblocal(dataframe=True)
     (events, related,
-     freeze, tactics) = parser.event(3788741)
-
-
+    freeze, tactics) = parser.event(3788741)
 
 Here are some alternatives to mplsoccer's statsbomb module:
 
