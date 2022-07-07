@@ -43,6 +43,12 @@ sc1 = p.scatter(teammate_locs.x, teammate_locs.y, c='orange', s=80, ec='k', ax=a
 sc2 = p.scatter(opponent_locs.x, opponent_locs.y, c='dodgerblue', s=80, ec='k', ax=ax)
 
 # Plot the visible area
-p.polygon([visible_area], color='None', ec='k', linestyle='--', lw=2, ax=ax)
+visible = p.polygon([visible_area], color='None', ec='k', linestyle='--', lw=2, ax=ax)
+
+# clip each player to the visible area
+for p1 in t1:
+    p1.set_clip_path(visible[0])
+for p2 in t2:
+    p2.set_clip_path(visible[0])
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

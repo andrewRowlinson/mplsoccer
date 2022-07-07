@@ -233,15 +233,8 @@ class BasePitchPlot(BasePitch):
         return hexbin
 
     def polygon(self, verts, ax=None, **kwargs):
-        """ Plot polygons using a PatchCollection.
-        See: https://matplotlib.org/stable/api/collections_api.html.
+        """ Plot polygons.
         Automatically flips the x and y vertices if the pitch is vertical.
-
-        Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
-        transOffset, norm, cmap
-
-        To use cmap use set_array as per this example:
-        https://matplotlib.org/stable/gallery/shapes_and_collections/patch_collection.html.
 
         Parameters
         ----------
@@ -250,11 +243,11 @@ class BasePitchPlot(BasePitch):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to
-            matplotlib.collections.PatchCollection.
+            matplotlib.patches.Polygon
 
         Returns
         -------
-        PatchCollection : matplotlib.collections.PatchCollection
+        list of matplotlib.patches.Polygon
 
         Examples
         --------
@@ -272,11 +265,10 @@ class BasePitchPlot(BasePitch):
         for vert in verts:
             vert = np.asarray(vert)
             vert = self._reverse_vertices_if_vertical(vert)
-            polygon = patches.Polygon(vert, closed=True)
+            polygon = patches.Polygon(vert, closed=True, **kwargs)
             patch_list.append(polygon)
-        patch_collection = PatchCollection(patch_list, **kwargs)
-        patch_collection = ax.add_collection(patch_collection)
-        return patch_collection
+            ax.add_patch(polygon)
+        return patch_list
 
     def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
         """ Plot a polygon with the angle to the goal using PatchCollection.
