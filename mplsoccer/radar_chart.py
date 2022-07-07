@@ -76,7 +76,8 @@ class Radar:
             raise ValueError(msg)
         if (self.max_range < self.min_range).sum() > 0:
             msg = ('The maximum range should be greater than the minimum range '
-                   f'to flip the statistic(s) set the argument greater_is_better={max_range >= min_range}')
+                   'to flip the statistic(s) set the argument '
+                   f'greater_is_better={max_range >= min_range}')
             raise TypeError(msg)
         if self.params.size != self.round_int.size:
             msg = 'The size of params and round_int must match'
@@ -236,6 +237,46 @@ max_range=[10, 10, 10])
         radar = Polygon(vertices, **kwargs)
         radar = ax.add_patch(radar)
         return radar, vertices
+    
+    def draw_radar_solid(self, values, ax=None, kwargs=None):
+        """ Draw a single radar (polygon) without cliping to the rings.
+
+        Parameters
+        ----------
+        values : sequence of floats
+            A sequence of float values for each parameter.
+        ax : matplotlib axis, default None
+            The axis to plot on.
+        **kwargs : All keyword arguments are passed on to Polygon (radar).
+
+        Returns
+        -------
+        radar : Polygon : matplotlib.patches.Polygon
+            The radar polygon.
+        vertices : a 2d numpy array (number of vertices, 2)
+            The vertices of the radar polygon. Where the second dimension is the x, y coordinates.
+
+        Examples
+        --------
+        >>> from mplsoccer import Radar
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
+max_range=[10, 10, 10])
+        >>> fig, ax = radar.setup_axis()
+        >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
+        >>> values = [5, 3, 10]
+        >>> radar_poly, vertices = radar.draw_radar_solid(values, ax=ax, \
+kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6})
+        """
+        validate_ax(ax)
+        if kwargs is None:
+            kwargs = {}
+        # to arrays
+        values = np.asarray(values)
+        # validate array size
+        if values.size != self.params.size:
+            msg = 'The size of params and values must match'
+            raise ValueError(msg)
+        return self._draw_radar(values, ax=ax, **kwargs)
 
     def draw_radar(self, values, ax=None, kwargs_radar=None, kwargs_rings=None):
         """ Draw a single radar (polygon) and some outer rings clipped to the radar's shape.

@@ -79,8 +79,9 @@ robotto_bold = FontManager(URL6)
 # Here are the player values we are going to plot. The values are taken
 # from the excellent `fbref <https://fbref.com/en/>`_ website (supplied by StatsBomb).
 
-bruno_values =  [0.25, 0.42, 0.42, 3.47, 1.04, 8.06, 5.62, 0.97, 0.56, 5.14, 3.54]
-bruyne_values = [0.32, 0.00, 0.43, 3.50, 0.98, 7.72, 6.18, 0.98, 1.71, 4.88, 4.96]
+bruno_values =   [0.22, 0.25, 0.30, 2.54, 0.43, 5.60, 4.34, 0.29, 0.69, 5.14, 4.97]
+bruyne_values =  [0.25, 0.52, 0.37, 3.59, 0.41, 6.36, 5.68, 0.57, 1.23, 4.00, 4.54]
+erikson_values = [0.13, 0.10, 0.35, 3.08, 0.29, 6.23, 5.08, 0.43, 0.67, 3.07, 1.34]
 
 ##############################################################################
 # Making a Simple Radar Chart
@@ -100,6 +101,23 @@ param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_regular.prop)  # draw the param labels
 
 ##############################################################################
+# Adding lines from the center to the edge
+# ----------------------------------------
+# Here we add spokes from the radar center to the edge using ``Radar.spoke``.
+
+fig, ax = radar.setup_axis()  # format axis as a radar
+rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')  # draw circles
+radar_output = radar.draw_radar(bruno_values, ax=ax,
+                                kwargs_radar={'facecolor': '#aa65b2'},
+                                kwargs_rings={'facecolor': '#66d8ba'})  # draw the radar
+radar_poly, rings_outer, vertices = radar_output
+range_labels = radar.draw_range_labels(ax=ax, fontsize=15, zorder=2.5,
+                                       fontproperties=robotto_thin.prop)  # draw the range labels
+param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
+                                       fontproperties=robotto_regular.prop)  # draw the param labels
+lines = radar.spoke(ax=ax, color='#a6a4a1', linestyle='--', zorder=2)
+
+##############################################################################
 # Making a Simple Comparison
 # --------------------------
 # Here we plot two players on the same axes to compare players.
@@ -115,6 +133,44 @@ range_labels = radar.draw_range_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_regular.prop)
+
+##############################################################################
+# Comparing three or more players
+# -------------------------------
+# Here we demonstrate comparing three players on the same chart. It's possible to
+# add as many as you want by stacking ``Radar.draw_radar_solid``
+
+# plot radar
+fig, ax = radar.setup_axis()
+rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
+
+radar1, vertices1 = radar.draw_radar_solid(bruno_values, ax=ax,
+                                           kwargs={'facecolor': '#aa65b2',
+                                                   'alpha': 0.6,
+                                                   'edgecolor': '#216352',
+                                                   'lw': 3})
+
+radar2, vertices2 = radar.draw_radar_solid(bruyne_values, ax=ax,
+                                           kwargs={'facecolor': '#66d8ba',
+                                                   'alpha': 0.6,
+                                                   'edgecolor': '#216352',
+                                                   'lw': 3})
+
+radar3, vertices3 = radar.draw_radar_solid(erikson_values, ax=ax,
+                                           kwargs={'facecolor': '#697cd4',
+                                                   'alpha': 0.6,
+                                                   'edgecolor': '#222b54',
+                                                   'lw': 3})
+
+ax.scatter(vertices1[:, 0], vertices1[:, 1],
+           c='#aa65b2', edgecolors='#502a54', marker='o', s=150, zorder=2)
+ax.scatter(vertices2[:, 0], vertices2[:, 1],
+           c='#66d8ba', edgecolors='#216352', marker='o', s=150, zorder=2)
+ax.scatter(vertices3[:, 0], vertices3[:, 1],
+           c='#697cd4', edgecolors='#222b54', marker='o', s=150, zorder=2)
+
+range_labels = radar.draw_range_labels(ax=ax, fontsize=25, fontproperties=robotto_thin.prop)
+param_labels = radar.draw_param_labels(ax=ax, fontsize=25, fontproperties=robotto_regular.prop)
 
 ##############################################################################
 # Making a Clean Radar
