@@ -1,4 +1,4 @@
-:rocket: Version 1.1.0
+:rocket: Version 1.1.1
 ----------------------
 
 ### Breaking Changes
