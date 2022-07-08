@@ -47,7 +47,7 @@ df['player_name'] = np.arange(1000)
 # ---------------------------
 # We will instantiate a radar object and set the lower and upper bounds.
 # For miscontrols/ dispossessed it is better to have a lower number so we
-# will flip the statistic by adding the paramater to lower_is_better.
+# will flip the statistic by adding the paramater to ``lower_is_better``.
 
 # create the radar object with an upper and lower bound of the 5% and 95% quantiles
 low = df[params].quantile(0.05).values
@@ -87,7 +87,7 @@ param_labels = radar.draw_param_labels(ax=ax, fontsize=15, fontproperties=fm.pro
 ##############################################################################
 # Adding a title and endnote
 # --------------------------
-# Here we will add an endnote and title to the Radar. We will use the grid function to create
+# Here we will add an endnote and title to the Radar. We will use the ``grid`` function to create
 # the figure and pass the axs['radar'] axes to the Radar's methods.
 
 # creating the figure using the grid function from mplsoccer:

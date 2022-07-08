@@ -44,7 +44,7 @@ lower_is_better = ['Miscontrol']
 ##############################################################################
 # Instantiate the Radar Class
 # ---------------------------
-# We will instantiate a radar object with the above parameters so that we can re-use it
+# We will instantiate a ``Radar`` object with the above parameters so that we can re-use it
 # several times.
 
 radar = Radar(params, low, high,
@@ -59,7 +59,7 @@ radar = Radar(params, low, high,
 ##############################################################################
 # Load some fonts
 # ---------------
-# We will use mplsoccer's FontManager to load some fonts from Google Fonts.
+# We will use mplsoccer's ``FontManager`` to load some fonts from Google Fonts.
 # We borrowed the FontManager from the excellent
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
 URL1 = ('https://github.com/googlefonts/SourceSerifProGFVersion/blob/main/'
