@@ -253,12 +253,14 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full',
                                          bin_statistic1['y_grid'][:2, :],
                                          bin_statistic1['cx'][0, :],
                                          bin_statistic1['cy'][0, :],
+                                         None,
                                          None)._asdict()
         result2 = _BinnedStatisticResult(bin_statistic1['statistic'][2:, :],
                                          bin_statistic1['x_grid'][2:, :],
                                          bin_statistic1['y_grid'][2:, :],
                                          bin_statistic1['cx'][2, :],
                                          bin_statistic1['cy'][2, :],
+                                         None,
                                          None)._asdict()
 
         # middle of the pitch
@@ -271,6 +273,7 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full',
                                          bin_statistic3['y_grid'][1:-1, 1:-1],
                                          bin_statistic3['cx'][1:-1, 1:-1],
                                          bin_statistic3['cy'][1:-1, 1:-1],
+                                         None,
                                          None)._asdict()
 
         # penalty areas
@@ -283,12 +286,14 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full',
                                          bin_statistic4['y_grid'][1:-1, 0:2],
                                          bin_statistic4['cx'][1:-1, :1],
                                          bin_statistic4['cy'][1:-1, :1],
+                                         None,
                                          None)._asdict()
         result5 = _BinnedStatisticResult(bin_statistic4['statistic'][1:-1, -1:],
                                          bin_statistic4['x_grid'][1:-1, -2:],
                                          bin_statistic4['y_grid'][1:-1, -2:],
                                          bin_statistic4['cx'][1:-1, -1:],
                                          bin_statistic4['cy'][1:-1, -1:],
+                                         None,
                                          None)._asdict()
 
         stats = [result1, result2, result3, result4, result5]
