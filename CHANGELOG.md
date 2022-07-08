@@ -52,6 +52,9 @@ as the dotted linestyle was plotted incorrectly when the lines overlapped.
 sum, min, and max.
 
 ### Docs
+* :page_with_curl: Added a new tutorial section and the first tutorial expected threat. \
+Expected threat is based on the methods popularised by \
+[Karun Singh](https://twitter.com/karun1710) and [Sarah Rudd](https://twitter.com/srudd_ok).
 * :page_with_curl: Removed the matplotlib sub_plot_mosaic function from the docs. \
 Many people reported that they had problems because it was not available in their \
 version of matplotlib. It has been replaced with the new ``grid`` functions.

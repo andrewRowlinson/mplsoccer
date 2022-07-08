@@ -10,7 +10,7 @@ from mplsoccer.utils import validate_ax
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid',
-                                     'cx', 'cy', 'binnumber'))
+                                     'cx', 'cy', 'binnumber', 'inside'))
 
 
 def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
@@ -143,8 +143,10 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
                                binnumber[1, :] == num_y + 1)
     binnumber[1, mask_y_out] = -1
     binnumber[1, ~mask_y_out] = binnumber[1, ~mask_y_out] - 1
+
+    inside = np.logical_and(~mask_x_out, ~mask_y_out)
     
-    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber)._asdict()
+    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
 
     return stats
 
