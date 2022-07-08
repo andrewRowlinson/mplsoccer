@@ -200,4 +200,12 @@ move_success['xt'] = added_xt
 # show players with top 5 total expected threat
 move_success.groupby('player_name')['xt'].sum().sort_values(ascending=False).head(5)
 
+##############################################################################
+# Wrap-up
+# -------
+# We built a replica of the expected threat model `Karun Singh <https://twitter.com/karun1710>`_
+# used in his blog post, which has routes in `Sarah Rudd <https://twitter.com/srudd_ok>`_ work
+# on using Markov models to value possession. We then tried out a few potential improvements.
+# Now it's over to you to try and build on this work.
+
 plt.show()  # If you are using a Jupyter notebook you do not need this line
