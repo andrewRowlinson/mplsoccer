@@ -3,7 +3,7 @@
 improvements to expected threat
 ===============================
 
-This example tries to make some improvements to our :ref:`sphx_glr_gallery_tutorials_plot_xt.py
+This example tries to make some improvements to our :ref:`sphx_glr_gallery_tutorials_plot_xt.py`
 model. Such as filtering out set pieces, changing the grid layout, and changing the simple
 goal probabilities with the average of a better expected goals model. Can you think of
 any more improvements?

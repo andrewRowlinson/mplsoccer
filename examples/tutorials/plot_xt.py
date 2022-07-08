@@ -233,6 +233,6 @@ move_success.groupby('player_name')['xt'].sum().sort_values(ascending=False).hea
 # Improvements
 # ------------
 # Now we have a simple model, let's try to make some
-# :ref:`sphx_glr_gallery_tutorials_plot_xt_improvements.py model.
+# :ref:`sphx_glr_gallery_tutorials_plot_xt_improvements.py` model.
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
