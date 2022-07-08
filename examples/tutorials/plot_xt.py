@@ -3,28 +3,30 @@
 Expected threat
 ===============
 
-This example shows how to create expected threat (xT). Expected threat is a way of valuing
-the likelihood of scoring when in possession of the ball at a position on the football pitch.
+This example shows how to create an expected threat (xT) model. Expected threat is a method
+for valuing the likelihood of scoring with possession of the ball at
+a position on the football pitch.
 
-Expected threat is based on `markov chains <https://en.wikipedia.org/wiki/Markov_chain>`_.
-The key to modelling soccer in this way is the probability of scoring only depends on the current
-action, it is memoryless, it does not consider what happened before or after the action.
-Often in soccer this isn't a fair assumption as attacks may form quickly on the counter or due
-to pressuring the opponent high up the field.
+Expected threat is based on `Markov chains <https://en.wikipedia.org/wiki/Markov_chain>`_.
+The main assumption for modelling soccer in this way is the probability of scoring
+only depends on the current action, it is memoryless, and it does not consider what
+happened before or after the event. Often in soccer, this isn't a fair assumption as attacks
+may form quickly on the counter or due to pressuring the opponent high up the field. In
+reality how an action came about may have an impact on what happens next.
 
-I really recommend reading through this excellent
+I recommend reading through this excellent
 `blog post <https://soccermatics.medium.com/explaining-expected-threat-cbc775d97935>`_ by
 `David Sumpter (@soccermatics) <https://twitter.com/Soccermatics>`_ on the history of expected
-threat, its limitations, and extensions.
+threat, its limitations, and possible extensions.
 
-The first use of markov chains to evaluate the probability of scoring was by
+The first use of Markov chains to evaluate the probability of scoring was by
 `Sarah Rudd <https://twitter.com/srudd_ok>`_ in their
-`conference presentation <http://nessis.org/nessis11/rudd.pdf>`_ "a framework for tactial
-analysis and individual offensive production assessment in soccer using markov chains." Although
-not named expected threat it contained many of the ideas used here. The idea was then popularised
-and named by `Karun Singh <https://twitter.com/karun1710>`_
+`conference presentation <http://nessis.org/nessis11/rudd.pdf>`_ "a framework for tactical
+analysis and individual offensive production assessment in soccer using Markov chains." Although
+not named expected threat it contained many of the ideas used here.
+`Karun Singh <https://twitter.com/karun1710>`_ then popularised and named the idea
 in their `fantastic interactive blog post <https://karun.in/blog/expected-threat.html>`_. In this
-tutorial we model expected threat using Karun's ideas.
+tutorial, we model expected threat using Karun's ideas in the blog post.
 """
 
 import matplotlib.patheffects as path_effects
@@ -49,7 +51,8 @@ bins = (16, 12)  # 16 cells x 12 cells
 # Get event data
 # --------------
 # Get event data from the FA Women's Super League 2019/20.
-# Here we include only regular play events, which excludes set pieces and also counter-attacks.
+# Here we include only the carries, shots, and passes used to model expected threat.
+# You may additionally want to filter out set pieces and counter-attacks.
 
 # first let's get the match file which lists all the match identifiers for
 # the 87 games from the FA WSL 2019/20
@@ -95,16 +98,21 @@ fig, ax = pitch.draw()
 shot_heatmap = pitch.heatmap(shot_probability, ax=ax)
 
 ##############################################################################
+# Plot move probability
+# ---------------------
+# As we only consider moves and shot probabilities. This is the mirror of the shot probability.
+# The shot_probability + goal_probability adds up to one for each grid cell,
+# as we assume only these two event types occur when in possession.
+fig, ax = pitch.draw()
+move_heatmap = pitch.heatmap(move_probability, ax=ax)
+
+##############################################################################
 # Plot goal probability
 # ---------------------
 fig, ax = pitch.draw()
 goal_heatmap = pitch.heatmap(goal_probability, ax=ax)
 
-##############################################################################
-# Plot move probability
-# ---------------------
-fig, ax = pitch.draw()
-move_heatmap = pitch.heatmap(move_probability, ax=ax)
+
 
 ##############################################################################
 # Calculate the move transition matrix
@@ -197,6 +205,7 @@ _ = pitch.heatmap(for_plotting, ax=ax)
 _ = pitch.label_heatmap(for_plotting, ax=ax, str_format='{:.2%}',
                         color='white', fontsize=14, va='center', ha='center',
                         path_effects=path_eff)
+# sphinx_gallery_thumbnail_path = 'gallery/tutorials/images/sphx_glr_plot_xt_004'
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
 
