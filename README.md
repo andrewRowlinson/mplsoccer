@@ -1,6 +1,4 @@
-<p align="center">
-<img src="/docs/source/logo.png" width="235px" alt="mplsoccer logo"/>
-</p>
+![mplsoccer logo](https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/docs/source/logo.png)
 
 **mplsoccer is a Python library for plotting soccer/football charts in Matplotlib 
 and loading StatsBomb open-data.**
@@ -35,7 +33,7 @@ pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
 fig, ax = pitch.draw()
 plt.show()
 ```
-![alt text](/docs/quick_start.png "statsbomb quick start pitch example")
+![mplsoccer pitch](https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/docs/quick_start.png)
 
 Plot a Radar
 ```python
@@ -52,7 +50,7 @@ range_labels = radar.draw_range_labels(ax=ax)
 param_labels = radar.draw_param_labels(ax=ax)
 plt.show()
 ```
-![alt text](/docs/quick_start_radar.png "radar quick start example")
+![mplsoccer radar](https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/docs/quick_start_radar.png)
 
 ---
 
