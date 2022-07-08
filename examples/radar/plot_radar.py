@@ -31,11 +31,15 @@ import matplotlib.pyplot as plt
 # parameter names of the statistics we want to show
 params = ["npxG", "Non-Penalty Goals", "xA", "Key Passes", "Through Balls",
           "Progressive Passes", "Shot-Creating Actions", "Goal-Creating Actions",
-          "Dribbles Completed", "Pressure Regains", "Touches In Box"]
+          "Dribbles Completed", "Pressure Regains", "Touches In Box", "Miscontrol"]
 
 # The lower and upper boundaries for the statistics
-low =  [0.08, 0.0, 0.1, 1, 0.6,  4, 3, 0.3, 0.3, 2.0, 2]
-high = [0.37, 0.6, 0.6, 4, 1.2, 10, 8, 1.3, 1.5, 5.5, 5]
+low =  [0.08, 0.0, 0.1, 1, 0.6,  4, 3, 0.3, 0.3, 2.0, 2, 0]
+high = [0.37, 0.6, 0.6, 4, 1.2, 10, 8, 1.3, 1.5, 5.5, 5, 5]
+
+# Add anything to this list where having a lower number is better
+# this flips the statistic
+lower_is_better = ['Miscontrol']
 
 ##############################################################################
 # Instantiate the Radar Class
@@ -44,8 +48,9 @@ high = [0.37, 0.6, 0.6, 4, 1.2, 10, 8, 1.3, 1.5, 5.5, 5]
 # several times.
 
 radar = Radar(params, low, high,
+              lower_is_better=lower_is_better,
               # whether to round any of the labels to integers instead of decimal places
-              round_int=[False]*11,
+              round_int=[False]*len(params),
               num_rings=4,  # the number of concentric circles (excluding center circle)
               # if the ring_width is more than the center_circle_radius then
               # the center circle radius will be wider than the width of the concentric circles
@@ -79,9 +84,9 @@ robotto_bold = FontManager(URL6)
 # Here are the player values we are going to plot. The values are taken
 # from the excellent `fbref <https://fbref.com/en/>`_ website (supplied by StatsBomb).
 
-bruno_values =   [0.22, 0.25, 0.30, 2.54, 0.43, 5.60, 4.34, 0.29, 0.69, 5.14, 4.97]
-bruyne_values =  [0.25, 0.52, 0.37, 3.59, 0.41, 6.36, 5.68, 0.57, 1.23, 4.00, 4.54]
-erikson_values = [0.13, 0.10, 0.35, 3.08, 0.29, 6.23, 5.08, 0.43, 0.67, 3.07, 1.34]
+bruno_values =   [0.22, 0.25, 0.30, 2.54, 0.43, 5.60, 4.34, 0.29, 0.69, 5.14, 4.97, 1.10]
+bruyne_values =  [0.25, 0.52, 0.37, 3.59, 0.41, 6.36, 5.68, 0.57, 1.23, 4.00, 4.54, 1.39]
+erikson_values = [0.13, 0.10, 0.35, 3.08, 0.29, 6.23, 5.08, 0.43, 0.67, 3.07, 1.34, 1.06]
 
 ##############################################################################
 # Making a Simple Radar Chart

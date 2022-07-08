@@ -27,11 +27,12 @@ class Radar:
         The name of parameters (e.g. 'Key Passes')
     min_range, max_range : sequence of floats
         Minimum and maximum range for each parameter (inner and outer edge of the Radar).
-    greater_is_better : sequence of bool, default None
-        If greater_is_better is False for a respective parameter then the radar object
-        will flip the statistic. In soccer, this is useful for parameters like miss-controls
+    lower_is_better : sequence of str, default None
+        Any params where it is better to have a lower statistic should be in this list.
+        If any of the strings match the params the the statistic will be flipped.
+        In soccer, this is useful for parameters like miss-controls
         where fewer miss-controls is better than more.
-        The default (None) sets all values to True (i.e. no flips).
+        The default (None), which does not flip any statistic.
     round_int : sequence of bool, default None
         Whether to round the respective range values to integers (if True) or floats (if False).
         The default (None) sets all range values to floats.
@@ -45,15 +46,18 @@ class Radar:
         the same size as the center circle radius. If the center_circle_radius is increased to
         more than the ring_width then the center circle radius is wider than the rings.
     """
-    def __init__(self, params, min_range, max_range, greater_is_better=None, round_int=None,
+    def __init__(self, params, min_range, max_range, lower_is_better=None, round_int=None,
                  num_rings=4, ring_width=1, center_circle_radius=1):
         self.params = np.asarray(params)
         self.min_range = np.asarray(min_range)
         self.max_range = np.asarray(max_range)
-        if greater_is_better is None:
+        self.lower_is_better = lower_is_better
+        if lower_is_better is None:
             self.greater_is_better = np.array([True] * self.params.size)
         else:
-            self.greater_is_better = np.asarray(greater_is_better)
+            lower_is_better = [param.lower().strip() for param in lower_is_better]
+            self.greater_is_better = np.asarray([param.lower().strip() not in lower_is_better 
+                                                 for param in params])
         if round_int is None:
             self.round_int = np.array([False] * self.params.size)
         else:
@@ -96,8 +100,8 @@ class Radar:
         if (~self.greater_is_better).sum() > 0:
             max_range_copy = self.max_range.copy()
             min_range_copy = self.min_range.copy()
-            self.min_range = np.where(greater_is_better, min_range_copy, max_range_copy)
-            self.max_range = np.where(greater_is_better, max_range_copy, min_range_copy)
+            self.min_range = np.where(self.greater_is_better, min_range_copy, max_range_copy)
+            self.max_range = np.where(self.greater_is_better, max_range_copy, min_range_copy)
 
         # get the rotation angles
         self.rotation = (2 * np.pi / self.num_labels) * np.arange(self.num_labels)
@@ -127,6 +131,7 @@ class Radar:
                 f'params={self.params!r}, '
                 f'min_range={self.min_range!r}, '
                 f'max_range={self.max_range!r}, '
+                f'lower_is_better={self.lower_is_better!r}, '
                 f'greater_is_better={self.greater_is_better!r}, '
                 f'round_int={self.round_int!r})')
 

@@ -46,11 +46,14 @@ df['player_name'] = np.arange(1000)
 # Instantiate the Radar Class
 # ---------------------------
 # We will instantiate a radar object and set the lower and upper bounds.
+# For miscontrols/ dispossessed it is better to have a lower number so we
+# will flip the statistic by adding the paramater to lower_is_better.
 
 # create the radar object with an upper and lower bound of the 5% and 95% quantiles
 low = df[params].quantile(0.05).values
 high = df[params].quantile(0.95).values
-radar = Radar(params, low, high, num_rings=4)
+lower_is_better = ['Miscontrols/ Dispossessed']
+radar = Radar(params, low, high, lower_is_better=lower_is_better, num_rings=4)
 
 ##############################################################################
 # Load a font

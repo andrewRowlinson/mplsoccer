@@ -5,6 +5,14 @@
 * :x: The ``statsbomb`` module is completely overhauled to make it easier to use. \
 The module now contains three classes ``Sbopen``, ``Sbapi`` and ``Sblocal`` for retrieving data \
 from the StatsBomb open-data, API, and local files.
+* :x: Added the ``lower_is_better`` argument to Radar. If any of lower_is_better \
+strings are in the parameter list then the radar object will flip the statistic. \
+Previously you had to manually switch the order of the min_range and max_range \
+to flip the statistic. In soccer, this is useful for parameters like miss-controls \
+where fewer miss-controls is better than more. \
+The default (None) does not flip any of the parameters.
+* :new: Added the ``grid`` module, which allows the ``grid``  function to be \
+used with other types of charts.
 * :x: The ``grid`` method is changed so if there is no endnote or title then the axes \
 (or numpy array of axes) are returned rather than a dictionary.
 * :x: Renamed ``calculate_grid_dimensions`` to ``grid_dimensions``.
@@ -15,21 +23,15 @@ estimators  plotted to show where in the distribution a person falls. \
 Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314)
 * :heart_eyes: Delaunay triangulation added to Pitch classes by \
 [Matthew Williamson]( https://twitter.com/photomattic) using the ``triplot`` method.
-* Binnumbers added to the ``bin_statistic`` methods to give the bin indices for each event. \
-If the event has a null coordinate or a coordinate outside the pitch the \
-indices are set to negative one.
+* :heart_eyes: Binnumbers added to the ``bin_statistic`` methods to give \
+the bin indices for each event. If the event has a null coordinate or a coordinate \
+outside the pitch the indices are set to negative one.
 * :icecream: ``corner_arcs`` Boolean argument added to pitches by \
 [Devin Pleuler]( https://twitter.com/devinpleuler) for plotting corner arcs.
 * :icecream: Added the ``linestyle``, ``goal_linestyle``, and ``line_alpha`` \
 arguments for styling of the pitches.
 * :icecream: Added ``spoke`` method to the Radar class for drawing lines from the center \
 of the radar to the edges for each plotted statistic.
-* :new: Added the ``greater_is_better`` argument to Radar. If greater_is_better \
-is False for a respective parameter then the radar object will flip the statistic. \
-In soccer, this is useful for parameters like miss-controls where fewer miss-controls \
-is better than more. The default (None) sets all values to True (i.e. no flips).
-* :new: Added the ``grid`` module, which allows the ``grid``  function to be \
-used with other types of charts.
 * :new: Added the ``statistic=circmean`` argument to bin_statistic, which uses \
 a nan safe version of scipy circmean.
 * :new: Added the ``draw_radar_solid`` method to ``Radar`` to more easily plot multiple radars \
