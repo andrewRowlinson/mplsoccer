@@ -14,15 +14,14 @@ import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap
 import cmasher as cmr
 
-from mplsoccer import VerticalPitch
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import VerticalPitch, Sbopen
 from mplsoccer.utils import FontManager
 
 # get data
-match_files = ['19789.json', '19794.json', '19805.json']
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
-df = pd.concat([read_event(f'{EVENT_SLUG}/{file}', **kwargs)['event'] for file in match_files])
+parser = Sbopen()
+match_files = [19789, 19794, 19805]
+df = pd.concat([parser.event(file)[0] for file in match_files])  # 0 index is the event file
+
 # filter chelsea pressure events
 mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pressure')
 df = df.loc[mask_chelsea_pressure, ['x', 'y']]
@@ -55,11 +54,11 @@ fig, axs = pitch.grid(nrows=11, ncols=4, space=0.1, figheight=40,
                       title_height=0, endnote_height=0,  # no title/ endnote
                       grid_width=0.9, grid_height=0.98, bottom=0.01, left=0.05)
 cmap_names = list(all_cmap_dict.keys())
-for idx, ax in enumerate(axs['pitch'].flat):
+for idx, ax in enumerate(axs.flat):
     cmap_name = f'cmr.{cmap_names[idx]}'
     cmap = all_cmap_dict[cmap_names[idx]]
     kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=cmap, shade=True, levels=100)
-    ax.set_title(cmap_name, fontsize=15)
+    ax_title = ax.set_title(cmap_name, fontsize=15)
 
 ##############################################################################
 # Cmasher kdeplot

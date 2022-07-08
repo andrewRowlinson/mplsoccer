@@ -9,16 +9,13 @@ This example shows how to plot all passes from a team in a match as lines.
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
-from mplsoccer import Pitch, VerticalPitch, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import Pitch, VerticalPitch, FontManager, Sbopen
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
-# get event dataframe for game 7478, create a dataframe of the passes,
-# and a boolean mask for the outcome
-df = read_event(f'{EVENT_SLUG}/7478.json',
-                related_event_df=False, shot_freeze_frame_df=False,
-                tactics_lineup_df=False)['event']
+# get event dataframe for game 7478
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
 
 ##############################################################################
 # Boolean mask for filtering the dataset by team
@@ -61,7 +58,7 @@ lc2 = pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
 ax.legend(facecolor='#22312b', edgecolor='None', fontsize=20, loc='upper left', handlelength=4)
 
 # Set the title
-ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
+ax_title = ax.set_title(f'{team1} passes vs {team2}', fontsize=30)
 
 ##############################################################################
 # Plotting with grid.
@@ -98,9 +95,9 @@ for text in legend.get_texts():
 # endnote and title
 axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=20,
                     fontproperties=robotto_regular.prop, color='#dee6ea')
-axs['title'].text(0.5, 0.5, f'{team1} passes vs {team2}', color='#dee6ea',
-                  va='center', ha='center',
-                  fontproperties=robotto_regular.prop, fontsize=25)
+ax_title = axs['title'].text(0.5, 0.5, f'{team1} passes vs {team2}', color='#dee6ea',
+                             va='center', ha='center',
+                             fontproperties=robotto_regular.prop, fontsize=25)
 
 ##############################################################################
 # Filter datasets to only include passes leading to shots, and goals

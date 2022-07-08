@@ -1,14 +1,14 @@
 name: mplsoccer
 channels:
-  - anaconda
   - conda-forge
+  - defaults
 dependencies:
   - jupyter
   - pandas
   - scipy
   - cmasher
   - seaborn
-  - beautifulsoup4
+  - requests
   - pyarrow
   - pillow
   - lxml

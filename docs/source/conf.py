@@ -79,6 +79,7 @@ sphinx_gallery_conf = {
                                        '../../examples/pizza_plots',
                                        '../../examples/bumpy_charts',
 									   '../../examples/pitch_plots',
+									   '../../examples/tutorials',
                                        '../../examples/statsbomb',
                                        '../../examples/pitch_setup', ])}
 

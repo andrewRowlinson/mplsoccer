@@ -13,14 +13,11 @@ import seaborn as sns
 from matplotlib.cm import get_cmap
 import matplotlib.pyplot as plt
 
-from mplsoccer import Pitch, VerticalPitch
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
-from mplsoccer.utils import FontManager
+from mplsoccer import Pitch, VerticalPitch, Sbopen, FontManager
 
 # get data for a Sevilla versus Barcelona match with a high amount of shots
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
-df = read_event(f'{EVENT_SLUG}/9860.json', **kwargs)['event']
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(9860)
 
 # setup the mplsoccer StatsBomb Pitches
 # note not much padding around the pitch so the marginal axis are tight to the pitch
@@ -109,11 +106,8 @@ txt2 = axs['pitch'].text(x=105, y=70, s=team2, fontproperties=fm.prop, color='#6
 # Get more shot data for additional games
 
 # sevilla versus barcelona 2014/2015 to 2019/2020
-sevilla_games = ['265835.json', '266142.json', '265839.json', '266989.json', '266280.json',
-                 '9673.json', '9860.json', '16029.json', '16190.json', '303473.json', '303674.json']
-df_list = [read_event(f'{EVENT_SLUG}/{file}', **kwargs)['event'] for file in sevilla_games]
-
-df = pd.concat(df_list)
+match_files = [265835, 266142, 265839, 266989, 266280, 9673, 9860, 16029, 16190, 303473, 303674]
+df = pd.concat([parser.event(file)[0] for file in match_files])  # 0 index is the event file
 
 # subset the shots
 df_shots = df[df.type_name == 'Shot'].copy()

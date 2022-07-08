@@ -10,16 +10,13 @@ from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
-from mplsoccer import Pitch, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import Pitch, FontManager, Sbopen
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
 
-# get event dataframe for game 7478, create a dataframe of the passes,
-# and a boolean mask for the outcome
-df = read_event(f'{EVENT_SLUG}/7478.json',
-                related_event_df=False, shot_freeze_frame_df=False,
-                tactics_lineup_df=False)['event']
+# get event dataframe for game 7478
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
 
 ##############################################################################
 # Boolean mask for filtering the dataset by team
@@ -49,7 +46,7 @@ hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Blues')
 fm = pitch.flow(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y,
                 color='black', arrow_type='same',
                 arrow_length=5, bins=bins, ax=ax)
-ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
+ax_title = ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
 
 ##############################################################################
 # Plotting using a cmap and scaled arrows
@@ -64,7 +61,7 @@ hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Reds')
 grey = LinearSegmentedColormap.from_list('custom cmap', ['#DADADA', 'black'])
 fm = pitch.flow(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y, cmap=grey,
                 arrow_type='scale', arrow_length=15, bins=bins, ax=ax)
-ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
+ax_title = ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
 
 ##############################################################################
 # Plotting with arrow lengths equal to average distance
@@ -78,7 +75,7 @@ hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Greens')
 # arrow length equal to the average distance in the cell
 fm = pitch.flow(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y, color='black',
                 arrow_type='average', bins=bins, ax=ax)
-ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
+ax_title = ax.set_title(f'{team1} pass flow map vs {team2}', fontsize=30, pad=-20)
 
 ##############################################################################
 # Plotting with an endnote/title

@@ -12,19 +12,14 @@ it stays that way after conversion. During conversion, coordinates outside the p
 side-lines are clipped to the pitch shape, while missing values are maintained.
 """
 
-import os
-import json
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import requests
 from kloppy import wyscout
 from adjustText import adjust_text
 from highlight_text import ax_text
 
-from mplsoccer import VerticalPitch, Standardizer, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import VerticalPitch, Standardizer, FontManager, Sbopen
 
 ##############################################################################
 # First, let's demonstate converting ``statsbomb`` coordinates to ``tracab`` coordinates.
@@ -122,21 +117,10 @@ _ = ax_text(34, 73, TEXT2, va='center', ha='center', fontproperties=fm.prop,
 # game and standardize to the same coordinates to compare.
 
 # Get the StatsBomb data
-df_statsbomb = read_event(f'{EVENT_SLUG}/7579.json',
-                          related_event_df=False, shot_freeze_frame_df=False,
-                          tactics_lineup_df=False)['event']
+parser = Sbopen()
+df_statsbomb = parser.event(7579)[0]  # events are the zero index
 
-# saving the file locally as readthedocs won't allow me to load it directly with kloppy
-# normally can skip this and do: dataset = wyscout.load_open_data(match_id=2058002, coordinates='wyscout')
-WYSCOUT_URL = (f'https://raw.githubusercontent.com/koenvo/wyscout-soccer-match-event-dataset/'
-               f'main/processed/files/2058002.json')
-response = requests.get(url=WYSCOUT_URL)
-response.encoding = 'unicode-escape'  # to make sure the encoding for é etc. is correct
-data = response.json()
-with open('2058002.json', 'w') as file:
-    json.dump(data, file)
-
-dataset = wyscout.load(event_data='2058002.json', coordinates='wyscout')
+dataset = wyscout.load_open_data(match_id=2058002, coordinates='wyscout')
 df_wyscout = dataset.to_pandas(
         additional_columns={
             'player_name': lambda event: str(event.player),
@@ -230,8 +214,7 @@ x_std, y_std = wyscout_to_statsbomb.transform(df_wyscout.coordinates_x,
 # According to Wikipedia the Campo de fútbol de Vallecas stadium is 100 meters x 65 meters
 # Let's load StatsBomb data from a Rayo Vallecano home game versus Barcelona and convert to meters.
 
-df_rayo_vallecano = read_event(f'{EVENT_SLUG}/266653.json')['event']
-
+df_rayo_vallecano = parser.event(266653)[0]  # events are the zero index
 statsbomb_to_custom = Standardizer(pitch_from='statsbomb',
                                    pitch_to='custom', length_to=100, width_to=65)
 

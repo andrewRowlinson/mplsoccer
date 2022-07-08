@@ -12,18 +12,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 
-from mplsoccer import Pitch, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import Pitch, FontManager, Sbopen
 
 ##############################################################################
 # Set team and match info, and get event and tactics dataframes for the defined match_id
-
-MATCH_ID = 15946
+parser = Sbopen()
+events, related, freeze, players = parser.event(15946)
 TEAM = 'Barcelona'
 OPPONENT = 'versus Alavés (A), 2018/19 La Liga'
-event_dict = read_event(f'{EVENT_SLUG}/{MATCH_ID}.json', warn=False)
-players = event_dict['tactics_lineup']
-events = event_dict['event']
 
 ##############################################################################
 # Adding on the last tactics id and formation for the team for each event
@@ -40,7 +36,7 @@ formation_dict = {1: 'GK', 2: 'RB', 3: 'RCB', 4: 'CB', 5: 'LCB', 6: 'LB', 7: 'RW
                   8: 'LWB', 9: 'RDM', 10: 'CDM', 11: 'LDM', 12: 'RM', 13: 'RCM',
                   14: 'CM', 15: 'LCM', 16: 'LM', 17: 'RW', 18: 'RAM', 19: 'CAM',
                   20: 'LAM', 21: 'LW', 22: 'RCF', 23: 'ST', 24: 'LCF', 25: 'SS'}
-players['position_abbreviation'] = players.player_position_id.map(formation_dict)
+players['position_abbreviation'] = players.position_id.map(formation_dict)
 
 ##############################################################################
 # Add on the subsitutions to the players dataframe, i.e. where players are subbed on

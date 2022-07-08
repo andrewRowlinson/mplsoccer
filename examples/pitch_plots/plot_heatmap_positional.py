@@ -12,14 +12,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap
 
-from mplsoccer import VerticalPitch, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import VerticalPitch, FontManager, Sbopen
 
 # get data
-match_files = ['19789.json', '19794.json', '19805.json']
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
-df = pd.concat([read_event(f'{EVENT_SLUG}/{file}', **kwargs)['event'] for file in match_files])
+parser = Sbopen()
+match_files = [19789, 19794, 19805]
+df = pd.concat([parser.event(file)[0] for file in match_files])  # 0 index is the event file
 # filter chelsea pressure events
 mask_chelsea_pressure = (df.team_name == 'Chelsea FCW') & (df.type_name == 'Pressure')
 df = df.loc[mask_chelsea_pressure, ['x', 'y']]

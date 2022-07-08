@@ -8,22 +8,18 @@ This example shows how to plot a shot freeze frame.
 
 import matplotlib.pyplot as plt
 
-from mplsoccer import VerticalPitch, FontManager
-from mplsoccer.statsbomb import read_event, read_lineup, EVENT_SLUG, LINEUP_SLUG
+from mplsoccer import VerticalPitch, FontManager, Sbopen
 
 plt.style.use('ggplot')
 
 # get event and lineup dataframes for game 7478
-
 # event data
-dict_event = read_event(f'{EVENT_SLUG}/7478.json',
-                        related_event_df=False, tactics_lineup_df=False, warn=False)
-df_event = dict_event['event']
-df_freeze = dict_event['shot_freeze_frame']
+parser = Sbopen()
+df_event, df_related, df_freeze, df_tactics = parser.event(7478)
 
 # lineup data
-df_lineup = read_lineup(f'{LINEUP_SLUG}/7478.json', warn=False)
-df_lineup = df_lineup[['player_id', 'player_jersey_number', 'team_name']].copy()
+df_lineup = parser.lineup(7478)
+df_lineup = df_lineup[['player_id', 'jersey_number', 'team_name']].copy()
 
 ##############################################################################
 # Subset a shot
@@ -45,9 +41,9 @@ team2 = list(set(df_event.team_name.unique()) - {team1})[0]
 # subset the team shooting, and the opposition (goalkeeper/ other)
 df_team1 = df_freeze_frame[df_freeze_frame.team_name == team1]
 df_team2_goal = df_freeze_frame[(df_freeze_frame.team_name == team2) &
-                                (df_freeze_frame.player_position_name == 'Goalkeeper')]
+                                (df_freeze_frame.position_name == 'Goalkeeper')]
 df_team2_other = df_freeze_frame[(df_freeze_frame.team_name == team2) &
-                                 (df_freeze_frame.player_position_name != 'Goalkeeper')]
+                                 (df_freeze_frame.position_name != 'Goalkeeper')]
 
 ##############################################################################
 # Plotting
@@ -85,7 +81,7 @@ pitch.goal_angle(df_shot_event.x, df_shot_event.y, ax=axs['pitch'], alpha=0.2, z
 robotto_regular = FontManager()
 
 # plot the jersey numbers
-for i, label in enumerate(df_freeze_frame.player_jersey_number):
+for i, label in enumerate(df_freeze_frame.jersey_number):
     pitch.annotate(label, (df_freeze_frame.x[i], df_freeze_frame.y[i]),
                    va='center', ha='center', color='white',
                    fontproperties=robotto_regular.prop, fontsize=15, ax=axs['pitch'])

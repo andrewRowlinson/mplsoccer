@@ -3,54 +3,52 @@
 Plots a Voronoi diagram
 =======================
 
-This example shows how to plot a Voronoi diagram for a shot freeze frame.
+This example shows how to plot a Voronoi diagram for a freeze frame.
 """
-
 import matplotlib.pyplot as plt
+from mplsoccer import Pitch, Sbopen
 import numpy as np
-import pandas as pd
 
-from mplsoccer import VerticalPitch
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
-
-plt.style.use('dark_background')
-
-# get event and freeze frame data for game 7478
-dict_event = read_event(f'{EVENT_SLUG}/7478.json', related_event_df=False,
-                        tactics_lineup_df=False, warn=False)
-df_event = dict_event['event']
-df_freeze = dict_event['shot_freeze_frame']
+# get freeze frame data for game 3788741
+parser = Sbopen()
+frames, visible = parser.frame(3788741)
 
 ##############################################################################
 # Subset a shot
 
-SHOT_ID = '8bb8bbc2-68a6-4c01-93de-53a194e7a1cf'
-df_freeze_frame = df_freeze[df_freeze.id == SHOT_ID].copy()
-df_shot_event = df_event[df_event.id == SHOT_ID].dropna(axis=1, how='all').copy()
+frame_idx = 50
+frame_id = visible.iloc[50].id
 
-##############################################################################
-# Location dataset
+visible_area = np.array(visible.iloc[frame_idx].visible_area).reshape(-1, 2)
+player_position_data = frames[frames.id == frame_id]
 
-df = pd.concat([df_shot_event[['x', 'y']], df_freeze_frame[['x', 'y']]])
-
-x = df.x.values
-y = df.y.values
-teams = np.concatenate([[True], df_freeze_frame.player_teammate.values])
+teammate_locs = player_position_data[player_position_data.teammate]
+opponent_locs = player_position_data[~player_position_data.teammate]
 
 ##############################################################################
 # Plotting
 
 # draw plot
-pitch = VerticalPitch(half=True)
-fig, ax = pitch.draw(figsize=(8, 6.2))
+p = Pitch(pitch_type='statsbomb')
+fig, ax = p.draw(figsize=(12,8))
 
 # Plot Voronoi
-team1, team2 = pitch.voronoi(x, y, teams)
-t1 = pitch.polygon(team1, ax=ax, fc='#c34c45', ec='white', lw=3, alpha=0.4)
-t2 = pitch.polygon(team2, ax=ax, fc='#6f63c5', ec='white', lw=3, alpha=0.4)
+team1, team2 = p.voronoi(player_position_data.x, player_position_data.y,
+                         player_position_data.teammate)
+t1 = p.polygon(team1, ax=ax, fc='orange', ec='white', lw=3, alpha=0.4)
+t2 = p.polygon(team2, ax=ax, fc='dodgerblue', ec='white', lw=3, alpha=0.4)
 
 # Plot players
-sc1 = pitch.scatter(x[teams], y[teams], ax=ax, c='#c34c45', s=150)
-sc2 = pitch.scatter(x[~teams], y[~teams], ax=ax, c='#6f63c5', s=150)
+sc1 = p.scatter(teammate_locs.x, teammate_locs.y, c='orange', s=80, ec='k', ax=ax)
+sc2 = p.scatter(opponent_locs.x, opponent_locs.y, c='dodgerblue', s=80, ec='k', ax=ax)
+
+# Plot the visible area
+visible = p.polygon([visible_area], color='None', ec='k', linestyle='--', lw=2, ax=ax)
+
+# clip each player to the visible area
+for p1 in t1:
+    p1.set_clip_path(visible[0])
+for p2 in t2:
+    p2.set_clip_path(visible[0])
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

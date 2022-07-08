@@ -11,5 +11,5 @@ API
    mplsoccer.py_pizza
    mplsoccer.utils
    mplsoccer.quiver
-   mplsoccer.linecollection  
-   
+   mplsoccer.linecollection
+   mplsoccer.grid

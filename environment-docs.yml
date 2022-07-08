@@ -1,7 +1,7 @@
 name: mplsoccer-docs
 channels:
-  - anaconda
   - conda-forge
+  - defaults
 dependencies:
   - pandas
   - scipy
@@ -9,7 +9,7 @@ dependencies:
   - sphinx
   - cmasher
   - pyarrow
-  - beautifulsoup4
+  - requests
   - lxml
   - pillow
   - pip

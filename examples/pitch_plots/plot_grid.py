@@ -28,8 +28,7 @@ import numpy as np
 from PIL import Image
 from highlight_text import ax_text
 
-from mplsoccer import Pitch, VerticalPitch, add_image, FontManager
-from mplsoccer.statsbomb import read_event, read_lineup, EVENT_SLUG, LINEUP_SLUG
+from mplsoccer import Pitch, VerticalPitch, add_image, FontManager, Sbopen
 
 ##############################################################################
 # Single Pitch
@@ -100,13 +99,9 @@ fig, axs = pitch.grid(nrows=3, ncols=4,  # number of rows/ columns
 # `Brad (@DymondFormation) <https://twitter.com/DymondFormation>`_.
 #
 # First we need to get the StatsBomb events, tactics, and lineup data
-JSON = '15946.json'
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False, 'tactics_lineup_df': True}
-event_dict = read_event(f'{EVENT_SLUG}/{JSON}', **kwargs)
-events = event_dict['event']
-tactics = event_dict['tactics_lineup']
-# read the lineup (has all the players even if they didn't play)
-lineup = read_lineup(f'{LINEUP_SLUG}/{JSON}', warn=False)
+parser = Sbopen()
+events, related, freeze, tactics = parser.event(15946)
+lineup = parser.lineup(15946)
 
 ##############################################################################
 # Add on the subbed on/ off times to the lineup dataframe
@@ -150,12 +145,6 @@ formation_dict = {1: 'GK', 2: 'RB', 3: 'RCB', 4: 'CB', 5: 'LCB', 6: 'LB', 7: 'RW
                   14: 'CM', 15: 'LCM', 16: 'LM', 17: 'RW', 18: 'RAM', 19: 'CAM',
                   20: 'LAM', 21: 'LW', 22: 'RCF', 23: 'ST', 24: 'LCF', 25: 'SS'}
 lineup['position_abbreviation'] = lineup.position_id.map(formation_dict)
-
-# add on a short name
-mask_name = lineup.player_nickname.isnull()
-lineup.loc[mask_name, 'player_nickname'] = lineup.loc[mask_name, 'player_name']
-lineup['short_name'] = (lineup.player_nickname.str[0] + '. ' +
-                        lineup.player_nickname.str.split(' ').str[-1])
 
 # sort the dataframe so the players are
 # in the order of their position (if started), otherwise in the order they came on
@@ -259,7 +248,7 @@ for idx, ax in enumerate(axs['pitch'].flat):
         # so put <> around the number of completed passes.
         total_pass = len(complete_pass) + len(incomplete_pass)
         annotation_string = (f'{lineup_player.position_abbreviation} | '
-                             f'{lineup_player.short_name} | '
+                             f'{lineup_player.player_nickname} | '
                              f'<{len(complete_pass)}>/{total_pass} | '
                              f'{round(100 * len(complete_pass)/total_pass, 1)}%')
         ax_text(0, -5, annotation_string, ha='left', va='center', fontsize=20,

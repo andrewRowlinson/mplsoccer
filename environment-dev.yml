@@ -1,6 +1,7 @@
 name: mplsoccer-dev
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - jupyter
   - pandas
@@ -9,7 +10,7 @@ dependencies:
   - sphinx
   - cmasher
   - pyarrow
-  - beautifulsoup4
+  - requests
   - lxml
   - setuptools
   - twine

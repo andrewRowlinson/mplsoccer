@@ -1,13 +1,75 @@
+:rocket: Version 1.1.0
+----------------------
+
+### Breaking Changes
+* :x: The ``statsbomb`` module is completely overhauled to make it easier to use. \
+The module now contains three classes ``Sbopen``, ``Sbapi`` and ``Sblocal`` for retrieving data \
+from the StatsBomb open-data, API, and local files.
+* :x: Added the ``lower_is_better`` argument to ``Radar``. If any of ``lower_is_better`` \
+strings are in the parameter list then the radar object will flip the statistic. \
+Previously you had to manually switch the order of the ``min_range`` and ``max_range`` \
+to flip the statistic. In soccer, this is useful for parameters like miss-controls \
+where fewer miss-controls is better than more. \
+The default (None) does not flip any of the parameters.
+* :new: Added the ``grid`` module, which allows the ``grid``  function to be \
+used with other types of charts.
+* :x: The ``grid`` method is changed so if there is no endnote or title then the axes \
+(or numpy array of axes) are returned rather than a dictionary.
+* :x: Renamed ``calculate_grid_dimensions`` to ``grid_dimensions``.
+
+### Added
+* :heart_eyes: Added a turbine chart, which is a Radar plot with multiple kernel density \
+estimators  plotted to show where in the distribution a person's skill falls. \
+Inspired by [Soumyajit Bose](https://twitter.com/Soumyaj15209314)
+* :heart_eyes: Delaunay triangulation added to Pitch classes by \
+[Matthew Williamson]( https://twitter.com/photomattic) using the ``triplot`` method.
+* :heart_eyes: Binnumbers added to the ``bin_statistic`` methods to give \
+the bin indices for each event. If the event has a null coordinate or a coordinate \
+outside the pitch the indices are set to negative one.
+* :icecream: ``corner_arcs`` Boolean argument added to pitches by \
+[Devin Pleuler]( https://twitter.com/devinpleuler) for plotting corner arcs.
+* :icecream: Added the ``linestyle``, ``goal_linestyle``, and ``line_alpha`` \
+arguments for styling of the pitches.
+* :icecream: Added ``spoke`` method to the Radar class for drawing lines from the center \
+of the radar to the edges for each plotted statistic.
+* :new: Added the ``statistic=circmean`` argument to bin_statistic, which uses \
+a nan safe version of scipy circmean.
+* :new: Added the ``draw_radar_solid`` method to ``Radar`` to more easily plot multiple radars \
+on the same chart.
+
+### Changes
+* :ok: ``polygon`` method of the Pitch class changed to plot multiple of \
+matplotlib.patches.Polygon rather than one matplotlib.collections.PatchCollection \
+so they can be clipped more easily to the shape of other patches.
+* :ok: Removed warnings for ``figsize``, ``tight_layout``, ``contrained_layout``, \
+``layout``, ``view``, and ``orientation`` as the arguments are deprecated.
+* :ok:  Changed how pitch lines are drawn from one continuous line to plotting some \
+lines separately. The one continuous line way of plotting caused problems \
+as the dotted linestyle was plotted incorrectly when the lines overlapped.
+* :ok: Changed how the ``box`` goal is drawn from a rectangle to a line to allow \
+``goal_linestyle`` to work without it overlapping with the pitch
+* :ok: Changed ``bin_statistic`` to use the nan safe versions of mean, std, median, \
+sum, min, and max.
+
+### Docs
+* :page_with_curl: Added a new tutorial section and the first tutorial expected threat. \
+Expected threat is based on the methods popularised by \
+[Karun Singh](https://twitter.com/karun1710) and [Sarah Rudd](https://twitter.com/srudd_ok).
+* :page_with_curl: Removed the matplotlib sub_plot_mosaic function from the docs. \
+Many people reported that they had problems because it was not available in their \
+version of matplotlib. It has been replaced with the new ``grid`` functions.
+
 :rocket: Version 1.0.7
 ----------------------
 
 ### Fixes
-* Fixed a memory leak in pitch.lines and pitch.quiver associated with assigning those collections to class-level legend handler map, so they never deallocated.
+* Fixed a memory leak in pitch.lines and pitch.quiver associated with assigning \
+those collections to class-level legend handler map, so they never deallocated.
 * Fixed read_lineup so it works from reading from a local file.
 
 :rocket: Version 1.0.6
 ----------------------
-  
+
 ### Fixes
 * Removed deprecated set indexer in statsbomb event reader.
 * Fixes for docs: simplified StatsBomb section, fixed broken StatsBomb logos, \

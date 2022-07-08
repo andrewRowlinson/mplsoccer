@@ -14,15 +14,13 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from highlight_text import ax_text
 
-from mplsoccer import VerticalPitch, add_image, FontManager
-from mplsoccer.statsbomb import read_event, EVENT_SLUG
+from mplsoccer import VerticalPitch, add_image, FontManager, Sbopen
 
 ##############################################################################
 # Load the first game that Messi played as a false-9 and the match before.
-kwargs = {'related_event_df': False, 'shot_freeze_frame_df': False,
-          'tactics_lineup_df': False, 'warn': False}
-df_false9 = read_event(f'{EVENT_SLUG}/69249.json', **kwargs)['event']
-df_before_false9 = read_event(f'{EVENT_SLUG}/69251.json', **kwargs)['event']
+parser = Sbopen()
+df_false9 = parser.event(69249)[0]  # 0 index is the event file
+df_before_false9 = parser.event(69251)[0]  # 0 index is the event file
 # filter messi's actions (starting positions)
 df_false9 = df_false9.loc[df_false9.player_id == 5503, ['x', 'y']]
 df_before_false9 = df_before_false9.loc[df_before_false9.player_id == 5503, ['x', 'y']]
