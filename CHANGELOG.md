@@ -1,3 +1,13 @@
+:rocket: Version 1.1.2
+----------------------
+
+### Fixes
+* Fixed the error message for ``Radar`` when min_range > max_range so that it notifies you \
+to use the argument ``lower_is_better`` rather than ``greater_is_better``.
+
+### Docs
+* :page_with_curl: Added an example of layering turbines and radar charts.
+
 :rocket: Version 1.1.1
 ----------------------
 

@@ -79,9 +79,9 @@ class Radar:
             msg = 'The size of params and max_range must match'
             raise ValueError(msg)
         if (self.max_range < self.min_range).sum() > 0:
-            msg = ('The maximum range should be greater than the minimum range '
-                   'to flip the statistic(s) set the argument '
-                   f'greater_is_better={max_range >= min_range}')
+            msg = ('The maximum range should be greater than the minimum range. '
+                   'If you want to flip the statistic(s) add the parameter '
+                   'to the argument lower_is_better. For example, lower_is_better=["Miscontrols"]')
             raise TypeError(msg)
         if self.params.size != self.round_int.size:
             msg = 'The size of params and round_int must match'
