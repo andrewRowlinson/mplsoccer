@@ -31,9 +31,9 @@ from mplsoccer import Bumpy, FontManager, add_image
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
 
 font_normal = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
-                           "static/Roboto-Regular.ttf?raw=true"))
-font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
-                         "static/Roboto-Medium.ttf?raw=true"))
+                           "Roboto%5Bwdth,wght%5D.ttf?raw=true"))
+font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robotoslab/"
+                         "RobotoSlab%5Bwght%5D.ttf?raw=true"))
 
 ##############################################################################
 # Load Files

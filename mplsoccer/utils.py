@@ -300,7 +300,7 @@ class FontManager:
 
     def __init__(self,
                  url=('https://github.com/google/fonts/blob/main/'
-                      'apache/roboto/static/Roboto-Regular.ttf?raw=true')):
+                      'apache/roboto/Roboto%5Bwdth,wght%5D.ttf?raw=true')):
         self.url = url
         with NamedTemporaryFile(delete=False, suffix=".ttf") as temp_file:
             temp_file.write(urlopen(self.url).read())

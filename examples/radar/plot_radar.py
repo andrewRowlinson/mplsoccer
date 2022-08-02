@@ -73,9 +73,10 @@ URL3 = ('https://github.com/google/fonts/blob/main/ofl/rubikmonoone/'
 rubik_regular = FontManager(URL3)
 URL4 = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Thin.ttf?raw=true'
 robotto_thin = FontManager(URL4)
-URL5 = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Regular.ttf?raw=true'
+URL5 = ('https://github.com/google/fonts/blob/3b947ee2732103ef6132b09d234aecd768d2d83c/'
+        'apache/roboto/static/Roboto-Thin.ttf?raw=true')
 robotto_regular = FontManager(URL5)
-URL6 = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Bold.ttf?raw=true'
+URL6 = 'https://github.com/google/fonts/blob/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf?raw=true'
 robotto_bold = FontManager(URL6)
 
 ##############################################################################
