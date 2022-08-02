@@ -32,12 +32,12 @@ from mplsoccer import PyPizza, add_image, FontManager
 # We borrowed the FontManager from the excellent
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
 
-font_normal = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/static/"
-                           "Roboto-Regular.ttf?raw=true"))
-font_italic = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/static/"
-                           "Roboto-Italic.ttf?raw=true"))
-font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/static/"
-                         "Roboto-Medium.ttf?raw=true"))
+font_normal = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
+                           "Roboto%5Bwdth,wght%5D.ttf?raw=true"))
+font_italic = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
+                           "Roboto-Italic%5Bwdth,wght%5D.ttf?raw=true"))
+font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robotoslab/"
+                         "RobotoSlab%5Bwght%5D.ttf?raw=true"))
 
 ##############################################################################
 # Load Image

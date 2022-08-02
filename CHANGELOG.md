@@ -1,3 +1,9 @@
+:rocket: Version 1.1.3
+----------------------
+
+### Fixes
+* Fixed the broken links for the Roboto fonts in the docs and ``FontManager`` class.
+
 :rocket: Version 1.1.2
 ----------------------
 

@@ -48,8 +48,8 @@ kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=ax,
 
 ##############################################################################
 # Load a custom font.
-URL = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Regular.ttf?raw=true'
-URL2 = 'https://github.com/google/fonts/blob/main/apache/roboto/static/Roboto-Bold.ttf?raw=true'
+URL = 'https://github.com/google/fonts/blob/main/apache/roboto/Roboto%5Bwdth,wght%5D.ttf?raw=true'
+URL2 = 'https://github.com/google/fonts/blob/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf?raw=true'
 robotto_regular = FontManager(URL)
 robboto_bold = FontManager(URL2)
 
