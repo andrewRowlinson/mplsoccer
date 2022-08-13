@@ -57,6 +57,7 @@ from dataclasses import dataclass, InitVar
 from typing import Optional
 
 import numpy as np
+import pandas as pd
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum']
@@ -110,12 +111,15 @@ class BaseDims:
     positional_y: Optional[np.array] = None
     # defined in stripes
     stripe_locations: Optional[np.array] = None
+    # positions
+    positions: Optional[dict] = None
 
     def setup_dims(self):
         """ Run methods for the extra pitch dimensions."""
         self.pitch_markings()
         self.juego_de_posicion()
         self.stripes()
+        self.create_positions()
 
     def pitch_markings(self):
         """ Create sorted pitch dimensions to enable standardization of coordinates.
@@ -175,6 +179,22 @@ class BaseDims:
         self.goal_top = self.center_width + (neg_if_inverted * self.goal_width)
         self.six_yard_left = self.six_yard_length
         self.six_yard_right = self.right - self.six_yard_length
+
+    def create_positions(self):
+        """ Create player positions. Used to translate a position e.g. CAM to the x,y coordinates"""
+        y = np.linspace(self.bottom, self.top, 11)[1::2]
+        x = np.linspace(self.left, self.right, 15)
+        x = np.append(x[:13][1::2], self.penalty_right)
+        x, y = np.meshgrid(x, y)
+        idx = [1, 2, 3, 4, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18,
+               19, 20, 22, 23, 24, 25, 27, 29, 30, 31, 32]
+        x = x.ravel()[idx]
+        y = y.ravel()[idx]
+        labels = ['RB', 'RWB', 'RM', 'RW',  'RCB', 'RDM', 'RCM', 'RAM', 'RCF',
+                  'GK', 'CB', 'CDM', 'CM', 'CAM', 'SS', 'ST', 'LCB', 'LDM', 'LCM',
+                  'LAM', 'LCF', 'LB', 'LWB', 'LM', 'LW',
+                 ]
+        self.positions = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
 
 
 @dataclass
@@ -304,8 +324,8 @@ def metricasports_dims(pitch_width, pitch_length):
                              width=1., center_width=0.5, length=1., center_length=0.5,
                              six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                              penalty_area_width=40.32, penalty_area_length=16.5,
-                             circle_diameter=18.3, corner_diameter=2., goal_length=2., goal_width=7.32,
-                             arc=None, invert_y=True, origin_center=False)
+                             circle_diameter=18.3, corner_diameter=2., goal_length=2.,
+                             goal_width=7.32, arc=None, invert_y=True, origin_center=False)
 
 
 def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
@@ -328,8 +348,8 @@ def tracab_dims(pitch_width, pitch_length):
                               six_yard_top=916., penalty_spot_distance=1100.,
                               penalty_area_width=4032., penalty_area_length=1650.,
                               penalty_area_bottom=-2016., penalty_area_top=2016.,
-                              center_width=0., center_length=0., circle_diameter=1830., corner_diameter=200.,
-                              arc=53.05, invert_y=False, origin_center=True)
+                              center_width=0., center_length=0., circle_diameter=1830.,
+                              corner_diameter=200., arc=53.05, invert_y=False, origin_center=True)
 
 
 def custom_dims(pitch_width, pitch_length):
@@ -337,8 +357,9 @@ def custom_dims(pitch_width, pitch_length):
     return CustomDims(bottom=0., left=0., aspect=1., width=pitch_width, length=pitch_length,
                       pitch_length=pitch_length, pitch_width=pitch_width, six_yard_width=18.32,
                       six_yard_length=5.5, penalty_area_width=40.32, penalty_spot_distance=11.,
-                      penalty_area_length=16.5, circle_diameter=18.3, corner_diameter=2., goal_length=2.,
-                      goal_width=7.32, arc=53.05, invert_y=False, origin_center=False)
+                      penalty_area_length=16.5, circle_diameter=18.3, corner_diameter=2.,
+                      goal_length=2., goal_width=7.32, arc=53.05,
+                      invert_y=False, origin_center=False)
 
 
 def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
