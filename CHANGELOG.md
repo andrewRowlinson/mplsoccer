@@ -1,3 +1,20 @@
+:rocket: Version 1.1.4
+----------------------
+
+### Fixes
+* Fixed the ``Pitch.bin_statistic`` method so that it returns consistent binnumber results for \
+the different pitch types. Now the binnumber indexing starts in the top-left hand corner \
+as index 0, 0. Previously it depended on whether the pitch had an inverted y-axes whether the \
+indexing started at the top or bottom left corner. This change is consistent with how indexing \
+on a numpy array works (0, 0) is the top-left corner so this enables the bin statistics \
+to be reconstructed from the binnumber via numpy indexing.
+
+### Changes
+* Bin numbers from ``Pitch.bin_statistic`` start in the top-left corner at index 0,0.
+* Statistics from ``Pitch.bin_statistic``, now mirror the horizontal pitch layout, i.e. they match \
+the output from ``Pitch.label_heatmap``. The y coordinate center and edges have been flipped \
+for inverted y-axis to allow this change (previously the statistic was flipped instead).
+
 :rocket: Version 1.1.3
 ----------------------
 

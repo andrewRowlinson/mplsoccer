@@ -58,7 +58,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
         and 'binnumber' (the bin indices each point belongs to).
         'binnumber' is a (2, N) array that represents the bin in which the observation falls
         if the observations falls outside the pitch the value is -1 for the dimension. The
-        binnumber are zero indexed and start from the bottom and left handside of the pitch.
+        binnumber are zero indexed and start from the top and left handside of the pitch.
 
     Examples
     --------
@@ -110,27 +110,25 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
      y_edge, binnumber) = binned_statistic_2d(x, y, values, statistic=statistic,
                                               bins=bins, range=pitch_range,
                                               expand_binnumbers=True)
-
-    statistic = statistic.T
-    # this ensures that all the heatmaps are created consistently at the heatmap edges
-    # i.e. grid cells are created from the bottom to the top of the pitch, where the top edge
-    # always belongs to the cell above. First the raw coordinates have been flipped above
-    # then the statistic is flipped back here
+    statistic = np.flip(statistic.T, axis=0)  # reshape to same layout as horizontal pitch
     if statistic.ndim == 3:
         num_y, num_x, _ = statistic.shape
     else:
         num_y, num_x = statistic.shape
-    if dim.invert_y and standardized is False:
-        statistic = np.flip(statistic, axis=0)
-        # flip the binnumber so can be used to index a numpy array
-        binnumber[1, :] = num_y - binnumber[1, :] + 1  # equivalent to flipping
-
     if normalize:
         statistic = statistic / statistic.sum()
+        
+    # flip the binnumber so can be used to index a numpy array (i.e. starts top left 0, 0)
+    binnumber[1, :] = num_y - binnumber[1, :] + 1  # equivalent to flipping
 
     x_grid, y_grid = np.meshgrid(x_edge, y_edge)
     cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
                          y_edge[:-1] + 0.5 * np.diff(y_edge))
+
+    if not (dim.invert_y and standardized is False):
+        # if not inverted flip y coordinates so bottom is zero
+        y_grid = np.flip(y_grid, axis=0)
+        cy = np.flip(cy, axis=0)
     
     # if outside the pitch set the bin number to minus one
     # else zero index the results by removing one

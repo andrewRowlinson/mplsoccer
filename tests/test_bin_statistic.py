@@ -24,7 +24,7 @@ def test_bin_statistic_points():
         assert stats["statistic"].sum() == num_points
         
 
-def check_binnumber_correct():
+def test_binnumber_correct():
     """ Test that the bin numbers match the statistic grid."""
     num_points = 10000000
     for pitch_type in valid:
