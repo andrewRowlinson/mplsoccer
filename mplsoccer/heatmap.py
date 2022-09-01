@@ -4,7 +4,7 @@ from collections import namedtuple
 from functools import partial
 
 import numpy as np
-from scipy.stats import binned_statistic_2d, circmean
+from scipy.stats import binned_statistic_2d, binned_statistic_dd, circmean
 
 from mplsoccer.utils import validate_ax
 
@@ -12,6 +12,27 @@ _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid',
                                      'cx', 'cy', 'binnumber', 'inside'))
 
+
+def _nan_safe(statistic):
+    """ Make the statistic nan safe"""
+    if statistic == 'mean':
+        statistic = np.nanmean
+    elif statistic == 'std':
+        statistic = np.nanstd
+    elif statistic == 'median':
+        statistic = np.nanmedian
+    elif statistic == 'sum':
+        statistic = np.nansum
+    elif statistic == 'min':
+        statistic = np.nanmin
+    elif statistic == 'max':
+        statistic = np.nanmax
+    elif statistic == 'circmean':
+        statistic = partial(circmean, nan_policy='omit')
+    else:
+        statistic = statistic
+    return statistic
+    
 
 def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
                   normalize=False, standardized=False):
@@ -75,25 +96,9 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     y = np.ravel(y)
     if x.size != y.size:
         raise ValueError("x and y must be the same size")
-    
-    # make values nan safe
-    if statistic == 'mean':
-        statistic = np.nanmean
-    elif statistic == 'std':
-        statistic = np.nanstd
-    elif statistic == 'median':
-        statistic = np.nanmedian
-    elif statistic == 'sum':
-        statistic = np.nansum
-    elif statistic == 'min':
-        statistic = np.nanmin
-    elif statistic == 'max':
-        statistic = np.nanmax
-    elif statistic == 'circmean':
-        statistic = partial(circmean, nan_policy='omit')
+        
+    statistic = _nan_safe(statistic)
 
-    if (values is None) & (statistic == 'count'):
-        values = x
     if (values is None) & (statistic != 'count'):
         raise ValueError("values on which to calculate the statistic are missing")
 
@@ -149,6 +154,78 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
 
     return stats
+
+
+def bin_statistic_3d(x, y, z, values=None, dim=None, statistic='count',
+                     bins=(5, 4, 10),
+                     normalize=False, standardized=False, center=True):
+    x = np.ravel(x)
+    y = np.ravel(y)
+    z = np.ravel(z)
+    if x.size != y.size:
+        raise ValueError("x and y must be the same size")
+    if x.size != z.size:
+        raise ValueError("x and z must be the same size")   
+    
+    width = 2 * np.pi / bins[2]
+    if center:
+        z = np.mod(z + width / 2, 2 * np.pi)
+    
+    statistic = _nan_safe(statistic)
+
+    if (values is None) & (statistic != 'count'):
+        raise ValueError("values on which to calculate the statistic are missing")
+
+    if standardized:
+        pitch_range = [[0, 105], [0, 68], [0, 2 * np.pi]]
+    else:
+        if dim.invert_y:
+            pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom], [0, 2 * np.pi]]
+            y = dim.bottom - y  # for inverted axis flip the coordinates
+        else:
+            pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top], [0, 2 * np.pi]]
+
+    (statistic, bin_edges,
+     binnumber) = binned_statistic_dd([x, y, z], values, statistic=statistic,
+                                      bins=bins, range=pitch_range,
+                                      expand_binnumbers=True)
+    statistic = np.transpose(statistic, axes=(1, 0, 2))
+    num_y, num_x, num_z = statistic.shape
+    if dim.invert_y and standardized is False:
+        binnumber[1] = num_y - binnumber[1] + 1  # equivalent to flipping
+        statistic = np.flip(statistic, axis=0)
+        
+    if normalize:
+        statistic = statistic / statistic.sum()
+        
+    x_edge, y_edge, z_edge = bin_edges
+    if center:
+        z_edge = z_edge - width / 2
+    
+    x_grid, y_grid = np.meshgrid(x_edge, y_edge)
+    cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
+                         y_edge[:-1] + 0.5 * np.diff(y_edge))
+    
+    # if outside the pitch/ range set the bin number to minus one
+    # else zero index the results by removing one
+    mask_x_out = np.logical_or(binnumber[0] == 0,
+                               binnumber[0] == num_x + 1)
+    mask_y_out = np.logical_or(binnumber[1] == 0,
+                               binnumber[1] == num_y + 1)
+    mask_z_out = np.logical_or(binnumber[2] == 0,
+                               binnumber[2] == num_z + 1)
+    binnumber[0, mask_x_out] = -1
+    binnumber[0, ~mask_x_out] = binnumber[0, ~mask_x_out] - 1
+    binnumber[1, mask_y_out] = -1
+    binnumber[1, ~mask_y_out] = binnumber[1, ~mask_y_out] - 1
+    binnumber[2, mask_z_out] = -1
+    binnumber[2, ~mask_z_out] = binnumber[2, ~mask_z_out] - 1
+    
+    inside = np.logical_and(~mask_x_out, ~mask_y_out)
+    
+    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
+    
+    return stats, z_edge
 
 
 def heatmap(stats, ax=None, vertical=False, **kwargs):

@@ -7,11 +7,14 @@ from collections import namedtuple
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib.projections import get_projection_class
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
 from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
 from mplsoccer.utils import Standardizer, set_visible
+from mplsoccer.utils import validate_ax
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -615,6 +618,84 @@ class BasePitch(ABC):
         self._draw_rectangle(ax, self.dim.positional_x[2], self.dim.bottom,
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
+
+    def inset_axes(self, xy, width=None, height=None, aspect=None, polar=False, ax=None, **kwargs):
+        """ A helper to create a grid of pitches in a specified location
+
+        Parameters
+        ----------
+        xy : tuple of float (x, y) or str (e.g. 'GK')
+            The coordinates of the centre of the inset axes. Can be either
+            given ax a tuple of x, y coordinates or a player position.
+            The valid player positions are 'RB', 'RWB', 'RM', 'RW',  'RCB', 'RDM',
+            'RCM', 'RAM', 'RCF', 'GK', 'CB', 'CDM', 'CM', 'CAM', 'SS', 'ST', 'LCB',
+            'LDM', 'LCM', 'LAM', 'LCF', 'LB', 'LWB', 'LM', 'LW'.
+        width : float, default None
+            The width of the inset axes in data coordinates.
+        height : float, default None
+            The height of the inset axes in data coordinates.
+        aspect : float or str ('pitch'), default None
+            You can specify a combination of width and aspect or height and aspect.
+            This will make the axes visually have the given aspect ratio (width/height).
+            For example, if you want an inset axes to appear square set aspect = 1. There
+            is also a special case aspect = 'pitch' that will create an inset_axes with
+            a drawn pitch.
+        polar : bool, default False
+            Whether the inset axes if a polar projection.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> inset_axes = pitch.inset_axes((60, 40), width=10, aspect=1, ax=ax)
+        """
+        validate_ax(ax)
+        if aspect == 'pitch':
+            aspect = self.ax_aspect
+            draw = True
+        else:
+            draw = False
+        if aspect is not None and width is not None and height is not None:
+            raise TypeError('Invalid argument: if using aspect you cannot use both width and height')
+        elif ((width is not None) + (height is not None) + (aspect is not None)) != 2:
+            raise TypeError('Invalid argument: must give the arguments width and height, or width and aspect, or height and aspect')
+        elif polar and draw:
+            raise TypeError('Invalid argument: polar and the aspect equal to pitch can not be combined.')
+        elif aspect is not None and width is None:
+            width = height * aspect * self.dim.aspect
+        elif aspect is not None and height is None:
+            height = width / (aspect * self.dim.aspect)
+
+        if isinstance(xy, str):
+            x, y = self.dim.positions[xy]['x'],  self.dim.positions[xy]['y']
+        else:
+            x, y = xy
+
+        x, y = self._reverse_if_vertical(x, y)
+
+        xoffset = - width / 2
+        yoffset = - height / 2      
+
+        if polar:
+            # From stackover answers by ImportanceOfBeingErnest
+            # https://stackoverflow.com/questions/46262749/plotting-scatter-of-several-polar-plots/46263911#46263911
+            # https://stackoverflow.com/questions/52865516/wrong-width-and-height-when-using-inset-axes-and-transdata
+            ax_inset = inset_axes(ax,
+                                  bbox_to_anchor=(x + xoffset, y + yoffset, width, height),
+                                  width='100%', height='100%',
+                                  loc=10, bbox_transform=ax.transData, borderpad=0.0,
+                                  axes_class=get_projection_class("polar"))
+            ax_inset.set_theta_direction(-1)
+            if self.vertical:
+                ax_inset.set_theta_zero_location('N')
+        else:
+            ax_inset = ax.inset_axes((x + xoffset, y + yoffset, width, height), transform=ax.transData, **kwargs)
+            if draw:
+                self.draw(ax_inset)
+        return ax_inset
 
     def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
              left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,
