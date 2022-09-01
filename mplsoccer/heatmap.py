@@ -170,8 +170,7 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     validate_ax(ax)
     if vertical:
         return ax.pcolormesh(stats['y_grid'], stats['x_grid'], stats['statistic'], **kwargs)
-    else:
-        return ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
+    return ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
 
 
 def bin_statistic_positional(x, y, values=None, dim=None, positional='full',

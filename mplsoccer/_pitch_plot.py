@@ -2,10 +2,10 @@
 
 from collections import namedtuple
 
-import matplotlib.docstring as docstring
-import matplotlib.patches as patches
 import numpy as np
 import seaborn as sns
+from matplotlib import docstring
+from matplotlib import patches
 from matplotlib import rcParams
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean

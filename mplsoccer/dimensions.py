@@ -361,19 +361,18 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     """
     if pitch_type == 'opta':
         return opta_dims()
-    elif pitch_type == 'wyscout':
+    if pitch_type == 'wyscout':
         return wyscout_dims()
-    elif pitch_type == 'uefa':
+    if pitch_type == 'uefa':
         return uefa_dims()
-    elif pitch_type == 'statsbomb':
+    if pitch_type == 'statsbomb':
         return statsbomb_dims()
-    elif pitch_type == 'metricasports':
+    if pitch_type == 'metricasports':
         return metricasports_dims(pitch_width, pitch_length)
-    elif pitch_type in ['skillcorner', 'secondspectrum']:
+    if pitch_type in ['skillcorner', 'secondspectrum']:
         return skillcorner_secondspectrum_dims(pitch_width, pitch_length)
-    elif pitch_type == 'tracab':
+    if pitch_type == 'tracab':
         pitch_width = pitch_width * 100.
         pitch_length = pitch_length * 100.
         return tracab_dims(pitch_width, pitch_length)
-    else:
-        return custom_dims(pitch_width, pitch_length)
+    return custom_dims(pitch_width, pitch_length)

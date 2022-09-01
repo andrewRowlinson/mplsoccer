@@ -1,11 +1,12 @@
 """`mplsoccer.quiver` is a python module containing a function to plot arrows in
 Matplotlib and a complementary handler for adding the arrows to the legend."""
 
-import matplotlib.patches as patches
 import numpy as np
+from matplotlib import patches
 from matplotlib.legend import Legend
 from matplotlib.legend_handler import HandlerLine2D
 from matplotlib.quiver import Quiver
+
 from mplsoccer.utils import validate_ax
 
 __all__ = ['arrows']

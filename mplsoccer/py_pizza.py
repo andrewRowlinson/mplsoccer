@@ -5,8 +5,8 @@ Author: Anmol_Durgapal(@slothfulwave612)
 The idea is inspired by Tom Worville, Football Slices, Soma Zero FC and Soumyajit Bose.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 __all__ = ["PyPizza"]
 

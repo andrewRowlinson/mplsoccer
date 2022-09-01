@@ -1,8 +1,10 @@
+"""`mplsoccer.statsbomb` is a python module for loading StatsBomb open, local and API data."""
+
+import json
 import os
 
 import pandas as pd
 import requests
-import json
 
 __all__ = ['Sbopen', 'Sbapi', 'Sblocal']
 

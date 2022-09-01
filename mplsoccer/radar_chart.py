@@ -56,7 +56,7 @@ class Radar:
             self.greater_is_better = np.array([True] * self.params.size)
         else:
             lower_is_better = [param.lower().strip() for param in lower_is_better]
-            self.greater_is_better = np.asarray([param.lower().strip() not in lower_is_better 
+            self.greater_is_better = np.asarray([param.lower().strip() not in lower_is_better
                                                  for param in params])
         if round_int is None:
             self.round_int = np.array([False] * self.params.size)
@@ -92,7 +92,7 @@ class Radar:
         if self.params.size < 3:
             msg = 'You are not making a pretty chart. Increase the number of params to 3 or more.'
             raise ValueError(msg)
-        
+
         # flip the min_range and max_range if the argument greater_is_better is False
         # for a parameter
         # typically in soccer this would be for parameters like miscontrols where
@@ -242,7 +242,7 @@ max_range=[10, 10, 10])
         radar = Polygon(vertices, **kwargs)
         radar = ax.add_patch(radar)
         return radar, vertices
-    
+
     def draw_radar_solid(self, values, ax=None, kwargs=None):
         """ Draw a single radar (polygon) without cliping to the rings.
 
