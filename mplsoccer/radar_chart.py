@@ -29,13 +29,13 @@ class Radar:
         Minimum and maximum range for each parameter (inner and outer edge of the Radar).
     lower_is_better : sequence of str, default None
         Any params where it is better to have a lower statistic should be in this list.
-        If any of the strings match the params the the statistic will be flipped.
+        If any of the strings match the params the statistic will be flipped.
         In soccer, this is useful for parameters like miss-controls
         where fewer miss-controls is better than more.
         The default (None), which does not flip any statistic.
     round_int : sequence of bool, default None
         Whether to round the respective range values to integers (if True) or floats (if False).
-        The default (None) sets all range values to floats.
+        The default (None) sets all range values to float.
     num_rings : int, default 4
         The number of concentric circles. This excludes the center circle so the
         total number is num_rings + 1.
@@ -142,7 +142,7 @@ class Radar:
         set_visible(ax)
 
     def setup_axis(self, facecolor='#FFFFFF', figsize=(12, 12), ax=None, **kwargs):
-        """ Setup an axis for plotting radar charts. If an ax is specified the settings are applied
+        """ Set up an axis for plotting radar charts. If an ax is specified the settings are applied
          to an existing axis. This method equalises the aspect ratio,
          and sets the facecolor and limits.
 
@@ -433,7 +433,7 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         # create the label values - linearly interpolate between the low and high for each circle
         label_values = np.linspace(self.min_range.reshape(-1, 1), self.max_range.reshape(-1, 1),
                                    num=self.num_rings + 1, axis=1).ravel()
-        # remove the first entry so we do not label the inner circle
+        # remove the first entry so that we do not label the inner circle
         mask = np.ones_like(label_values, dtype=bool)
         mask[0::self.num_rings + 1] = 0
         label_values = label_values[mask]
@@ -553,9 +553,7 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         spoke_y = np.repeat(spoke_y, 3)
         spoke_y[0::3] = 0
         spoke_y[2::3] = np.nan
-
-        lines = ax.plot(spoke_x, spoke_y, **kwargs)
-        return lines
+        return ax.plot(spoke_x, spoke_y, **kwargs)
 
     def _setup_cmap_circle(self):
         x, y = np.meshgrid(np.linspace(-self.lim, self.lim, 1000),
@@ -567,11 +565,10 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         self.circle_cmap_values = radius
 
     def _plot_cmap_circle(self, ax=None, cmap=None):
-        gradient = ax.imshow(self.circle_cmap_values, origin='lower',
-                             interpolation='bilinear',
-                             extent=[-self.lim, self.lim, -self.lim, self.lim],
-                             cmap=cmap)
-        return gradient
+        return ax.imshow(self.circle_cmap_values, origin='lower',
+                         interpolation='bilinear',
+                         extent=[-self.lim, self.lim, -self.lim, self.lim],
+                         cmap=cmap)
 
     def _rotated_kde_points(self, distribution_values, x_value, min_value,
                             max_value, rotation, scale=0.85):

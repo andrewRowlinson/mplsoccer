@@ -16,9 +16,9 @@ from mplsoccer.utils import validate_ax
 __all__ = ['lines']
 
 
-def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
-          comet=False, transparent=False, alpha_start=0.01,
-          alpha_end=1, cmap=None, ax=None, vertical=False, reverse_cmap=False, **kwargs):
+def lines(xstart, ystart, xend, yend, color=None, n_segments=100, comet=False, transparent=False,
+          alpha_start=0.01, alpha_end=1, cmap=None, ax=None, vertical=False,
+          reverse_cmap=False, **kwargs):
     """ Plots lines using matplotlib.collections.LineCollection.
     This is a fast way to plot multiple lines without loops.
     Also enables lines that increase in width or opacity by splitting
@@ -89,94 +89,74 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100,
         raise TypeError("alpha_end values should be within 0-1 range")
     if alpha_start > alpha_end:
         msg = "Alpha start > alpha end. The line will increase in transparency nearer to the end"
+
         warnings.warn(msg)
-
-    if 'colors' in kwargs.keys():
+    if 'colors' in kwargs:
         warnings.warn("lines method takes 'color' as an argument, 'colors' in ignored")
-
     if color is not None and cmap is not None:
         raise ValueError("Only use one of color or cmap arguments not both.")
-
-    if 'lw' in kwargs.keys() and 'linewidth' in kwargs.keys():
+    if 'lw' in kwargs and 'linewidth' in kwargs:
         raise TypeError("lines got multiple values for 'linewidth' argument (linewidth and lw).")
 
-    # set linewidth
-    if 'lw' in kwargs.keys():
+    if 'lw' in kwargs:
         lw = kwargs.pop('lw', 5)
-    elif 'linewidth' in kwargs.keys():
+    elif 'linewidth' in kwargs:
         lw = kwargs.pop('linewidth', 5)
     else:
         lw = 5
-
-    # to arrays
     xstart = np.ravel(xstart)
     ystart = np.ravel(ystart)
     xend = np.ravel(xend)
     yend = np.ravel(yend)
     lw = np.ravel(lw)
-
-    if (comet or transparent) and (lw.size > 1):
+    if (comet or transparent) and lw.size > 1:
         msg = "Multiple linewidths with a comet or transparent line is not implemented."
-        raise NotImplementedError(msg)
 
-    # set color
+        raise NotImplementedError(msg)
     if color is None and cmap is None:
         color = rcParams['lines.color']
-
-    if (comet or transparent) and (cmap is None) and (to_rgba_array(color).shape[0] > 1):
+    if (comet or transparent) and cmap is None and to_rgba_array(color).shape[0] > 1:
         msg = "Multiple colors with a comet or transparent line is not implemented."
         raise NotImplementedError(msg)
-
     if xstart.size != ystart.size:
         raise ValueError("xstart and ystart must be the same size")
     if xstart.size != xend.size:
         raise ValueError("xstart and xend must be the same size")
     if ystart.size != yend.size:
         raise ValueError("ystart and yend must be the same size")
-
-    if (lw.size > 1) and (lw.size != xstart.size):
+    if lw.size > 1 and lw.size != xstart.size:
         raise ValueError("lw and xstart must be the same size")
-
     if lw.size == 1:
         lw = lw[0]
-
     if vertical:
         ystart, xstart = xstart, ystart
         yend, xend = xend, yend
-
-    # create linewidth
     if comet:
         lw = np.linspace(1, lw, n_segments)
         handler_first_lw = False
     else:
         handler_first_lw = True
-
-    if (transparent is False) and (comet is False) and (cmap is None):
-        multi_segment = False
-    else:
-        multi_segment = True
-
+    multi_segment = transparent is not False or comet is not False or cmap is not None
     if transparent:
         cmap = create_transparent_cmap(color, cmap, n_segments, alpha_start, alpha_end)
-
     if isinstance(cmap, str):
         cmap = get_cmap(cmap)
-
     if cmap is not None:
         handler_cmap = True
-        line_collection = _lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap,
-                                      ax=ax, n_segments=n_segments, multi_segment=multi_segment,
+        line_collection = _lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap, ax=ax,
+                                      n_segments=n_segments, multi_segment=multi_segment,
                                       reverse_cmap=reverse_cmap, **kwargs)
+
     else:
         handler_cmap = False
-        line_collection = _lines_no_cmap(xstart, ystart, xend, yend,
-                                         lw=lw, color=color, ax=ax, n_segments=n_segments,
+        line_collection = _lines_no_cmap(xstart, ystart, xend, yend, lw=lw, color=color,
+                                         ax=ax, n_segments=n_segments,
                                          multi_segment=multi_segment, **kwargs)
 
     line_collection_handler = HandlerLines(numpoints=n_segments, invert_y=reverse_cmap,
                                            first_lw=handler_first_lw, use_cmap=handler_cmap)
-    Legend.update_default_handler_map({LineCollection: line_collection_handler})
 
+    Legend.update_default_handler_map({LineCollection: line_collection_handler})
     return line_collection
 
 

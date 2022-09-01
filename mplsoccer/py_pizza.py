@@ -279,7 +279,7 @@ class PyPizza:
         return None
 
     def __setup_pizza(self, ax, width):
-        """To setup the pizza plot.
+        """To set up the pizza plot.
 
             Parameters
             ----------

@@ -13,8 +13,8 @@ _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                      'cx', 'cy', 'binnumber', 'inside'))
 
 
-def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
-                  normalize=False, standardized=False):
+def bin_statistic(x, y, values=None, dim=None, statistic='count',
+                  bins=(5, 4), normalize=False, standardized=False):
     """ Calculates binned statistics using scipy.stats.binned_statistic_2d.
 
     This method automatically sets the range, changes the scipy defaults,
@@ -75,8 +75,6 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
     y = np.ravel(y)
     if x.size != y.size:
         raise ValueError("x and y must be the same size")
-    
-    # make values nan safe
     if statistic == 'mean':
         statistic = np.nanmean
     elif statistic == 'std':
@@ -91,62 +89,49 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count', bins=(5, 4),
         statistic = np.nanmax
     elif statistic == 'circmean':
         statistic = partial(circmean, nan_policy='omit')
-
     if (values is None) & (statistic == 'count'):
         values = x
     if (values is None) & (statistic != 'count'):
         raise ValueError("values on which to calculate the statistic are missing")
-
     if standardized:
         pitch_range = [[0, 105], [0, 68]]
+    elif dim.invert_y:
+        pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom]]
+        y = dim.bottom - y
     else:
-        if dim.invert_y:
-            pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom]]
-            y = dim.bottom - y  # for inverted axis flip the coordinates
-        else:
-            pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top]]
+        pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top]]
+    statistic, x_edge, y_edge, binnumber = binned_statistic_2d(x, y, values, statistic=statistic,
+                                                               bins=bins, range=pitch_range,
+                                                               expand_binnumbers=True)
 
-    (statistic, x_edge,
-     y_edge, binnumber) = binned_statistic_2d(x, y, values, statistic=statistic,
-                                              bins=bins, range=pitch_range,
-                                              expand_binnumbers=True)
-    statistic = np.flip(statistic.T, axis=0)  # reshape to same layout as horizontal pitch
+    statistic = np.flip(statistic.T, axis=0)
     if statistic.ndim == 3:
         num_y, num_x, _ = statistic.shape
     else:
         num_y, num_x = statistic.shape
     if normalize:
         statistic = statistic / statistic.sum()
-        
-    # flip the binnumber so can be used to index a numpy array (i.e. starts top left 0, 0)
-    binnumber[1, :] = num_y - binnumber[1, :] + 1  # equivalent to flipping
-
+    binnumber[1, :] = num_y - binnumber[1, :] + 1
     x_grid, y_grid = np.meshgrid(x_edge, y_edge)
-    cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
-                         y_edge[:-1] + 0.5 * np.diff(y_edge))
+    cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge), y_edge[:-1] + 0.5 * np.diff(y_edge))
 
-    if not (dim.invert_y and standardized is False):
-        # if not inverted flip y coordinates so bottom is zero
+    if not dim.invert_y or standardized is not False:
         y_grid = np.flip(y_grid, axis=0)
         cy = np.flip(cy, axis=0)
-    
+
     # if outside the pitch set the bin number to minus one
     # else zero index the results by removing one
     mask_x_out = np.logical_or(binnumber[0, :] == 0,
                                binnumber[0, :] == num_x + 1)
     binnumber[0, mask_x_out] = -1
     binnumber[0, ~mask_x_out] = binnumber[0, ~mask_x_out] - 1
-    
+
     mask_y_out = np.logical_or(binnumber[1, :] == 0,
                                binnumber[1, :] == num_y + 1)
     binnumber[1, mask_y_out] = -1
     binnumber[1, ~mask_y_out] = binnumber[1, ~mask_y_out] - 1
-
     inside = np.logical_and(~mask_x_out, ~mask_y_out)
-    
-    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
-
-    return stats
+    return _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
 
 
 def heatmap(stats, ax=None, vertical=False, **kwargs):
@@ -184,11 +169,9 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     """
     validate_ax(ax)
     if vertical:
-        mesh = ax.pcolormesh(stats['y_grid'], stats['x_grid'], stats['statistic'], **kwargs)
+        return ax.pcolormesh(stats['y_grid'], stats['x_grid'], stats['statistic'], **kwargs)
     else:
-        mesh = ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
-
-    return mesh
+        return ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
 
 
 def bin_statistic_positional(x, y, values=None, dim=None, positional='full',

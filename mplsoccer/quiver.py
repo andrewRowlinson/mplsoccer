@@ -130,14 +130,8 @@ class HandlerQuiver(HandlerLine2D):
         overhang = (orig_handle.headlength - orig_handle.headaxislength)/orig_handle.headlength
         edgecolor = orig_handle.get_edgecolor()
         facecolor = orig_handle.get_facecolor()
-        if len(edgecolor) == 0:
-            edgecolor = None
-        else:
-            edgecolor = edgecolor[0]
-        if len(facecolor) == 0:
-            facecolor = None
-        else:
-            facecolor = facecolor[0]
+        edgecolor = None if len(edgecolor) == 0 else edgecolor[0]
+        facecolor = None if len(facecolor) == 0 else facecolor[0]
         legline = patches.FancyArrow(x=xdata[0],
                                      y=ydata[0],
                                      dx=xdata[-1]-xdata[0],

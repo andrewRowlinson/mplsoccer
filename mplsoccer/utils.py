@@ -88,7 +88,7 @@ def validate_ax(ax):
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
                 grid=False, tick=False, label=False):
     """ Helper method to set the visibility of matplotlib spines, grid and ticks/ labels.
-    By default sets all to invisible.
+    By default, sets all to invisible.
 
     Parameters
     ----------
@@ -130,25 +130,14 @@ def set_labels(ax, label_value, label_axis):
     else:
         ax.set_yticks(np.arange(len(label_value)) + 1)
         axis = ax.get_yticklabels()
-
-    # fetch labels
     labels = [items.get_text() for items in axis]
-
-    # init a count variable
-    if label_axis == 'x':
-        count = 0
-    else:
-        count = len(label_value) - 1
-
-    # iterate through all the labels and change the label name
+    count = 0 if label_axis == 'x' else len(label_value) - 1
     for i in range(len(labels)):
         labels[i] = label_value[count]
-
         if label_axis == 'x':
             count += 1
         else:
             count -= 1
-
     return labels
 
 
@@ -213,7 +202,7 @@ class Standardizer:
         x, y : array-like or scalar.
             Commonly, these parameters are 1D arrays.
         reverse : bool, default False
-            If reverse=True then reverse the transform. Therefore the coordinates
+            If reverse=True then reverse the transform. Therefore, the coordinates
             are converted from pitch_to to pitch_from.
 
         Returns
