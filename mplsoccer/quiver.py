@@ -1,11 +1,12 @@
 """`mplsoccer.quiver` is a python module containing a function to plot arrows in
 Matplotlib and a complementary handler for adding the arrows to the legend."""
 
-import matplotlib.patches as patches
 import numpy as np
+from matplotlib import patches
 from matplotlib.legend import Legend
 from matplotlib.legend_handler import HandlerLine2D
 from matplotlib.quiver import Quiver
+
 from mplsoccer.utils import validate_ax
 
 __all__ = ['arrows']
@@ -130,14 +131,8 @@ class HandlerQuiver(HandlerLine2D):
         overhang = (orig_handle.headlength - orig_handle.headaxislength)/orig_handle.headlength
         edgecolor = orig_handle.get_edgecolor()
         facecolor = orig_handle.get_facecolor()
-        if len(edgecolor) == 0:
-            edgecolor = None
-        else:
-            edgecolor = edgecolor[0]
-        if len(facecolor) == 0:
-            facecolor = None
-        else:
-            facecolor = facecolor[0]
+        edgecolor = None if len(edgecolor) == 0 else edgecolor[0]
+        facecolor = None if len(facecolor) == 0 else facecolor[0]
         legline = patches.FancyArrow(x=xdata[0],
                                      y=ydata[0],
                                      dx=xdata[-1]-xdata[0],

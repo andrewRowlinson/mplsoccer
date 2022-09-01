@@ -36,7 +36,7 @@ def create_transparent_cmap(color=None, cmap=None, n_segments=100, alpha_start=0
         The number of colors in the cmap.
     alpha_start, alpha_end: float, default 0.01, 1
         The starting/ ending alpha values for the cmap transparency.
-        Takes values between 0 (transparent) and 1 (opaque).
+        Values between 0 (transparent) and 1 (opaque).
 
     Returns
     -------

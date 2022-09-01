@@ -1,7 +1,7 @@
 """ Module containing: Pitch and VerticalPitch, which are used to plot pitches in mplsoccer"""
 
-import matplotlib.patches as patches
 import numpy as np
+from matplotlib import patches
 from matplotlib.lines import Line2D
 
 from mplsoccer._pitch_plot import BasePitchPlot

@@ -210,7 +210,7 @@ def scatter_rotation(x, y, rotation_degrees, marker=None, ax=None, vertical=Fals
         The axis to plot on.
     vertical : bool, default False
         Rotates the markers correctly for the orientation. If using a vertical setup
-        where the x and y axis are flipped set vertical=True.
+        where the x and y-axis are flipped set vertical=True.
     **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
 
     Returns
@@ -220,7 +220,7 @@ def scatter_rotation(x, y, rotation_degrees, marker=None, ax=None, vertical=Fals
     rotation_degrees = np.ma.ravel(rotation_degrees)
     if x.size != rotation_degrees.size:
         raise ValueError("x and rotation_degrees must be the same size")
-    # rotated counter clockwise - this makes it clockwise with zero facing the direction of play
+    # rotated counterclockwise - this makes it clockwise with zero facing the direction of play
     rotation_degrees = - rotation_degrees
     # if horizontal rotate by 90 degrees so 0 degrees is this way →
     if vertical is False:
@@ -231,8 +231,7 @@ def scatter_rotation(x, y, rotation_degrees, marker=None, ax=None, vertical=Fals
         marker_style._transform = marker_style.get_transform().rotate_deg(degrees)
         markers.append(marker_style)
 
-    rotated_scatter = _mscatter(x, y, markers=markers, ax=ax, **kwargs)
-    return rotated_scatter
+    return _mscatter(x, y, markers=markers, ax=ax, **kwargs)
 
 
 def scatter_football(x, y, ax=None, **kwargs):
@@ -258,7 +257,7 @@ def scatter_football(x, y, ax=None, **kwargs):
     sc_hex = ax.scatter(x, y, edgecolors=pentcolor, c=hexcolor, linewidths=linewidths,
                         marker=football_hexagon_marker, s=s, **kwargs)
 
-    if 'label' in kwargs.keys():
+    if 'label' in kwargs:
         Legend.update_default_handler_map({sc_hex: HandlerFootball()})
         del kwargs['label']
 
@@ -275,13 +274,12 @@ class HandlerFootball(HandlerPathCollection):
         edgecolor = orig_handle.get_edgecolor()[0]
         facecolor = orig_handle.get_facecolor()[0]
         sizes = [size*0.249 for size in sizes]
-        p = type(orig_handle)([football_hexagon_marker, football_pentagon_marker],
-                              sizes=sizes,
-                              offsets=offsets,
-                              transOffset=transOffset,
-                              facecolors=[facecolor, edgecolor],
-                              edgecolors=edgecolor)
-        return p
+        return type(orig_handle)([football_hexagon_marker, football_pentagon_marker],
+                                 sizes=sizes,
+                                 offsets=offsets,
+                                 transOffset=transOffset,
+                                 facecolors=[facecolor, edgecolor],
+                                 edgecolors=edgecolor)
 
     def _default_update_prop(self, legend_handle, orig_handle):
         facecolor = legend_handle.get_facecolor()

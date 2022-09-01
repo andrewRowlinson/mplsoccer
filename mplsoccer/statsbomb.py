@@ -1,8 +1,10 @@
+"""`mplsoccer.statsbomb` is a python module for loading StatsBomb open, local and API data."""
+
+import json
 import os
 
 import pandas as pd
 import requests
-import json
 
 __all__ = ['Sbopen', 'Sbapi', 'Sblocal']
 
@@ -33,7 +35,7 @@ class Sbopen:
 
         Returns
         -------
-        json-encoded content of a requests response
+        json-encoded content of a request's response
             For the StatsBomb data this is typically a list of dictionaries.
         """
         resp = requests.get(url=url)
@@ -123,9 +125,7 @@ class Sbopen:
         """
         url = f'{self.url}competitions.json'
         data = self._get_data(url)
-        if self.dataframe:
-            return pd.DataFrame(data)
-        return data
+        return pd.DataFrame(data) if self.dataframe else data
 
     def frame(self, match_id):
         """ StatsBomb 360 open-data.
@@ -185,7 +185,7 @@ class Sbapi:
 
         Returns
         -------
-        json-encoded content of a requests response
+        json-encoded content of a request's response
             For the StatsBomb data this is typically a list of dictionaries.
         """
         resp = requests.get(url=url, auth=self.auth)
@@ -282,9 +282,7 @@ class Sbapi:
         """
         url = f'{self.url}{version}/competitions'
         data = self._get_data(url)
-        if self.dataframe:
-            return pd.DataFrame(data)
-        return data
+        return pd.DataFrame(data) if self.dataframe else data
 
     def frame(self, match_id, version=1):
         """ StatsBomb 360 data from the API.
@@ -423,9 +421,7 @@ class Sblocal:
         >>> competition = parser.competition(path)
         """
         data = self._get_data(path)
-        if self.dataframe:
-            return pd.DataFrame(data)
-        return data
+        return pd.DataFrame(data) if self.dataframe else data
 
     def frame(self, path):
         """ Read the 360 data from a local file.
@@ -586,11 +582,18 @@ def flatten_event(events, match_id, dataframe=True):
     related = []
     freeze = []
     tactics = []
+    cols_to_drop = ['pass_through_ball', 'pass_outswinging', 'pass_inswinging', 'clearance_head',
+                    'clearance_left_foot', 'clearance_right_foot', 'pass_straight',
+                    'clearance_other', 'goalkeeper_punched_out',
+                    'goalkeeper_shot_saved_off_target', 'shot_saved_off_target',
+                    'goalkeeper_shot_saved_to_post', 'shot_saved_to_post', 'goalkeeper_lost_out',
+                    'goalkeeper_lost_in_play', 'goalkeeper_success_out',
+                    'goalkeeper_success_in_play', 'goalkeeper_saved_to_post',
+                    'shot_kick_off', 'goalkeeper_penalty_saved_to_post']
+
     for row in events:
         row['match_id'] = match_id
         for key in list(row):
-
-            # unpack nested columns
             if isinstance(row[key], dict):
                 for nested_key in list(row[key]):
                     nested_value = row[key][nested_key]
@@ -614,54 +617,28 @@ def flatten_event(events, match_id, dataframe=True):
                     else:
                         row[f'{key}_{nested_key}'] = nested_value
                 del row[key]
-
-        # unpack the location column
         if 'location' in row:
             _flatten_location(row, row['location'])
             del row['location']
-
-        # replace random star in ball receipts in some rows
         row['type_name'] = row['type_name'].replace('Ball Receipt*', 'Ball Receipt')
-
         # pass through ball is deprecated now, but it was not always added to technique name
         if 'pass_through_ball' in row:
             row['technique_name'] = 'Through Ball'
-
-        # drop cols that are covered by other columns
-        # (e.g. pass technique covers through, ball, inswinging etc.)
-        cols_to_drop = ['pass_through_ball', 'pass_outswinging', 'pass_inswinging',
-                        'clearance_head', 'clearance_left_foot', 'clearance_right_foot',
-                        'pass_straight', 'clearance_other', 'goalkeeper_punched_out',
-                        'goalkeeper_shot_saved_off_target', 'shot_saved_off_target',
-                        'goalkeeper_shot_saved_to_post', 'shot_saved_to_post',
-                        'goalkeeper_lost_out', 'goalkeeper_lost_in_play',
-                        'goalkeeper_success_out', 'goalkeeper_success_in_play',
-                        'goalkeeper_saved_to_post', 'shot_kick_off',
-                        'goalkeeper_penalty_saved_to_post',
-                        ]
         for col in cols_to_drop:
             row.pop(col, None)
-
-        # remove related_events as storing as separate dictionary
         if 'related_events' in row:
-            for related_event in row['related_events']:
-                related.append({'match_id': match_id,
-                                'id': row['id'],
-                                'index': row['index'],
-                                'type_name': row['type_name'],
-                                'id_related': related_event})
-            del row['related_events']
+            related.extend({'match_id': match_id, 'id': row['id'], 'index': row['index'],
+                            'type_name': row['type_name'], 'id_related': related_event}
+                           for related_event in row['related_events'])
 
-    # flatten list of lists (e.g. player in lineup or freeze-frame into separate entry)
+            del row['related_events']
     tactics = _flatten_list_of_lists(tactics, key='event_tactics_id')
     freeze = _flatten_list_of_lists(freeze, key='event_freeze_id')
-
     if dataframe:
         events = _event_dataframe(events)
         related = _related_dataframe(related, events)
         freeze = pd.DataFrame(freeze)
         tactics = pd.DataFrame(tactics)
-
     return events, related, freeze, tactics
 
 
@@ -733,13 +710,12 @@ def flatten_match(match, dataframe=True):
                         for k in list(nested_value):
                             if k == 'nickname' and not nested_value[k]:
                                 row[f'{key}_{nested_key}_{k}'] = nested_value['name']
+                            elif isinstance(nested_value[k], dict):
+                                for sub_k in nested_value[k]:
+                                    nested_sub_value = nested_value[k][sub_k]
+                                    row[f'{key}_{nested_key}_{k}_{sub_k}'] = nested_sub_value
                             else:
-                                if isinstance(nested_value[k], dict):
-                                    for sub_k in nested_value[k]:
-                                        nested_sub_value = nested_value[k][sub_k]
-                                        row[f'{key}_{nested_key}_{k}_{sub_k}'] = nested_sub_value
-                                else:
-                                    row[f'{key}_{nested_key}_{k}'] = nested_value[k]
+                                row[f'{key}_{nested_key}_{k}'] = nested_value[k]
                     elif key in ['competition_stage', 'stadium', 'referee', 'metadata']:
                         row[f'{key}_{nested_key}'] = nested_value
                     else:
@@ -772,7 +748,7 @@ def flatten_360(data, match_id, dataframe=True):
     frames = []
     visible = []
     for row in data:
-        for idx, frame in enumerate(row['freeze_frame']):
+        for frame in row['freeze_frame']:
             frame['match_id'] = match_id
             frame['id'] = row['event_uuid']
             _flatten_location(frame, frame['location'])
