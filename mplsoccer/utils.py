@@ -275,21 +275,25 @@ class FontManager:
     url : str, default is the url for Roboto-Regular.ttf
         Can really be any .ttf file, but probably looks like
         'https://github.com/google/fonts/blob/main/ofl/cinzel/static/Cinzel-Regular.ttf?raw=true'
-        Note make sure the ?raw=true is at the end.
+        Note 1: make sure the ?raw=true is at the end.
+        Note 2: urls like 'https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/static/Cinzel-Regular.ttf'
+                allow Cross-Origin Resource Sharing, and work in browser environments
+                based on PyOdide (e.g. JupyterLite). Those urls don't need the ?raw=true at the end
+
 
     Examples
     --------
     >>> from mplsoccer import FontManager
     >>> import matplotlib.pyplot as plt
-    >>> font_url = 'https://github.com/google/fonts/blob/main/ofl/abel/Abel-Regular.ttf?raw=true'
+    >>> font_url = 'https://raw.githubusercontent.com/google/fonts/main/ofl/abel/Abel-Regular.ttf'
     >>> fm = FontManager(url=font_url)
     >>> fig, ax = plt.subplots()
     >>> ax.text(x=0.5, y=0.5, s="Good content.", fontproperties=fm.prop, size=30)
     """
 
     def __init__(self,
-                 url=('https://github.com/google/fonts/blob/main/'
-                      'apache/roboto/Roboto%5Bwdth,wght%5D.ttf?raw=true')):
+                 url=('https://raw.githubusercontent.com/google/fonts/main/'
+                      'apache/roboto/Roboto%5Bwdth,wght%5D.ttf')):
         self.url = url
         with NamedTemporaryFile(delete=False, suffix=".ttf") as temp_file:
             temp_file.write(urlopen(self.url).read())
