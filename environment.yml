@@ -3,18 +3,18 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - jupyter
-  - pandas
-  - scipy
   - cmasher
-  - seaborn
-  - requests
-  - pyarrow
-  - pillow
+  - jupyter
   - lxml
+  - pandas
+  - pillow
+  - pyarrow
+  - requests
+  - scipy
+  - seaborn
   - pip
   - pip:
-      - mplsoccer
+      - adjustText
       - highlight-text
       - kloppy
-      - adjustText
+      - mplsoccer

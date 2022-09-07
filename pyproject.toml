@@ -1,0 +1,75 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mplsoccer"
+description = 'Football pitch plotting library for matplotlib'
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+keywords = [
+  "football",
+  "soccer",
+  "matplotlib",
+  "mplsoccer",
+  "visualization",
+]
+authors = [
+  { name = "Andrew Rowlinson", email = "rowlinsonandy@gmail.com" },
+  { name = "Anmol Durgapal", email = "slothfulwave10@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Matplotlib",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = ['matplotlib',
+                'numpy',
+                'pandas',
+                'pillow',
+                'scipy',
+                'seaborn',
+				]
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://mplsoccer.readthedocs.io"
+Issues = "https://github.com/andrewRowlinson/mplsoccer/issues"
+Source = "https://github.com/andrewRowlinson/mplsoccer"
+
+[tool.hatch.version]
+path = "mplsoccer/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=temporary --cov=tests"
+no-cov = "cov --no-cov"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["37", "38", "39", "310", "311"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "mplsoccer/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
