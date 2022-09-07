@@ -26,8 +26,8 @@ df_pass_barca = df[(df.type_name == 'Pass') &
                    (~df.sub_type_name.isin(['Throw-in', 'Corner', 'Free Kick', 'Kick Off']))].copy()
 
 # setup a mplsoccer FontManager to download google fonts (SigmarOne-Regular)
-fm_rubik = FontManager(('https://github.com/google/fonts/blob/main/ofl/rubikmonoone/'
-                        'RubikMonoOne-Regular.ttf?raw=true'))
+fm_rubik = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/'
+                       'rubikmonoone/RubikMonoOne-Regular.ttf')
 
 ##############################################################################
 # Shot map Barcelona

@@ -158,7 +158,7 @@ for index, row in average_locs_and_count.iterrows():
                    ha='center', size=16, weight='bold', ax=axs['pitch'])
 
 # Load a custom font.
-URL = 'https://github.com/google/fonts/blob/main/apache/roboto/Roboto%5Bwdth,wght%5D.ttf?raw=true'
+URL = 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto%5Bwdth,wght%5D.ttf'
 robotto_regular = FontManager(URL)
 
 # endnote /title

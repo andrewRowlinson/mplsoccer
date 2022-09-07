@@ -3,21 +3,21 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - cmasher
+  - lxml
+  - numpydoc
   - pandas
+  - pillow
+  - pyarrow
+  - requests
   - scipy
   - seaborn
   - sphinx
-  - cmasher
-  - pyarrow
-  - requests
-  - lxml
-  - pillow
-  - pip
   - sphinx-gallery
   - sphinx_rtd_theme
-  - numpydoc
+  - pip
   - pip:
-      - -e .
+      - --editable .
+      - adjustText
       - highlight-text
       - kloppy
-      - adjustText

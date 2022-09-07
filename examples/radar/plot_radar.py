@@ -62,22 +62,20 @@ radar = Radar(params, low, high,
 # We will use mplsoccer's ``FontManager`` to load some fonts from Google Fonts.
 # We borrowed the FontManager from the excellent
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
-URL1 = ('https://github.com/googlefonts/SourceSerifProGFVersion/blob/main/'
-        'fonts/SourceSerifPro-Regular.ttf?raw=true')
+URL1 = ('https://raw.githubusercontent.com/googlefonts/SourceSerifProGFVersion/main/fonts/'
+        'SourceSerifPro-Regular.ttf')
 serif_regular = FontManager(URL1)
-URL2 = ('https://github.com/googlefonts/SourceSerifProGFVersion/blob/main/'
-        'fonts/SourceSerifPro-ExtraLight.ttf?raw=true')
+URL2 = ('https://raw.githubusercontent.com/googlefonts/SourceSerifProGFVersion/main/fonts/'
+        'SourceSerifPro-ExtraLight.ttf')
 serif_extra_light = FontManager(URL2)
-URL3 = ('https://github.com/google/fonts/blob/main/ofl/rubikmonoone/'
-        'RubikMonoOne-Regular.ttf?raw=true')
+URL3 = ('https://raw.githubusercontent.com/google/fonts/main/ofl/rubikmonoone/'
+        'RubikMonoOne-Regular.ttf')
 rubik_regular = FontManager(URL3)
-URL4 = 'https://github.com/googlefonts/roboto/blob/main/src/hinted/Roboto-Thin.ttf?raw=true'
+URL4 = 'https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Thin.ttf'
 robotto_thin = FontManager(URL4)
-URL5 = ('https://github.com/google/fonts/blob/3b947ee2732103ef6132b09d234aecd768d2d83c/'
-        'apache/roboto/static/Roboto-Thin.ttf?raw=true')
-robotto_regular = FontManager(URL5)
-URL6 = 'https://github.com/google/fonts/blob/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf?raw=true'
-robotto_bold = FontManager(URL6)
+URL5 = ('https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/'
+        'RobotoSlab%5Bwght%5D.ttf')
+robotto_bold = FontManager(URL5)
 
 ##############################################################################
 # Player Values
@@ -104,7 +102,7 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop)  # draw the range labels
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
-                                       fontproperties=robotto_regular.prop)  # draw the param labels
+                                       fontproperties=robotto_thin.prop)  # draw the param labels
 
 ##############################################################################
 # Adding lines from the center to the edge
@@ -120,7 +118,7 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15, zorder=2.5,
                                        fontproperties=robotto_thin.prop)  # draw the range labels
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
-                                       fontproperties=robotto_regular.prop)  # draw the param labels
+                                       fontproperties=robotto_thin.prop)  # draw the param labels
 lines = radar.spoke(ax=ax, color='#a6a4a1', linestyle='--', zorder=2)
 
 ##############################################################################
@@ -138,7 +136,7 @@ radar_poly, radar_poly2, vertices1, vertices2 = radar_output
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
-                                       fontproperties=robotto_regular.prop)
+                                       fontproperties=robotto_thin.prop)
 
 ##############################################################################
 # Comparing three or more players
@@ -176,7 +174,7 @@ ax.scatter(vertices3[:, 0], vertices3[:, 1],
            c='#697cd4', edgecolors='#222b54', marker='o', s=150, zorder=2)
 
 range_labels = radar.draw_range_labels(ax=ax, fontsize=25, fontproperties=robotto_thin.prop)
-param_labels = radar.draw_param_labels(ax=ax, fontsize=25, fontproperties=robotto_regular.prop)
+param_labels = radar.draw_param_labels(ax=ax, fontsize=25, fontproperties=robotto_thin.prop)
 
 ##############################################################################
 # Making a Clean Radar
@@ -210,7 +208,7 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25,
-                                       fontproperties=robotto_regular.prop)
+                                       fontproperties=robotto_thin.prop)
 
 # adding the endnote and title text (these axes range from 0-1, i.e. 0, 0 is the bottom left)
 # Note we are slightly offsetting the text from the edges by 0.01 (1%, e.g. 0.99)
@@ -219,12 +217,12 @@ endnote_text = axs['endnote'].text(0.99, 0.5, 'Inspired By: StatsBomb / Rami Mog
 title1_text = axs['title'].text(0.01, 0.65, 'Bruno Fernandes', fontsize=25,
                                 fontproperties=robotto_bold.prop, ha='left', va='center')
 title2_text = axs['title'].text(0.01, 0.25, 'Manchester United', fontsize=20,
-                                fontproperties=robotto_regular.prop,
+                                fontproperties=robotto_thin.prop,
                                 ha='left', va='center', color='#B6282F')
 title3_text = axs['title'].text(0.99, 0.65, 'Radar Chart', fontsize=25,
                                 fontproperties=robotto_bold.prop, ha='right', va='center')
 title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
-                                fontproperties=robotto_regular.prop,
+                                fontproperties=robotto_thin.prop,
                                 ha='right', va='center', color='#B6282F')
 # sphinx_gallery_thumbnail_path = 'gallery/radar/images/sphx_glr_plot_radar_004.png'
 
@@ -248,7 +246,7 @@ radar_poly, radar_poly2, vertices1, vertices2 = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25,
-                                       fontproperties=robotto_regular.prop)
+                                       fontproperties=robotto_thin.prop)
 axs['radar'].scatter(vertices1[:, 0], vertices1[:, 1],
                      c='#00f2c1', edgecolors='#6d6c6d', marker='o', s=150, zorder=2)
 axs['radar'].scatter(vertices2[:, 0], vertices2[:, 1],
@@ -261,13 +259,13 @@ endnote_text = axs['endnote'].text(0.99, 0.5, 'Inspired By: StatsBomb / Rami Mog
 title1_text = axs['title'].text(0.01, 0.65, 'Bruno Fernandes', fontsize=25, color='#01c49d',
                                 fontproperties=robotto_bold.prop, ha='left', va='center')
 title2_text = axs['title'].text(0.01, 0.25, 'Manchester United', fontsize=20,
-                                fontproperties=robotto_regular.prop,
+                                fontproperties=robotto_thin.prop,
                                 ha='left', va='center', color='#01c49d')
 title3_text = axs['title'].text(0.99, 0.65, 'Kevin De Bruyne', fontsize=25,
                                 fontproperties=robotto_bold.prop,
                                 ha='right', va='center', color='#d80499')
 title4_text = axs['title'].text(0.99, 0.25, 'Manchester City', fontsize=20,
-                                fontproperties=robotto_regular.prop,
+                                fontproperties=robotto_thin.prop,
                                 ha='right', va='center', color='#d80499')
 
 ##############################################################################
@@ -288,7 +286,7 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#fcfcfc',
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#fcfcfc',
-                                       fontproperties=robotto_regular.prop)
+                                       fontproperties=robotto_thin.prop)
 
 # adding the endnote and title text (these axes range from 0-1, i.e. 0, 0 is the bottom left)
 # Note we are slightly offsetting the text from the edges by 0.01 (1%, e.g. 0.99)
@@ -299,13 +297,13 @@ title1_text = axs['title'].text(0.01, 0.65, 'Bruno Fernandes', fontsize=25,
                                 fontproperties=robotto_bold.prop,
                                 ha='left', va='center', color='#e4dded')
 title2_text = axs['title'].text(0.01, 0.25, 'Manchester United', fontsize=20,
-                                fontproperties=robotto_regular.prop,
+                                fontproperties=robotto_thin.prop,
                                 ha='left', va='center', color='#cc2a3f')
 title3_text = axs['title'].text(0.99, 0.65, 'Radar Chart', fontsize=25,
                                 fontproperties=robotto_bold.prop,
                                 ha='right', va='center', color='#e4dded')
 title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
-                                fontproperties=robotto_regular.prop,
+                                fontproperties=robotto_thin.prop,
                                 ha='right', va='center', color='#cc2a3f')
 
 fig.set_facecolor('#121212')
@@ -333,7 +331,7 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#f0f6f6',
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#f0f6f6',
-                                       fontproperties=robotto_regular.prop)
+                                       fontproperties=robotto_thin.prop)
 axs['radar'].scatter(vertices[:, 0], vertices[:, 1], c='#eeb743', edgecolors='#070707',
                      marker='D', s=220, zorder=2)
 
@@ -346,13 +344,13 @@ title1_text = axs['title'].text(0.01, 0.65, 'Bruno Fernandes', fontsize=25,
                                 fontproperties=robotto_bold.prop, ha='left',
                                 va='center', color='#eeb743')
 title2_text = axs['title'].text(0.01, 0.25, 'Manchester United', fontsize=20,
-                                fontproperties=robotto_regular.prop, ha='left',
+                                fontproperties=robotto_thin.prop, ha='left',
                                 va='center', color='#f0f6f6')
 title3_text = axs['title'].text(0.99, 0.65, 'Radar Chart', fontsize=25,
                                 fontproperties=robotto_bold.prop, ha='right',
                                 va='center', color='#eeb743')
 title4_text = axs['title'].text(0.99, 0.25, 'Midfielder', fontsize=20,
-                                fontproperties=robotto_regular.prop, ha='right',
+                                fontproperties=robotto_thin.prop, ha='right',
                                 va='center', color='#f0f6f6')
 
 fig.set_facecolor('#070707')

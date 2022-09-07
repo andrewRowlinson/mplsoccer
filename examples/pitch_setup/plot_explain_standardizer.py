@@ -19,8 +19,8 @@ FIGSIZE = (FIGWIDTH, FIGHEIGHT)
 FIG_ASPECT = FIGWIDTH / FIGHEIGHT
 fig = plt.figure(figsize=FIGSIZE)
 
-fm_rubik = FontManager(('https://github.com/google/fonts/blob/main/ofl/rubikmonoone/'
-                        'RubikMonoOne-Regular.ttf?raw=true'))
+fm_rubik = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/'
+                       'rubikmonoone/RubikMonoOne-Regular.ttf')
 
 # layout specifications
 PAD = 1
