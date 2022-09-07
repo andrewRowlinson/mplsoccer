@@ -188,8 +188,8 @@ red_arrow = dict(arrowstyle='simple, head_width=0.7',
                  connectionstyle="arc3,rad=-0.8", fc="red", ec="red")
 
 # a fontmanager object for using a google font
-fm_scada = FontManager(('https://github.com/googlefonts/scada/blob/main/fonts/ttf/'
-                        'Scada-Regular.ttf?raw=true'))
+fm_scada = FontManager('https://raw.githubusercontent.com/googlefonts/scada/main/fonts/ttf/'
+                       'Scada-Regular.ttf')
 
 # Load the Club/ Statsbomb logos
 # these are the property of the respective clubs/ StatsBomb.

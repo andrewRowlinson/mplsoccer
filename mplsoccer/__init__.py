@@ -1,6 +1,7 @@
 """ This module imports the mplsoccer classes/ functions so that they can be used like
 from mplsoccer import Pitch."""
 
+from .__about__ import __version__
 from .statsbomb import Sbopen, Sbapi,  Sblocal
 from .cm import *
 from .linecollection import *

@@ -28,8 +28,8 @@ vertical_pitch = VerticalPitch(half=True, pad_top=0.05, pad_right=0.05, pad_bott
 
 # setup a mplsoccer FontManager to download google fonts (Roboto-Regular / SigmarOne-Regular)
 fm = FontManager()
-fm_rubik = FontManager(('https://github.com/google/fonts/blob/main/ofl/rubikmonoone/'
-                        'RubikMonoOne-Regular.ttf?raw=true'))
+fm_rubik = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/rubikmonoone/'
+                       'RubikMonoOne-Regular.ttf')
 
 ##############################################################################
 # Subset the shots for each team and move Barcelona's shots to the other side of the pitch.

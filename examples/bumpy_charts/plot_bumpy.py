@@ -30,10 +30,10 @@ from mplsoccer import Bumpy, FontManager, add_image
 # We borrowed the FontManager from the excellent
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
 
-font_normal = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
-                           "Roboto%5Bwdth,wght%5D.ttf?raw=true"))
-font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robotoslab/"
-                         "RobotoSlab%5Bwght%5D.ttf?raw=true"))
+font_normal = FontManager("https://raw.githubusercontent.com/google/fonts/main/apache/"
+                          "roboto/Roboto%5Bwdth,wght%5D.ttf")
+font_bold = FontManager("https://raw.githubusercontent.com/google/fonts/main/apache/"
+                        "robotoslab/RobotoSlab%5Bwght%5D.ttf")
 
 ##############################################################################
 # Load Files
@@ -42,16 +42,16 @@ font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robot
 # You can find all the images/data `here <https://github.com/andrewRowlinson/mplsoccer-assets>`_.
 
 epl = Image.open(
-    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/epl.png?raw=true")
+    urlopen("https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/epl.png")
 )
 
 season_dict = json.load(
-    urlopen("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/epl.json?raw=true")
+    urlopen("https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/epl.json")
 )
 
 player_dict = json.load(
-    urlopen(("https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/"
-             "percentile.json?raw=true"))
+    urlopen("https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/"
+            "percentile.json")
 )
 
 ##############################################################################

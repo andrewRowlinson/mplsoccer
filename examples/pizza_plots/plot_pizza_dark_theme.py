@@ -31,19 +31,19 @@ from mplsoccer import PyPizza, add_image, FontManager
 # We borrowed the FontManager from the excellent
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
 
-font_normal = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
-                           "Roboto%5Bwdth,wght%5D.ttf?raw=true"))
-font_italic = FontManager(("https://github.com/google/fonts/blob/main/apache/roboto/"
-                           "Roboto-Italic%5Bwdth,wght%5D.ttf?raw=true"))
-font_bold = FontManager(("https://github.com/google/fonts/blob/main/apache/robotoslab/"
-                         "RobotoSlab%5Bwght%5D.ttf?raw=true"))
+font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
+                          'Roboto%5Bwdth,wght%5D.ttf')
+font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
+                          'Roboto-Italic%5Bwdth,wght%5D.ttf')
+font_bold = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/'
+                        'RobotoSlab%5Bwght%5D.ttf')
 
 ##############################################################################
 # Load Image
 # ----------
 # Load a cropped image of Frenkie de Jong.
 
-URL = "https://github.com/andrewRowlinson/mplsoccer-assets/blob/main/fdj_cropped.png?raw=true"
+URL = "https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/fdj_cropped.png"
 fdj_cropped = Image.open(urlopen(URL))
 
 ##############################################################################

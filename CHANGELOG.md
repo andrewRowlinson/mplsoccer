@@ -1,3 +1,12 @@
+:rocket: Version 1.1.5
+----------------------
+
+### Fixes
+* Fixes the ``FontManager`` URLs so that they can be imported in JupyterLite.
+
+### Changes
+* We now use hatch rather than setuptools for the mplsoccer build.
+
 :rocket: Version 1.1.4
 ----------------------
 

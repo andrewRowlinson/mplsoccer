@@ -24,8 +24,8 @@ mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1) & (df.outcome_na
 df_pass = df.loc[mask_team1, ['x', 'y', 'end_x', 'end_y', 'outcome_name']]
 
 # load a custom font from google fonts
-fm = FontManager('https://github.com/google/fonts/blob/main/ofl/sedgwickave/'
-                 'SedgwickAve-Regular.ttf?raw=true')
+fm = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/sedgwickave/'
+                 'SedgwickAve-Regular.ttf')
 
 ##############################################################################
 # Plotting cybperpunk passes
