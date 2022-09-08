@@ -34,7 +34,8 @@ classifiers = [
 dependencies = ['matplotlib',
                 'numpy',
                 'pandas',
-                'pillow',
+                'Pillow',
+                'requests',
                 'scipy',
                 'seaborn',
 				]

@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - cmasher
+  - grayskull
   - hatch
   - jupyterlab
   - lxml
