@@ -41,8 +41,8 @@ from mplsoccer import lines
 fig, ax = plt.subplots()
 ax.set_xlim(0, 120)
 ax.set_ylim(0, 80)
-lines(x, y, x_end, y_end, color='red', comet=True, transparent=True,
-      alpha_start=0.1, alpha_end=0.4, ax=ax)
+lc1 = lines(x, y, x_end, y_end, color='red', comet=True, transparent=True,
+            alpha_start=0.1, alpha_end=0.4, ax=ax)
 
 ##############################################################################
 # Plot using cmap
@@ -52,7 +52,7 @@ lines(x, y, x_end, y_end, color='red', comet=True, transparent=True,
 fig, ax = plt.subplots()
 ax.set_xlim(0, 120)
 ax.set_ylim(0, 80)
-lines(x, y, x_end, y_end, cmap='viridis', comet=True, transparent=True,
-      alpha_start=0.1, alpha_end=0.4, ax=ax)
+lc2 = lines(x, y, x_end, y_end, cmap='viridis', comet=True, transparent=True,
+            alpha_start=0.1, alpha_end=0.4, ax=ax)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
