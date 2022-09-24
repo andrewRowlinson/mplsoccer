@@ -2,11 +2,14 @@
 ----------------------
 
 ### Fixes
-* Fixes the ``PyPizza`` class so that ``linewidths`` of zero are allowed values. \
+* Fixed the ``PyPizza`` class so that ``linewidths`` of zero are allowed values. \
 see: https://github.com/andrewRowlinson/mplsoccer/issues/71
+* Fixed the ``HandlerFootball`` class so the football scatter method is compatible with \
+Matplotlib 3.6 where transOffset was replaced with offset_transform. \
+see: https://github.com/andrewRowlinson/mplsoccer/issues/72
 
 ### Docs
-* Added wedges example to tutorials.
+* Added a wedges example to the tutorials as an alternative to comet lines.
 
 :rocket: Version 1.1.5/1.1.6
 ----------------------------
