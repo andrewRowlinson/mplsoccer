@@ -59,13 +59,24 @@ class PyPizza:
         self.straight_line_limit = straight_line_limit
         self.straight_line_color = straight_line_color
         self.straight_line_lw = straight_line_lw
-        self.straight_line_ls = straight_line_ls
+        # if any of the linewidths are zero set the linestyle to solid
+        # to prevent https://github.com/andrewRowlinson/mplsoccer/issues/71
+        if straight_line_lw == 0:
+            self.straight_line_ls = 'solid'
+        else:
+            self.straight_line_ls = straight_line_ls
         self.last_circle_color = last_circle_color
         self.last_circle_lw = last_circle_lw
-        self.last_circle_ls = last_circle_ls
+        if last_circle_lw == 0:
+            self.last_circle_ls = 'solid'
+        else:
+            self.last_circle_ls = last_circle_ls
         self.other_circle_color = other_circle_color
         self.other_circle_lw = other_circle_lw
-        self.other_circle_ls = other_circle_ls
+        if other_circle_lw == 0:
+            self.other_circle_ls = 'solid'
+        else:
+            self.other_circle_ls = other_circle_ls
 
         self.param_texts = []
         self.value_texts = []
@@ -316,6 +327,7 @@ class PyPizza:
         gridlines = ax.yaxis.get_gridlines()
         gridlines[index].set_color(self.last_circle_color)
         gridlines[index].set_linewidth(self.last_circle_lw)
+
         gridlines[index].set_linestyle(self.last_circle_ls)
 
         # for other circles excluding last circle

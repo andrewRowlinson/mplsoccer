@@ -28,7 +28,9 @@ ax.set_xlim(0, 120)
 ax.set_ylim(0, 80)
 for i in range(len(x)):
     ax.annotate('', xy=(x[i], y[i]), xytext=(x_end[i], y_end[i]), zorder=2,
-                arrowprops=dict(arrowstyle="wedge,tail_width=1", linewidth=1, fc='red', ec='black', alpha=0.4))
+                arrowprops=dict(arrowstyle="wedge,tail_width=1", linewidth=1,
+                                fc='red', ec='black', alpha=0.4),
+                )
 
 ##############################################################################
 # Plot using lines
@@ -39,7 +41,8 @@ from mplsoccer import lines
 fig, ax = plt.subplots()
 ax.set_xlim(0, 120)
 ax.set_ylim(0, 80)
-lines(x, y, x_end, y_end, color='red', comet=True, transparent=True, alpha_start=0.1, alpha_end=0.4, ax=ax)
+lines(x, y, x_end, y_end, color='red', comet=True, transparent=True,
+      alpha_start=0.1, alpha_end=0.4, ax=ax)
 
 ##############################################################################
 # Plot using cmap
@@ -49,6 +52,7 @@ lines(x, y, x_end, y_end, color='red', comet=True, transparent=True, alpha_start
 fig, ax = plt.subplots()
 ax.set_xlim(0, 120)
 ax.set_ylim(0, 80)
-lines(x, y, x_end, y_end, cmap='viridis', comet=True, transparent=True, alpha_start=0.1, alpha_end=0.4, ax=ax)
+lines(x, y, x_end, y_end, cmap='viridis', comet=True, transparent=True,
+      alpha_start=0.1, alpha_end=0.4, ax=ax)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
