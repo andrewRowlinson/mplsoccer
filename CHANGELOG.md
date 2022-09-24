@@ -1,5 +1,15 @@
-:rocket: Version 1.1.5
+:rocket: Version 1.1.7
 ----------------------
+
+### Fixes
+* Fixes the ``PyPizza`` class so that ``linewidths`` of zero are allowed values. \
+see: https://github.com/andrewRowlinson/mplsoccer/issues/71
+
+### Docs
+* Added wedges example to tutorials.
+
+:rocket: Version 1.1.5/1.1.6
+----------------------------
 
 ### Fixes
 * Fixes the ``FontManager`` URLs so that they can be imported in JupyterLite.

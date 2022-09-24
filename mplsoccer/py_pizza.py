@@ -77,7 +77,6 @@ class PyPizza:
             self.other_circle_ls = 'solid'
         else:
             self.other_circle_ls = other_circle_ls
-
         self.param_texts = []
         self.value_texts = []
         self.compare_value_texts = []
