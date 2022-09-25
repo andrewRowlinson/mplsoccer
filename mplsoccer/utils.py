@@ -7,12 +7,14 @@ from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
 import matplotlib.font_manager as fm
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes as polar_inset_axes
+from matplotlib.projections import get_projection_class
 import numpy as np
 from PIL import Image
 
 from mplsoccer import dimensions
 
-__all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager', 'set_labels']
+__all__ = ['add_image', 'validate_ax', 'inset_axes', 'set_visible', 'Standardizer', 'FontManager', 'set_labels', 'get_aspect']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -85,6 +87,94 @@ def validate_ax(ax):
         raise TypeError(msg)
 
 
+def get_aspect(ax):
+    """ Get the aspect ratio of an axes.
+    From Stackoverflow post by askewchan:
+    https://stackoverflow.com/questions/41597177/get-aspect-ratio-of-axes
+    
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes, default None
+
+    Returns
+    -------
+    float
+    """
+    left_bottom, right_top = ax.get_position() * ax.figure.get_size_inches()
+    width, height = right_top - left_bottom
+    return height / width * ax.get_data_ratio()
+
+
+def inset_axes(x, y, width=None, height=None, aspect=None, polar=False, vertical=False, ax=None, **kwargs):
+    """ A helper to create an inset axes.
+
+    Parameters
+    ----------
+    x : float
+        The x coordinate of the center of the inset axes.
+    y : float
+        The y coordinate of the center of the inset axes.
+    width : float, default None
+        The width of the inset axes in data coordinates.
+    height : float, default None
+        The height of the inset axes in data coordinates.
+    aspect : float or str ('pitch'), default None
+        You can specify a combination of width and aspect or height and aspect.
+        This will make the axes visually have the given aspect ratio (width/height).
+        For example, if you want an inset axes to appear square set aspect = 1.
+    polar : bool, default False
+        Whether the inset axes if a polar projection.
+    vertical : bool, default False
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
+    ax : matplotlib.axes.Axes, default None
+        The axis to plot on.
+    **kwargs : All other keyword arguments are passed on to inset_axes.
+
+    Examples
+    --------
+    >>> from mplsoccer import inset_axes
+    >>> import matplotlib.pyplot as plt
+    >>> fig, ax = plt.subplots()
+    >>> inset_axes = pitch.inset_axes(0.5, 0.5, width=0.2, aspect=1, ax=ax)
+    """
+    validate_ax(ax)
+    ax_aspect = ax.get_aspect()
+    if ax_aspect == 'auto':
+        ax_aspect = get_aspect(ax)
+        
+    if vertical:
+        x, y = y, x
+
+    if aspect is not None and width is not None and height is not None:
+        raise TypeError('Invalid argument: if using aspect you cannot use both width and height')
+    elif ((width is not None) + (height is not None) + (aspect is not None)) != 2:
+        raise TypeError('Invalid argument: must give the arguments width and height, or width and aspect, or height and aspect')
+    elif aspect is not None and width is None:
+        width = height * aspect * ax_aspect
+    elif aspect is not None and height is None:
+        height = width * ax_aspect / aspect
+
+    bbox = (x - width / 2, y - height / 2, width, height)
+
+    if polar:
+        # From stackover answers by ImportanceOfBeingErnest
+        # https://stackoverflow.com/questions/46262749/plotting-scatter-of-several-polar-plots/46263911#46263911
+        # https://stackoverflow.com/questions/52865516/wrong-width-and-height-when-using-inset-axes-and-transdata
+        ax_inset = polar_inset_axes(ax,
+                                    bbox_to_anchor=bbox,
+                                    width='100%', height='100%',
+                                    loc=10, bbox_transform=ax.transData, borderpad=0.0,
+                                    axes_class=get_projection_class('polar'),
+                                    **kwargs)
+        ax_inset.set_theta_direction(-1)
+        if vertical:
+            ax_inset.set_theta_zero_location('N')
+        return ax_inset
+    
+    return ax.inset_axes(bbox, transform=ax.transData, **kwargs)
+
+
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
                 grid=False, tick=False, label=False):
     """ Helper method to set the visibility of matplotlib spines, grid and ticks/ labels.
@@ -150,7 +240,6 @@ def set_labels(ax, label_value, label_axis):
             count -= 1
 
     return labels
-
 
 class Standardizer:
     """ Convert from one set of coordinates to another.
