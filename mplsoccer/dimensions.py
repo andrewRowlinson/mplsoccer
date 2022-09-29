@@ -241,7 +241,7 @@ def opta_dims():
     """ Create 'opta' dimensions."""
     return FixedDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
                      width=100., length=100., pitch_width=68., pitch_length=105.,
-                     goal_width=10.76, goal_length=1.9,  goal_bottom=44.62, goal_top=55.38,
+                     goal_width=10.76, goal_length=1.9,  goal_bottom=45.2, goal_top=54.8,
                      six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
                      six_yard_right=94.2, six_yard_bottom=36.8, six_yard_top=63.2,
                      penalty_left=11.5, penalty_right=88.5,
