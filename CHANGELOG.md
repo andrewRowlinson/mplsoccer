@@ -1,3 +1,9 @@
+:rocket: Version 1.0.7
+----------------------
+
+### Fixes
+* Fixed goal width dimensions for ``opta_dims`` definitions
+
 :rocket: Version 1.0.6
 ----------------------
   
