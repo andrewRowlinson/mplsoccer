@@ -2,7 +2,7 @@
 ----------------------
 
 ### Fixes
-* Fixed goal width dimensions for ``opta_dims`` definitions
+* Fixed goal width dimensions for ``opta_dims`` definitions from (44.62,55.38) to (45.2,54.8)
 
 :rocket: Version 1.1.7
 ----------------------
