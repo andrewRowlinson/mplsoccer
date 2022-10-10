@@ -11,6 +11,9 @@ from mplsoccer.utils import validate_ax
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid',
                                      'cx', 'cy', 'binnumber', 'inside'))
+_BinnedStatisticResult3d = namedtuple('BinnedStatisticResult3d',
+                                      ('statistic', 'x_grid', 'y_grid', 'z_grid',
+                                       'cx', 'cy', 'binnumber', 'inside'))
 
 
 def _nan_safe(statistic):
@@ -221,11 +224,10 @@ def bin_statistic_3d(x, y, z, values=None, dim=None, statistic='count',
     binnumber[2, mask_z_out] = -1
     binnumber[2, ~mask_z_out] = binnumber[2, ~mask_z_out] - 1
     
-    inside = np.logical_and(~mask_x_out, ~mask_y_out)
+    inside = np.logical_and(~mask_x_out, ~mask_y_out)   
+    stats = _BinnedStatisticResult3d(statistic, x_grid, y_grid, z_edge, cx, cy, binnumber, inside)._asdict()
     
-    stats = _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
-    
-    return stats, z_edge
+    return stats
 
 
 def heatmap(stats, ax=None, vertical=False, **kwargs):
