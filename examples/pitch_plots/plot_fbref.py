@@ -79,7 +79,7 @@ teams = df['Squad'].values
 vmin = df[touches_cols].min().min()  # we normalise the heatmaps with the min / max values
 vmax = df[touches_cols].max().max()
 for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
-    # the top of the Opta's pitch is zero
+    # the top of the pitch is zero
     # plot the title half way between zero and -20 (the top padding)
     ax.text(60, -10, teams[i],
             ha='center', va='center', fontsize=50,
@@ -138,7 +138,7 @@ vmin = df[touches_cols].min().min()  # we normalise the heatmaps with the min / 
 vmax = df[touches_cols].max().max()
 
 for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
-    # the top of the Opta's pitch is zero
+    # the top of the pitch is zero
     # plot the title half way between zero and -20 (the top padding)
     ax.text(60, -10, teams[i], ha='center', va='center', fontsize=50, fontproperties=fm.prop)
 
