@@ -1,9 +1,9 @@
 """
 ==============
-FBRef Pressure
+FBRef Touches
 ==============
 
-This example shows how to scrape pressure events from FBRef.com and plot them as a heatmap.
+This example shows how to scrape touches events from FBRef.com and plot them as a heatmap.
 """
 from urllib.request import urlopen
 
@@ -21,7 +21,7 @@ from mplsoccer import Pitch, FontManager, add_image
 # the option "Modify & Share Table". Then "click url for sharing" and get the table as a url.
 URL = 'https://fbref.com/en/share/LdLSY'
 df = pd.read_html(URL)[0]
-# select a subset of the columns (Squad and pressure columns)
+# select a subset of the columns (Squad and touches columns)
 df = df[['Unnamed: 0_level_0', 'Touches']].copy()
 df.columns = df.columns.droplevel()  # drop the top-level of the multi-index
 df = df.drop(["Def Pen", "Att Pen", "Live"], axis = 1) # drop the def pen, att pen, live touches column
@@ -35,12 +35,12 @@ df_total = df_total.T
 df_total = df_total.divide(df_total.sum(axis=1), axis=0) * 100
 
 ##############################################################################
-# Calculate the percentages for each team and sort so that the teams which press higher are last
+# Calculate the percentages for each team and sort so that the teams make the most touches are last
 df[touches_cols] = df[touches_cols].divide(df[touches_cols].sum(axis=1), axis=0) * 100.
 df.sort_values(['Att 3rd', 'Def 3rd'], ascending=[True, False], inplace=True)
 
 ##############################################################################
-# Get the StatsBomb logo and Fonts
+# Get Stats Perform's logo and Fonts
 
 SP_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/commons/d/d5/StatsPerform_Logo_Primary_01.png')
 sp_logo = Image.open(urlopen(SP_LOGO_URL))
@@ -57,7 +57,7 @@ path_eff = [path_effects.Stroke(linewidth=3, foreground='black'),
 # setup a mplsoccer pitch
 pitch = Pitch(line_zorder=2, line_color='black', pad_top=20)
 
-# mplsoccer calculates the binned statistics usually from raw locations, such as pressure events
+# mplsoccer calculates the binned statistics usually from raw locations, such as touches events
 # for this example we will create a binned statistic dividing
 # the pitch into thirds for one point (0, 0)
 # we will fill this in a loop later with each team's statistics from the dataframe
@@ -138,7 +138,7 @@ vmin = df[touches_cols].min().min()  # we normalise the heatmaps with the min / 
 vmax = df[touches_cols].max().max()
 
 for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
-    # the top of the StatsBomb pitch is zero
+    # the top of the Opta's pitch is zero
     # plot the title half way between zero and -20 (the top padding)
     ax.text(60, -10, teams[i], ha='center', va='center', fontsize=50, fontproperties=fm.prop)
 
@@ -170,7 +170,7 @@ add_image(sp_logo, fig,
           left=axs['endnote'].get_position().x0,
           bottom=axs['endnote'].get_position().y0,
           height=axs['endnote'].get_position().height)
-TITLE = 'Pressure events, percentage point difference\nfrom the Bundesliga average 2022/23'
+TITLE = 'Touches events, percentage point difference\nfrom the Bundesliga average 2022/23'
 title = axs['title'].text(0.5, 0.5, TITLE, ha='center', va='center', fontsize=60)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
