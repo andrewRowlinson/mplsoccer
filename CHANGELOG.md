@@ -1,3 +1,10 @@
+:rocket: Version 1.1.9
+----------------------
+
+### Fixes
+* Fixed positional pitch marking to remove extraneous lines when ``Pitch`` is created with 
+``positional=True`` 
+
 :rocket: Version 1.1.8
 ----------------------
 

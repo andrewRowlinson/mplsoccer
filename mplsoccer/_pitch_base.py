@@ -597,8 +597,13 @@ class BasePitch(ABC):
                      'alpha': self.line_alpha, 'linestyle': self.positional_linestyle,
                      'zorder': self.positional_zorder}
         # x lines for Juego de Posición
-        for coord in self.dim.positional_x[1:-1]:
-            self._draw_line(ax, [coord, coord], [self.dim.bottom, self.dim.top], **line_prop)
+        #through lines
+        self._draw_line(ax, [self.dim.positional_x[1], self.dim.positional_x[1]], [self.dim.bottom, self.dim.top], **line_prop)
+        self._draw_line(ax, [self.dim.positional_x[5], self.dim.positional_x[5]], [self.dim.bottom, self.dim.top], **line_prop)
+        #short lines
+        for coord in self.dim.positional_x[2:5]:
+            self._draw_line(ax, [coord, coord], [self.dim.bottom,  self.dim.penalty_area_bottom], **line_prop)
+            self._draw_line(ax, [coord, coord], [self.dim.top,  self.dim.penalty_area_top], **line_prop)
         # y lines for Juego de Posición
         self._draw_line(ax, [self.dim.left, self.dim.right],
                         [self.dim.positional_y[1], self.dim.positional_y[1]], **line_prop)
