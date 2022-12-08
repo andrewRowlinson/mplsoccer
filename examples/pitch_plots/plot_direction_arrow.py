@@ -1,3 +1,11 @@
+"""
+=========
+Direction play/attack arrow
+=========
+
+This example shows how to add a direction of play to pitch plotting in mplsoccer
+example of this is https://twitter.com/Worville/status/1365738445826633733?s=20`._
+"""
 from mplsoccer import Pitch, VerticalPitch
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
