@@ -55,13 +55,21 @@ origin_center = If true, the origin starts at (center length, center width)
 
 from dataclasses import dataclass, InitVar
 from typing import Optional
-
+from enum import Enum
 import numpy as np
+import pandas as pd
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
+
+
+ 
+class PositionLineType(Enum):
+    """ Enum for the position line types."""
+    FOUR_PER_LINE = 4
+    FIVE_PER_LINE = 5
 
 
 @dataclass
@@ -117,6 +125,9 @@ class BaseDims:
         self.pitch_markings()
         self.juego_de_posicion()
         self.stripes()
+        self.positions={position_line_type:{} for position_line_type in PositionLineType}
+        self.create_positions_five_per_line()
+        self.create_positions_four_per_line()
 
     def pitch_markings(self):
         """ Create sorted pitch dimensions to enable standardization of coordinates.
@@ -173,7 +184,52 @@ class BaseDims:
         self.six_yard_left = self.six_yard_length
         self.six_yard_right = self.right - self.six_yard_length
 
+    def create_positions_five_per_line(self):
+        """ Create player positions, using 5 poistions per line (for example, RB, RCB, CB, LCB, LB).
 
+        This can be used to evenly space players when you have 3 or 5 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates"""
+        y = np.linspace(self.bottom, self.top, 11)[1::2]
+        x = np.linspace(self.left, self.right, 15)
+        x = np.append(x[:13][1::2], self.penalty_right)
+        x, y = np.meshgrid(x, y)
+        idx = [1, 2, 3, 4, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18,
+               19, 20, 22, 23, 24, 25, 27, 29, 30, 31, 32]
+        x = x.ravel()[idx]
+        y = y.ravel()[idx]
+        labels = ['RB', 'RWB', 'RM', 'RW',  'RCB', 'RDM', 'RCM', 'RAM', 'RCF',
+                  'GK', 'CB', 'CDM', 'CM', 'CAM', 'SS', 'ST', 'LCB', 'LDM', 'LCM',
+                  'LAM', 'LCF', 'LB', 'LWB', 'LM', 'LW',
+                 ]
+        self.positions[PositionLineType.FIVE_PER_LINE] = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
+    
+    def create_positions_four_per_line(self):
+        """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
+
+        This can be used to evenly space players when you have 2 or 4 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates"""
+        y = np.linspace(self.bottom, self.top, 9)[1:-1]
+        x = np.linspace(self.left, self.right, 15)
+        x = np.append(x[:13][1::2], self.penalty_right)
+        x, y = np.meshgrid(x, y)
+        idx = [1, 2, 3, 4,
+               15, 16, 17, 18, 20,
+               21, 26,
+               29, 30, 31, 32, 34,
+               43, 44, 45, 46]
+        x = x.ravel()[idx]
+        y = y.ravel()[idx]
+        labels = ['RB', 'RWB', 'RM', 'RW',  
+                  'RCB', 'RDM', 'RCM', 'RAM', 'RCF',
+                  'GK', 'SS', 
+                  'LCB', 'LDM', 'LCM', 'LAM', 'LCF', 
+                  'LB', 'LWB', 'LM', 'LW',
+                 ]
+        self.positions[PositionLineType.FOUR_PER_LINE] = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
+
+    
 @dataclass
 class FixedDims(BaseDims):
     """ Dataclass holding the dimensions for pitches with fixed dimensions:
@@ -389,3 +445,347 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     if pitch_type == 'impect':
         return impect_dims()
     return custom_dims(pitch_width, pitch_length)
+
+
+class FormationHelper:
+    FORMATION_POSITIONS = {
+        '4231':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('RDM',PositionLineType.FIVE_PER_LINE),
+            ('LDM',PositionLineType.FIVE_PER_LINE),
+            ('LM',PositionLineType.FIVE_PER_LINE),
+            ('RM',PositionLineType.FIVE_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '433':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('LW',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '442':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('LM',PositionLineType.FOUR_PER_LINE),
+            ('RM',PositionLineType.FOUR_PER_LINE),
+            ('LCM',PositionLineType.FOUR_PER_LINE),
+            ('RCM',PositionLineType.FOUR_PER_LINE),
+            ('LCF',PositionLineType.FOUR_PER_LINE),
+            ('RCF',PositionLineType.FOUR_PER_LINE)
+        ],
+        '4141':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LM',PositionLineType.FOUR_PER_LINE),
+            ('RM',PositionLineType.FOUR_PER_LINE),
+            ('LCM',PositionLineType.FOUR_PER_LINE),
+            ('RCM',PositionLineType.FOUR_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '451':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('LM',PositionLineType.FIVE_PER_LINE),
+            ('RM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('CM',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '352':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('CM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FOUR_PER_LINE),
+            ('RCF',PositionLineType.FOUR_PER_LINE)
+        ],
+        '532':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FIVE_PER_LINE),
+            ('RB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FOUR_PER_LINE),
+            ('RCF',PositionLineType.FOUR_PER_LINE)
+        ],
+        '541':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('LM',PositionLineType.FOUR_PER_LINE),
+            ('RM',PositionLineType.FOUR_PER_LINE),
+            ('LCM',PositionLineType.FOUR_PER_LINE),
+            ('RCM',PositionLineType.FOUR_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE),
+        ],
+        '343':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('LW',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '4411':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('LM',PositionLineType.FOUR_PER_LINE),
+            ('RM',PositionLineType.FOUR_PER_LINE),
+            ('LCM',PositionLineType.FOUR_PER_LINE),
+            ('RCM',PositionLineType.FOUR_PER_LINE),
+            ('SS',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '41212':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FOUR_PER_LINE),
+            ('RCF',PositionLineType.FOUR_PER_LINE)
+        ],
+        '3412':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FIVE_PER_LINE),
+            ('RCF',PositionLineType.FIVE_PER_LINE)
+        ],
+        '4321':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('RAM',PositionLineType.FIVE_PER_LINE),
+            ('LAM',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '4222':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('RDM',PositionLineType.FIVE_PER_LINE),
+            ('LDM',PositionLineType.FIVE_PER_LINE),
+            ('RAM',PositionLineType.FIVE_PER_LINE),
+            ('LAM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FIVE_PER_LINE),
+            ('RCF',PositionLineType.FIVE_PER_LINE)
+        ],
+        '3511':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('SS',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '3142':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FIVE_PER_LINE),
+            ('RCF',PositionLineType.FIVE_PER_LINE)
+        ],
+        '31213':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('LW',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '4132':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LM',PositionLineType.FOUR_PER_LINE),
+            ('RM',PositionLineType.FOUR_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FIVE_PER_LINE),
+            ('RCF',PositionLineType.FIVE_PER_LINE)
+        ],
+        '424':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('RDM',PositionLineType.FIVE_PER_LINE),
+            ('LDM',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FOUR_PER_LINE),
+            ('LW',PositionLineType.FOUR_PER_LINE),
+            ('LCF',PositionLineType.FOUR_PER_LINE),
+            ('RCF',PositionLineType.FOUR_PER_LINE)
+        ],
+        '4312':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('LB',PositionLineType.FOUR_PER_LINE),
+            ('LCB',PositionLineType.FOUR_PER_LINE),
+            ('RCB',PositionLineType.FOUR_PER_LINE),
+            ('RB',PositionLineType.FOUR_PER_LINE),
+            ('CM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FOUR_PER_LINE),
+            ('RCF',PositionLineType.FOUR_PER_LINE)
+        ],
+        '3241':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('RDM',PositionLineType.FOUR_PER_LINE),
+            ('LDM',PositionLineType.FOUR_PER_LINE),
+            ('LM',PositionLineType.FOUR_PER_LINE),
+            ('RM',PositionLineType.FOUR_PER_LINE),
+            ('RAM',PositionLineType.FIVE_PER_LINE),
+            ('LAM',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        '3331':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('RDM',PositionLineType.FIVE_PER_LINE),
+            ('LDM',PositionLineType.FIVE_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('RM',PositionLineType.FIVE_PER_LINE),
+            ('LM',PositionLineType.FIVE_PER_LINE),
+            ('CAM',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        'pyramid':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('CM',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FIVE_PER_LINE),
+            ('LW',PositionLineType.FIVE_PER_LINE),
+            ('RCF',PositionLineType.FIVE_PER_LINE),
+            ('LCF',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        'metodo':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('RWB',PositionLineType.FIVE_PER_LINE),
+            ('LWB',PositionLineType.FIVE_PER_LINE),
+            ('CDM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LW',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+        'wm':[
+            ('GK',PositionLineType.FIVE_PER_LINE),
+            ('RCB',PositionLineType.FIVE_PER_LINE),
+            ('LCB',PositionLineType.FIVE_PER_LINE),
+            ('CB',PositionLineType.FIVE_PER_LINE),
+            ('RDM',PositionLineType.FOUR_PER_LINE),
+            ('LDM',PositionLineType.FOUR_PER_LINE),
+            ('RCM',PositionLineType.FIVE_PER_LINE),
+            ('LCM',PositionLineType.FIVE_PER_LINE),
+            ('RW',PositionLineType.FIVE_PER_LINE),
+            ('LW',PositionLineType.FIVE_PER_LINE),
+            ('ST',PositionLineType.FIVE_PER_LINE)
+        ],
+
+
+
+    }
+
+    @classmethod
+    def get_formation(cls, formation):
+        formation=formation.replace('-','')
+        if formation not in cls.FORMATION_POSITIONS:
+            raise ValueError(f'Formation {formation} not supported. Currently supported formations are: {cls.formations}')
+        return cls.FORMATION_POSITIONS[formation]
+
+    @classmethod
+    @property
+    def formations(cls):
+        return list(cls.FORMATION_POSITIONS.keys())

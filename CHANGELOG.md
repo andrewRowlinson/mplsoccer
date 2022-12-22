@@ -1,3 +1,10 @@
+:rocket: Version 1.1.12
+----------------------
+
+### Changes
+* Added position coordinate information to ``BaseDim`` class.
+* Added ``FormationHelper`` class that groups the positions present in common formations
+
 :rocket: Version 1.1.11
 ----------------------
 
