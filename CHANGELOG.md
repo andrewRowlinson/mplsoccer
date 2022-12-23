@@ -4,6 +4,7 @@
 ### Changes
 * Added position coordinate information to ``BaseDim`` class.
 * Added ``FormationHelper`` class that groups the positions present in common formations
+* Added ``inset_axes`` and ``inset_formation_axes`` functions to pitch to easily inset new axes at specified locations.
 
 :rocket: Version 1.1.11
 ----------------------

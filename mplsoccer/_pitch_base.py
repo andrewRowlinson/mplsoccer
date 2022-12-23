@@ -9,9 +9,10 @@ import numpy as np
 from matplotlib import rcParams
 
 from mplsoccer import dimensions
+from mplsoccer.dimensions import FormationHelper
 from mplsoccer.cm import grass_cmap
 from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
-from mplsoccer.utils import Standardizer, set_visible
+from mplsoccer.utils import Standardizer, set_visible, inset_axes
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -621,6 +622,80 @@ class BasePitch(ABC):
         self._draw_rectangle(ax, self.dim.positional_x[2], self.dim.bottom,
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
+
+    def inset_axes(self, x, y, length=None, width=None, aspect=None, polar=False,
+                   ax=None, **kwargs):
+        """ A function to create an inset axes.
+        Parameters
+        ----------
+        x : float
+            The x coordinate of the center of the inset axes.
+        y : float
+            The y coordinate of the center of the inset axes.
+        length : float, default None
+            The length of the inset axes in the x data coordinates.
+        width : float, default None
+            The width of the inset axes in the y data coordinates.
+        aspect : float or str ('pitch'), default None
+            You can specify a combination of width and aspect or length and aspect.
+            This will make the axes visually have the given aspect ratio (length/width).
+            For example, if you want an inset axes to appear square set aspect = 1.
+            For polar plots, this is defaulted to 1.
+        polar : bool, default False
+            Whether the inset axes if a polar projection.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to the inset_axes.
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> inset_axes = pitch.inset_axes(60, 40, width=20, aspect=1, ax=ax)
+        """
+        return inset_axes(x=x, y=y, length=length, width=width, aspect=aspect,
+                          polar=polar, vertical=self.vertical, ax=ax, **kwargs)
+
+    def inset_formation_axes(self, formation, length=None, width=None, aspect=None, polar=False,
+                             ax=None, **kwargs):
+        """ A function to create multiple inset axes for a formation.
+        Parameters
+        ----------
+        formation : str
+            The formation to plot.  Formations allowed are the ones supported by `FormationHelper`.
+        length : float, default None
+            The length of the inset axes in the x data coordinates.
+        width : float, default None
+            The width of the inset axes in the y data coordinates.
+        aspect : float or str ('pitch'), default None
+            You can specify a combination of width and aspect or length and aspect.
+            This will make the axes visually have the given aspect ratio (length/width).
+            For example, if you want an inset axes to appear square set aspect = 1.
+            For polar plots, this is defaulted to 1.
+        polar : bool, default False
+            Whether the inset axes if a polar projection.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to the inset_axes.
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> inset_axes = pitch.inset_formation_axes("433", width=20, aspect=1, ax=ax)
+        """
+        positions_in_formation = FormationHelper.get_formation(formation)
+        axes = {
+            position: self.inset_axes(
+                x=self.dim.positions[four_or_five_line][position]['x'],
+                y=self.dim.positions[four_or_five_line][position]['y'],
+                length=length, width=width, aspect=aspect, polar=polar, ax=ax, **kwargs
+            )
+            for position, four_or_five_line in positions_in_formation
+        }
+        return axes
+
+
 
     def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
              left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,
