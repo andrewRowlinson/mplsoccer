@@ -13,8 +13,10 @@ import numpy as np
 from PIL import Image
 import warnings
 from mplsoccer import dimensions
+import matplotlib
 
 __all__ = ['add_image', 'validate_ax', 'inset_axes', 'set_visible', 'Standardizer', 'FontManager', 'set_labels', 'get_aspect']
+
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -168,17 +170,23 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
         # From stackover answers by ImportanceOfBeingErnest
         # https://stackoverflow.com/questions/46262749/plotting-scatter-of-several-polar-plots/46263911#46263911
         # https://stackoverflow.com/questions/52865516/wrong-width-and-height-when-using-inset-axes-and-transdata
-        ax_inset = polar_inset_axes(ax,
+        # This was added as native functinality in matplotlib 3.6
+        if matplotlib.__version__ < '3.6':
+            ax_inset = polar_inset_axes(ax,
                                     bbox_to_anchor=bbox, width='100%', height='100%',
                                     loc=10, bbox_transform=ax.transData, borderpad=0.0,
                                     axes_class=get_projection_class('polar'),
                                     **kwargs)
-        ax_inset.set_theta_direction(-1)
-        if vertical:
-            ax_inset.set_theta_zero_location('N')
-        return ax_inset
+            ax_inset.set_theta_direction(-1)
+            if vertical:
+                ax_inset.set_theta_zero_location('N')
+            return ax_inset
+        else:
+            return ax.inset_axes(bbox, transform=ax.transData, projection='polar')
 
     return ax.inset_axes(bbox, transform=ax.transData, **kwargs)
+
+
 
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
                 grid=False, tick=False, label=False):
@@ -205,6 +213,7 @@ def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine
     ax.grid(grid)
     ax.tick_params(bottom=tick, top=tick, left=tick, right=tick,
                    labelbottom=label, labeltop=label, labelleft=label, labelright=label)
+
 
 
 def set_labels(ax, label_value, label_axis):
