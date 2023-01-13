@@ -38,8 +38,8 @@ flamingo_cmap = LinearSegmentedColormap.from_list("Flamingo - 100 colors",
 pitch = VerticalPitch(line_color='#000009', line_zorder=2)
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
 kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=ax,
-                    # shade using 100 levels so it looks smooth
-                    shade=True, levels=100,
+                    # fill using 100 levels so it looks smooth
+                    fill=True, levels=100,
                     # shade the lowest area so it looks smooth
                     # so even if there are no events it gets some color
                     shade_lowest=True,
@@ -73,8 +73,8 @@ fig, axs = pitch.grid(figheight=10, title_height=0.08, endnote_space=0, title_sp
                       axis=False,
                       grid_height=0.82, endnote_height=0.03)
 kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'],
-                    # shade using 100 levels so it looks smooth
-                    shade=True, levels=100,
+                    # fill using 100 levels so it looks smooth
+                    fill=True, levels=100,
                     # shade the lowest area so it looks smooth
                     # so even if there are no events it gets some color
                     shade_lowest=True,
@@ -100,11 +100,11 @@ ax_sb_logo = add_image(sb_logo, fig,
 fig, axs = pitch.grid(ncols=2, axis=False, endnote_height=0.05)
 
 kde_before = pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax=axs['pitch'][0],
-                           shade=True, levels=100, shade_lowest=True,
+                           fill=True, levels=100, shade_lowest=True,
                            cut=4, cmap='Reds')
 
 kde_after = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'][1],
-                          shade=True, levels=100, shade_lowest=True,
+                          fill=True, levels=100, shade_lowest=True,
                           cut=4, cmap='Blues')
 
 ax_sb_logo = add_image(sb_logo, fig,

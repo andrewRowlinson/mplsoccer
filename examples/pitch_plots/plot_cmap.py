@@ -57,7 +57,7 @@ cmap_names = list(all_cmap_dict.keys())
 for idx, ax in enumerate(axs.flat):
     cmap_name = f'cmr.{cmap_names[idx]}'
     cmap = all_cmap_dict[cmap_names[idx]]
-    kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=cmap, shade=True, levels=100)
+    kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=cmap, fill=True, levels=100)
     ax_title = ax.set_title(cmap_name, fontsize=15)
 
 ##############################################################################
@@ -76,12 +76,12 @@ for idx, ax in enumerate(axs.flat):
 # dark
 pitch_dark = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#122c3d')
 fig, ax = pitch_dark.draw()
-kdeplot_dark = pitch_dark.kdeplot(df.x, df.y, ax=ax, cmap=cmr.voltage, shade=True, levels=100)
+kdeplot_dark = pitch_dark.kdeplot(df.x, df.y, ax=ax, cmap=cmr.voltage, fill=True, levels=100)
 
 # light
 pitch_light = VerticalPitch(line_zorder=2)
 fig, ax = pitch_light.draw()
-kdeplot_light = pitch_light.kdeplot(df.x, df.y, ax=ax, cmap=cmr.voltage_r, shade=True, levels=100)
+kdeplot_light = pitch_light.kdeplot(df.x, df.y, ax=ax, cmap=cmr.voltage_r, fill=True, levels=100)
 
 ##############################################################################
 # Create colormaps using LinearSegmentedColormap
@@ -154,7 +154,7 @@ pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#15242e'
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
 # note use the colormap with 100 colors for a smoother finish
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_cmap_007.png'
-kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=pearl_earring_cmap_100, shade=True, levels=100)
+kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=pearl_earring_cmap_100, fill=True, levels=100)
 
 ##############################################################################
 # Flamingo colormap heatmap
@@ -172,7 +172,7 @@ hexmap = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#f4f4f4', gridsize=(8, 8), 
 # Flamingo colormap kdeplot
 pitch = VerticalPitch(line_color='#000009', line_zorder=2, pitch_color='#e3aca7')
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
-kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=flamingo_cmap_100, shade=True, levels=100)
+kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=flamingo_cmap_100, fill=True, levels=100)
 
 ##############################################################################
 # Violet colormap heatmap
@@ -191,7 +191,7 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#20143f',
 # Violet colormap kdeplot
 pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#332a49')
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
-kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_violet_cmap_100, shade=True, levels=100)
+kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_violet_cmap_100, fill=True, levels=100)
 
 ##############################################################################
 # Yellow colormap heatmap
@@ -210,6 +210,6 @@ hexbin = pitch.hexbin(df.x, df.y, ax=ax, edgecolors='#443d07',
 # Yellow colormap kdeplot
 pitch = VerticalPitch(line_color='#cfcfcf', line_zorder=2, pitch_color='#7c2e2a')
 fig, ax = pitch.draw(figsize=(4.4, 6.4))
-kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_yellow_cmap_100, shade=True, levels=100)
+kdeplot = pitch.kdeplot(df.x, df.y, ax=ax, cmap=el_greco_yellow_cmap_100, fill=True, levels=100)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
