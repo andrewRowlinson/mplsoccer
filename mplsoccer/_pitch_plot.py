@@ -158,7 +158,7 @@ class BasePitchPlot(BasePitch):
         >>> fig, ax = pitch.draw()
         >>> x = np.random.uniform(low=0, high=120, size=100)
         >>> y = np.random.uniform(low=0, high=80, size=100)
-        >>> pitch.kdeplot(x, y, cmap='Reds', shade=True, levels=100, ax=ax)
+        >>> pitch.kdeplot(x, y, cmap='Reds', fill=True, levels=100, ax=ax)
         """
         validate_ax(ax)
 

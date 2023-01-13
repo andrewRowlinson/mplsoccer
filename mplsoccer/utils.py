@@ -267,7 +267,6 @@ class FontManager:
     Find a nice font at https://fonts.google.com/, and then get its corresponding URL
     from https://github.com/google/fonts/.
 
-
     The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll).
 
     Parameters
@@ -279,7 +278,6 @@ class FontManager:
         Note 2: urls like 'https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/static/Cinzel-Regular.ttf'
                 allow Cross-Origin Resource Sharing, and work in browser environments
                 based on PyOdide (e.g. JupyterLite). Those urls don't need the ?raw=true at the end
-
 
     Examples
     --------

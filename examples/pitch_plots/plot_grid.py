@@ -248,10 +248,10 @@ for idx, ax in enumerate(axs['pitch'].flat):
         # so put <> around the number of completed passes.
         total_pass = len(complete_pass) + len(incomplete_pass)
         annotation_string = (f'{lineup_player.position_abbreviation} | '
-                             f'{lineup_player.player_nickname} | '
+                             f'{lineup_player.player_name} | '
                              f'<{len(complete_pass)}>/{total_pass} | '
                              f'{round(100 * len(complete_pass)/total_pass, 1)}%')
-        ax_text(0, -5, annotation_string, ha='left', va='center', fontsize=20,
+        ax_text(0, -5, annotation_string, ha='left', va='center', fontsize=13,
                 fontproperties=fm_scada.prop,  # using the fontmanager for the google font
                 highlight_textprops=[{"color": '#56ae6c'}], ax=ax)
 
@@ -272,7 +272,7 @@ for idx, ax in enumerate(axs['pitch'].flat):
 pitch.kdeplot(x=pass_receipts.x, y=pass_receipts.y, ax=ax,
               cmap=cmr.lavender,
               levels=100,
-              thresh=0, shade=True)
+              thresh=0, fill=True)
 ax.text(0, -5, f'{team}: Pass Receipt Heatmap', ha='left', va='center',
         fontsize=20, fontproperties=fm_scada.prop)
 
