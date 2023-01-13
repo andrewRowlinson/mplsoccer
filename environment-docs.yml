@@ -14,7 +14,7 @@ dependencies:
   - seaborn
   - sphinx
   - sphinx-gallery
-  - sphinx_rtd_theme
+  - sphinx_rtd_theme > 1
   - pip
   - pip:
       - --editable .
