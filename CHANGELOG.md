@@ -1,3 +1,10 @@
+:rocket: Version 1.1.10
+----------------------
+
+### Fixes
+* Fixed the StatsBomb lineup parsers so when the player_nickname is missing \
+the parsers still work.
+
 :rocket: Version 1.1.9
 ----------------------
 

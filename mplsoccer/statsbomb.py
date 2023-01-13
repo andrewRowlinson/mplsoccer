@@ -671,7 +671,7 @@ def flatten_lineup(data, match_id, dataframe=True):
                 player['country_id'] = player['country']['id']
                 player['country_name'] = player['country']['name']
                 del player['country']
-            if player['player_nickname'] is None:
+            if 'player_nickname' in player and player['player_nickname'] is None:
                 player['player_nickname'] = player['player_name']
             player.pop('positions', None)  # if flattened would be multiple lines
             player.pop('cards', None)  # if flattened would be multiple lines
