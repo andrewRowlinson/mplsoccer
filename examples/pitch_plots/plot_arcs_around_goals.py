@@ -24,7 +24,7 @@ def plot_arcs_around_goals_on_pitches(pitch_cls):
             pitch = pitch_cls(pitch_type=pt)
             
         pitch.draw(axes[idx])
-        axes[idx].set_title(pt, fontsize=20, c='white', pad=15)
+        axes[idx].set_title(pt, fontsize=20, c='black', pad=15)
         for radius_meters in (5, 10, 20, 30):
             for color, placement in zip(colors, placements):
                 pitch.add_arc_around_goal(axes[idx], radius_meters, placement=placement, color=color)
