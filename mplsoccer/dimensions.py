@@ -185,7 +185,7 @@ class FixedDims(BaseDims):
 @dataclass
 class VariableCenterDims(BaseDims):
     """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
-    'tracab', 'skillcorner', and 'secondspectrum'."""
+    'tracab', 'skillcorner', 'impect', and 'secondspectrum'."""
     penalty_spot_distance: InitVar[float] = None
 
     def __post_init__(self, penalty_spot_distance):
@@ -356,7 +356,7 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     ----------
     pitch_type : str
         The pitch type used in the plot.
-        The supported pitch types are: 'opta', 'statsbomb', 'tracab',
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'impect',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
