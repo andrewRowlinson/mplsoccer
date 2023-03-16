@@ -59,7 +59,8 @@ from typing import Optional
 import numpy as np
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
-         'metricasports', 'custom', 'skillcorner', 'secondspectrum']
+         'metricasports', 'custom', 'skillcorner', 'secondspectrum',
+         'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
 
@@ -184,7 +185,7 @@ class FixedDims(BaseDims):
 @dataclass
 class VariableCenterDims(BaseDims):
     """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
-    'tracab', 'skillcorner', and 'secondspectrum'."""
+    'tracab', 'skillcorner', 'impect', and 'secondspectrum'."""
     penalty_spot_distance: InitVar[float] = None
 
     def __post_init__(self, penalty_spot_distance):
@@ -327,6 +328,16 @@ def tracab_dims(pitch_width, pitch_length):
                               center_width=0., center_length=0., circle_diameter=1830.,
                               corner_diameter=200., arc=53.05, invert_y=False, origin_center=True)
 
+def impect_dims():
+    """ Create 'impect' dimensions."""
+    return VariableCenterDims(aspect=1., pitch_width=68, pitch_length=105,
+                              goal_width=7.32, goal_length=2., goal_bottom=-3.66, goal_top=3.66,
+                              six_yard_width=18.32, six_yard_length=5.5, six_yard_bottom=-9.16,
+                              six_yard_top=9.16, penalty_spot_distance=11.,
+                              penalty_area_width=40.32, penalty_area_length=16.5,
+                              penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
+                              center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
+                              invert_y=False, origin_center=True)
 
 def custom_dims(pitch_width, pitch_length):
     """ Create 'custom' dimensions."""
@@ -345,7 +356,7 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     ----------
     pitch_type : str
         The pitch type used in the plot.
-        The supported pitch types are: 'opta', 'statsbomb', 'tracab',
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab', 'impect',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
@@ -375,4 +386,6 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
         pitch_width = pitch_width * 100.
         pitch_length = pitch_length * 100.
         return tracab_dims(pitch_width, pitch_length)
+    if pitch_type == 'impect':
+        return impect_dims()
     return custom_dims(pitch_width, pitch_length)

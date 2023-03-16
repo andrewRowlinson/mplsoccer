@@ -1,3 +1,9 @@
+:rocket: Version 1.1.11
+----------------------
+
+### Added
+* Added the pitch type ``impect`` for plotting [impect data](https://www.impect.com/en/).
+
 :rocket: Version 1.1.10
 ----------------------
 

@@ -25,7 +25,8 @@ class BasePitch(ABC):
     pitch_type : str, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
-        'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
+        'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
+        and 'impect'.
     half : bool, default False
         Whether to display half of the pitch.
     pitch_color : any Matplotlib color, default None
