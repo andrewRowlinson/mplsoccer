@@ -100,8 +100,8 @@ class PyPizza:
                 f'other_circle_lw={self.other_circle_lw}, '
                 f'other_circle_ls={self.other_circle_ls}, ')
 
-    def make_pizza(self, values, compare_values=None, bottom=0.0, figsize=(24, 16),
-                   ax=None, param_location=108, slice_colors=None, value_colors=None,
+    def make_pizza(self, values, alt_text_values=None, compare_values=None, alt_text_compare_values=None,
+                   bottom=0.0, figsize=(24, 16), ax=None, param_location=108, slice_colors=None, value_colors=None,
                    compare_colors=None, value_bck_colors=None, compare_value_colors=None,
                    compare_value_bck_colors=None, color_blank_space=None, blank_alpha=0.5,
                    kwargs_slices=None, kwargs_compare=None, kwargs_params=None, kwargs_values=None,
@@ -112,8 +112,14 @@ class PyPizza:
             ----------
             values : sequence of floats/int
                 Values for each parameter.
+            alt_text_values: sequence of floats/int, default None
+                Text to display in the text box for each slice.  If None is specified
+                the value is used.
             compare_values : sequence of floats/int, default None
                 Comparison Values for each parameter.
+            alt_text_compare_values: sequence of floats/int, default None
+                Text to display in the text box for each comparison slice.  If None is specified
+                the compare_value is used.
             bottom : float, default 0.0
                 Start value for the bar.
             figsize : tuple of floats, default (24, 16)
@@ -274,10 +280,23 @@ class PyPizza:
         self.__setup_pizza(ax, width)
 
         # add text
+        if alt_text_values is not None:
+            if len(alt_text_values) != len(values):
+                raise Exception("Length of alt_text_values and values are not equal!!!")
+            text_values = alt_text_values
+        else:
+            text_values = values
+
+        if alt_text_compare_values is not None:
+            if len(alt_text_compare_values) != len(compare_values):
+                raise Exception("Length of alt_text_compare_values and compare_values are not equal!!!")
+            text_compare_values = alt_text_compare_values
+        else:
+            text_compare_values = compare_values
         self.__add_texts(
-            ax, values, param_location,
+            ax, text_values, param_location,
             value_colors=value_colors, value_bck_colors=value_bck_colors,
-            compare_values=compare_values, compare_value_colors=compare_value_colors,
+            compare_values=text_compare_values, compare_value_colors=compare_value_colors,
             temp_values=temp_values, temp_compare_values=temp_compare_values,
             compare_value_bck_colors=compare_value_bck_colors,
             kwargs_params=kwargs_params, kwargs_values=kwargs_values,
