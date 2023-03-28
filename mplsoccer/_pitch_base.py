@@ -686,12 +686,12 @@ class BasePitch(ABC):
         """
         positions_in_formation = FormationHelper.get_formation(formation)
         axes = {
-            position: self.inset_axes(
-                x=self.dim.positions[four_or_five_line][position]['x'],
-                y=self.dim.positions[four_or_five_line][position]['y'],
+            position_coordinates.position_name: self.inset_axes(
+                x=position_coordinates(self.dim)['x'],
+                y=position_coordinates(self.dim)['y'],
                 length=length, width=width, aspect=aspect, polar=polar, ax=ax, **kwargs
             )
-            for position, four_or_five_line in positions_in_formation
+            for position_coordinates in positions_in_formation
         }
         return axes
 

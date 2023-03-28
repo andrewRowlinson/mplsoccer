@@ -54,22 +54,16 @@ origin_center = If true, the origin starts at (center length, center width)
 """
 
 from dataclasses import dataclass, InitVar
-from typing import Optional
-from enum import Enum
+from typing import Optional, Dict, List
 import numpy as np
 import pandas as pd
+import abc
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
-
- 
-class PositionLineType(Enum):
-    """ Enum for the position line types."""
-    FOUR_PER_LINE = 4
-    FIVE_PER_LINE = 5
 
 
 @dataclass
@@ -119,13 +113,15 @@ class BaseDims:
     positional_y: Optional[np.array] = None
     # defined in stripes
     stripe_locations: Optional[np.array] = None
+    four_man_line_positions: Optional[Dict[str, Dict[str, float]]] = None
+    five_man_line_positions: Optional[Dict[str, Dict[str, float]]] = None
+
 
     def setup_dims(self):
         """ Run methods for the extra pitch dimensions."""
         self.pitch_markings()
         self.juego_de_posicion()
         self.stripes()
-        self.positions={position_line_type:{} for position_line_type in PositionLineType}
         self.create_positions_five_per_line()
         self.create_positions_four_per_line()
 
@@ -202,7 +198,7 @@ class BaseDims:
                   'GK', 'CB', 'CDM', 'CM', 'CAM', 'SS', 'ST', 'LCB', 'LDM', 'LCM',
                   'LAM', 'LCF', 'LB', 'LWB', 'LM', 'LW',
                  ]
-        self.positions[PositionLineType.FIVE_PER_LINE] = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
+        self.five_man_line_positions = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
     
     def create_positions_four_per_line(self):
         """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
@@ -227,7 +223,7 @@ class BaseDims:
                   'LCB', 'LDM', 'LCM', 'LAM', 'LCF', 
                   'LB', 'LWB', 'LM', 'LW',
                  ]
-        self.positions[PositionLineType.FOUR_PER_LINE] = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
+        self.four_man_line_positions = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
 
     
 @dataclass
@@ -447,331 +443,352 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     return custom_dims(pitch_width, pitch_length)
 
 
+
+class PositionCoodinates(abc.ABC):
+    def __init__(self, position:str):
+        self._position = position
+
+    @property
+    def position_name(self):
+        return self._position
+
+    @abc.abstractmethod
+    def __call__(self, dim:BaseDims)->Dict[str, float]:
+        pass
+
+class FourManLinePositionCoordinates(PositionCoodinates):
+    def __call__(self, dim: BaseDims) -> Dict[str, float]:
+        return dim.four_man_line_positions[self._position]
+    
+class FiveManLinePositionCoordinates(PositionCoodinates):
+    def __call__(self, dim: BaseDims) -> Dict[str, float]:
+        return dim.five_man_line_positions[self._position]
+
 class FormationHelper:
     FORMATION_POSITIONS = {
         '4231':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('RDM',PositionLineType.FIVE_PER_LINE),
-            ('LDM',PositionLineType.FIVE_PER_LINE),
-            ('LM',PositionLineType.FIVE_PER_LINE),
-            ('RM',PositionLineType.FIVE_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('RDM'),
+            FiveManLinePositionCoordinates('LDM'),
+            FiveManLinePositionCoordinates('LM'),
+            FiveManLinePositionCoordinates('RM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '433':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('LW',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('LW'),
+            FiveManLinePositionCoordinates('RW'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '442':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('LM',PositionLineType.FOUR_PER_LINE),
-            ('RM',PositionLineType.FOUR_PER_LINE),
-            ('LCM',PositionLineType.FOUR_PER_LINE),
-            ('RCM',PositionLineType.FOUR_PER_LINE),
-            ('LCF',PositionLineType.FOUR_PER_LINE),
-            ('RCF',PositionLineType.FOUR_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FourManLinePositionCoordinates('LM'),
+            FourManLinePositionCoordinates('RM'),
+            FourManLinePositionCoordinates('LCM'),
+            FourManLinePositionCoordinates('RCM'),
+            FourManLinePositionCoordinates('LCF'),
+            FourManLinePositionCoordinates('RCF'),
         ],
         '4141':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LM',PositionLineType.FOUR_PER_LINE),
-            ('RM',PositionLineType.FOUR_PER_LINE),
-            ('LCM',PositionLineType.FOUR_PER_LINE),
-            ('RCM',PositionLineType.FOUR_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FourManLinePositionCoordinates('LM'),
+            FourManLinePositionCoordinates('RM'),
+            FourManLinePositionCoordinates('LCM'),
+            FourManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '451':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('LM',PositionLineType.FIVE_PER_LINE),
-            ('RM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('CM',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('LM'),
+            FiveManLinePositionCoordinates('RM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('CM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '352':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('CM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FOUR_PER_LINE),
-            ('RCF',PositionLineType.FOUR_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('CM'),
+            FourManLinePositionCoordinates('LCF'),
+            FourManLinePositionCoordinates('RCF'),
         ],
         '532':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FIVE_PER_LINE),
-            ('RB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FOUR_PER_LINE),
-            ('RCF',PositionLineType.FOUR_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('LB'),
+            FiveManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('CDM'),
+            FourManLinePositionCoordinates('LCF'),
+            FourManLinePositionCoordinates('RCF'),
         ],
         '541':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('LM',PositionLineType.FOUR_PER_LINE),
-            ('RM',PositionLineType.FOUR_PER_LINE),
-            ('LCM',PositionLineType.FOUR_PER_LINE),
-            ('RCM',PositionLineType.FOUR_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE),
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FourManLinePositionCoordinates('LM'),
+            FourManLinePositionCoordinates('RM'),
+            FourManLinePositionCoordinates('LCM'),
+            FourManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '343':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('LW',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('LW'),
+            FiveManLinePositionCoordinates('RW'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '4411':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('LM',PositionLineType.FOUR_PER_LINE),
-            ('RM',PositionLineType.FOUR_PER_LINE),
-            ('LCM',PositionLineType.FOUR_PER_LINE),
-            ('RCM',PositionLineType.FOUR_PER_LINE),
-            ('SS',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FourManLinePositionCoordinates('LM'),
+            FourManLinePositionCoordinates('RM'),
+            FourManLinePositionCoordinates('LCM'),
+            FourManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('SS'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '41212':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FOUR_PER_LINE),
-            ('RCF',PositionLineType.FOUR_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FourManLinePositionCoordinates('LCF'),
+            FourManLinePositionCoordinates('RCF'),
         ],
         '3412':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FIVE_PER_LINE),
-            ('RCF',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FiveManLinePositionCoordinates('LCF'),
+            FiveManLinePositionCoordinates('RCF'),
         ],
         '4321':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('RAM',PositionLineType.FIVE_PER_LINE),
-            ('LAM',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('RAM'),
+            FiveManLinePositionCoordinates('LAM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '4222':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('RDM',PositionLineType.FIVE_PER_LINE),
-            ('LDM',PositionLineType.FIVE_PER_LINE),
-            ('RAM',PositionLineType.FIVE_PER_LINE),
-            ('LAM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FIVE_PER_LINE),
-            ('RCF',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('RDM'),
+            FiveManLinePositionCoordinates('LDM'),
+            FiveManLinePositionCoordinates('RAM'),
+            FiveManLinePositionCoordinates('LAM'),
+            FiveManLinePositionCoordinates('LCF'),
+            FiveManLinePositionCoordinates('RCF'),
         ],
         '3511':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('SS',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('SS'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '3142':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FIVE_PER_LINE),
-            ('RCF',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('LCF'),
+            FiveManLinePositionCoordinates('RCF'),
         ],
         '31213':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('LW',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FiveManLinePositionCoordinates('LW'),
+            FiveManLinePositionCoordinates('RW'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '4132':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LM',PositionLineType.FOUR_PER_LINE),
-            ('RM',PositionLineType.FOUR_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FIVE_PER_LINE),
-            ('RCF',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FourManLinePositionCoordinates('LM'),
+            FourManLinePositionCoordinates('RM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FiveManLinePositionCoordinates('LCF'),
+            FiveManLinePositionCoordinates('RCF'),
         ],
         '424':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('RDM',PositionLineType.FIVE_PER_LINE),
-            ('LDM',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FOUR_PER_LINE),
-            ('LW',PositionLineType.FOUR_PER_LINE),
-            ('LCF',PositionLineType.FOUR_PER_LINE),
-            ('RCF',PositionLineType.FOUR_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('RDM'),
+            FiveManLinePositionCoordinates('LDM'),
+            FourManLinePositionCoordinates('RW'),
+            FourManLinePositionCoordinates('LW'),
+            FourManLinePositionCoordinates('LCF'),
+            FourManLinePositionCoordinates('RCF'),
         ],
         '4312':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('LB',PositionLineType.FOUR_PER_LINE),
-            ('LCB',PositionLineType.FOUR_PER_LINE),
-            ('RCB',PositionLineType.FOUR_PER_LINE),
-            ('RB',PositionLineType.FOUR_PER_LINE),
-            ('CM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FOUR_PER_LINE),
-            ('RCF',PositionLineType.FOUR_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FourManLinePositionCoordinates('LB'),
+            FourManLinePositionCoordinates('LCB'),
+            FourManLinePositionCoordinates('RCB'),
+            FourManLinePositionCoordinates('RB'),
+            FiveManLinePositionCoordinates('CM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FourManLinePositionCoordinates('LCF'),
+            FourManLinePositionCoordinates('RCF'),
         ],
         '3241':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('RDM',PositionLineType.FOUR_PER_LINE),
-            ('LDM',PositionLineType.FOUR_PER_LINE),
-            ('LM',PositionLineType.FOUR_PER_LINE),
-            ('RM',PositionLineType.FOUR_PER_LINE),
-            ('RAM',PositionLineType.FIVE_PER_LINE),
-            ('LAM',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FourManLinePositionCoordinates('RDM'),
+            FourManLinePositionCoordinates('LDM'),
+            FourManLinePositionCoordinates('LM'),
+            FourManLinePositionCoordinates('RM'),
+            FiveManLinePositionCoordinates('RAM'),
+            FiveManLinePositionCoordinates('LAM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         '3331':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('RDM',PositionLineType.FIVE_PER_LINE),
-            ('LDM',PositionLineType.FIVE_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('RM',PositionLineType.FIVE_PER_LINE),
-            ('LM',PositionLineType.FIVE_PER_LINE),
-            ('CAM',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FiveManLinePositionCoordinates('RDM'),
+            FiveManLinePositionCoordinates('LDM'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('RM'),
+            FiveManLinePositionCoordinates('LM'),
+            FiveManLinePositionCoordinates('CAM'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         'pyramid':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('CM',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FIVE_PER_LINE),
-            ('LW',PositionLineType.FIVE_PER_LINE),
-            ('RCF',PositionLineType.FIVE_PER_LINE),
-            ('LCF',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('CM'),
+            FiveManLinePositionCoordinates('RW'),
+            FiveManLinePositionCoordinates('LW'),
+            FiveManLinePositionCoordinates('RCF'),
+            FiveManLinePositionCoordinates('LCF'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         'metodo':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('RWB',PositionLineType.FIVE_PER_LINE),
-            ('LWB',PositionLineType.FIVE_PER_LINE),
-            ('CDM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LW',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('LWB'),
+            FiveManLinePositionCoordinates('CDM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LW'),
+            FiveManLinePositionCoordinates('RW'),
+            FiveManLinePositionCoordinates('ST'),
         ],
         'wm':[
-            ('GK',PositionLineType.FIVE_PER_LINE),
-            ('RCB',PositionLineType.FIVE_PER_LINE),
-            ('LCB',PositionLineType.FIVE_PER_LINE),
-            ('CB',PositionLineType.FIVE_PER_LINE),
-            ('RDM',PositionLineType.FOUR_PER_LINE),
-            ('LDM',PositionLineType.FOUR_PER_LINE),
-            ('RCM',PositionLineType.FIVE_PER_LINE),
-            ('LCM',PositionLineType.FIVE_PER_LINE),
-            ('RW',PositionLineType.FIVE_PER_LINE),
-            ('LW',PositionLineType.FIVE_PER_LINE),
-            ('ST',PositionLineType.FIVE_PER_LINE)
+            FiveManLinePositionCoordinates('GK'),
+            FiveManLinePositionCoordinates('RCB'),
+            FiveManLinePositionCoordinates('LCB'),
+            FiveManLinePositionCoordinates('CB'),
+            FourManLinePositionCoordinates('RDM'),
+            FourManLinePositionCoordinates('LDM'),
+            FiveManLinePositionCoordinates('RCM'),
+            FiveManLinePositionCoordinates('LCM'),
+            FiveManLinePositionCoordinates('RW'),
+            FiveManLinePositionCoordinates('LW'),
+            FiveManLinePositionCoordinates('ST'),
         ],
 
 
@@ -779,7 +796,7 @@ class FormationHelper:
     }
 
     @classmethod
-    def get_formation(cls, formation):
+    def get_formation(cls, formation)->List[PositionCoodinates]:
         formation=formation.replace('-','')
         if formation not in cls.FORMATION_POSITIONS:
             raise ValueError(f'Formation {formation} not supported. Currently supported formations are: {cls.formations}')
@@ -787,5 +804,5 @@ class FormationHelper:
 
     @classmethod
     @property
-    def formations(cls):
+    def formations(cls)->List[str]:
         return list(cls.FORMATION_POSITIONS.keys())

@@ -11,20 +11,18 @@ This is provided in two flavours, for lines of 5 players and for lines of 4 play
 
 from mplsoccer import VerticalPitch
 
-# Get the enum that specifies whether you want locations using the 4 or 5 player lines
-from mplsoccer import PositionLineType
 
 
 ##############################################################################
-# You can retrieve the position coordinates using the ``dim.positions`` attribute.
-# Whether you want the coordinates for the 4 or 5 player lines is specified by the ``PositionLineType`` enum.
+# You can retrieve the position coordinates from ``pitch.dim`` using either
+# the ``five_man_line_positions`` or the ``four_man_line_positions`` dictionary.
 
 pitch = VerticalPitch(pitch_type='opta', pitch_color='grass', line_color='white', line_alpha=0.5)
 
-striker_coordinates = pitch.dim.positions[PositionLineType.FIVE_PER_LINE]['ST']
-cdm_coordinates = pitch.dim.positions[PositionLineType.FIVE_PER_LINE]['CDM']
-rcm_coordinates = pitch.dim.positions[PositionLineType.FIVE_PER_LINE]['RCM']
-lcm_coordinates = pitch.dim.positions[PositionLineType.FIVE_PER_LINE]['LCM']
+striker_coordinates = pitch.dim.five_man_line_positions['ST']
+cdm_coordinates = pitch.dim.five_man_line_positions['CDM']
+rcm_coordinates = pitch.dim.four_man_line_positions['RCM']
+lcm_coordinates = pitch.dim.four_man_line_positions['LCM']
 
 
 ##############################################################################
@@ -43,7 +41,7 @@ pitch.scatter(lcm_coordinates['x'], lcm_coordinates['y'], s=100, ax=ax, color='b
 
 ##############################################################################
 # As an extra resource, the ``FormationHelper`` class can be used to get a list of 
-# tuples of position name and PositionLineType enum value for each position in every common formation.
+# ``PositionCoordinates`` objects for a given formation.
 # The following formations have been provided
 
 from mplsoccer import FormationHelper
@@ -62,8 +60,8 @@ axes = axes.flatten()
 
 for i, formation in enumerate(sorted(FormationHelper.formations)):
     position_list = FormationHelper.get_formation(formation)
-    for position, four_or_five_player_line in position_list:
-        x, y = p.dim.positions[four_or_five_player_line][position]['x'], p.dim.positions[four_or_five_player_line][position]['y']
+    for position_coords in position_list:
+        x, y = position_coords(p.dim)['x'], position_coords(p.dim)['y']
         p.scatter(x,y, color='black', s=350, ax=axes[i])
-        p.annotate(xy=(x,y), text=position, color='white', fontsize=8, ha='center', va='center', ax=axes[i])
+        p.annotate(xy=(x,y), text=position_coords.position_name, color='white', fontsize=8, ha='center', va='center', ax=axes[i])
     axes[i].set_title(formation, fontsize=10)
