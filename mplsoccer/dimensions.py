@@ -655,6 +655,7 @@ class FormationHelper:
             FiveManLinePositionCoordinates('CB'),
             FiveManLinePositionCoordinates('LWB'),
             FiveManLinePositionCoordinates('RWB'),
+            FiveManLinePositionCoordinates('CDM'),
             FiveManLinePositionCoordinates('RCM'),
             FiveManLinePositionCoordinates('LCM'),
             FiveManLinePositionCoordinates('SS'),
