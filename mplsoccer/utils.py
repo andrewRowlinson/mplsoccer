@@ -3,20 +3,21 @@
 # The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll)
 # ridge_map is available here: https://github.com/ColCarroll/ridge_map
 
+import warnings
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
+import matplotlib
 import matplotlib.font_manager as fm
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes as polar_inset_axes
-from matplotlib.projections import get_projection_class
 import numpy as np
 from PIL import Image
-import warnings
+from matplotlib.projections import get_projection_class
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes as polar_inset_axes
+
 from mplsoccer import dimensions
-import matplotlib
 
-__all__ = ['add_image', 'validate_ax', 'inset_axes', 'set_visible', 'Standardizer', 'FontManager', 'set_labels', 'get_aspect']
-
+__all__ = ['add_image', 'validate_ax', 'inset_axes', 'set_visible', 'Standardizer', 'FontManager',
+           'set_labels', 'get_aspect']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -88,11 +89,12 @@ def validate_ax(ax):
         msg = "Missing 1 required argument: ax. A Matplotlib axis is required for plotting."
         raise TypeError(msg)
 
+
 def get_aspect(ax):
     """ Get the aspect ratio of an axes.
     From Stackoverflow post by askewchan:
     https://stackoverflow.com/questions/41597177/get-aspect-ratio-of-axes
-    
+
     Parameters
     ----------
     ax : matplotlib.axes.Axes, default None
@@ -105,8 +107,8 @@ def get_aspect(ax):
     return height / width * ax.get_data_ratio()
 
 
-
-def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical=False, ax=None, **kwargs):
+def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical=False, ax=None,
+               **kwargs):
     """ A function to create an inset axes.
     Parameters
     ----------
@@ -135,7 +137,7 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
     >>> from mplsoccer import inset_axes
     >>> import matplotlib.pyplot as plt
     >>> fig, ax = plt.subplots()
-    >>> inset_axes = pitch.inset_axes(0.5, 0.5, width=0.2, aspect=1, ax=ax)
+    >>> inset_ax = inset_axes(0.5, 0.5, width=0.2, aspect=1, ax=ax)
     """
     validate_ax(ax)
     ax_aspect = ax.get_aspect()
@@ -157,7 +159,9 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
     if aspect is not None and length is not None and width is not None:
         raise TypeError('Invalid argument: if using aspect you cannot use both length and width')
     if ((length is not None) + (width is not None) + (aspect is not None)) != 2:
-        raise TypeError('Invalid argument: must give the arguments length and width, or length and aspect, or width and aspect')
+        raise TypeError(
+            'Invalid argument: must give the arguments length and width,'
+            ' or length and aspect, or width and aspect')
 
     if aspect is not None and length is None:
         length = width * aspect / ax_aspect
@@ -173,19 +177,17 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
         # This was added as native functinality in matplotlib 3.6
         if matplotlib.__version__ < '3.6':
             ax_inset = polar_inset_axes(ax,
-                                    bbox_to_anchor=bbox, width='100%', height='100%',
-                                    loc=10, bbox_transform=ax.transData, borderpad=0.0,
-                                    axes_class=get_projection_class('polar'),
-                                    **kwargs)
+                                        bbox_to_anchor=bbox, width='100%', height='100%',
+                                        loc=10, bbox_transform=ax.transData, borderpad=0.0,
+                                        axes_class=get_projection_class('polar'),
+                                        **kwargs)
             ax_inset.set_theta_direction(-1)
             if vertical:
                 ax_inset.set_theta_zero_location('N')
             return ax_inset
-        else:
-            return ax.inset_axes(bbox, transform=ax.transData, projection='polar')
+        return ax.inset_axes(bbox, transform=ax.transData, projection='polar')
 
     return ax.inset_axes(bbox, transform=ax.transData, **kwargs)
-
 
 
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
@@ -213,7 +215,6 @@ def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine
     ax.grid(grid)
     ax.tick_params(bottom=tick, top=tick, left=tick, right=tick,
                    labelbottom=label, labeltop=label, labelleft=label, labelright=label)
-
 
 
 def set_labels(ax, label_value, label_axis):
@@ -271,6 +272,7 @@ class Standardizer:
     >>> x_std, y_std = standard.transform(x, y)
 
     """
+
     def __init__(self, pitch_from, pitch_to, length_from=None,
                  width_from=None, length_to=None, width_to=None):
 

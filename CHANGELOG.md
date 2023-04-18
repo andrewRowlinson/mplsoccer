@@ -1,10 +1,18 @@
 :rocket: Version 1.1.12
 ----------------------
 
-### Changes
-* Added position coordinate information to ``BaseDim`` class.
-* Added ``FormationHelper`` class that groups the positions present in common formations
-* Added ``inset_axes`` and ``inset_formation_axes`` functions to pitch to easily inset new axes at specified locations.
+### Added
+* Added the position coordinates to the pitch dimensions, e.g. Goalkeeper (GK) coordinates. \
+The positions are accessible via the ``pitch.dim.position_line4`` and ``pitch.dim.position_line5`` \
+attributes. The ``position_line5`` attribute is equivalent to the StatsBomb data specification, \
+while the ``position_line4`` has a maximum of four players per line (e.g. four at the back) so the \
+positions have more space around them than the lines of five.
+* Added formations that group these new player positions into 25 common formations. \
+The formations are accessible via the ``pitch.get_formation()`` function. \
+For example, pitch.get_formation('442')
+* Added ``inset_axes`` and ``inset_formation_axes`` functions to the pitch class \
+to easily inset new axes at specified locations and formations. \
+For example, inset_axes = pitch.inset_formation_axes("433", width=15, aspect=1, ax=ax).
 
 :rocket: Version 1.1.11
 ----------------------

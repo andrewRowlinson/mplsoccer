@@ -3,13 +3,13 @@
 import warnings
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams
 
 from mplsoccer import dimensions
-from mplsoccer.dimensions import FormationHelper
 from mplsoccer.cm import grass_cmap
 from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
 from mplsoccer.utils import Standardizer, set_visible, inset_axes
@@ -599,13 +599,17 @@ class BasePitch(ABC):
                      'alpha': self.line_alpha, 'linestyle': self.positional_linestyle,
                      'zorder': self.positional_zorder}
         # x lines for Juego de Posición
-        #through lines
-        self._draw_line(ax, [self.dim.positional_x[1], self.dim.positional_x[1]], [self.dim.bottom, self.dim.top], **line_prop)
-        self._draw_line(ax, [self.dim.positional_x[5], self.dim.positional_x[5]], [self.dim.bottom, self.dim.top], **line_prop)
-        #short lines
+        # through lines
+        self._draw_line(ax, [self.dim.positional_x[1], self.dim.positional_x[1]],
+                        [self.dim.bottom, self.dim.top], **line_prop)
+        self._draw_line(ax, [self.dim.positional_x[5], self.dim.positional_x[5]],
+                        [self.dim.bottom, self.dim.top], **line_prop)
+        # short lines
         for coord in self.dim.positional_x[2:5]:
-            self._draw_line(ax, [coord, coord], [self.dim.bottom,  self.dim.penalty_area_bottom], **line_prop)
-            self._draw_line(ax, [coord, coord], [self.dim.top,  self.dim.penalty_area_top], **line_prop)
+            self._draw_line(ax, [coord, coord], [self.dim.bottom, self.dim.penalty_area_bottom],
+                            **line_prop)
+            self._draw_line(ax, [coord, coord], [self.dim.top, self.dim.penalty_area_top],
+                            **line_prop)
         # y lines for Juego de Posición
         self._draw_line(ax, [self.dim.left, self.dim.right],
                         [self.dim.positional_y[1], self.dim.positional_y[1]], **line_prop)
@@ -626,6 +630,7 @@ class BasePitch(ABC):
     def inset_axes(self, x, y, length=None, width=None, aspect=None, polar=False,
                    ax=None, **kwargs):
         """ A function to create an inset axes.
+
         Parameters
         ----------
         x : float
@@ -646,6 +651,11 @@ class BasePitch(ABC):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to the inset_axes.
+
+        Returns
+        --------
+        ax : matplotlib.axes.Axes
+
         Examples
         --------
         >>> from mplsoccer import Pitch
@@ -656,13 +666,49 @@ class BasePitch(ABC):
         return inset_axes(x=x, y=y, length=length, width=width, aspect=aspect,
                           polar=polar, vertical=self.vertical, ax=ax, **kwargs)
 
+    @property
+    def formations(self) -> List[str]:
+        """ Return a list of valid mplsoccer formations."""
+        return list(self.dim.formations.keys())
+
+    def get_formation(self, formation):
+        """ Get a formation.
+
+           Parameters
+           ----------
+           formation : str
+               The formation. For valid formations see the attribute formations
+               For example, pitch = Pitch()
+               print(pitch.formations)
+
+           Returns
+           -------
+           formation : dict[str, dataclass]
+               A dictionary of player positions (e.g. GK) and coordinates (x, y)
+
+           Examples
+           --------
+           >>> from mplsoccer import Pitch
+           >>> pitch = Pitch()
+           >>> formation = pitch.get_formation('442')
+           """
+        formation = formation.replace('-', '')
+        if formation not in self.formations:
+            raise ValueError(
+                f'Formation {formation} not supported.'
+                f' Currently supported formations are: {self.formations}')
+        return self.dim.formations[formation]
+
     def inset_formation_axes(self, formation, length=None, width=None, aspect=None, polar=False,
                              ax=None, **kwargs):
         """ A function to create multiple inset axes for a formation.
+
         Parameters
         ----------
         formation : str
-            The formation to plot.  Formations allowed are the ones supported by `FormationHelper`.
+            The formation to plot. For valid formations see the attribute formations
+               For example, pitch = Pitch()
+               print(pitch.formations)
         length : float, default None
             The length of the inset axes in the x data coordinates.
         width : float, default None
@@ -677,25 +723,25 @@ class BasePitch(ABC):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to the inset_axes.
+
+        Returns
+        -------
+        inset_axes : dict[str, axes]
+            A dictionary of player positions (e.g. GK) and matplotlib axes.
+
         Examples
         --------
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
         >>> fig, ax = pitch.draw()
-        >>> inset_axes = pitch.inset_formation_axes("433", width=20, aspect=1, ax=ax)
+        >>> inset_axes = pitch.inset_formation_axes("433", width=15, aspect=1, ax=ax)
         """
-        positions_in_formation = FormationHelper.get_formation(formation)
-        axes = {
-            position_coordinates.position_name: self.inset_axes(
-                x=position_coordinates(self.dim)['x'],
-                y=position_coordinates(self.dim)['y'],
-                length=length, width=width, aspect=aspect, polar=polar, ax=ax, **kwargs
-            )
-            for position_coordinates in positions_in_formation
-        }
+        positions_in_formation = self.get_formation(formation)
+        axes = {position: self.inset_axes(x=positions_in_formation[position].x,
+                                          y=positions_in_formation[position].y, length=length,
+                                          width=width, aspect=aspect, polar=polar, ax=ax, **kwargs)
+                for position in positions_in_formation}
         return axes
-
-
 
     def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
              left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,

@@ -54,16 +54,76 @@ origin_center = If true, the origin starts at (center length, center width)
 """
 
 from dataclasses import dataclass, InitVar
-from typing import Optional, Dict, List
+from typing import Optional, Dict
+
 import numpy as np
-import pandas as pd
-import abc
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
+
+@dataclass
+class Coordinate:
+    """ Dataclass for holding coordinates (x, y)"""
+    x: float
+    y: float
+
+
+@dataclass
+class PositionLine4:
+    """ Dataclass for positions (x, y) coordinates in lines of four."""
+    GK: Coordinate
+    RB: Coordinate
+    RCB: Coordinate
+    LCB: Coordinate
+    LB: Coordinate
+    RWB: Coordinate
+    RDM: Coordinate
+    LDM: Coordinate
+    LWB: Coordinate
+    RM: Coordinate
+    RCM: Coordinate
+    LCM: Coordinate
+    LM: Coordinate
+    RW: Coordinate
+    RAM: Coordinate
+    LAM: Coordinate
+    LW: Coordinate
+    RCF: Coordinate
+    LCF: Coordinate
+    SS: Coordinate
+
+
+@dataclass
+class PositionLine5:
+    """ Dataclass for positions (x, y) coordinates in lines of five."""
+    GK: Coordinate
+    RB: Coordinate
+    RCB: Coordinate
+    CB: Coordinate
+    LCB: Coordinate
+    LB: Coordinate
+    RWB: Coordinate
+    RDM: Coordinate
+    CDM: Coordinate
+    LDM: Coordinate
+    LWB: Coordinate
+    RM: Coordinate
+    RCM: Coordinate
+    CM: Coordinate
+    LCM: Coordinate
+    LM: Coordinate
+    RW: Coordinate
+    RAM: Coordinate
+    CAM: Coordinate
+    LAM: Coordinate
+    LW: Coordinate
+    RCF: Coordinate
+    ST: Coordinate
+    LCF: Coordinate
+    SS: Coordinate
 
 
 @dataclass
@@ -113,9 +173,9 @@ class BaseDims:
     positional_y: Optional[np.array] = None
     # defined in stripes
     stripe_locations: Optional[np.array] = None
-    four_man_line_positions: Optional[Dict[str, Dict[str, float]]] = None
-    five_man_line_positions: Optional[Dict[str, Dict[str, float]]] = None
-
+    position_line4: PositionLine4 = None
+    position_line5: PositionLine5 = None
+    formations: Optional[Dict[str, Dict[str, Coordinate]]] = None
 
     def setup_dims(self):
         """ Run methods for the extra pitch dimensions."""
@@ -124,6 +184,7 @@ class BaseDims:
         self.stripes()
         self.create_positions_five_per_line()
         self.create_positions_four_per_line()
+        self.create_formations()
 
     def pitch_markings(self):
         """ Create sorted pitch dimensions to enable standardization of coordinates.
@@ -181,55 +242,345 @@ class BaseDims:
         self.six_yard_right = self.right - self.six_yard_length
 
     def create_positions_five_per_line(self):
-        """ Create player positions, using 5 poistions per line (for example, RB, RCB, CB, LCB, LB).
+        """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
 
         This can be used to evenly space players when you have 3 or 5 players per line.
 
-        Used to translate a position e.g. CAM to the x,y coordinates"""
+        Used to translate a position e.g. CAM to the x,y coordinates."""
         y = np.linspace(self.bottom, self.top, 11)[1::2]
         x = np.linspace(self.left, self.right, 15)
         x = np.append(x[:13][1::2], self.penalty_right)
         x, y = np.meshgrid(x, y)
-        idx = [1, 2, 3, 4, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18,
-               19, 20, 22, 23, 24, 25, 27, 29, 30, 31, 32]
-        x = x.ravel()[idx]
-        y = y.ravel()[idx]
-        labels = ['RB', 'RWB', 'RM', 'RW',  'RCB', 'RDM', 'RCM', 'RAM', 'RCF',
-                  'GK', 'CB', 'CDM', 'CM', 'CAM', 'SS', 'ST', 'LCB', 'LDM', 'LCM',
-                  'LAM', 'LCF', 'LB', 'LWB', 'LM', 'LW',
-                 ]
-        self.five_man_line_positions = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
-    
+        idx = [14, 1, 8, 15, 22, 29, 2, 9, 16, 23, 30, 3, 10,
+               17, 24, 31, 4, 11, 18, 25, 32, 13, 20, 27, 19]
+        self.position_line5 = PositionLine5(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
+
     def create_positions_four_per_line(self):
         """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
 
         This can be used to evenly space players when you have 2 or 4 players per line.
 
-        Used to translate a position e.g. CAM to the x,y coordinates"""
+        Used to translate a position e.g. CAM to the x,y coordinates."""
         y = np.linspace(self.bottom, self.top, 9)[1:-1]
         x = np.linspace(self.left, self.right, 15)
         x = np.append(x[:13][1::2], self.penalty_right)
         x, y = np.meshgrid(x, y)
-        idx = [1, 2, 3, 4,
-               15, 16, 17, 18, 20,
-               21, 26,
-               29, 30, 31, 32, 34,
-               43, 44, 45, 46]
-        x = x.ravel()[idx]
-        y = y.ravel()[idx]
-        labels = ['RB', 'RWB', 'RM', 'RW',  
-                  'RCB', 'RDM', 'RCM', 'RAM', 'RCF',
-                  'GK', 'SS', 
-                  'LCB', 'LDM', 'LCM', 'LAM', 'LCF', 
-                  'LB', 'LWB', 'LM', 'LW',
-                 ]
-        self.four_man_line_positions = pd.DataFrame({'x': x, 'y': y}, index=labels).to_dict(orient='index')
+        idx = [21, 1, 15, 29, 43, 2, 16, 30, 44, 3, 17, 31, 45, 4, 18, 32, 46, 20, 34, 26]
+        self.position_line4 = PositionLine4(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
 
-    
+    def create_formations(self):
+        """ Create formations from the player positions."""
+        self.formations = {
+            '4231': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'RDM': self.position_line5.RDM,
+                     'LDM': self.position_line5.LDM,
+                     'LM': self.position_line5.LM,
+                     'RM': self.position_line5.RM,
+                     'CAM': self.position_line5.CAM,
+                     'ST': self.position_line5.ST,
+                     },
+            '433': {'GK': self.position_line5.GK,
+                    'LB': self.position_line4.LB,
+                    'LCB': self.position_line4.LCB,
+                    'RCB': self.position_line4.RCB,
+                    'RB': self.position_line4.RB,
+                    'CDM': self.position_line5.CDM,
+                    'RCM': self.position_line5.RCM,
+                    'LCM': self.position_line5.LCM,
+                    'LW': self.position_line5.LW,
+                    'RW': self.position_line5.RW,
+                    'ST': self.position_line5.ST,
+                    },
+            '442': {'GK': self.position_line5.GK,
+                    'LB': self.position_line4.LB,
+                    'LCB': self.position_line4.LCB,
+                    'RCB': self.position_line4.RCB,
+                    'RB': self.position_line4.RB,
+                    'LM': self.position_line4.LM,
+                    'RM': self.position_line4.RM,
+                    'LCM': self.position_line4.LCM,
+                    'RCM': self.position_line4.RCM,
+                    'LCF': self.position_line4.LCF,
+                    'RCF': self.position_line4.RCF,
+                    },
+            '4141': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'CDM': self.position_line5.CDM,
+                     'LM': self.position_line4.LM,
+                     'RM': self.position_line4.RM,
+                     'LCM': self.position_line4.LCM,
+                     'RCM': self.position_line4.RCM,
+                     'ST': self.position_line5.ST,
+                     },
+            '451': {'GK': self.position_line5.GK,
+                    'LB': self.position_line4.LB,
+                    'LCB': self.position_line4.LCB,
+                    'RCB': self.position_line4.RCB,
+                    'RB': self.position_line4.RB,
+                    'LM': self.position_line5.LM,
+                    'RM': self.position_line5.RM,
+                    'LCM': self.position_line5.LCM,
+                    'RCM': self.position_line5.RCM,
+                    'CM': self.position_line5.CM,
+                    'ST': self.position_line5.ST,
+                    },
+            '352': {'GK': self.position_line5.GK,
+                    'RCB': self.position_line5.RCB,
+                    'LCB': self.position_line5.LCB,
+                    'CB': self.position_line5.CB,
+                    'LWB': self.position_line5.LWB,
+                    'RWB': self.position_line5.RWB,
+                    'RCM': self.position_line5.RCM,
+                    'LCM': self.position_line5.LCM,
+                    'CM': self.position_line5.CM,
+                    'LCF': self.position_line4.LCF,
+                    'RCF': self.position_line4.RCF,
+                    },
+            '532': {'GK': self.position_line5.GK,
+                    'RCB': self.position_line5.RCB,
+                    'LCB': self.position_line5.LCB,
+                    'CB': self.position_line5.CB,
+                    'LB': self.position_line5.LB,
+                    'RB': self.position_line5.RB,
+                    'RCM': self.position_line5.RCM,
+                    'LCM': self.position_line5.LCM,
+                    'CDM': self.position_line5.CDM,
+                    'LCF': self.position_line4.LCF,
+                    'RCF': self.position_line4.RCF,
+                    },
+            '541': {'GK': self.position_line5.GK,
+                    'LWB': self.position_line5.LWB,
+                    'LCB': self.position_line5.LCB,
+                    'CB': self.position_line5.CB,
+                    'RCB': self.position_line5.RCB,
+                    'RWB': self.position_line5.RWB,
+                    'LM': self.position_line4.LM,
+                    'RM': self.position_line4.RM,
+                    'LCM': self.position_line4.LCM,
+                    'RCM': self.position_line4.RCM,
+                    'ST': self.position_line5.ST,
+                    },
+            '343': {'GK': self.position_line5.GK,
+                    'RCB': self.position_line5.RCB,
+                    'LCB': self.position_line5.LCB,
+                    'CB': self.position_line5.CB,
+                    'LWB': self.position_line5.LWB,
+                    'RWB': self.position_line5.RWB,
+                    'RCM': self.position_line5.RCM,
+                    'LCM': self.position_line5.LCM,
+                    'LW': self.position_line5.LW,
+                    'RW': self.position_line5.RW,
+                    'ST': self.position_line5.ST,
+                    },
+            '4411': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'LM': self.position_line4.LM,
+                     'RM': self.position_line4.RM,
+                     'LCM': self.position_line4.LCM,
+                     'RCM': self.position_line4.RCM,
+                     'SS': self.position_line5.SS,
+                     'ST': self.position_line5.ST,
+                     },
+            '41212': {'GK': self.position_line5.GK,
+                      'LB': self.position_line4.LB,
+                      'LCB': self.position_line4.LCB,
+                      'RCB': self.position_line4.RCB,
+                      'RB': self.position_line4.RB,
+                      'CDM': self.position_line5.CDM,
+                      'LCM': self.position_line5.LCM,
+                      'RCM': self.position_line5.RCM,
+                      'CAM': self.position_line5.CAM,
+                      'LCF': self.position_line4.LCF,
+                      'RCF': self.position_line4.RCF,
+                      },
+            '3412': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'LCB': self.position_line5.LCB,
+                     'CB': self.position_line5.CB,
+                     'LWB': self.position_line5.LWB,
+                     'RWB': self.position_line5.RWB,
+                     'RCM': self.position_line5.RCM,
+                     'LCM': self.position_line5.LCM,
+                     'CAM': self.position_line5.CAM,
+                     'LCF': self.position_line5.LCF,
+                     'RCF': self.position_line5.RCF,
+                     },
+            '4321': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'CDM': self.position_line5.CDM,
+                     'LCM': self.position_line5.LCM,
+                     'RCM': self.position_line5.RCM,
+                     'RAM': self.position_line5.RAM,
+                     'LAM': self.position_line5.LAM,
+                     'ST': self.position_line5.ST,
+                     },
+            '4222': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'RDM': self.position_line5.RDM,
+                     'LDM': self.position_line5.LDM,
+                     'RAM': self.position_line5.RAM,
+                     'LAM': self.position_line5.LAM,
+                     'LCF': self.position_line5.LCF,
+                     'RCF': self.position_line5.RCF,
+                     },
+            '3511': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'LCB': self.position_line5.LCB,
+                     'CB': self.position_line5.CB,
+                     'LWB': self.position_line5.LWB,
+                     'RWB': self.position_line5.RWB,
+                     'CDM': self.position_line5.CDM,
+                     'RCM': self.position_line5.RCM,
+                     'LCM': self.position_line5.LCM,
+                     'SS': self.position_line5.SS,
+                     'ST': self.position_line5.ST,
+                     },
+            '3142': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'LCB': self.position_line5.LCB,
+                     'CB': self.position_line5.CB,
+                     'LWB': self.position_line5.LWB,
+                     'RWB': self.position_line5.RWB,
+                     'RCM': self.position_line5.RCM,
+                     'LCM': self.position_line5.LCM,
+                     'CDM': self.position_line5.CDM,
+                     'LCF': self.position_line5.LCF,
+                     'RCF': self.position_line5.RCF,
+                     },
+            '31213': {'GK': self.position_line5.GK,
+                      'RCB': self.position_line5.RCB,
+                      'LCB': self.position_line5.LCB,
+                      'CB': self.position_line5.CB,
+                      'CDM': self.position_line5.CDM,
+                      'RCM': self.position_line5.RCM,
+                      'LCM': self.position_line5.LCM,
+                      'CAM': self.position_line5.CAM,
+                      'LW': self.position_line5.LW,
+                      'RW': self.position_line5.RW,
+                      'ST': self.position_line5.ST,
+                      },
+            '4132': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'CDM': self.position_line5.CDM,
+                     'LM': self.position_line4.LM,
+                     'RM': self.position_line4.RM,
+                     'CAM': self.position_line5.CAM,
+                     'LCF': self.position_line5.LCF,
+                     'RCF': self.position_line5.RCF,
+                     },
+            '424': {'GK': self.position_line5.GK,
+                    'LB': self.position_line4.LB,
+                    'LCB': self.position_line4.LCB,
+                    'RCB': self.position_line4.RCB,
+                    'RB': self.position_line4.RB,
+                    'RDM': self.position_line5.RDM,
+                    'LDM': self.position_line5.LDM,
+                    'RW': self.position_line4.RW,
+                    'LW': self.position_line4.LW,
+                    'LCF': self.position_line4.LCF,
+                    'RCF': self.position_line4.RCF,
+                    },
+            '4312': {'GK': self.position_line5.GK,
+                     'LB': self.position_line4.LB,
+                     'LCB': self.position_line4.LCB,
+                     'RCB': self.position_line4.RCB,
+                     'RB': self.position_line4.RB,
+                     'CM': self.position_line5.CM,
+                     'LCM': self.position_line5.LCM,
+                     'RCM': self.position_line5.RCM,
+                     'CAM': self.position_line5.CAM,
+                     'LCF': self.position_line4.LCF,
+                     'RCF': self.position_line4.RCF,
+                     },
+            '3241': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'LCB': self.position_line5.LCB,
+                     'CB': self.position_line5.CB,
+                     'RDM': self.position_line4.RDM,
+                     'LDM': self.position_line4.LDM,
+                     'LM': self.position_line4.LM,
+                     'RM': self.position_line4.RM,
+                     'RAM': self.position_line5.RAM,
+                     'LAM': self.position_line5.LAM,
+                     'ST': self.position_line5.ST,
+                     },
+            '3331': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'LCB': self.position_line5.LCB,
+                     'CB': self.position_line5.CB,
+                     'RDM': self.position_line5.RDM,
+                     'LDM': self.position_line5.LDM,
+                     'CDM': self.position_line5.CDM,
+                     'RM': self.position_line5.RM,
+                     'LM': self.position_line5.LM,
+                     'CAM': self.position_line5.CAM,
+                     'ST': self.position_line5.ST,
+                     },
+            'pyramid': {'GK': self.position_line5.GK,
+                        'RCB': self.position_line5.RCB,
+                        'LCB': self.position_line5.LCB,
+                        'RCM': self.position_line5.RCM,
+                        'LCM': self.position_line5.LCM,
+                        'CM': self.position_line5.CM,
+                        'RW': self.position_line5.RW,
+                        'LW': self.position_line5.LW,
+                        'RCF': self.position_line5.RCF,
+                        'LCF': self.position_line5.LCF,
+                        'ST': self.position_line5.ST,
+                        },
+            'metodo': {'GK': self.position_line5.GK,
+                       'RCB': self.position_line5.RCB,
+                       'LCB': self.position_line5.LCB,
+                       'RWB': self.position_line5.RWB,
+                       'LWB': self.position_line5.LWB,
+                       'CDM': self.position_line5.CDM,
+                       'LCM': self.position_line5.LCM,
+                       'RCM': self.position_line5.RCM,
+                       'LW': self.position_line5.LW,
+                       'RW': self.position_line5.RW,
+                       'ST': self.position_line5.ST,
+                       },
+            'wm': {'GK': self.position_line5.GK,
+                   'RCB': self.position_line5.RCB,
+                   'LCB': self.position_line5.LCB,
+                   'CB': self.position_line5.CB,
+                   'RDM': self.position_line4.RDM,
+                   'LDM': self.position_line4.LDM,
+                   'RCM': self.position_line5.RCM,
+                   'LCM': self.position_line5.LCM,
+                   'RW': self.position_line5.RW,
+                   'LW': self.position_line5.LW,
+                   'ST': self.position_line5.ST,
+                   },
+        }
+
+
 @dataclass
 class FixedDims(BaseDims):
     """ Dataclass holding the dimensions for pitches with fixed dimensions:
      'opta', 'wyscout', 'statsbomb' and 'uefa'."""
+
     def __post_init__(self):
         self.setup_dims()
 
@@ -335,7 +686,7 @@ def uefa_dims():
 def statsbomb_dims():
     """ Create 'statsbomb dimensions."""
     return FixedDims(left=0., right=120., bottom=80., top=0., aspect=1.,
-                     width=80., length=120.,  pitch_width=80.,  pitch_length=120.,
+                     width=80., length=120., pitch_width=80., pitch_length=120.,
                      goal_width=8., goal_length=2.4, goal_bottom=44., goal_top=36.,
                      six_yard_width=20., six_yard_length=6., six_yard_left=6.,
                      six_yard_right=114., six_yard_bottom=50., six_yard_top=30.,
@@ -380,6 +731,7 @@ def tracab_dims(pitch_width, pitch_length):
                               center_width=0., center_length=0., circle_diameter=1830.,
                               corner_diameter=200., arc=53.05, invert_y=False, origin_center=True)
 
+
 def impect_dims():
     """ Create 'impect' dimensions."""
     return VariableCenterDims(aspect=1., pitch_width=68, pitch_length=105,
@@ -390,6 +742,7 @@ def impect_dims():
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
                               center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
                               invert_y=False, origin_center=True)
+
 
 def custom_dims(pitch_width, pitch_length):
     """ Create 'custom' dimensions."""
@@ -441,369 +794,3 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     if pitch_type == 'impect':
         return impect_dims()
     return custom_dims(pitch_width, pitch_length)
-
-
-
-class PositionCoodinates(abc.ABC):
-    def __init__(self, position:str):
-        self._position = position
-
-    @property
-    def position_name(self):
-        return self._position
-
-    @abc.abstractmethod
-    def __call__(self, dim:BaseDims)->Dict[str, float]:
-        pass
-
-class FourManLinePositionCoordinates(PositionCoodinates):
-    def __call__(self, dim: BaseDims) -> Dict[str, float]:
-        return dim.four_man_line_positions[self._position]
-    
-class FiveManLinePositionCoordinates(PositionCoodinates):
-    def __call__(self, dim: BaseDims) -> Dict[str, float]:
-        return dim.five_man_line_positions[self._position]
-
-class FormationHelper:
-    FORMATION_POSITIONS = {
-        '4231':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('RDM'),
-            FiveManLinePositionCoordinates('LDM'),
-            FiveManLinePositionCoordinates('LM'),
-            FiveManLinePositionCoordinates('RM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '433':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('LW'),
-            FiveManLinePositionCoordinates('RW'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '442':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FourManLinePositionCoordinates('LM'),
-            FourManLinePositionCoordinates('RM'),
-            FourManLinePositionCoordinates('LCM'),
-            FourManLinePositionCoordinates('RCM'),
-            FourManLinePositionCoordinates('LCF'),
-            FourManLinePositionCoordinates('RCF'),
-        ],
-        '4141':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FourManLinePositionCoordinates('LM'),
-            FourManLinePositionCoordinates('RM'),
-            FourManLinePositionCoordinates('LCM'),
-            FourManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '451':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('LM'),
-            FiveManLinePositionCoordinates('RM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('CM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '352':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('CM'),
-            FourManLinePositionCoordinates('LCF'),
-            FourManLinePositionCoordinates('RCF'),
-        ],
-        '532':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('LB'),
-            FiveManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('CDM'),
-            FourManLinePositionCoordinates('LCF'),
-            FourManLinePositionCoordinates('RCF'),
-        ],
-        '541':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FourManLinePositionCoordinates('LM'),
-            FourManLinePositionCoordinates('RM'),
-            FourManLinePositionCoordinates('LCM'),
-            FourManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '343':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('LW'),
-            FiveManLinePositionCoordinates('RW'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '4411':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FourManLinePositionCoordinates('LM'),
-            FourManLinePositionCoordinates('RM'),
-            FourManLinePositionCoordinates('LCM'),
-            FourManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('SS'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '41212':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FourManLinePositionCoordinates('LCF'),
-            FourManLinePositionCoordinates('RCF'),
-        ],
-        '3412':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FiveManLinePositionCoordinates('LCF'),
-            FiveManLinePositionCoordinates('RCF'),
-        ],
-        '4321':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('RAM'),
-            FiveManLinePositionCoordinates('LAM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '4222':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('RDM'),
-            FiveManLinePositionCoordinates('LDM'),
-            FiveManLinePositionCoordinates('RAM'),
-            FiveManLinePositionCoordinates('LAM'),
-            FiveManLinePositionCoordinates('LCF'),
-            FiveManLinePositionCoordinates('RCF'),
-        ],
-        '3511':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('SS'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '3142':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('LCF'),
-            FiveManLinePositionCoordinates('RCF'),
-        ],
-        '31213':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FiveManLinePositionCoordinates('LW'),
-            FiveManLinePositionCoordinates('RW'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '4132':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FourManLinePositionCoordinates('LM'),
-            FourManLinePositionCoordinates('RM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FiveManLinePositionCoordinates('LCF'),
-            FiveManLinePositionCoordinates('RCF'),
-        ],
-        '424':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('RDM'),
-            FiveManLinePositionCoordinates('LDM'),
-            FourManLinePositionCoordinates('RW'),
-            FourManLinePositionCoordinates('LW'),
-            FourManLinePositionCoordinates('LCF'),
-            FourManLinePositionCoordinates('RCF'),
-        ],
-        '4312':[
-            FiveManLinePositionCoordinates('GK'),
-            FourManLinePositionCoordinates('LB'),
-            FourManLinePositionCoordinates('LCB'),
-            FourManLinePositionCoordinates('RCB'),
-            FourManLinePositionCoordinates('RB'),
-            FiveManLinePositionCoordinates('CM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FourManLinePositionCoordinates('LCF'),
-            FourManLinePositionCoordinates('RCF'),
-        ],
-        '3241':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FourManLinePositionCoordinates('RDM'),
-            FourManLinePositionCoordinates('LDM'),
-            FourManLinePositionCoordinates('LM'),
-            FourManLinePositionCoordinates('RM'),
-            FiveManLinePositionCoordinates('RAM'),
-            FiveManLinePositionCoordinates('LAM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        '3331':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FiveManLinePositionCoordinates('RDM'),
-            FiveManLinePositionCoordinates('LDM'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('RM'),
-            FiveManLinePositionCoordinates('LM'),
-            FiveManLinePositionCoordinates('CAM'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        'pyramid':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('CM'),
-            FiveManLinePositionCoordinates('RW'),
-            FiveManLinePositionCoordinates('LW'),
-            FiveManLinePositionCoordinates('RCF'),
-            FiveManLinePositionCoordinates('LCF'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        'metodo':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('RWB'),
-            FiveManLinePositionCoordinates('LWB'),
-            FiveManLinePositionCoordinates('CDM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LW'),
-            FiveManLinePositionCoordinates('RW'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-        'wm':[
-            FiveManLinePositionCoordinates('GK'),
-            FiveManLinePositionCoordinates('RCB'),
-            FiveManLinePositionCoordinates('LCB'),
-            FiveManLinePositionCoordinates('CB'),
-            FourManLinePositionCoordinates('RDM'),
-            FourManLinePositionCoordinates('LDM'),
-            FiveManLinePositionCoordinates('RCM'),
-            FiveManLinePositionCoordinates('LCM'),
-            FiveManLinePositionCoordinates('RW'),
-            FiveManLinePositionCoordinates('LW'),
-            FiveManLinePositionCoordinates('ST'),
-        ],
-
-
-
-    }
-
-    @classmethod
-    def get_formation(cls, formation)->List[PositionCoodinates]:
-        formation=formation.replace('-','')
-        if formation not in cls.FORMATION_POSITIONS:
-            raise ValueError(f'Formation {formation} not supported. Currently supported formations are: {cls.formations}')
-        return cls.FORMATION_POSITIONS[formation]
-
-    @classmethod
-    @property
-    def formations(cls)->List[str]:
-        return list(cls.FORMATION_POSITIONS.keys())
