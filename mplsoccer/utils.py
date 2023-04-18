@@ -110,6 +110,7 @@ def get_aspect(ax):
 def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical=False, ax=None,
                **kwargs):
     """ A function to create an inset axes.
+
     Parameters
     ----------
     x : float
@@ -132,6 +133,11 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
     ax : matplotlib.axes.Axes, default None
         The axis to plot on.
     **kwargs : All other keyword arguments are passed on to the inset_axes.
+
+    Returns
+    --------
+    ax : matplotlib.axes.Axes
+
     Examples
     --------
     >>> from mplsoccer import inset_axes
