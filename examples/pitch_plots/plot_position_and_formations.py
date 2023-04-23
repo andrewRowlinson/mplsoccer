@@ -36,21 +36,47 @@ pitch.scatter(lcm_coordinates.x, lcm_coordinates.y, s=100, ax=ax, color='blue')
 
 ##############################################################################
 # Below is a showcase of all available formations and their positions
+# Note that Opta pitch type has a custom position layout that is slightly 
+# different from other pitch types.  The difference is that Second Striker
+# does not have a dedicated position on the pitch (it shares position with CAM)
+# and this means that the DM, CM and AM lines are a little better spaced out.
 
 # Create a grid of pitch
 p = VerticalPitch('opta', line_alpha=0.5, pitch_color='grass', line_color='white')
 COLS = 5
 rows = len(p.formations) // COLS
 
-fig, axes = p.grid(nrows=rows, ncols=COLS, title_height=0, endnote_height=0, figheight=20,
+fig, axes = p.grid(nrows=rows, ncols=COLS, title_height=0.05, endnote_height=0, figheight=20,
                    space=0.08)
-axes = axes.flatten()
+axes_p = axes['pitch'].flatten()
 
 for i, formation in enumerate(sorted(p.formations)):
     position_dict = p.get_formation(formation)
     for position in position_dict:
         x, y = position_dict[position].x, position_dict[position].y
-        p.scatter(x, y, color='black', s=350, ax=axes[i])
+        p.scatter(x, y, color='black', s=350, ax=axes_p[i])
         p.annotate(xy=(x, y), text=position, color='white', fontsize=8, ha='center', va='center',
-                   ax=axes[i])
-    axes[i].set_title(formation, fontsize=10)
+                   ax=axes_p[i])
+    axes_p[i].set_title(formation, fontsize=10)
+axes['title'].axis('off')
+axes['title'].text(0.5, 0.5, 'Formations and positions (opta layout)', fontsize=20, ha='center', va='center')
+
+
+p = VerticalPitch('statsbomb', line_alpha=0.5, pitch_color='grass', line_color='white')
+COLS = 5
+rows = len(p.formations) // COLS
+
+fig, axes = p.grid(nrows=rows, ncols=COLS, title_height=0.05, endnote_height=0, figheight=20,
+                   space=0.08)
+axes_p = axes['pitch'].flatten()
+
+for i, formation in enumerate(sorted(p.formations)):
+    position_dict = p.get_formation(formation)
+    for position in position_dict:
+        x, y = position_dict[position].x, position_dict[position].y
+        p.scatter(x, y, color='black', s=350, ax=axes_p[i])
+        p.annotate(xy=(x, y), text=position, color='white', fontsize=8, ha='center', va='center',
+                   ax=axes_p[i])
+    axes_p[i].set_title(formation, fontsize=10)
+axes['title'].axis('off')
+axes['title'].text(0.5, 0.5, 'Formations and positions (default layout)', fontsize=20, ha='center', va='center')

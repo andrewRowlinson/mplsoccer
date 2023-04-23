@@ -640,10 +640,58 @@ class MetricasportsDims(BaseDims):
         self.penalty_box_dims()
         self.setup_dims()
 
+class OptaDims(FixedDims):
+    """ Dataclass holding the dimensions for the 'opta' pitch."""
+   
+    def create_positions_five_per_line(self):
+        """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
 
+        This can be used to evenly space players when you have 3 or 5 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates.
+        
+        The difference between this and the base class is that SS is not given its own dedicated line.
+
+        Instead DM, CM and AM are spaced out more evenly across the pitch.
+        
+        """
+        y = np.linspace(self.bottom, self.top, 11)[1::2]
+        x = np.linspace(self.left, self.right, 15)
+        x = np.append(x[:13][1::2], self.penalty_right)
+        inner_lines = np.linspace(x[1], x[-1], 5)[1:-1]
+        x = np.append(x[:2], np.append(inner_lines, x[-1]))
+        x, y = np.meshgrid(x, y)
+        idx = [12, 1, 7, 13, 19, 25, 2, 8, 14, 20, 26, 3, 9,
+               15, 21, 27, 4, 10, 16, 22, 28, 11, 17, 23, 16]
+        self.position_line5 = PositionLine5(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
+        
+    def create_positions_four_per_line(self):
+        """
+        Create player positions, using 4 positions per line (for example, RB, CB, CB, LB).
+
+        This can be used to evenly space players when you have 4 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates.
+
+        The difference between this and the base class is that SS is not given its own dedicated line.
+
+        Instead DM, CM and AM are spaced out more evenly across the pitch.
+        
+        """
+        y = np.linspace(self.bottom, self.top, 9)[1:-1]
+        x = np.linspace(self.left, self.right, 15)
+        x = np.append(x[:13][1::2], self.penalty_right)
+        inner_lines = np.linspace(x[1], x[-1], 5)[1:-1]
+        x = np.append(x[:2], np.append(inner_lines, x[-1]))
+        x, y = np.meshgrid(x, y)
+        idx = [18, 1, 13, 25, 37, 2, 14, 26, 38, 3, 15, 27, 39, 4, 16, 28, 40, 17, 29, 22]
+        self.position_line4 = PositionLine4(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
+    
 def opta_dims():
     """ Create 'opta' dimensions."""
-    return FixedDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
+    return OptaDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
                      width=100., length=100., pitch_width=68., pitch_length=105.,
                      goal_width=9.6, goal_length=1.9, goal_bottom=45.2, goal_top=54.8,
                      six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
