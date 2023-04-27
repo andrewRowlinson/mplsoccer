@@ -1,3 +1,9 @@
+:rocket: Version 1.1.12
+----------------------
+
+### Fixes
+* Fixed the timestamp conversion for match data.
+
 :rocket: Version 1.1.11
 ----------------------
 
