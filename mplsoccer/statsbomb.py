@@ -504,6 +504,10 @@ def _event_dataframe(data):
     df = pd.DataFrame(data)
     if df.empty:
         return None
+    mask = df['tactics_formation'].notnull()
+    # tactics_formation from float to string
+    df.loc[mask, 'tactics_formation'] = df.loc[mask, 'tactics_formation'].astype(int).astype(str)
+    df.loc[~mask, 'tactics_formation'] = None
     df['timestamp'] = pd.to_datetime(df['timestamp']).dt.time
     df.sort_values(['period', 'timestamp', 'index'], inplace=True)
     df.reset_index(drop=True, inplace=True)
