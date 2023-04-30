@@ -170,9 +170,9 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
             ' or length and aspect, or width and aspect')
 
     if aspect is not None and length is None:
-        length = width * aspect / ax_aspect
+        length = width * aspect * ax_aspect
     elif aspect is not None and width is None:
-        width = length / aspect / ax_aspect
+        width = length / aspect * ax_aspect
 
     bbox = (x - length / 2, y - width / 2, length, width)
 
