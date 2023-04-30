@@ -573,6 +573,162 @@ class BaseDims:
                    'LW': self.position_line5.LW,
                    'ST': self.position_line5.ST,
                    },
+            '41221': {'GK': self.position_line5.GK,
+                      'RB': self.position_line5.RB,
+                      'RCB': self.position_line5.RCB,
+                      'LCB': self.position_line5.LCB,
+                      'LB': self.position_line5.LB,
+                      'CDM': self.position_line5.CDM,
+                      'RCM': self.position_line5.RCM,
+                      'LCM': self.position_line5.LCM,
+                      'RW': self.position_line5.RW,
+                      'LW': self.position_line5.LW,
+                      'ST': self.position_line5.ST,
+                      },
+            '3421': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'CB': self.position_line5.CB,
+                     'LCB': self.position_line5.LCB,
+                     'RWB': self.position_line4.RWB,
+                     'LWB': self.position_line4.LWB,
+                     'RDM': self.position_line4.RDM,
+                     'LDM': self.position_line4.LDM,
+                     'RAM': self.position_line4.RAM,
+                     'LAM': self.position_line4.LAM,
+                     'ST': self.position_line5.ST,
+                     },
+            '42211': {'GK': self.position_line5.GK,
+                      'RB': self.position_line4.RB,
+                      'RCB': self.position_line4.RCB,
+                      'LCB': self.position_line4.LCB,
+                      'LB': self.position_line4.LB,
+                      'RDM': self.position_line5.RDM,
+                      'LDM': self.position_line5.LDM,
+                      'RM': self.position_line5.RM,
+                      'LM': self.position_line5.LM,
+                      'CAM': self.position_line5.CAM,
+                      'ST': self.position_line5.ST,
+                      },
+            '32221': {'GK': self.position_line5.GK,
+                      'RCB': self.position_line5.RCB,
+                      'CB': self.position_line5.CB,
+                      'LCB': self.position_line5.LCB,
+                      'RDM': self.position_line4.RDM,
+                      'LDM': self.position_line4.LDM,
+                      'RM': self.position_line5.RM,
+                      'LM': self.position_line5.LM,
+                      'RAM': self.position_line4.RAM,
+                      'LAM': self.position_line4.LAM,
+                      'ST': self.position_line5.ST,
+                      },
+            '5221': {'GK': self.position_line5.GK,
+                     'RB': self.position_line5.RB,
+                     'RCB': self.position_line5.RCB,
+                     'CB': self.position_line5.CB,
+                     'LCB': self.position_line5.LCB,
+                     'LB': self.position_line5.LB,
+                     'RCM': self.position_line5.RCM,
+                     'LCM': self.position_line5.LCM,
+                     'RW': self.position_line5.RW,
+                     'LW': self.position_line5.LW,
+                     'ST': self.position_line5.ST,
+                     },
+            '3232': {'GK': self.position_line5.GK,
+                     'RCB': self.position_line5.RCB,
+                     'CB': self.position_line5.CB,
+                     'LCB': self.position_line5.LCB,
+                     'RWB': self.position_line5.RWB,
+                     'LWB': self.position_line5.LWB,
+                     'RCM': self.position_line5.RCM,
+                     'CM': self.position_line5.CM,
+                     'LCM': self.position_line5.LCM,
+                     'RCF': self.position_line5.RCF,
+                     'LCF': self.position_line5.LCF,
+                     },
+            '312112': {'GK': self.position_line5.GK,
+                       'RCB': self.position_line5.RCB,
+                       'CB': self.position_line5.CB,
+                       'LCB': self.position_line5.LCB,
+                       'CDM': self.position_line5.CDM,
+                       'RCM': self.position_line5.RCM,
+                       'LCM': self.position_line5.LCM,
+                       'CAM': self.position_line5.CAM,
+                       'RCF': self.position_line5.RCF,
+                       'LCF': self.position_line5.LCF,
+                       'SS': self.position_line5.SS,
+                       },
+            '42121': {'GK': self.position_line5.GK,
+                      'RB': self.position_line4.RB,
+                      'RCB': self.position_line4.RCB,
+                      'LCB': self.position_line4.LCB,
+                      'LB': self.position_line4.LB,
+                      'RDM': self.position_line5.RDM,
+                      'LDM': self.position_line5.LDM,
+                      'CM': self.position_line5.CM,
+                      'RW': self.position_line5.RW,
+                      'LW': self.position_line5.LW,
+                      'ST': self.position_line5.ST,
+                      },
+            '31222': {'GK': self.position_line5.GK,
+                      'RCB': self.position_line5.RCB,
+                      'CB': self.position_line5.CB,
+                      'LCB': self.position_line5.LCB,
+                      'CDM': self.position_line5.CDM,
+                      'RCM': self.position_line5.RCM,
+                      'LCM': self.position_line5.LCM,
+                      'RW': self.position_line5.RW,
+                      'LW': self.position_line5.LW,
+                      'RCF': self.position_line5.RCF,
+                      'LCF': self.position_line5.LCF,
+                      },
+            '4213': {'GK': self.position_line5.GK,
+                     'RB': self.position_line4.RB,
+                     'RCB': self.position_line4.RCB,
+                     'LCB': self.position_line4.LCB,
+                     'LB': self.position_line4.LB,
+                     'RDM': self.position_line5.RDM,
+                     'LDM': self.position_line5.LDM,
+                     'CAM': self.position_line5.CAM,
+                     'RCF': self.position_line5.RCF,
+                     'ST': self.position_line5.ST,
+                     'LCF': self.position_line5.LCF,
+                     },
+            '32122': {'GK': self.position_line5.GK,
+                      'RCB': self.position_line5.RCB,
+                      'CB': self.position_line5.CB,
+                      'LCB': self.position_line5.LCB,
+                      'RWB': self.position_line5.RWB,
+                      'LWB': self.position_line5.LWB,
+                      'CM': self.position_line5.CM,
+                      'RAM': self.position_line5.RAM,
+                      'LAM': self.position_line5.LAM,
+                      'RCF': self.position_line5.RCF,
+                      'LCF': self.position_line5.LCF,
+                      },
+            '41131': {'GK': self.position_line5.GK,
+                      'RB': self.position_line4.RB,
+                      'RCB': self.position_line4.RCB,
+                      'LCB': self.position_line4.LCB,
+                      'LB': self.position_line4.LB,
+                      'CDM': self.position_line5.CDM,
+                      'CM': self.position_line5.CM,
+                      'RW': self.position_line5.RW,
+                      'CAM': self.position_line5.CAM,
+                      'LW': self.position_line5.LW,
+                      'ST': self.position_line5.ST,
+                      },
+            '31312': {'GK': self.position_line5.GK,
+                      'RCB': self.position_line5.RCB,
+                      'CB': self.position_line5.CB,
+                      'LCB': self.position_line5.LCB,
+                      'CDM': self.position_line5.CDM,
+                      'RCM': self.position_line5.RCM,
+                      'CM': self.position_line5.CM,
+                      'LCM': self.position_line5.LCM,
+                      'SS': self.position_line5.SS,
+                      'RCF': self.position_line5.RCF,
+                      'LCF': self.position_line5.LCF,
+                      },
         }
 
 
@@ -640,20 +796,22 @@ class MetricasportsDims(BaseDims):
         self.penalty_box_dims()
         self.setup_dims()
 
+
 class OptaDims(FixedDims):
     """ Dataclass holding the dimensions for the 'opta' pitch."""
-   
+
     def create_positions_five_per_line(self):
         """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
 
         This can be used to evenly space players when you have 3 or 5 players per line.
 
         Used to translate a position e.g. CAM to the x,y coordinates.
-        
-        The difference between this and the base class is that SS is not given its own dedicated line.
+
+        The difference between this and the base class is that SS
+        is not given its own dedicated line.
 
         Instead DM, CM and AM are spaced out more evenly across the pitch.
-        
+
         """
         y = np.linspace(self.bottom, self.top, 11)[1::2]
         x = np.linspace(self.left, self.right, 15)
@@ -665,7 +823,7 @@ class OptaDims(FixedDims):
                15, 21, 27, 4, 10, 16, 22, 28, 11, 17, 23, 16]
         self.position_line5 = PositionLine5(
             *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
-        
+
     def create_positions_four_per_line(self):
         """
         Create player positions, using 4 positions per line (for example, RB, CB, CB, LB).
@@ -674,10 +832,11 @@ class OptaDims(FixedDims):
 
         Used to translate a position e.g. CAM to the x,y coordinates.
 
-        The difference between this and the base class is that SS is not given its own dedicated line.
+        The difference between this and the base class is that
+        SS is not given its own dedicated line.
 
         Instead DM, CM and AM are spaced out more evenly across the pitch.
-        
+
         """
         y = np.linspace(self.bottom, self.top, 9)[1:-1]
         x = np.linspace(self.left, self.right, 15)
@@ -688,19 +847,20 @@ class OptaDims(FixedDims):
         idx = [18, 1, 13, 25, 37, 2, 14, 26, 38, 3, 15, 27, 39, 4, 16, 28, 40, 17, 29, 22]
         self.position_line4 = PositionLine4(
             *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
-    
+
+
 def opta_dims():
     """ Create 'opta' dimensions."""
     return OptaDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
-                     width=100., length=100., pitch_width=68., pitch_length=105.,
-                     goal_width=9.6, goal_length=1.9, goal_bottom=45.2, goal_top=54.8,
-                     six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
-                     six_yard_right=94.2, six_yard_bottom=36.8, six_yard_top=63.2,
-                     penalty_left=11.5, penalty_right=88.5,
-                     penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
-                     penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
-                     center_width=50., center_length=50., circle_diameter=17.68,
-                     corner_diameter=1.94, arc=None, invert_y=False, origin_center=False)
+                    width=100., length=100., pitch_width=68., pitch_length=105.,
+                    goal_width=9.6, goal_length=1.9, goal_bottom=45.2, goal_top=54.8,
+                    six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
+                    six_yard_right=94.2, six_yard_bottom=36.8, six_yard_top=63.2,
+                    penalty_left=11.5, penalty_right=88.5,
+                    penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
+                    penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
+                    center_width=50., center_length=50., circle_diameter=17.68,
+                    corner_diameter=1.94, arc=None, invert_y=False, origin_center=False)
 
 
 def wyscout_dims():
