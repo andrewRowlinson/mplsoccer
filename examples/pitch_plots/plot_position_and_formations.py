@@ -9,6 +9,8 @@ This is provided in two flavours, for lines of 5 players and for lines of 4 play
 to better control spacing.
 """
 
+import math
+
 from mplsoccer import VerticalPitch
 
 ##############################################################################
@@ -44,7 +46,7 @@ pitch.scatter(lcm_coordinates.x, lcm_coordinates.y, s=100, ax=ax, color='blue')
 # Create a grid of pitch
 p = VerticalPitch('opta', line_alpha=0.5, pitch_color='grass', line_color='white')
 COLS = 5
-rows = len(p.formations) // COLS
+rows = math.ceil(len(p.formations) / COLS)
 
 fig, axes = p.grid(nrows=rows, ncols=COLS, title_height=0.05, endnote_height=0, figheight=20,
                    space=0.08)
@@ -59,12 +61,12 @@ for i, formation in enumerate(sorted(p.formations)):
                    ax=axes_p[i])
     axes_p[i].set_title(formation, fontsize=10)
 axes['title'].axis('off')
-axes['title'].text(0.5, 0.5, 'Formations and positions (opta layout)', fontsize=20, ha='center', va='center')
-
+axes['title'].text(0.5, 0.5, 'Formations and positions (opta layout)', fontsize=20, ha='center',
+                   va='center')
 
 p = VerticalPitch('statsbomb', line_alpha=0.5, pitch_color='grass', line_color='white')
 COLS = 5
-rows = len(p.formations) // COLS
+rows = math.ceil(len(p.formations) / COLS)
 
 fig, axes = p.grid(nrows=rows, ncols=COLS, title_height=0.05, endnote_height=0, figheight=20,
                    space=0.08)
@@ -79,4 +81,5 @@ for i, formation in enumerate(sorted(p.formations)):
                    ax=axes_p[i])
     axes_p[i].set_title(formation, fontsize=10)
 axes['title'].axis('off')
-axes['title'].text(0.5, 0.5, 'Formations and positions (default layout)', fontsize=20, ha='center', va='center')
+axes['title'].text(0.5, 0.5, 'Formations and positions (default layout)', fontsize=20, ha='center',
+                   va='center')
