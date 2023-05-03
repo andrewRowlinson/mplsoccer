@@ -742,6 +742,55 @@ class BasePitch(ABC):
                                           width=width, aspect=aspect, polar=polar, ax=ax, **kwargs)
                 for position in positions_in_formation}
         return axes
+    
+    def inset_positional_axes(self, positions, length=None, width=None, aspect=None, polar=False,
+                             ax=None, **kwargs):
+        """ A function to create multiple inset axes for a formation.
+
+        Parameters
+        ----------
+        positions : Collection[str]
+            A List of positions to plot.
+        length : float, default None
+            The length of the inset axes in the x data coordinates.
+        width : float, default None
+            The width of the inset axes in the y data coordinates.
+        aspect : float or str ('pitch'), default None
+            You can specify a combination of width and aspect or length and aspect.
+            This will make the axes visually have the given aspect ratio (length/width).
+            For example, if you want an inset axes to appear square set aspect = 1.
+            For polar plots, this is defaulted to 1.
+        polar : bool, default False
+            Whether the inset axes if a polar projection.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to the inset_axes.
+
+        Returns
+        -------
+        inset_axes : dict[str, axes]
+            A dictionary of player positions (e.g. GK) and matplotlib axes.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> inset_axes = pitch.inset_positional_axes(['LB','RCB','RCDM'], width=15, aspect=1, ax=ax)
+        """
+        def _error_handle_getattr(position):
+            try:
+                return getattr(self.dim.position_line5, position)
+            except AttributeError as err:
+                raise AttributeError(f'Position {position} not supported.'
+                                     f' Currently supported positions are: {self.dim.position_line5.__annotations__.keys()}') from err
+        
+        position_coords = {position: _error_handle_getattr(position) for position in positions}
+        axes = {position: self.inset_axes(x=position_coords[position].x,
+                                          y=position_coords[position].y, length=length,
+                                          width=width, aspect=aspect, polar=polar, ax=ax, **kwargs)
+                for position in position_coords}
+        return axes
 
     def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
              left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,
