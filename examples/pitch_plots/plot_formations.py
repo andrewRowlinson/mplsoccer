@@ -5,8 +5,8 @@ Formations
 
 You can plot formations (e.g. 4-4-2) on any mplsoccer pitch using the ``formation`` method.
 The formations work is a collaboration between
-[Dmitry Mogilevsky](https://twitter.com/ChicagoDmitry) and
-[Andy Rowlinson](https://twitter.com/numberstorm).
+`Dmitry Mogilevsky <https://twitter.com/ChicagoDmitry>`_ and
+`Andy Rowlinson <https://twitter.com/numberstorm>`_.
 
 The formations can be plotted as various options by using the ``kind`` argument:
 
