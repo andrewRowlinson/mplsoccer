@@ -270,8 +270,8 @@ class Radar:
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
         >>> radar_poly, vertices = radar.draw_radar_solid(values, ax=ax,
-        ...                                               kwargs_radar={'facecolor': '#00f2c1',
-        ...                                                             'alpha': 0.6})
+        ...                                               kwargs={'facecolor': '#00f2c1',
+        ...                                                       'alpha': 0.6})
         """
         validate_ax(ax)
         if kwargs is None:

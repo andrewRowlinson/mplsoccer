@@ -15,6 +15,12 @@ Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install mplso
 
     pip install mplsoccer
 
+Or install via `Anaconda <https://docs.anaconda.com/free/anaconda/install/index.html>`_
+
+.. code-block:: bash
+
+    conda install -c conda-forge mplsoccer
+
 Plot a StatsBomb pitch:
 
 .. code-block:: python

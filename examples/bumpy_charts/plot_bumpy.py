@@ -287,3 +287,5 @@ fig_text(
 )
 # if space is left in the plot use this
 plt.tight_layout(pad=0.5)
+
+plt.show()

@@ -11,7 +11,12 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install mplsocc
 
 ```bash
 pip install mplsoccer
-```
+
+Or install via [Anaconda](https://docs.anaconda.com/free/anaconda/install/index.html).
+
+```bash
+conda install -c conda-forge mplsoccer
+```  
 
 ---
 

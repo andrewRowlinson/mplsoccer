@@ -351,8 +351,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> events, related, freeze, tactics = parser.event(path)
         """
         data = self._get_data(path)
@@ -373,8 +373,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> lineups = parser.lineup(path)
         """
         data = self._get_data(path)
@@ -395,8 +395,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> matches = parser.match(path)
         """
         data = self._get_data(path)
@@ -416,8 +416,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> competition = parser.competition(path)
         """
         data = self._get_data(path)
@@ -438,8 +438,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> frames, visible = parser.frame(path)
         """
         data = self._get_data(path)

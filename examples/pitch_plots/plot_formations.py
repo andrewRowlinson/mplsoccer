@@ -5,11 +5,16 @@ Formations
 
 You can plot formations (e.g. 4-4-2) on all of mplsoccer's pitches using the ``formation`` method.
 The formations can be plotted as various options by using the ``kind`` argument:
-- scatter
-- image
-- axes
-- pitch
-- text
+
+* scatter
+
+* image
+
+* axes
+
+* pitch
+
+* text
 """
 import math
 from urllib.request import urlopen
@@ -30,25 +35,10 @@ path_eff = [path_effects.Stroke(linewidth=3, foreground='white'),
             path_effects.Normal()]
 
 ##############################################################################
-# Valid formations
-# ----------------
-# Print a list of the valid formations.
-# mplsoccer also accepts the hyphenated versions and the Wyscout formations
-# that include zeros, e.g. '4-4-2' and '5-3-0'.
-pitch = VerticalPitch()
-print(pitch.formations)
-
-##############################################################################
-# Positions
-# ---------
-# The examples below create inset axes for each position in a formation.
-# You could also plot directly from the dataframe of coordinates returned from the pitch class
-pitch.formations_dataframe
-
-##############################################################################
 # Load StatsBomb data
 # -------------------
-# Load the Starting XI and pass receptions for Barcelona vs. Real Madrid for plotting
+# Load the Starting XI and pass receptions for a Barcelona vs. Real Madrid match for
+# plotting Barcelona's starting formation.
 
 parser = Sbopen()
 event, related, freeze, tactics = parser.event(69249)
@@ -93,8 +83,8 @@ sc_half = pitch.formation(formation, positions=starting_xi.position_id, c='#ad1f
 sc_half_flip = pitch.formation(formation, positions=starting_xi.position_id, kind='scatter',
                                flip=True, half=True, ax=ax[2])
 
-txt_fulll = pitch.text(60, 40, 'flip=False\nhalf=False', ax=ax[0], va='center', ha='center',
-                       color='#053e7a', fontsize=20)
+txt_full = pitch.text(60, 40, 'flip=False\nhalf=False', ax=ax[0], va='center', ha='center',
+                      color='#053e7a', fontsize=20)
 txt_flip = pitch.text(60, 40, 'flip=True\nhalf=False', ax=ax[1], va='center', ha='center',
                       color='#01453e', fontsize=20)
 txt_half = pitch.text(45, 40, 'flip=False\nhalf=True', ax=ax[2], va='center', ha='center',
@@ -103,7 +93,7 @@ txt_half_flip = pitch.text(75, 40, 'flip=True\nhalf=True', ax=ax[2], va='center'
                            color='#9d49c7', fontsize=20)
 
 ##############################################################################
-# Get Images
+# Get images
 # -----------
 # First let's get some images from Wikipedia. Note, it would be better if these all had the
 # same aspect ratio for plotting.
@@ -145,11 +135,11 @@ image_urls = {
 images = [Image.open(urlopen(url)) for url in starting_xi.player_name.map(image_urls)]
 
 ##############################################################################
-# Image
-# -----
-# You can plot the formations as images using ``kind='image`` and image arguments.
-# Here we use xoffset and yoffset to eliminate some of the overlapping images.
-# This should be in the same order as the positions argument (i.e. player identifiers).
+# Formation Images
+# ----------------
+# You can plot the formations as images using ``kind='image'`` and ``image`` arguments.
+# Here we use xoffset and yoffset to eliminate some overlapping images.
+# The offsets should be in the same order as the positions argument (i.e. player identifiers).
 # Additional keyword arguments are passed on to Axes.imshow.
 pitch = VerticalPitch(goal_type='box')
 fig, ax = pitch.draw(figsize=(6, 8.72))
@@ -160,14 +150,16 @@ ax_image = pitch.formation(formation, positions=starting_xi.position_id, kind='i
                            yoffset=[0, 2, 5, -5, -2, 0, 0, 0, 0, 0, 0],
                            # yoffset in the same order as the positions
                            ax=ax)
+# comment below sets this as the thumbnail in the docs
+# sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_formations_002'
 
 ##############################################################################
 # Text and Scatter
 # ----------------
-# You can plot the formations as text using ``kind='text`` and the ``text`` arguments.
+# You can plot the formations as text using ``kind='text'`` and the ``text`` arguments.
 # Additional keyword arguments are passed on to Axes.text.
-# Here we also plot ``kind='scatter`` to add a marker for each position and additional
-# arguments are passed on to Axes.scatter
+# Here we also plot ``kind='scatter'`` to add a marker for each position and additional
+# arguments are passed on to Axes.scatter.
 pitch = VerticalPitch(goal_type='box')
 fig, ax = pitch.draw(figsize=(6, 8.72))
 ax_text = pitch.formation(formation, positions=starting_xi.position_id, kind='text',
@@ -186,14 +178,12 @@ ax_scatter = pitch.formation(formation, positions=starting_xi.position_id, kind=
 ##############################################################################
 # Pitch of pitches
 # ----------------
-# You can plot the formations as text using ``kind='text`` and the ``text`` arguments.
-# Additional keyword arguments are passed on to Axes.text.
-# Here we also plot ``kind='scatter`` to add a marker for each position and
-# additional arguments are passed on to Axes.scatter
+# You can plot the formations as pitches using ``kind='pitch'`` argument.
+# Additional keyword arguments amend the inset pitch's appearance, e.g. ``line_color``.
 #
 # In this example, it is the first game that Messi played as a false-nine.
 # After around 7 minutes Eto'o" and Messi switched
-# positions, which is why their heatmaps look switched.
+# positions, which is why their heatmaps look the wrong way around.
 pitch = VerticalPitch(goal_type='box')
 fig, axs = pitch.grid(endnote_height=0, title_height=0.08, figheight=14, grid_width=0.9,
                       grid_height=0.9, axis=False)
@@ -247,12 +237,12 @@ ax_text = pitch.formation(formation, positions=starting_xi.position_id, height=1
                           kind='axes', ax=ax)
 
 ##############################################################################
-# Opta
-# ----
-# First, generate some data for the Team of the Week. We will use the 4-3-3 formation
-# and specify position names provided by the pitch.get_formation('433') method.
+# Get Opta data
+# -------------
+# mplsoccer also supports Wyscout and Opta formations. Let's generate some data
+# for the Team of the Week using Opta's position identifiers. We will use the '4-3-3' formation.
 #
-# All the opta formations are included in mplsoccer.
+# Note, all the Opta formations are included in mplsoccer.
 # However, '412112' could be called '4-4-2 diamond' and '31213' could be called '343' in the data.
 totw_player_data = pd.DataFrame(
     {
@@ -281,8 +271,10 @@ image_dict = {team: Image.open(urlopen(url)) for team, url in badge_urls.items()
 images = [image_dict[team] for team in totw_player_data.team]
 
 ##############################################################################
+# Plotting Opta data
+# ------------------
 # Next, create the pitch figure using `pitch.grid` to create a header space for the title.
-# We use ``formation`` to create text and images for each position in the formation
+# We use the ``formation`` method to create text and images for each position in the formation
 # and use xoffsets to adjust the positions to avoid overlaps
 
 # setup figure
@@ -317,8 +309,8 @@ badge_axes = pitch.formation('433', kind='image', positions=totw_player_data.pos
                              )
 
 ##############################################################################
-# Wyscout data
-# ------------
+# Get Wyscout data
+# ----------------
 # This example uses some example Wyscout data
 # `Wyscout data <https://www.hudl.com/blog/wyscout-analysis-chelsea-vs-manchester-united>`_.
 
@@ -333,8 +325,8 @@ df_wyscout = pd.DataFrame(wyscout_data)
 df_wyscout
 
 ##############################################################################
-# Wyscout formations
-# ------------------
+# Plotting Wyscout formations
+# ---------------------------
 # Here we plot the '3-4-1-2' formation on a Wyscout pitch.
 # Note for some formations in the Wyscout data there are two attacking midfielders ('amf')
 # In mplsoccer, we have assigned the right position 'ramf' and the left position 'lamf'.
@@ -356,9 +348,24 @@ sc_text = pitch.formation(WYSCOUT_FORMATION, positions=wyscout_data['position_id
                           ax=ax)
 
 ##############################################################################
+# Valid formations
+# ----------------
+# You can print a list of the valid formations included in mplsoccer.
+# mplsoccer also accepts the hyphenated versions and the Wyscout formations
+# that include zeros, e.g. '4-4-2' and '5-3-0'.
+pitch = VerticalPitch()
+print(pitch.formations)
+
+##############################################################################
+# Valid positions
+# ---------------
+# You can also return a dataframe of the formations, positions and coordinates.
+pitch.formations_dataframe
+
+##############################################################################
 # Available formations
 # --------------------
-# Below is a showcase of all available formations and their positions
+# Below is a showcase of all available formations and their positions.
 
 pitch = VerticalPitch('uefa', line_alpha=0.5, pitch_color='#53ac5c', line_color='white')
 
@@ -367,7 +374,7 @@ COLS = 5
 rows = math.ceil(len(pitch.formations) / COLS)
 
 fig, axes = pitch.grid(nrows=rows, ncols=COLS, title_height=0.015, endnote_height=0, figheight=50,
-                       space=0.08)
+                       space=0.08, grid_height=0.92)
 axes_p = axes['pitch'].flatten()
 for i, formation in enumerate(pitch.formations):
     pitch.formation(formation, kind='scatter', color='black', s=350, ax=axes_p[i])

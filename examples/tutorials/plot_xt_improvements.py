@@ -1,6 +1,6 @@
 """
 ===============================
-improvements to expected threat
+Improvements to expected threat
 ===============================
 
 This example tries to make some improvements to our :ref:`sphx_glr_gallery_tutorials_plot_xt.py`

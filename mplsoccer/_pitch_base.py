@@ -877,7 +877,7 @@ class BasePitch(ABC):
         >>> fig, ax = pitch.draw(figsize=(6.875, 10))
         >>> position_text = pitch.formation('442',
         ...                                 positions=[1, 2, 3, 5, 6, 9, 11, 12, 16, 22, 24],
-        ...                                 s=['GK', 'RB', 'RCB', 'LCB', 'LB', 'RDM', 'LDM',
+        ...                                 text=['GK', 'RB', 'RCB', 'LCB', 'LB', 'RDM', 'LDM',
         ...                                 'RM', 'LM', 'RCF', 'LCF'],
         ...                                 ax=ax,
         ...                                 kind='text')
