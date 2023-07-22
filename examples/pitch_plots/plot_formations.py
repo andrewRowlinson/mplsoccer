@@ -4,6 +4,10 @@ Formations
 ==========
 
 You can plot formations (e.g. 4-4-2) on any mplsoccer pitch using the ``formation`` method.
+The formations work is a collaboration between
+[Dmitry Mogilevsky](https://twitter.com/ChicagoDmitry) and
+[Andy Rowlinson](https://twitter.com/numberstorm).
+
 The formations can be plotted as various options by using the ``kind`` argument:
 
 * ``kind='scatter'``
@@ -178,7 +182,7 @@ ax_scatter = pitch.formation(formation, positions=starting_xi.position_id, kind=
 ##############################################################################
 # Pitch of pitches
 # ----------------
-# You can plot the formations as pitches using ``kind='pitch'`` argument.
+# You can plot the formations as pitches using the ``kind='pitch'`` argument.
 # Additional keyword arguments amend the inset pitch's appearance, e.g. ``line_color``.
 #
 # In this example, it is the first game that Messi played as a false-nine.
@@ -397,8 +401,8 @@ for j in range(1, number_spare_axes + 1):
 # Positions dataframe
 # -------------------
 # If you want to access the underlying positions. You can do this with the ``get_positions``
-# method. There are four variations with either four or five positions in each line
-# ``line=4`` or ``line=5`` and either ``second_striker=True`` or ``second_striker=False``.
+# method. There are four variations with either four or five positions in each line,
+# ``line=4`` or ``line=5``, and either ``second_striker=True`` or ``second_striker=False``.
 # The positions without a second striker have more space around the attacking positions.
 pitch.get_positions(line=5, second_striker=True)
 
