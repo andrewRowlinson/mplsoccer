@@ -26,6 +26,12 @@ the alpha was controlled by the ``line_alpha`` attribute.
 ### Fixes
 * Fixed some deprecation warnings for Matplotlib (get_cmap) and Seaborn (kdeplot).
 
+:rocket: Version 1.1.12
+----------------------
+
+### Fixes
+* Fixed the timestamp conversion for match data.
+
 :rocket: Version 1.1.11
 ----------------------
 
