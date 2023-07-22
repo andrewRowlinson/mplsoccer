@@ -31,7 +31,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Topic :: Scientific/Engineering :: Visualization",
 ]
-dependencies = ['matplotlib',
+dependencies = ['matplotlib >= 3.6',
                 'numpy',
                 'pandas',
                 'Pillow',

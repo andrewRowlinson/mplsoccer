@@ -7,17 +7,15 @@ import warnings
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
-import matplotlib
 import matplotlib.font_manager as fm
 import numpy as np
 from PIL import Image
-from matplotlib.projections import get_projection_class
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes as polar_inset_axes
 
 from mplsoccer import dimensions
 
-__all__ = ['add_image', 'validate_ax', 'inset_axes', 'set_visible', 'Standardizer', 'FontManager',
-           'set_labels', 'get_aspect']
+__all__ = ['add_image', 'validate_ax', 'inset_axes',
+           'set_visible', 'Standardizer', 'FontManager',
+           'set_labels', 'get_aspect', 'inset_image']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -83,6 +81,73 @@ def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     return ax_image
 
 
+def inset_image(x, y, image, width=None, height=None, vertical=False, ax=None, **kwargs):
+    """ Adds an image as an inset_axes.
+
+    Parameters
+    ----------
+    x, y: float
+    image: array-like or PIL image
+        The image data.
+    width, height: float, default None
+        The width, height of the inset_axes for plotting the image.
+        By default in the data coordinates.
+    vertical : bool, default False
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
+    ax : matplotlib.axes.Axes, default None
+        The axis to plot on.
+
+    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from PIL import Image
+    >>> from urllib.request import urlopen
+    >>> from mplsoccer import inset_image
+    >>> fig, ax = plt.subplots()
+    >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+    >>> image = urlopen(image_url)
+    >>> image = Image.open(image)
+    >>> ax_image = inset_image(0.5, 0.5, image, width=0.2, ax=ax)
+    """
+    validate_ax(ax)
+
+    if isinstance(image, Image.Image):
+        image_width, image_height = image.size
+    else:
+        image_height, image_width = image.shape[:2]
+    image_aspect = image_height / image_width
+
+    ax_aspect = ax.get_aspect()
+    if ax_aspect == 'auto':
+        ax_aspect = get_aspect(ax)
+
+    if vertical:
+        x, y = y, x
+
+    if height is not None and width is not None:
+        raise TypeError('Invalid argument: you must only give one of height or width not both')
+    if height is None and width is None:
+        raise TypeError('Invalid argument: you must supply one of height or width')
+
+    if width is None:
+        width = height / image_aspect * ax_aspect
+    elif height is None:
+        height = width * image_aspect / ax_aspect
+
+    bbox = (x - width / 2, y - height / 2, width, height)
+    ax_inset = ax.inset_axes(bbox, transform=ax.transData, xlim=(0, image_width),
+                             ylim=(image_height, 0), **kwargs)
+    ax_inset.imshow(image, **kwargs)
+    ax_inset.axis('off')
+    return ax_inset
+
+
 def validate_ax(ax):
     """ Error message when ax is missing."""
     if ax is None:
@@ -107,23 +172,21 @@ def get_aspect(ax):
     return height / width * ax.get_data_ratio()
 
 
-def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical=False, ax=None,
+def inset_axes(x, y, width=None, height=None, aspect=None, polar=False, vertical=False, ax=None,
                **kwargs):
     """ A function to create an inset axes.
 
     Parameters
     ----------
-    x : float
-        The x coordinate of the center of the inset axes.
-    y : float
-        The y coordinate of the center of the inset axes.
-    length : float, default None
-        The length of the inset axes in the x data coordinates.
+    x, y: float
+        The x/y coordinate of the center of the inset axes.
     width : float, default None
-        The width of the inset axes in the y data coordinates.
+        The width of the inset axes in the x data coordinates.
+    height : float, default None
+        The height of the inset axes in the y data coordinates.
     aspect : float or str ('pitch'), default None
-        You can specify a combination of width and aspect or length and aspect.
-        This will make the axes visually have the given aspect ratio (length/width).
+        You can specify a combination of height and aspect or width and aspect.
+        This will make the axes visually have the given aspect ratio (width/height).
         For example, if you want an inset axes to appear square set aspect = 1.
         For polar plots, this is defaulted to 1.
     polar : bool, default False
@@ -143,10 +206,14 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
     >>> from mplsoccer import inset_axes
     >>> import matplotlib.pyplot as plt
     >>> fig, ax = plt.subplots()
-    >>> inset_ax = inset_axes(0.5, 0.5, width=0.2, aspect=1, ax=ax)
+    >>> inset_ax = inset_axes(0.5, 0.5, height=0.2, aspect=1, ax=ax)
     """
     validate_ax(ax)
+    xlim = kwargs.pop('xlim', (0, 1))
+    ylim = kwargs.pop('ylim', (0, 1))
     ax_aspect = ax.get_aspect()
+    if not isinstance(polar, bool):
+        raise TypeError(f"Invalid 'polar' argument: '{polar}' should be bool.")
     if ax_aspect == 'auto':
         ax_aspect = get_aspect(ax)
     if polar and aspect is not None and aspect != 1:
@@ -155,45 +222,28 @@ def inset_axes(x, y, length=None, width=None, aspect=None, polar=False, vertical
         aspect = 1
     if vertical:
         x, y = y, x
-        length, width = width, length
-        ax_aspect = 1 / ax_aspect
+        width, height = height, width
     if vertical and aspect is not None:
         aspect = 1 / aspect
 
-    if polar and width is not None and length is not None:
-        raise TypeError('Invalid argument: for polar axes provide only one of length or width')
-    if aspect is not None and length is not None and width is not None:
-        raise TypeError('Invalid argument: if using aspect you cannot use both length and width')
-    if ((length is not None) + (width is not None) + (aspect is not None)) != 2:
+    if polar and height is not None and width is not None:
+        raise TypeError('Invalid argument: for polar axes provide only one of width or height')
+    if aspect is not None and width is not None and height is not None:
+        raise TypeError('Invalid argument: if using aspect you cannot use both width and height')
+    if ((width is not None) + (height is not None) + (aspect is not None)) != 2:
         raise TypeError(
-            'Invalid argument: must give the arguments length and width,'
-            ' or length and aspect, or width and aspect')
+            'Invalid argument: must give the arguments width and height,'
+            ' or width and aspect, or height and aspect')
 
-    if aspect is not None and length is None:
-        length = width * aspect * ax_aspect
-    elif aspect is not None and width is None:
-        width = length / aspect * ax_aspect
+    if aspect is not None and width is None:
+        width = height / aspect * ax_aspect
+    elif aspect is not None and height is None:
+        height = width * aspect / ax_aspect
 
-    bbox = (x - length / 2, y - width / 2, length, width)
-
-    if polar:
-        # From stackover answers by ImportanceOfBeingErnest
-        # https://stackoverflow.com/questions/46262749/plotting-scatter-of-several-polar-plots/46263911#46263911
-        # https://stackoverflow.com/questions/52865516/wrong-width-and-height-when-using-inset-axes-and-transdata
-        # This was added as native functinality in matplotlib 3.6
-        if matplotlib.__version__ < '3.6':
-            ax_inset = polar_inset_axes(ax,
-                                        bbox_to_anchor=bbox, width='100%', height='100%',
-                                        loc=10, bbox_transform=ax.transData, borderpad=0.0,
-                                        axes_class=get_projection_class('polar'),
-                                        **kwargs)
-            ax_inset.set_theta_direction(-1)
-            if vertical:
-                ax_inset.set_theta_zero_location('N')
-            return ax_inset
-        return ax.inset_axes(bbox, transform=ax.transData, projection='polar')
-
-    return ax.inset_axes(bbox, transform=ax.transData, **kwargs)
+    bbox = (x - width / 2, y - height / 2, width, height)
+    return ax.inset_axes(bbox, transform=ax.transData,
+                         xlim=xlim, ylim=ylim, polar=polar,
+                         **kwargs)
 
 
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
@@ -271,8 +321,8 @@ class Standardizer:
     Examples
     --------
     >>> from mplsoccer import Standardizer
-    >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom', \
-                                length_to=105, width_to=68)
+    >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom',
+    ...                         length_to=105, width_to=68)
     >>> x = [20, 30]
     >>> y = [50, 80]
     >>> x_std, y_std = standard.transform(x, y)
@@ -388,8 +438,8 @@ class FontManager:
         'https://github.com/google/fonts/blob/main/ofl/cinzel/static/Cinzel-Regular.ttf?raw=true'
         Note 1: make sure the ?raw=true is at the end.
         Note 2: urls like 'https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/static/Cinzel-Regular.ttf'
-                allow Cross-Origin Resource Sharing, and work in browser environments
-                based on PyOdide (e.g. JupyterLite). Those urls don't need the ?raw=true at the end
+        allow Cross-Origin Resource Sharing, and work in browser environments
+        based on PyOdide (e.g. JupyterLite). Those urls don't need the ?raw=true at the end
 
     Examples
     --------

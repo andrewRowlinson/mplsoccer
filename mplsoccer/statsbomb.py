@@ -560,7 +560,10 @@ def _match_dataframe(data):
                  'home_team_managers_dob', 'away_team_managers_dob']
     for date in date_cols:
         if date in df.columns:
-            df[date] = pd.to_datetime(df[date])
+            if pd.__version__ < '2':
+                df[date] = pd.to_datetime(df[date])
+            else:
+                df[date] = pd.to_datetime(df[date], format='ISO8601')
     return df
 
 

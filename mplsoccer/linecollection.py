@@ -3,8 +3,8 @@
 import warnings
 
 import numpy as np
+from matplotlib import colormaps
 from matplotlib import rcParams
-from matplotlib.cm import get_cmap
 from matplotlib.collections import LineCollection
 from matplotlib.colors import to_rgba_array
 from matplotlib.legend import Legend
@@ -140,7 +140,7 @@ def lines(xstart, ystart, xend, yend, color=None, n_segments=100, comet=False, t
     if transparent:
         cmap = create_transparent_cmap(color, cmap, n_segments, alpha_start, alpha_end)
     if isinstance(cmap, str):
-        cmap = get_cmap(cmap)
+        cmap = colormaps.get_cmap(cmap)
     if cmap is not None:
         handler_cmap = True
         line_collection = _lines_cmap(xstart, ystart, xend, yend, lw=lw, cmap=cmap, ax=ax,

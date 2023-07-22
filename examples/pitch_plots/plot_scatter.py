@@ -7,7 +7,7 @@ This example shows how to plot a scatter chart.
 """
 
 import numpy as np
-from matplotlib import cm
+from matplotlib import colormaps
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
@@ -92,7 +92,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 # You could use the same technique to assign fewer colors to the scatter.
 
 # get the cmap as 10 colors (n_colors can be anything)
-cmap = cm.get_cmap('Greys')  # reversed plasma
+cmap = colormaps.get_cmap('Greys')  # reversed plasma
 N_COLORS = 10
 cmap = cmap(np.linspace(0.5, 1, N_COLORS))  # from half-way (0.5) to end (1) of grey colormap
 cmap = ListedColormap(cmap, name='Greys')

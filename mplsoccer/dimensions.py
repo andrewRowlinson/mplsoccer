@@ -54,76 +54,17 @@ origin_center = If true, the origin starts at (center length, center width)
 """
 
 from dataclasses import dataclass, InitVar
-from typing import Optional, Dict
 
 import numpy as np
+from typing import Optional, Dict
+
+from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
+    PositionLine5WithSecondStriker, Coordinate
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
-
-
-@dataclass
-class Coordinate:
-    """ Dataclass for holding coordinates (x, y)"""
-    x: float
-    y: float
-
-
-@dataclass
-class PositionLine4:
-    """ Dataclass for positions (x, y) coordinates in lines of four."""
-    GK: Coordinate
-    RB: Coordinate
-    RCB: Coordinate
-    LCB: Coordinate
-    LB: Coordinate
-    RWB: Coordinate
-    RDM: Coordinate
-    LDM: Coordinate
-    LWB: Coordinate
-    RM: Coordinate
-    RCM: Coordinate
-    LCM: Coordinate
-    LM: Coordinate
-    RW: Coordinate
-    RAM: Coordinate
-    LAM: Coordinate
-    LW: Coordinate
-    RCF: Coordinate
-    LCF: Coordinate
-    SS: Coordinate
-
-
-@dataclass
-class PositionLine5:
-    """ Dataclass for positions (x, y) coordinates in lines of five."""
-    GK: Coordinate
-    RB: Coordinate
-    RCB: Coordinate
-    CB: Coordinate
-    LCB: Coordinate
-    LB: Coordinate
-    RWB: Coordinate
-    RDM: Coordinate
-    CDM: Coordinate
-    LDM: Coordinate
-    LWB: Coordinate
-    RM: Coordinate
-    RCM: Coordinate
-    CM: Coordinate
-    LCM: Coordinate
-    LM: Coordinate
-    RW: Coordinate
-    RAM: Coordinate
-    CAM: Coordinate
-    LAM: Coordinate
-    LW: Coordinate
-    RCF: Coordinate
-    ST: Coordinate
-    LCF: Coordinate
-    SS: Coordinate
 
 
 @dataclass
@@ -173,9 +114,19 @@ class BaseDims:
     positional_y: Optional[np.array] = None
     # defined in stripes
     stripe_locations: Optional[np.array] = None
+    # These positions do not include an extra line for the second striker line, at the moment
+    # the only provider to use this position is StatsBomb for a few formations
+    # we use these positions if there is no second striker so there is more
+    # space for the visualization
     position_line4: PositionLine4 = None
     position_line5: PositionLine5 = None
-    formations: Optional[Dict[str, Dict[str, Coordinate]]] = None
+    # these are additional positions including space for a second striker line.
+    # The attacking midfielders are placed slightly backwards for these positions,
+    # and for the five positions variation a second striker (SS) is placed between the
+    # atttacking midfielder line and the forwards
+    position_line4_with_ss: PositionLine4 = None
+    position_line5_with_ss: PositionLine5WithSecondStriker = None
+    formations: Dict[str, Dict[str, Coordinate]] = None
 
     def setup_dims(self):
         """ Run methods for the extra pitch dimensions."""
@@ -184,6 +135,8 @@ class BaseDims:
         self.stripes()
         self.create_positions_five_per_line()
         self.create_positions_four_per_line()
+        self.create_positions_five_per_line_ss()
+        self.create_positions_four_per_line_ss()
         self.create_formations()
 
     def pitch_markings(self):
@@ -247,14 +200,30 @@ class BaseDims:
         This can be used to evenly space players when you have 3 or 5 players per line.
 
         Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 6)
         y = np.linspace(self.bottom, self.top, 11)[1::2]
-        x = np.linspace(self.left, self.right, 15)
-        x = np.append(x[:13][1::2], self.penalty_right)
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 6)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
         x, y = np.meshgrid(x, y)
-        idx = [14, 1, 8, 15, 22, 29, 2, 9, 16, 23, 30, 3, 10,
-               17, 24, 31, 4, 11, 18, 25, 32, 13, 20, 27, 19]
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [12, 1, 7, 13, 19, 25, 2, 8, 14, 20, 26, 3, 9, 15, 21, 27, 4, 10, 16, 22, 28, 11, 17,
+               23]
         self.position_line5 = PositionLine5(
-            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
 
     def create_positions_four_per_line(self):
         """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
@@ -262,474 +231,97 @@ class BaseDims:
         This can be used to evenly space players when you have 2 or 4 players per line.
 
         Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 6)
         y = np.linspace(self.bottom, self.top, 9)[1:-1]
-        x = np.linspace(self.left, self.right, 15)
-        x = np.append(x[:13][1::2], self.penalty_right)
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 6)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
         x, y = np.meshgrid(x, y)
-        idx = [21, 1, 15, 29, 43, 2, 16, 30, 44, 3, 17, 31, 45, 4, 18, 32, 46, 20, 34, 26]
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [18, 1, 13, 25, 37, 2, 14, 26, 38, 3, 15, 27, 39, 4, 16, 28, 40, 17, 29]
         self.position_line4 = PositionLine4(
-            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
+
+    def create_positions_five_per_line_ss(self):
+        """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
+
+        This can be used to evenly space players when you have 3 or 5 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 7)
+        y = np.linspace(self.bottom, self.top, 11)[1::2]
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 7)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
+        x, y = np.meshgrid(x, y)
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [14, 1, 8, 15, 22, 29, 2, 9, 16, 23, 30, 3, 10, 17, 24, 31, 4, 11, 18, 25, 32, 13, 20,
+               27, 19]
+        self.position_line5_with_ss = PositionLine5WithSecondStriker(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
+
+    def create_positions_four_per_line_ss(self):
+        """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
+
+        This can be used to evenly space players when you have 2 or 4 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 7)
+        y = np.linspace(self.bottom, self.top, 9)[1:-1]
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 7)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
+        x, y = np.meshgrid(x, y)
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [21, 1, 15, 29, 43, 2, 16, 30, 44, 3, 17, 31, 45, 4, 18, 32, 46, 20, 34]
+        self.position_line4_with_ss = PositionLine4(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
 
     def create_formations(self):
         """ Create formations from the player positions."""
-        self.formations = {
-            '442': {'GK': self.position_line5.GK,
-                    'RB': self.position_line4.RB,
-                    'LB': self.position_line4.LB,
-                    'RDM': self.position_line4.RCM,
-                    'RCB': self.position_line4.RCB,
-                    'LCB': self.position_line4.LCB,
-                    'RM': self.position_line4.RM,
-                    'LDM': self.position_line4.LCM,
-                    'LCF': self.position_line4.LCF,
-                    'RCF': self.position_line4.RCF,
-                    'LM': self.position_line4.LM,
-                    },
-            '41212': {'GK': self.position_line5.GK,
-                      'RB': self.position_line4.RB,
-                      'LB': self.position_line4.LB,
-                      'CDM': self.position_line5.CDM,
-                      'RCB': self.position_line4.RCB,
-                      'LCB': self.position_line4.LCB,
-                      'RCM': self.position_line5.RCM,
-                      'CAM': self.position_line5.CAM,
-                      'LCF': self.position_line4.LCF,
-                      'RCF': self.position_line4.RCF,
-                      'LCM': self.position_line5.LCM,
-                      },
-            '433': {'GK': self.position_line5.GK,
-                    'RB': self.position_line4.RB,
-                    'LB': self.position_line4.LB,
-                    'CDM': self.position_line5.CDM,
-                    'RCB': self.position_line4.RCB,
-                    'LCB': self.position_line4.LCB,
-                    'RCM': self.position_line5.RCM,
-                    'LCM': self.position_line5.LCM,
-                    'ST': self.position_line5.ST,
-                    'RW': self.position_line5.RW,
-                    'LW': self.position_line5.LW,
-                    },
-            '451': {'GK': self.position_line5.GK,
-                    'RB': self.position_line4.RB,
-                    'LB': self.position_line4.LB,
-                    'RCM': self.position_line5.RCM,
-                    'RCB': self.position_line4.RCB,
-                    'LCB': self.position_line4.LCB,
-                    'RM': self.position_line5.RM,
-                    'LCM': self.position_line5.LCM,
-                    'ST': self.position_line5.ST,
-                    'CDM': self.position_line5.CM,
-                    'LM': self.position_line5.LM,
-                    },
-            '4411': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'RDM': self.position_line4.RCM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'RM': self.position_line4.RM,
-                     'LDM': self.position_line4.LCM,
-                     'ST': self.position_line5.ST,
-                     'CAM': self.position_line5.CAM,
-                     'LM': self.position_line4.LM,
-                     },
-            '4141': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'CDM': self.position_line5.CDM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'RM': self.position_line4.RM,
-                     'RCM': self.position_line4.RCM,
-                     'ST': self.position_line5.ST,
-                     'LCM': self.position_line4.LCM,
-                     'LM': self.position_line4.LM,
-                     },
-            '4231': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'LDM': self.position_line5.LDM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'RW': self.position_line5.RW,
-                     'RDM': self.position_line5.RDM,
-                     'ST': self.position_line5.ST,
-                     'CAM': self.position_line5.CAM,
-                     'LW': self.position_line5.LW,
-                     },
-            '4321': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'CM': self.position_line5.CM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'LCM': self.position_line5.LCM,
-                     'RCM': self.position_line5.RCM,
-                     'ST': self.position_line5.ST,
-                     'RW': self.position_line5.RW,
-                     'LW': self.position_line5.LW,
-                     },
-            '532': {'GK': self.position_line5.GK,
-                    'RB': self.position_line5.RB,
-                    'LB': self.position_line5.LB,
-                    'LCB': self.position_line5.LCB,
-                    'CB': self.position_line5.CB,
-                    'RCB': self.position_line5.RCB,
-                    'RCM': self.position_line5.RCM,
-                    'CDM': self.position_line5.CDM,
-                    'LCF': self.position_line4.LCF,
-                    'RCF': self.position_line4.RCF,
-                    'LCM': self.position_line5.LCM,
-                    },
-            '541': {'GK': self.position_line5.GK,
-                    'RB': self.position_line5.RWB,
-                    'LB': self.position_line5.LWB,
-                    'LCB': self.position_line5.LCB,
-                    'CB': self.position_line5.CB,
-                    'RCB': self.position_line5.RCB,
-                    'RM': self.position_line4.RM,
-                    'RDM': self.position_line4.RCM,
-                    'ST': self.position_line5.ST,
-                    'LDM': self.position_line4.LCM,
-                    'LM': self.position_line4.LM,
-                    },
-            '352': {'GK': self.position_line5.GK,
-                    'RWB': self.position_line5.RWB,
-                    'LWB': self.position_line5.LWB,
-                    'LCB': self.position_line5.LCB,
-                    'CB': self.position_line5.CB,
-                    'RCB': self.position_line5.RCB,
-                    'RCM': self.position_line5.RCM,
-                    'LCM': self.position_line5.LCM,
-                    'LCF': self.position_line4.LCF,
-                    'RCF': self.position_line4.RCF,
-                    'CDM': self.position_line5.CM,
-                    },
-            '343': {'GK': self.position_line5.GK,
-                    'RWB': self.position_line5.RWB,
-                    'LWB': self.position_line5.LWB,
-                    'LCB': self.position_line5.LCB,
-                    'CB': self.position_line5.CB,
-                    'RCB': self.position_line5.RCB,
-                    'RDM': self.position_line5.RCM,
-                    'LDM': self.position_line5.LCM,
-                    'ST': self.position_line5.ST,
-                    'RW': self.position_line5.RW,
-                    'LW': self.position_line5.LW,
-                    },
-            '31312': {'GK': self.position_line5.GK,
-                      'RCM': self.position_line5.RCM,
-                      'LCM': self.position_line5.LCM,
-                      'LCB': self.position_line5.LCB,
-                      'CB': self.position_line5.CB,
-                      'RCB': self.position_line5.RCB,
-                      'CDM': self.position_line5.CDM,
-                      'CM': self.position_line5.CM,
-                      'SS': self.position_line5.SS,
-                      'RCF': self.position_line5.RCF,
-                      'LCF': self.position_line5.LCF,
-                      },
-            '4222': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'RCM': self.position_line5.RCM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'RW': self.position_line5.RW,
-                     'LCM': self.position_line5.LCM,
-                     'LCF': self.position_line5.LCF,
-                     'RCF': self.position_line5.RCF,
-                     'LW': self.position_line5.LW,
-                     },
-            '3511': {'GK': self.position_line5.GK,
-                     'RWB': self.position_line5.RWB,
-                     'LWB': self.position_line5.LWB,
-                     'LCB': self.position_line5.LCB,
-                     'RCB': self.position_line5.RCB,
-                     'CB': self.position_line5.CB,
-                     'RCM': self.position_line5.RCM,
-                     'LCM': self.position_line5.LCM,
-                     'ST': self.position_line5.ST,
-                     'CAM': self.position_line5.CAM,
-                     'CDM': self.position_line5.CDM,
-                     },
-            '3421': {'GK': self.position_line5.GK,
-                     'RWB': self.position_line4.RWB,
-                     'LWB': self.position_line4.LWB,
-                     'LCB': self.position_line5.LCB,
-                     'CB': self.position_line5.CB,
-                     'RCB': self.position_line5.RCB,
-                     'RDM': self.position_line4.RDM,
-                     'LDM': self.position_line4.LDM,
-                     'ST': self.position_line5.ST,
-                     'RAM': self.position_line4.RAM,
-                     'LAM': self.position_line4.LAM,
-                     },
-            '3412': {'GK': self.position_line5.GK,
-                     'RWB': self.position_line5.RWB,
-                     'LWB': self.position_line5.LWB,
-                     'LCB': self.position_line5.LCB,
-                     'CB': self.position_line5.CB,
-                     'RCB': self.position_line5.RCB,
-                     'RDM': self.position_line5.RCM,
-                     'LDM': self.position_line5.LCM,
-                     'CAM': self.position_line5.CAM,
-                     'RCF': self.position_line5.RCF,
-                     'LCF': self.position_line5.LCF,
-                     },
-            '3142': {'GK': self.position_line5.GK,
-                     'RM': self.position_line4.RM,
-                     'LM': self.position_line4.LM,
-                     'CB': self.position_line5.CB,
-                     'RCB': self.position_line5.RCB,
-                     'LCB': self.position_line5.LCB,
-                     'RCM': self.position_line4.RCM,
-                     'CDM': self.position_line5.CDM,
-                     'RCF': self.position_line5.RCF,
-                     'LCF': self.position_line5.LCF,
-                     'LCM': self.position_line4.LCM,
-                     },
-            '31213': {'GK': self.position_line5.GK,
-                      'RCM': self.position_line5.RCM,
-                      'LCM': self.position_line5.LCM,
-                      'LCB': self.position_line5.LCB,
-                      'CB': self.position_line5.CB,
-                      'RCB': self.position_line5.RCB,
-                      'CAM': self.position_line5.CAM,
-                      'CDM': self.position_line5.CDM,
-                      'ST': self.position_line5.ST,
-                      'RW': self.position_line5.RW,
-                      'LW': self.position_line5.LW,
-                      },
-            '4132': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'CDM': self.position_line5.CDM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'RW': self.position_line4.RW,
-                     'CAM': self.position_line5.CAM,
-                     'RCF': self.position_line5.RCF,
-                     'LCF': self.position_line5.LCF,
-                     'LW': self.position_line4.LW,
-                     },
-            '424': {'GK': self.position_line5.GK,
-                    'RB': self.position_line4.RB,
-                    'LB': self.position_line4.LB,
-                    'RDM': self.position_line5.RDM,
-                    'RCB': self.position_line4.RCB,
-                    'LCB': self.position_line4.LCB,
-                    'RW': self.position_line4.RW,
-                    'LDM': self.position_line5.LDM,
-                    'RCF': self.position_line4.RCF,
-                    'LCF': self.position_line4.LCF,
-                    'LW': self.position_line4.LW,
-                    },
-            '4312': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'LB': self.position_line4.LB,
-                     'CM': self.position_line5.CM,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'RCM': self.position_line5.RCM,
-                     'CAM': self.position_line5.CAM,
-                     'RCF': self.position_line4.RCF,
-                     'LCF': self.position_line4.LCF,
-                     'LCM': self.position_line5.LCM,
-                     },
-            '3241': {'GK': self.position_line5.GK,
-                     'RDM': self.position_line4.RDM,
-                     'LDM': self.position_line4.LDM,
-                     'LCB': self.position_line5.LCB,
-                     'CB': self.position_line5.CB,
-                     'RCB': self.position_line5.RCB,
-                     'RAM': self.position_line4.RAM,
-                     'LAM': self.position_line4.LAM,
-                     'ST': self.position_line5.ST,
-                     'RM': self.position_line4.RW,
-                     'LM': self.position_line4.LW,
-                     },
-            '3331': {'GK': self.position_line5.GK,
-                     'RDM': self.position_line5.RDM,
-                     'LDM': self.position_line5.LDM,
-                     'LCB': self.position_line5.LCB,
-                     'CB': self.position_line5.CB,
-                     'RCB': self.position_line5.RCB,
-                     'CAM': self.position_line5.CAM,
-                     'CDM': self.position_line5.CDM,
-                     'ST': self.position_line5.ST,
-                     'RM': self.position_line5.RM,
-                     'LM': self.position_line5.LM,
-                     },
-            'pyramid': {'GK': self.position_line5.GK,
-                        'RCB': self.position_line5.RCB,
-                        'LCB': self.position_line5.LCB,
-                        'RCM': self.position_line5.RCM,
-                        'CM': self.position_line5.CM,
-                        'LCM': self.position_line5.LCM,
-                        'RW': self.position_line5.RW,
-                        'LW': self.position_line5.LW,
-                        'RCF': self.position_line5.RCF,
-                        'ST': self.position_line5.ST,
-                        'LCF': self.position_line5.LCF,
-                        },
-            'metodo': {'GK': self.position_line5.GK,
-                       'RCB': self.position_line5.RCB,
-                       'LCB': self.position_line5.LCB,
-                       'RWB': self.position_line5.RWB,
-                       'CDM': self.position_line5.CDM,
-                       'LWB': self.position_line5.LWB,
-                       'RCM': self.position_line5.RCM,
-                       'LCM': self.position_line5.LCM,
-                       'RW': self.position_line5.RW,
-                       'LW': self.position_line5.LW,
-                       'ST': self.position_line5.ST,
-                       },
-            'wm': {'GK': self.position_line5.GK,
-                   'RCB': self.position_line5.RCB,
-                   'CB': self.position_line5.CB,
-                   'LCB': self.position_line5.LCB,
-                   'RDM': self.position_line4.RDM,
-                   'LDM': self.position_line4.LDM,
-                   'RCM': self.position_line5.RCM,
-                   'LCM': self.position_line5.LCM,
-                   'RW': self.position_line5.RW,
-                   'LW': self.position_line5.LW,
-                   'ST': self.position_line5.ST,
-                   },
-            '41221': {'GK': self.position_line5.GK,
-                      'RB': self.position_line4.RB,
-                      'RCB': self.position_line4.RCB,
-                      'LCB': self.position_line4.LCB,
-                      'LB': self.position_line4.LB,
-                      'CDM': self.position_line5.CDM,
-                      'RCM': self.position_line5.RCM,
-                      'LCM': self.position_line5.LCM,
-                      'RW': self.position_line5.RW,
-                      'LW': self.position_line5.LW,
-                      'ST': self.position_line5.ST,
-                      },
-            '42211': {'GK': self.position_line5.GK,
-                      'RB': self.position_line4.RB,
-                      'RCB': self.position_line4.RCB,
-                      'LCB': self.position_line4.LCB,
-                      'LB': self.position_line4.LB,
-                      'RDM': self.position_line5.RDM,
-                      'LDM': self.position_line5.LDM,
-                      'RM': self.position_line5.RM,
-                      'LM': self.position_line5.LM,
-                      'CAM': self.position_line5.CAM,
-                      'ST': self.position_line5.ST,
-                      },
-            '32221': {'GK': self.position_line5.GK,
-                      'RCB': self.position_line5.RCB,
-                      'CB': self.position_line5.CB,
-                      'LCB': self.position_line5.LCB,
-                      'RDM': self.position_line4.RDM,
-                      'LDM': self.position_line4.LDM,
-                      'RM': self.position_line5.RM,
-                      'LM': self.position_line5.LM,
-                      'RAM': self.position_line4.RAM,
-                      'LAM': self.position_line4.LAM,
-                      'ST': self.position_line5.ST,
-                      },
-            '5221': {'GK': self.position_line5.GK,
-                     'RB': self.position_line5.RB,
-                     'RCB': self.position_line5.RCB,
-                     'CB': self.position_line5.CB,
-                     'LCB': self.position_line5.LCB,
-                     'LB': self.position_line5.LB,
-                     'RCM': self.position_line5.RCM,
-                     'LCM': self.position_line5.LCM,
-                     'RW': self.position_line5.RW,
-                     'LW': self.position_line5.LW,
-                     'ST': self.position_line5.ST,
-                     },
-            '3232': {'GK': self.position_line5.GK,
-                     'RCB': self.position_line5.RCB,
-                     'CB': self.position_line5.CB,
-                     'LCB': self.position_line5.LCB,
-                     'RWB': self.position_line5.RWB,
-                     'LWB': self.position_line5.LWB,
-                     'RCM': self.position_line5.RCM,
-                     'CM': self.position_line5.CM,
-                     'LCM': self.position_line5.LCM,
-                     'RCF': self.position_line5.RCF,
-                     'LCF': self.position_line5.LCF,
-                     },
-            '312112': {'GK': self.position_line5.GK,
-                       'RCB': self.position_line5.RCB,
-                       'CB': self.position_line5.CB,
-                       'LCB': self.position_line5.LCB,
-                       'CDM': self.position_line5.CDM,
-                       'RCM': self.position_line5.RCM,
-                       'LCM': self.position_line5.LCM,
-                       'CAM': self.position_line5.CAM,
-                       'SS': self.position_line5.SS,
-                       'RCF': self.position_line5.RCF,
-                       'LCF': self.position_line5.LCF,
-                       },
-            '42121': {'GK': self.position_line5.GK,
-                      'RB': self.position_line4.RB,
-                      'RCB': self.position_line4.RCB,
-                      'LCB': self.position_line4.LCB,
-                      'LB': self.position_line4.LB,
-                      'RDM': self.position_line5.RDM,
-                      'LDM': self.position_line5.LDM,
-                      'CM': self.position_line5.CM,
-                      'RW': self.position_line5.RW,
-                      'LW': self.position_line5.LW,
-                      'ST': self.position_line5.ST,
-                      },
-            '31222': {'GK': self.position_line5.GK,
-                      'RCB': self.position_line5.RCB,
-                      'CB': self.position_line5.CB,
-                      'LCB': self.position_line5.LCB,
-                      'CDM': self.position_line5.CDM,
-                      'RCM': self.position_line5.RCM,
-                      'LCM': self.position_line5.LCM,
-                      'RW': self.position_line5.RW,
-                      'LW': self.position_line5.LW,
-                      'RCF': self.position_line5.RCF,
-                      'LCF': self.position_line5.LCF,
-                      },
-            '4213': {'GK': self.position_line5.GK,
-                     'RB': self.position_line4.RB,
-                     'RCB': self.position_line4.RCB,
-                     'LCB': self.position_line4.LCB,
-                     'LB': self.position_line4.LB,
-                     'RDM': self.position_line5.RDM,
-                     'LDM': self.position_line5.LDM,
-                     'CAM': self.position_line5.CAM,
-                     'RCF': self.position_line5.RCF,
-                     'ST': self.position_line5.ST,
-                     'LCF': self.position_line5.LCF,
-                     },
-            '32122': {'GK': self.position_line5.GK,
-                      'RCB': self.position_line5.RCB,
-                      'CB': self.position_line5.CB,
-                      'LCB': self.position_line5.LCB,
-                      'RWB': self.position_line5.RWB,
-                      'LWB': self.position_line5.LWB,
-                      'CM': self.position_line5.CM,
-                      'RAM': self.position_line5.RAM,
-                      'LAM': self.position_line5.LAM,
-                      'RCF': self.position_line5.RCF,
-                      'LCF': self.position_line5.LCF,
-                      },
-            '41131': {'GK': self.position_line5.GK,
-                      'RB': self.position_line4.RB,
-                      'RCB': self.position_line4.RCB,
-                      'LCB': self.position_line4.LCB,
-                      'LB': self.position_line4.LB,
-                      'CDM': self.position_line5.CDM,
-                      'CM': self.position_line5.CM,
-                      'RW': self.position_line5.RW,
-                      'CAM': self.position_line5.CAM,
-                      'LW': self.position_line5.LW,
-                      'ST': self.position_line5.ST,
-                      },
-        }
+        formations = Formation(self.position_line4, self.position_line5,
+                               self.position_line4_with_ss,
+                               self.position_line5_with_ss)
+        self.formations = formations.formations
 
 
 @dataclass
@@ -797,70 +389,18 @@ class MetricasportsDims(BaseDims):
         self.setup_dims()
 
 
-class OptaDims(FixedDims):
-    """ Dataclass holding the dimensions for the 'opta' pitch."""
-
-    def create_positions_five_per_line(self):
-        """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
-
-        This can be used to evenly space players when you have 3 or 5 players per line.
-
-        Used to translate a position e.g. CAM to the x,y coordinates.
-
-        The difference between this and the base class is that SS
-        is not given its own dedicated line.
-
-        Instead DM, CM and AM are spaced out more evenly across the pitch.
-
-        """
-        y = np.linspace(self.bottom, self.top, 11)[1::2]
-        x = np.linspace(self.left, self.right, 15)
-        x = np.append(x[:13][1::2], self.penalty_right)
-        inner_lines = np.linspace(x[1], x[-1], 5)[1:-1]
-        x = np.append(x[:2], np.append(inner_lines, x[-1]))
-        x, y = np.meshgrid(x, y)
-        idx = [12, 1, 7, 13, 19, 25, 2, 8, 14, 20, 26, 3, 9,
-               15, 21, 27, 4, 10, 16, 22, 28, 11, 17, 23, 16]
-        self.position_line5 = PositionLine5(
-            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
-
-    def create_positions_four_per_line(self):
-        """
-        Create player positions, using 4 positions per line (for example, RB, CB, CB, LB).
-
-        This can be used to evenly space players when you have 4 players per line.
-
-        Used to translate a position e.g. CAM to the x,y coordinates.
-
-        The difference between this and the base class is that
-        SS is not given its own dedicated line.
-
-        Instead DM, CM and AM are spaced out more evenly across the pitch.
-
-        """
-        y = np.linspace(self.bottom, self.top, 9)[1:-1]
-        x = np.linspace(self.left, self.right, 15)
-        x = np.append(x[:13][1::2], self.penalty_right)
-        inner_lines = np.linspace(x[1], x[-1], 5)[1:-1]
-        x = np.append(x[:2], np.append(inner_lines, x[-1]))
-        x, y = np.meshgrid(x, y)
-        idx = [18, 1, 13, 25, 37, 2, 14, 26, 38, 3, 15, 27, 39, 4, 16, 28, 40, 17, 29, 22]
-        self.position_line4 = PositionLine4(
-            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(), y.ravel()[idx].tolist()))])
-
-
 def opta_dims():
     """ Create 'opta' dimensions."""
-    return OptaDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
-                    width=100., length=100., pitch_width=68., pitch_length=105.,
-                    goal_width=9.6, goal_length=1.9, goal_bottom=45.2, goal_top=54.8,
-                    six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
-                    six_yard_right=94.2, six_yard_bottom=36.8, six_yard_top=63.2,
-                    penalty_left=11.5, penalty_right=88.5,
-                    penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
-                    penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
-                    center_width=50., center_length=50., circle_diameter=17.68,
-                    corner_diameter=1.94, arc=None, invert_y=False, origin_center=False)
+    return FixedDims(left=0., right=100., bottom=0., top=100., aspect=68 / 105,
+                     width=100., length=100., pitch_width=68., pitch_length=105.,
+                     goal_width=9.6, goal_length=1.9, goal_bottom=45.2, goal_top=54.8,
+                     six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
+                     six_yard_right=94.2, six_yard_bottom=36.8, six_yard_top=63.2,
+                     penalty_left=11.5, penalty_right=88.5,
+                     penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
+                     penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
+                     center_width=50., center_length=50., circle_diameter=17.68,
+                     corner_diameter=1.94, arc=None, invert_y=False, origin_center=False)
 
 
 def wyscout_dims():

@@ -115,11 +115,10 @@ class BasePitchPlot(BasePitch):
 
         if marker == 'football':
             return scatter_football(x, y, ax=ax, **kwargs)
-        elif rotation_degrees is not None:
+        if rotation_degrees is not None:
             return scatter_rotation(x, y, rotation_degrees, marker=marker,
                                     vertical=self.vertical, ax=ax, **kwargs)
-        else:
-            return ax.scatter(x, y, marker=marker, **kwargs)
+        return ax.scatter(x, y, marker=marker, **kwargs)
 
     def _reflect_2d(self, x, y, standardized=False):
         """ Reflect data in the pitch lines."""
@@ -337,14 +336,45 @@ class BasePitchPlot(BasePitch):
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
         >>> fig, ax = pitch.draw()
-        >>> pitch.annotate(text='center', xytext=(50, 50), xy=(60, 40), ha='center', va='center', \
-                           ax=ax, arrowprops=dict(facecolor='black'))
+        >>> pitch.annotate(text='center', xytext=(50, 50), xy=(60, 40), ha='center', va='center',
+        ...                ax=ax, arrowprops=dict(facecolor='black'))
         """
         validate_ax(ax)
         xy = self._reverse_annotate_if_vertical(xy)
         if xytext is not None:
             xytext = self._reverse_annotate_if_vertical(xytext)
         return ax.annotate(text, xy, xytext, **kwargs)
+
+    def text(self, x, y, s, ax=None, **kwargs):
+        """ Utility wrapper around ax.text
+        which automatically flips the x/y coordinates if the pitch is vertical.
+
+        See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.text.html
+
+        Parameters
+        ----------
+        x, y : float
+            The position to place the text
+        s : str
+            The text
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text.
+
+        Returns
+        -------
+        annotation : matplotlib.text.Text
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.text(60, 40, 'Center of the pitch', va='center', ha='center', ax=ax)
+        """
+        validate_ax(ax)
+        x, y = self._reverse_if_vertical(x, y)
+        return ax.text(x, y, s, **kwargs)
 
     @docstring.copy(bin_statistic)
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
@@ -367,7 +397,8 @@ class BasePitchPlot(BasePitch):
     def heatmap_positional(self, stats, ax=None, **kwargs):
         return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
 
-    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, ax=None, **kwargs):
+    def label_heatmap(self, stats, str_format=None, exclude_zeros=False,
+                      xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
         Parameters
@@ -378,6 +409,8 @@ class BasePitchPlot(BasePitch):
             A format string passed to str_format.format() to format the labels.
         exclude_zeros : bool
             Whether to exclude zeros when labelling the heatmap.
+        xoffset, yoffset : float, default 0
+            The amount in data coordinates to offset the labels from the center of the grid cell.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
 
@@ -400,8 +433,8 @@ class BasePitchPlot(BasePitch):
         >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
         >>> stats['statistic'] = stats['statistic'].astype(int)
         >>> path_eff = [path_effects.Stroke(linewidth=0.5, foreground='#22312b')]
-        >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center', \
-                                       va='center', path_effects=path_eff)
+        >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center',
+        ...                            va='center', path_effects=path_eff)
         """
         validate_ax(ax)
 
@@ -421,8 +454,8 @@ class BasePitchPlot(BasePitch):
             mask_clip = np.ravel(mask_clip)
 
             text = np.ravel(bin_stat['statistic'])[~mask_clip]
-            cx = np.ravel(bin_stat['cx'])[~mask_clip]
-            cy = np.ravel(bin_stat['cy'])[~mask_clip]
+            cx = np.ravel(bin_stat['cx'])[~mask_clip] + xoffset
+            cy = np.ravel(bin_stat['cy'])[~mask_clip] + yoffset
             for idx, text_str in enumerate(text):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
@@ -691,9 +724,9 @@ class BasePitchPlot(BasePitch):
         >>> fig, ax = pitch.draw()
         >>> bs_heatmap = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(6, 4))
         >>> hm = pitch.heatmap(bs_heatmap, ax=ax, cmap='Blues')
-        >>> fm = pitch.flow(df.x, df.y, df.end_x, df.end_y, color='black', arrow_type='same', \
-                            arrow_length=6, bins=(6, 4), headwidth=2, headlength=2, \
-                            headaxislength=2, ax=ax)
+        >>> fm = pitch.flow(df.x, df.y, df.end_x, df.end_y, color='black', arrow_type='same',
+        ...                 arrow_length=6, bins=(6, 4), headwidth=2, headlength=2,
+        ...                 headaxislength=2, ax=ax)
         """
         validate_ax(ax)
         if self.dim.aspect != 1:
