@@ -3,18 +3,18 @@
 Formations
 ==========
 
-You can plot formations (e.g. 4-4-2) on all of mplsoccer's pitches using the ``formation`` method.
+You can plot formations (e.g. 4-4-2) on any mplsoccer pitch using the ``formation`` method.
 The formations can be plotted as various options by using the ``kind`` argument:
 
-* scatter
+* ``kind='scatter'``
 
-* image
+* ``kind='image'``
 
-* axes
+* ``kind='axes'``
 
-* pitch
+* ``kind='pitch'``
 
-* text
+* ``kind='text'``
 """
 import math
 from urllib.request import urlopen
@@ -95,7 +95,7 @@ txt_half_flip = pitch.text(75, 40, 'flip=True\nhalf=True', ax=ax[2], va='center'
 ##############################################################################
 # Get images
 # -----------
-# First let's get some images from Wikipedia. Note, it would be better if these all had the
+# Let's get some images from Wikipedia. Note, it would be better if these all had the
 # same aspect ratio for plotting.
 image_urls = {
     # Credit: Darz Mol. Creative Commons Attribution-Share Alike 2.5 Spain license.
@@ -135,8 +135,8 @@ image_urls = {
 images = [Image.open(urlopen(url)) for url in starting_xi.player_name.map(image_urls)]
 
 ##############################################################################
-# Formation Images
-# ----------------
+# Formation of images
+# -------------------
 # You can plot the formations as images using ``kind='image'`` and ``image`` arguments.
 # Here we use xoffset and yoffset to eliminate some overlapping images.
 # The offsets should be in the same order as the positions argument (i.e. player identifiers).
@@ -154,7 +154,7 @@ ax_image = pitch.formation(formation, positions=starting_xi.position_id, kind='i
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_formations_002'
 
 ##############################################################################
-# Text and Scatter
+# Text and scatter
 # ----------------
 # You can plot the formations as text using ``kind='text'`` and the ``text`` arguments.
 # Additional keyword arguments are passed on to Axes.text.
@@ -243,7 +243,8 @@ ax_text = pitch.formation(formation, positions=starting_xi.position_id, height=1
 # for the Team of the Week using Opta's position identifiers. We will use the '4-3-3' formation.
 #
 # Note, all the Opta formations are included in mplsoccer.
-# However, '412112' could be called '4-4-2 diamond' and '31213' could be called '343' in the data.
+# However, '412112' could be called '4-4-2 diamond' in Opta's data and '31213' could be
+# called '343' in Opta's data.
 totw_player_data = pd.DataFrame(
     {
         'position': ['LW', 'ST', 'RW', 'LCM', 'CDM', 'RCM', 'LB', 'LCB', 'RCB', 'RB', 'GK'],
@@ -259,7 +260,7 @@ totw_player_data = pd.DataFrame(
 totw_player_data
 
 ##############################################################################
-# Get the club badges as a dictionary and turn it into a list of badges for each player
+# Get the club badges as a dictionary and turn it into a list of badges for each player.
 badge_urls = {
     'Manchester United': 'https://www.thesportsdb.com/images/media/team/badge/xzqdr11517660252.png',
     'Chelsea': 'https://www.thesportsdb.com/images/media/team/badge/yvwvtu1448813215.png',
@@ -311,7 +312,7 @@ badge_axes = pitch.formation('433', kind='image', positions=totw_player_data.pos
 ##############################################################################
 # Get Wyscout data
 # ----------------
-# This example uses some example Wyscout data
+# The next example uses some example
 # `Wyscout data <https://www.hudl.com/blog/wyscout-analysis-chelsea-vs-manchester-united>`_.
 
 wyscout_data = {'player_name': ['David de Gea', 'Bailly', 'Maguire', 'Shaw',
@@ -384,7 +385,7 @@ for i, formation in enumerate(pitch.formations):
                     color='white', fontsize=8, ha='center', va='center', ax=axes_p[i])
     axes_p[i].set_title(formation, fontsize=10)
 axes['title'].axis('off')
-title = axes['title'].text(0.5, 0.5, 'Formations and positions (default layout)', fontsize=20,
+title = axes['title'].text(0.5, 0.5, 'Formations and positions', fontsize=35,
                            ha='center', va='center')
 
 # remove spare axes
