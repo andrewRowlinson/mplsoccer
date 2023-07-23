@@ -2,9 +2,9 @@
 ----------------------
 
 ### Added
-* :heart_eyes: Added the ``formation` method, which plots formations as text, images, inset axes, \
+* :heart_eyes: Added the ``formation`` method, which plots formations as text, images, inset axes, \
 scatter plots or pitches.
-* :new: You can return a dataframe for all the formations and player positions with the \
+* :new: Added the ability to return a dataframe for all the formations and player positions with the \
 ``Pitch.formations_dataframe`` attribute and the ``Pitch.get_positions()`` method.
 * :new: Added the ``inset_axes`` and ``inset_image`` methods/functions for plotting \
 inset axes and images.
@@ -15,13 +15,13 @@ for plotting a heatmap's labels off-center.
 
 ### Breaking Changes
 * :x: Fixed the Matplotlib dependency to version 3.6 or higher.
-* :x: The StatsBomb ``tactics_formation`` is changed from a numeric dtype to string, \
+* :x: The StatsBomb ``tactics_formation`` is changed from a numeric dtype to a string dtype, \
 e.g. 442 changed to '442'
 
 ### Changes
-* :ok: Added some new pitch attributes ``positional_alpha`` and ``shade_alpha`` for \
-controlling the transparency of the positional and shade in the middle of the pitch. Previously \
-the alpha was controlled by the ``line_alpha`` attribute.
+* :ok: Added the new pitch attributes ``positional_alpha`` and ``shade_alpha`` for \
+controlling the transparency of the positional lines and shaded block in the middle of the pitch. \ 
+Previously, the alpha was controlled by the ``line_alpha`` attribute.
 
 ### Fixes
 * Fixed some deprecation warnings for Matplotlib (get_cmap) and Seaborn (kdeplot).
