@@ -20,7 +20,7 @@ e.g. 442 changed to '442'
 
 ### Changes
 * :ok: Added the new pitch attributes ``positional_alpha`` and ``shade_alpha`` for \
-controlling the transparency of the positional lines and shaded block in the middle of the pitch. \ 
+controlling the transparency of the positional lines and shaded block in the middle of the pitch. \
 Previously, the alpha was controlled by the ``line_alpha`` attribute.
 
 ### Fixes
