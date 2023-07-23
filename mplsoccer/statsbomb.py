@@ -351,8 +351,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> events, related, freeze, tactics = parser.event(path)
         """
         data = self._get_data(path)
@@ -373,8 +373,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> lineups = parser.lineup(path)
         """
         data = self._get_data(path)
@@ -395,8 +395,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> matches = parser.match(path)
         """
         data = self._get_data(path)
@@ -416,8 +416,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> competition = parser.competition(path)
         """
         data = self._get_data(path)
@@ -438,8 +438,8 @@ class Sblocal:
 
         Examples
         --------
-        >>> from mplsoccer import Sbopen
-        >>> parser = Sbopen(dataframe=True)
+        >>> from mplsoccer import Sblocal
+        >>> parser = Sblocal(dataframe=True)
         >>> frames, visible = parser.frame(path)
         """
         data = self._get_data(path)
@@ -504,6 +504,10 @@ def _event_dataframe(data):
     df = pd.DataFrame(data)
     if df.empty:
         return None
+    mask = df['tactics_formation'].notnull()
+    # tactics_formation from float to string
+    df.loc[mask, 'tactics_formation'] = df.loc[mask, 'tactics_formation'].astype(int).astype(str)
+    df.loc[~mask, 'tactics_formation'] = None
     df['timestamp'] = pd.to_datetime(df['timestamp']).dt.time
     df.sort_values(['period', 'timestamp', 'index'], inplace=True)
     df.reset_index(drop=True, inplace=True)

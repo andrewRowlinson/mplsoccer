@@ -37,7 +37,7 @@ font_bold = FontManager("https://raw.githubusercontent.com/google/fonts/main/apa
 
 ##############################################################################
 # Load Files
-# ---------------
+# ----------
 # We will using these images/data in our examples.
 # You can find all the images/data `here <https://github.com/andrewRowlinson/mplsoccer-assets>`_.
 
@@ -56,8 +56,8 @@ player_dict = json.load(
 
 ##############################################################################
 # Making A Bumpy Chart
-# ----------------------------
-# A Bump Chart is a special form of a line plot.
+# --------------------
+# A Bumpy Chart is a special form of a line plot.
 # This chart is well-suited for exploring changes in rank over time.
 # Using this chart, you can easily compare the position,
 # performance or rankings of multiple observations with
@@ -127,7 +127,7 @@ plt.tight_layout(pad=0.5)
 
 ##############################################################################
 # Flip The y-axis
-# ----------------------------
+# ---------------
 # If you want to plot positions from the bottom, i.e. the 1st position will
 # be at the bottom and the 20th position will be at the top. You can do it easily.
 # You just have to pass ``upside_down=True`` inside ``plot`` function.
@@ -186,7 +186,7 @@ plt.tight_layout(pad=0.5)
 
 ##############################################################################
 # Light Theme
-# ----------------------------
+# -----------
 # You can use ``background_color``, ``scatter_color``, ``label_color``, and ``line_color`` arguments
 # to change the whole theme of the plot. Below is the code demonstrating how to make a light-theme
 # bumpy chart using ``mplsoccer``.
@@ -247,7 +247,7 @@ plt.tight_layout(pad=0.5)
 
 ##############################################################################
 # Player Percentile Rank Viz
-# ----------------------------
+# --------------------------
 # Here we will create a bumpy-chart that will compare two players based on their percentile rank.
 
 # attributes and highlight dict
@@ -272,8 +272,7 @@ fig, ax = bumpy.plot(
     secondary_alpha=0.05, highlight_dict=highlight_dict,
     figsize=(20, 12),
     x_label="Attributes", y_label="Percentile Rank", ylim=(0.5, 12),
-    upside_down=True,
-    fontfamily="Liberation Serif"
+    upside_down=True
 )
 
 # title and subtitle
@@ -283,7 +282,9 @@ TITLE = "Comparison Between <Cristián Zapata> and <Francesco Acerbi>"
 fig_text(
     0.02, 0.98, TITLE, color="#F2F2F2",
     highlight_textprops=[{"color": 'crimson'}, {"color": 'cornflowerblue'}],
-    size=34, fig=fig, fontfamily="Liberation Serif"
+    size=34, fig=fig
 )
 # if space is left in the plot use this
 plt.tight_layout(pad=0.5)
+
+plt.show()

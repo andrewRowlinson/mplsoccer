@@ -10,7 +10,7 @@ jointgrid gives a handy way to put marginal axis on each side of the pitch.
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 import matplotlib.pyplot as plt
 
 from mplsoccer import Pitch, VerticalPitch, Sbopen, FontManager
@@ -122,11 +122,12 @@ df_team1['x'] = pitch.dim.right - df_team1.x
 
 ##############################################################################
 # Get colors
+# ----------
 # We are using Reds and Blues colormaps below and select a color just over half
 # way (60%) through the colormap for use in the charts.
 
-red = get_cmap('Reds')(np.linspace(0, 1, 100))[60]
-blue = get_cmap('Blues')(np.linspace(0, 1, 100))[60]
+red = colormaps.get_cmap('Reds')(np.linspace(0, 1, 100))[60]
+blue = colormaps.get_cmap('Blues')(np.linspace(0, 1, 100))[60]
 
 ##############################################################################
 # Hexbin shot map with kdeplot marginal axes

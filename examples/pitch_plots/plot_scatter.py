@@ -7,7 +7,7 @@ This example shows how to plot a scatter chart.
 """
 
 import numpy as np
-from matplotlib import cm
+from matplotlib import colormaps
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
@@ -92,7 +92,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 # You could use the same technique to assign fewer colors to the scatter.
 
 # get the cmap as 10 colors (n_colors can be anything)
-cmap = cm.get_cmap('Greys')  # reversed plasma
+cmap = colormaps.get_cmap('Greys')  # reversed plasma
 N_COLORS = 10
 cmap = cmap(np.linspace(0.5, 1, N_COLORS))  # from half-way (0.5) to end (1) of grey colormap
 cmap = ListedColormap(cmap, name='Greys')
@@ -146,7 +146,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 # Another method popularized by `@petermckeever <https://twitter.com/petermckeever>`_.
 # is to use hatch patterns to show where something was not-successful versus successful.
 # There are lots of different hatch patterns.
-# See: matplotlib.org/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_hatch
+# See set_hatch: https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Patch.html
 # This is typically combined with the highlight-text package
 # by `@danzn1 <https://twitter.com/danzn1>`_.
 
@@ -329,7 +329,7 @@ title2 = axs['title'].text(0.5, 0.25, "versus Sevilla", color=pitch.line_color,
 # In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
 #
 # We are going to plot pass data as an arrowhead marker with the
-# arrow facing in the direction of the pass
+# arrow facing in the direction of the pass.
 # The marker size is going to relate to the pass distance,
 # so larger markers mean the pass was longer.
 pitch = Pitch()

@@ -13,6 +13,12 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install mplsocc
 pip install mplsoccer
 ```
 
+Or install via [Anaconda](https://docs.anaconda.com/free/anaconda/install/index.html).
+
+```bash
+conda install -c conda-forge mplsoccer
+```
+
 ---
 
 ## Docs
@@ -89,11 +95,10 @@ for a full list of the recent changes to mplsoccer.
 ## Inspiration
 
 mplsoccer was inspired by:
-- [Peter McKeever](http://petermckeever.com/2020/10/how-to-draw-a-football-pitch/) heavily 
-inspired the API design
+- [Peter McKeever](https://petermckeever.com/) heavily inspired the API design
 - [ggsoccer](https://github.com/Torvaney/ggsoccer) influenced the design and Standardizer
 - [lastrow's](https://twitter.com/lastrowview) legendary animations
-- [fcrstats'](http://fcrstats.com/) tutorials for using football data
+- [fcrstats'](https://twitter.com/FC_rstats) tutorials for using football data
 - [fcpython's](https://fcpython.com/) Python tutorials for using football data
 - [Karun Singh's](https://twitter.com/karun1710) expected threat (xT) visualizations
 - [StatsBomb's](https://statsbomb.com/) great visual design and free open-data

@@ -6,12 +6,14 @@ from collections import namedtuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib import rcParams
+from typing import List
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
 from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
-from mplsoccer.utils import Standardizer, set_visible
+from mplsoccer.utils import Standardizer, set_visible, inset_axes, inset_image, validate_ax
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -114,8 +116,8 @@ class BasePitch(ABC):
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
-                 positional_linestyle=None, positional_color='#eadddd',
-                 shade_middle=False, shade_color='#f2f2f2', shade_zorder=0.7,
+                 positional_linestyle=None, positional_color='#eadddd', positional_alpha=1,
+                 shade_middle=False, shade_color='#f2f2f2', shade_alpha=1, shade_zorder=0.7,
                  pitch_length=None, pitch_width=None,
                  goal_type='line', goal_alpha=1, goal_linestyle=None,
                  axis=False, label=False, tick=False, corner_arcs=False):
@@ -147,8 +149,10 @@ class BasePitch(ABC):
             self.positional_linewidth = linewidth
         self.positional_linestyle = positional_linestyle
         self.positional_color = positional_color
+        self.positional_alpha = positional_alpha
         self.shade_middle = shade_middle
         self.shade_color = shade_color
+        self.shade_alpha = shade_alpha
         self.shade_zorder = shade_zorder
         self.pitch_length = pitch_length
         self.pitch_width = pitch_width
@@ -242,8 +246,11 @@ class BasePitch(ABC):
                 f'positional={self.positional!r}, positional_zorder={self.positional_zorder!r}, '
                 f'positional_linewidth={self.positional_linewidth!r}, '
                 f'positional_linestyle={self.positional_linestyle!r}, '
-                f'positional_color={self.positional_color!r}, shade_middle={self.shade_middle!r}, '
-                f'shade_color={self.shade_color!r}, shade_zorder={self.shade_zorder!r}, '
+                f'positional_color={self.positional_color!r}, '
+                f'positional_alpha={self.positional_alpha!r}, '
+                f'shade_middle={self.shade_middle!r}, '
+                f'shade_color={self.shade_color!r}, shade_alpha={self.shade_alpha!r}, '
+                f'shade_zorder={self.shade_zorder!r}, '
                 f'pitch_length={self.pitch_length!r}, pitch_width={self.pitch_width!r}, '
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
                 f'line_alpha={self.line_alpha!r}, label={self.label!r}, '
@@ -595,16 +602,20 @@ class BasePitch(ABC):
 
     def _draw_juego_de_posicion(self, ax):
         line_prop = {'linewidth': self.positional_linewidth, 'color': self.positional_color,
-                     'alpha': self.line_alpha, 'linestyle': self.positional_linestyle,
+                     'alpha': self.positional_alpha, 'linestyle': self.positional_linestyle,
                      'zorder': self.positional_zorder}
         # x lines for Juego de Posición
-        #through lines
-        self._draw_line(ax, [self.dim.positional_x[1], self.dim.positional_x[1]], [self.dim.bottom, self.dim.top], **line_prop)
-        self._draw_line(ax, [self.dim.positional_x[5], self.dim.positional_x[5]], [self.dim.bottom, self.dim.top], **line_prop)
-        #short lines
+        # through lines
+        self._draw_line(ax, [self.dim.positional_x[1], self.dim.positional_x[1]],
+                        [self.dim.bottom, self.dim.top], **line_prop)
+        self._draw_line(ax, [self.dim.positional_x[5], self.dim.positional_x[5]],
+                        [self.dim.bottom, self.dim.top], **line_prop)
+        # short lines
         for coord in self.dim.positional_x[2:5]:
-            self._draw_line(ax, [coord, coord], [self.dim.bottom,  self.dim.penalty_area_bottom], **line_prop)
-            self._draw_line(ax, [coord, coord], [self.dim.top,  self.dim.penalty_area_top], **line_prop)
+            self._draw_line(ax, [coord, coord], [self.dim.bottom, self.dim.penalty_area_bottom],
+                            **line_prop)
+            self._draw_line(ax, [coord, coord], [self.dim.top, self.dim.penalty_area_top],
+                            **line_prop)
         # y lines for Juego de Posición
         self._draw_line(ax, [self.dim.left, self.dim.right],
                         [self.dim.positional_y[1], self.dim.positional_y[1]], **line_prop)
@@ -617,10 +628,483 @@ class BasePitch(ABC):
 
     def _draw_shade_middle(self, ax):
         shade_prop = {'fill': True, 'facecolor': self.shade_color,
-                      'alpha': self.line_alpha, 'zorder': self.shade_zorder}
+                      'alpha': self.shade_alpha,
+                      'zorder': self.shade_zorder}
         self._draw_rectangle(ax, self.dim.positional_x[2], self.dim.bottom,
                              self.dim.positional_x[4] - self.dim.positional_x[2], self.dim.width,
                              **shade_prop)
+
+    def _set_multiple_attributes(self, kwargs):
+        for key in kwargs:
+            if hasattr(self, key):
+                setattr(self, key, kwargs[key])
+
+    def inset_axes(self, x, y, width=None, height=None, aspect=None, polar=False,
+                   ax=None, **kwargs):
+        """ A function to create an inset axes.
+        This method produces the same axes
+        with VerticalPitch and Pitch when
+        the arguments are the same.
+
+        Parameters
+        ----------
+        x, y : float
+            The x/y coordinate of the center of the inset axes.
+        width, height : float, default None
+            The width/height of the inset axes in the x/y data coordinates.
+        aspect : float, default None
+            You can specify a combination of height and aspect or width and aspect.
+            This will make the axes visually have the given aspect ratio (length/width).
+            For example, if you want an inset axes to appear square set aspect = 1.
+            For polar plots, this is defaulted to 1.
+        polar : bool, default False
+            Whether the inset axes if a polar projection.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to the inset_axes.
+
+        Returns
+        --------
+        ax : matplotlib.axes.Axes
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> inset_axes = pitch.inset_axes(60, 40, width=20, aspect=1, ax=ax)
+        """
+        return inset_axes(x=x, y=y, height=height, width=width, aspect=aspect,
+                          polar=polar, vertical=self.vertical, ax=ax, **kwargs)
+
+    def inset_image(self, x, y, image, width=None, height=None, ax=None, **kwargs):
+        """ Adds an image as an inset_axes
+    
+        Parameters
+        ----------
+        x, y: float
+        image: array-like or PIL image
+            The image data.
+        width, height: float, default None
+            The width, height of the inset_axes for plotting the image.
+            By default, in the data coordinates.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+    
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
+    
+        Returns
+        -------
+        matplotlib.axes.Axes
+    
+        Examples
+        --------
+        >>> from mplsoccer import VerticalPitch
+        >>> from urllib.request import urlopen
+        >>> from PIL import Image
+        >>> pitch = VerticalPitch()
+        >>> fig, ax = pitch.draw()
+        >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+        >>> image = urlopen(image_url)
+        >>> image = Image.open(image)
+        >>> ax_image = pitch.inset_image(60, 40, image, width=30, ax=ax)
+        """
+        return inset_image(x=x, y=y, image=image, width=width, height=height,
+                           vertical=self.vertical, ax=ax, **kwargs)
+
+    @property
+    def formations(self) -> List[str]:
+        """ Return a list of valid mplsoccer formations."""
+        return list(self.dim.formations.keys())
+
+    @property
+    def formations_dataframe(self) -> pd.DataFrame:
+        """ Return a dataframe of mplsoccer formations, positions and coordinates."""
+        return pd.concat(
+            [pd.DataFrame([formation.__dict__ for formation in self.dim.formations[key]])
+                 .assign(formation=key)
+                 .drop('location', axis='columns')
+             for key in self.dim.formations])
+
+    def get_positions(self, line=5, second_striker=True) -> pd.DataFrame:
+        """ Get the player positions.
+
+           Parameters
+           ----------
+           line : int, default 5
+               Whether to have either five or four positions per line
+           second_striker : bool, default True
+               Whether to have a separate line for the second striker.
+               If False, the attacking players are more evenly spaced.
+
+           Returns
+           -------
+           positions : pd.DataFrame
+           """
+
+        if line not in (4, 5):
+            raise ValueError('line must be either 4 or 5')
+        if not isinstance(second_striker, bool):
+            raise TypeError('second_striker must be boolean')
+        if line == 5 and second_striker:
+            return pd.DataFrame({key: value.__dict__ for key, value in
+                                 self.dim.position_line5_with_ss.__dict__.items()}).T
+        if line == 4 and second_striker:
+            return pd.DataFrame({key: value.__dict__ for key, value in
+                                 self.dim.position_line4_with_ss.__dict__.items()}).T
+        if line == 5:
+            return pd.DataFrame(
+                {key: value.__dict__ for key, value in self.dim.position_line5.__dict__.items()}).T
+        return pd.DataFrame(
+            {key: value.__dict__ for key, value in self.dim.position_line4.__dict__.items()}).T
+
+    def get_formation(self, formation):
+        """ Get a formation.
+
+           Parameters
+           ----------
+           formation : str
+               The formation. For valid formations see the attribute formations
+               For example, pitch = Pitch()
+               print(pitch.formations)
+
+           Returns
+           -------
+           formation : list[mplsoccer.formations.Position]
+               A list of the mplsoccer dataclass for holding the positions and coordinates
+
+           Examples
+           --------
+           >>> from mplsoccer import Pitch
+           >>> pitch = Pitch()
+           >>> formation = pitch.get_formation('442')
+           """
+        formation = formation.replace('-', '').replace('0', '')
+        if formation not in self.formations:
+            raise ValueError(
+                f'Formation {formation} not supported.'
+                f' Currently supported formations are: {self.formations}')
+        return self.dim.formations[formation]
+
+    def formation(self,
+                  formation,
+                  positions=None,
+                  kind='scatter',
+                  text=None,
+                  image=None,
+                  flip=False,
+                  half=False,
+                  height=None,
+                  width=None,
+                  aspect=None,
+                  polar=False,
+                  xoffset=None,
+                  yoffset=None,
+                  ax=None,
+                  **kwargs):
+
+        """ A method to plot formations
+
+        Parameters
+        ----------
+        formation : str
+            The formation to plot. For valid formations see the attribute formations
+            For example, pitch = Pitch(); print(pitch.formations)
+        positions : Collection
+            A collection of position identifiers to map the xoffset, yoffset, image and text
+            arguments to mplsoccer positions. Only necessary for pitch_type='statsbomb',
+            kind='image', kind='text' or where one of the xoffset/yoffset is not None
+            
+            For StatsBomb pitches, the position identifiers are between 1 and 25.
+            For Opta pitches, the position identifiers are between 1 and 11.
+            For Wyscout pitches, the position identifiers are:
+            'gk', 'rwb', 'rb5', 'rb', 'rcb3', 'rcb', 'cb', 'lcb', 'lcb3', 'lb', 'lb5',
+            'lwb', 'rdmf', 'dmf', 'ldmf', 'rcmf3', 'rcmf', 'lcmf', 'lcmf3', 'rw',
+            'ramf', 'amf', 'lamf', 'lw', 'ss', 'cf'.
+            For other pitches, the position identifiers are: 
+            'GK', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'RWB', 'LWB', 'RDM', 'CDM', 'LDM',
+            'RM', 'RCM', 'CM', 'LCM', 'LM', 'RW', 'RAM', 'CAM', 'LAM', 'LW', 'RCF',
+            'ST', 'LCF', 'SS'.
+        kind : string, default 'scatter'
+            The kind of plot to produce: 'scatter', 'text', 'image', 'pitch', or 'axes'.
+        text : Collection[string], default None
+            The text data to plot if kind = 'text'.
+        image : Collection[array-like or PIL image], default None
+            The image data to plot if kind = 'image'.
+        flip : bool, default False
+            Whether to flip the positions horizontally so the direction of attack is right to left.
+        half : bool, default False
+            Whether to fit the positions in one half of the pitch rather than the full pitch.
+        height, width : float, default None
+            The height/width of the inset axes, inset pitch, or inset image in
+            the x/y data coordinates.
+        aspect : float, default None
+            The aspect ratio of the inset axes or inset image. You can specify a combination of
+            height and aspect or width and aspect. This will make the axes visually have the
+            given aspect ratio (length/width). For example, if you want an inset axes to appear
+            square set aspect = 1. For polar plots, this is defaulted to 1.
+        polar : bool, default False
+            Whether the inset axes if a polar projection for kind='axes'.
+        xoffset, yoffset : Collection[float] or float, default None
+            Offsets for the positions for plotting the positions off-center.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to:
+
+            - Axes.scatter for kind='scatter'
+            - Axes.text for kind='text'
+            - Axes.imshow for kind='image'
+            - Temporarily amends the pitch attributes (e.g. line_color) for kind='pitch'
+            - Axes.inset_axes for kind='axes'
+
+
+        Returns
+        -------
+        positions : dict[str, axes], matplotlib.PathCollection or list[matplotlib.Text]
+
+            - A dictionary of player positions (e.g. GK) and matplotlib axes
+              for kind='image', kind='pitch' or kind='axes'.
+              If the formation is a valid formation used by the data provider (pitch_type),
+            the dictionary keys will be the data provider's position identifiers.
+            - matplotlib.PathCollection for kind='scatter'.
+            - A list of matplotlib.Text for kind='text'.
+
+
+        Examples
+        --------
+        >>> from mplsoccer import VerticalPitch
+        >>> pitch = VerticalPitch()
+        >>> fig, ax = pitch.draw(figsize=(6.875, 10))
+        >>> position_text = pitch.formation('442',
+        ...                                 positions=[1, 2, 3, 5, 6, 9, 11, 12, 16, 22, 24],
+        ...                                 text=['GK', 'RB', 'RCB', 'LCB', 'LB', 'RDM', 'LDM',
+        ...                                 'RM', 'LM', 'RCF', 'LCF'],
+        ...                                 ax=ax,
+        ...                                 kind='text')
+
+        >>> from mplsoccer import VerticalPitch
+        >>> pitch = VerticalPitch()
+        >>> fig, ax = pitch.draw(figsize=(6.875, 10))
+        >>> position_scatter = pitch.formation('442',
+        ...                                    positions=[1, 2, 3, 5, 6, 9, 11, 12, 16, 22, 24],
+        ...                                    ax=ax,
+        ...                                    kind='scatter')
+
+        >>> from mplsoccer import VerticalPitch
+        >>> from urllib.request import urlopen
+        >>> from PIL import Image
+        >>> image = Image.open(urlopen('https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'))
+        >>> pitch = VerticalPitch()
+        >>> fig, ax = pitch.draw(figsize=(6.875, 10))
+        >>> position_image = pitch.formation('442',
+        ...                                  positions=[1, 2, 3, 5, 6, 9, 11, 12, 16, 22, 24],
+        ...                                  image=[image] * 11,
+        ...                                  height=15,
+        ...                                  ax=ax,
+        ...                                  kind='image')
+
+        >>> from mplsoccer import VerticalPitch
+        >>> pitch = VerticalPitch()
+        >>> fig, ax = pitch.draw(figsize=(6.875, 10))
+        >>> position_image = pitch.formation('442',
+        ...                                  positions=[1, 2, 3, 5, 6, 9, 11, 12, 16, 22, 24],
+        ...                                  height=15,
+        ...                                  ax=ax,
+        ...                                  linewidth=1,
+        ...                                  kind='pitch')
+
+        >>> from mplsoccer import VerticalPitch
+        >>> pitch = VerticalPitch()
+        >>> fig, ax = pitch.draw(figsize=(6.875, 10))
+        >>> position_image = pitch.formation('442',
+        ...                                  positions=[1, 2, 3, 5, 6, 9, 11, 12, 16, 22, 24],
+        ...                                  height=15,
+        ...                                  aspect=1,
+        ...                                  ax=ax,
+        ...                                  kind='axes')
+        """
+        # get all the player coordinates and position names for a formation
+        formation_positions = self.get_formation(formation)
+        possible_position_list = [
+            getattr(pos, self.pitch_type) if hasattr(pos, self.pitch_type) and
+                                             getattr(pos, self.pitch_type) is not None
+            else pos.name
+            for pos in formation_positions]
+
+        requires_positions = (
+                xoffset is not None or
+                yoffset is not None or
+                self.pitch_type == 'statsbomb' or
+                kind in ('text', 'image')
+        )
+
+        if xoffset is None:
+            xoffset = 0
+        if yoffset is None:
+            yoffset = 0
+        xoffset = np.ravel(xoffset)
+        yoffset = np.ravel(yoffset)
+
+        # validtions
+        validate_ax(ax)
+        if positions is None and requires_positions:
+            raise TypeError("Missing 1 required argument: 'positions'. "
+                            "Provide a collection of positions. For example, try a list of "
+                            f"positions from {possible_position_list} for formation='{formation}' "
+                            f"and pitch_type='{self.pitch_type}'."
+                            )
+        if positions is not None and len(positions) != len(formation_positions):
+            raise ValueError(
+                f'There are {len(formation_positions)} players in the formation, but you have '
+                f'provided {len(positions)} positions. You need as many positions as players.'
+            )
+        if text is None and kind == 'text':
+            raise TypeError("Missing 1 required argument: 'text'. "
+                            "Text (kind='text') requires a collection of strings ('text') to plot."
+                            )
+        if text is not None and len(text) != len(formation_positions):
+            raise ValueError(
+                f'There are {len(formation_positions)} players in the formation, but you have '
+                f'provided {len(text)} text strings for argument s. '
+                f'You need as many text strings as players.'
+            )
+        if image is not None and len(image) != len(formation_positions):
+            raise ValueError(
+                f'There are {len(formation_positions)} players in the formation, but you have '
+                f'provided {len(image)} images for argument image. '
+                f'You need as many images as players.'
+            )
+        if image is None and kind == 'image':
+            raise TypeError("Missing 1 required argument: 'image'. "
+                            "Images (kind='image') require a collection of 'image' to plot."
+                            )
+        if not isinstance(half, bool):
+            raise TypeError(f"Invalid 'half' argument: '{half}' should be bool.")
+        if not isinstance(flip, bool):
+            raise TypeError(f"Invalid 'flip' argument: '{flip}' should be bool.")
+
+        # validate the offsets are the same length as the number of players
+        if (((len(formation_positions) != xoffset.size) and xoffset.size > 1) or
+                ((len(formation_positions) != yoffset.size) and yoffset.size > 1)
+        ):
+            raise ValueError(
+                f'There are {len(formation_positions)} players in the formation, but you have '
+                f'provided {xoffset.size} xoffset and {yoffset.size} yoffset. '
+                f'You need to supply either a single offset '
+                f'for all players (e.g. xoffset=1) or as many offsets as players.'
+            )
+
+        # tile a single offset to all the players when a single number provided
+        if xoffset.size == 1:
+            xoffset = np.tile(xoffset, len(formation_positions))
+        if yoffset.size == 1:
+            yoffset = np.tile(yoffset, len(formation_positions))
+
+        x = []
+        y = []
+        position_names = []
+        sorted_image = []
+        sorted_text = []
+        sorted_xoffset = []
+        sorted_yoffset = []
+
+        for position in formation_positions:
+            if half and flip:
+                x.append(position.x_half_flip)
+                y.append(position.y_half_flip)
+            elif half:
+                x.append(position.x_half)
+                y.append(position.y_half)
+            elif flip:
+                x.append(position.x_flip)
+                y.append(position.y_flip)
+            else:
+                x.append(position.x)
+                y.append(position.y)
+
+            if self.pitch_type == 'statsbomb':
+                possible_positions = set(position.statsbomb).intersection(set(positions))
+                if len(possible_positions) == 1:
+                    pos = possible_positions.pop()
+                else:
+                    raise ValueError(
+                        f'Cannot standardize to the {formation} formation. '
+                        f'The following possible identifiers are returned by'
+                        f' mplsoccer for the {position.name} position: {position.statsbomb}. '
+                        f'These are either contained multiple times or no times in the list '
+                        f'supplied to the positions keyword argument: {positions}.'
+                    )
+            elif self.pitch_type in ('wyscout', 'opta') and getattr(position,
+                                                                    self.pitch_type) is not None:
+                pos = getattr(position, self.pitch_type)
+            else:
+                pos = position.name
+            position_names.append(pos)
+            # find the index of the position in the original list supplied to the positions argument
+            if requires_positions:
+                if (np.array(positions) == pos).sum() == 0:
+                    raise ValueError(
+                        f"The position identifier {pos} returned by mplsoccer is not contained in "
+                        f"the positions argument: {positions}. "
+                        f"For example try a list of positions from:'{possible_position_list}'"
+                    )
+                position_idx = np.arange(len(positions))[np.array(positions) == pos].item()
+                if text is not None:
+                    sorted_text.append(text[position_idx])
+                if image is not None:
+                    sorted_image.append(image[position_idx])
+                sorted_xoffset.append(xoffset[position_idx])
+                sorted_yoffset.append(yoffset[position_idx])
+
+        if requires_positions:
+            x = np.asarray(x) + sorted_xoffset
+            y = np.asarray(y) + sorted_yoffset
+
+        if requires_positions and set(position_names) != set(positions):
+            raise ValueError(
+                f'The positions argument: {positions} does'
+                f' not match the positions returned by mplsoccer: {position_names}.'
+                f' You need to change the positions argument so it is consistent.'
+            )
+
+        if kind == 'scatter':
+            return self.scatter(x, y, ax=ax, **kwargs)
+        if kind == 'image':
+            axes = {}
+            for i in range(len(formation_positions)):
+                axes[position_names[i]] = self.inset_image(x[i], y[i], sorted_image[i], width=width,
+                                                           height=height, ax=ax, **kwargs)
+            return axes
+        if kind == 'pitch':
+            axes = {}
+            old_attr = {key: getattr(self, key) for key, value in kwargs.items() if
+                        hasattr(self, key)}
+            self._set_multiple_attributes(kwargs)
+            for i in range(len(formation_positions)):
+                axes[position_names[i]] = self.inset_axes(x=x[i], y=y[i], height=height,
+                                                          width=width,
+                                                          aspect=1 / self.ax_aspect, polar=False,
+                                                          ax=ax)
+                self.draw(axes[position_names[i]])
+            self._set_multiple_attributes(old_attr)
+            return axes
+        if kind == 'axes':
+            axes = {}
+            for i in range(len(formation_positions)):
+                axes[position_names[i]] = self.inset_axes(x=x[i], y=y[i], height=height,
+                                                          width=width,
+                                                          aspect=aspect, polar=polar, ax=ax,
+                                                          **kwargs)
+            return axes
+        if kind == 'text':
+            text = []
+            for i in range(len(formation_positions)):
+                text.append(self.text(x[i], y[i], sorted_text[i], ax=ax, **kwargs))
+            return text
+        raise NotImplementedError(f"kind = '{kind}' is not implemented. "
+                                  "Valid arguments are 'scatter', 'image', 'axes', "
+                                  "'pitch', or 'text'."
+                                  )
 
     def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
              left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,
@@ -727,9 +1211,9 @@ class BasePitch(ABC):
         --------
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
-        >>> grid_width, grid_height = pitch.grid_dimensions(figwidth=16, figheight=9, \
-                                                            nrows=1, ncols=1, \
-                                                            max_grid=1,  space=0)
+        >>> grid_width, grid_height = pitch.grid_dimensions(figwidth=16, figheight=9,
+        ...                                                 nrows=1, ncols=1,
+        ...                                                 max_grid=1,  space=0)
         """
         grid_width, grid_height = grid_dimensions(self.ax_aspect, figwidth=figwidth,
                                                   figheight=figheight,
@@ -807,10 +1291,10 @@ class BasePitch(ABC):
         >>> import numpy as np
         >>> import seaborn as sns
         >>> pitch = Pitch()
-        >>> fig, axs = pitch.jointgrid(ax_left=False, ax_right=False, \
-                                       ax_bottom=False, ax_top=True)
+        >>> fig, axs = pitch.jointgrid(ax_left=False, ax_right=False,
+        ...                            ax_bottom=False, ax_top=True)
         >>> x = np.random.uniform(low=0, high=120, size=100)
-        >>> sns.kdeplot(x=x, ax=axs['top'], shade=True)
+        >>> sns.kdeplot(x=x, ax=axs['top'], fill=True)
         """
         if left is None:
             left = (1 - grid_width) / 2
@@ -1061,6 +1545,10 @@ class BasePitch(ABC):
     @abstractmethod
     def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
         """ Implement a wrapper for matplotlib.axes.Axes.annotate."""
+
+    @abstractmethod
+    def text(self, x, y, s, ax=None, **kwargs):
+        """ Implement a wrapper for matplotlib.axes.Axes.text."""
 
     @abstractmethod
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),

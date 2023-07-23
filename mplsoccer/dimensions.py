@@ -54,9 +54,12 @@ origin_center = If true, the origin starts at (center length, center width)
 """
 
 from dataclasses import dataclass, InitVar
-from typing import Optional
 
 import numpy as np
+from typing import Optional, Dict
+
+from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
+    PositionLine5WithSecondStriker, Coordinate
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
@@ -111,12 +114,30 @@ class BaseDims:
     positional_y: Optional[np.array] = None
     # defined in stripes
     stripe_locations: Optional[np.array] = None
+    # These positions do not include an extra line for the second striker line, at the moment
+    # the only provider to use this position is StatsBomb for a few formations
+    # we use these positions if there is no second striker so there is more
+    # space for the visualization
+    position_line4: PositionLine4 = None
+    position_line5: PositionLine5 = None
+    # these are additional positions including space for a second striker line.
+    # The attacking midfielders are placed slightly backwards for these positions,
+    # and for the five positions variation a second striker (SS) is placed between the
+    # atttacking midfielder line and the forwards
+    position_line4_with_ss: PositionLine4 = None
+    position_line5_with_ss: PositionLine5WithSecondStriker = None
+    formations: Dict[str, Dict[str, Coordinate]] = None
 
     def setup_dims(self):
         """ Run methods for the extra pitch dimensions."""
         self.pitch_markings()
         self.juego_de_posicion()
         self.stripes()
+        self.create_positions_five_per_line()
+        self.create_positions_four_per_line()
+        self.create_positions_five_per_line_ss()
+        self.create_positions_four_per_line_ss()
+        self.create_formations()
 
     def pitch_markings(self):
         """ Create sorted pitch dimensions to enable standardization of coordinates.
@@ -173,11 +194,141 @@ class BaseDims:
         self.six_yard_left = self.six_yard_length
         self.six_yard_right = self.right - self.six_yard_length
 
+    def create_positions_five_per_line(self):
+        """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
+
+        This can be used to evenly space players when you have 3 or 5 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 6)
+        y = np.linspace(self.bottom, self.top, 11)[1::2]
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 6)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
+        x, y = np.meshgrid(x, y)
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [12, 1, 7, 13, 19, 25, 2, 8, 14, 20, 26, 3, 9, 15, 21, 27, 4, 10, 16, 22, 28, 11, 17,
+               23]
+        self.position_line5 = PositionLine5(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
+
+    def create_positions_four_per_line(self):
+        """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
+
+        This can be used to evenly space players when you have 2 or 4 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 6)
+        y = np.linspace(self.bottom, self.top, 9)[1:-1]
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 6)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
+        x, y = np.meshgrid(x, y)
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [18, 1, 13, 25, 37, 2, 14, 26, 38, 3, 15, 27, 39, 4, 16, 28, 40, 17, 29]
+        self.position_line4 = PositionLine4(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
+
+    def create_positions_five_per_line_ss(self):
+        """ Create player positions, using 5 positions per line (for example, RB, RCB, CB, LCB, LB).
+
+        This can be used to evenly space players when you have 3 or 5 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 7)
+        y = np.linspace(self.bottom, self.top, 11)[1::2]
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 7)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
+        x, y = np.meshgrid(x, y)
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [14, 1, 8, 15, 22, 29, 2, 9, 16, 23, 30, 3, 10, 17, 24, 31, 4, 11, 18, 25, 32, 13, 20,
+               27, 19]
+        self.position_line5_with_ss = PositionLine5WithSecondStriker(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
+
+    def create_positions_four_per_line_ss(self):
+        """ Create player positions, using 4 poistions per line (for example, RB, RCB, LCB, LB).
+
+        This can be used to evenly space players when you have 2 or 4 players per line.
+
+        Used to translate a position e.g. CAM to the x,y coordinates."""
+        x = np.linspace(self.penalty_left, self.penalty_right, 7)
+        y = np.linspace(self.bottom, self.top, 9)[1:-1]
+        x_half = np.linspace(self.left + self.six_yard_length / 2,
+                             self.center_length - self.six_yard_length, 7)
+        x_half = np.repeat(np.expand_dims(x_half, axis=0), len(y), axis=0)
+        x, y = np.meshgrid(x, y)
+
+        x_flip = np.where(self.origin_center, self.center_length - x, self.right - x)
+        x_half_flip = np.where(self.origin_center, self.center_length - x_half, self.right - x_half)
+        y_flip = np.where(self.origin_center, self.center_width - y, max(self.top, self.bottom) - y)
+
+        idx = [21, 1, 15, 29, 43, 2, 16, 30, 44, 3, 17, 31, 45, 4, 18, 32, 46, 20, 34]
+        self.position_line4_with_ss = PositionLine4(
+            *[Coordinate(*c) for c in list(zip(x.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist(),
+                                               x_half.ravel()[idx].tolist(),
+                                               y.ravel()[idx].tolist(),
+                                               x_half_flip.ravel()[idx].tolist(),
+                                               y_flip.ravel()[idx].tolist()
+                                               ))]
+        )
+
+    def create_formations(self):
+        """ Create formations from the player positions."""
+        formations = Formation(self.position_line4, self.position_line5,
+                               self.position_line4_with_ss,
+                               self.position_line5_with_ss)
+        self.formations = formations.formations
+
 
 @dataclass
 class FixedDims(BaseDims):
     """ Dataclass holding the dimensions for pitches with fixed dimensions:
      'opta', 'wyscout', 'statsbomb' and 'uefa'."""
+
     def __post_init__(self):
         self.setup_dims()
 
@@ -283,7 +434,7 @@ def uefa_dims():
 def statsbomb_dims():
     """ Create 'statsbomb dimensions."""
     return FixedDims(left=0., right=120., bottom=80., top=0., aspect=1.,
-                     width=80., length=120.,  pitch_width=80.,  pitch_length=120.,
+                     width=80., length=120., pitch_width=80., pitch_length=120.,
                      goal_width=8., goal_length=2.4, goal_bottom=44., goal_top=36.,
                      six_yard_width=20., six_yard_length=6., six_yard_left=6.,
                      six_yard_right=114., six_yard_bottom=50., six_yard_top=30.,
@@ -328,6 +479,7 @@ def tracab_dims(pitch_width, pitch_length):
                               center_width=0., center_length=0., circle_diameter=1830.,
                               corner_diameter=200., arc=53.05, invert_y=False, origin_center=True)
 
+
 def impect_dims():
     """ Create 'impect' dimensions."""
     return VariableCenterDims(aspect=1., pitch_width=68, pitch_length=105,
@@ -338,6 +490,7 @@ def impect_dims():
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
                               center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
                               invert_y=False, origin_center=True)
+
 
 def custom_dims(pitch_width, pitch_length):
     """ Create 'custom' dimensions."""

@@ -1,3 +1,31 @@
+:rocket: Version 1.2.0
+----------------------
+
+### Added
+* :heart_eyes: Added the ``formation`` method, which plots formations as text, images, inset axes, \
+scatter plots or pitches.
+* :new: Added the ability to return a dataframe for all the formations and player positions with the \
+``Pitch.formations_dataframe`` attribute and the ``Pitch.get_positions()`` method.
+* :new: Added the ``inset_axes`` and ``inset_image`` methods/functions for plotting \
+inset axes and images.
+* :new: Added the ``Pitch.text`` wrapper for Axes.text, which automatically flips \
+the x and y coordinates.
+* :new: Added the ``xoffset`` and ``yoffset``arguments to the label_heatmap method \
+for plotting a heatmap's labels off-center.
+
+### Breaking Changes
+* :x: Fixed the Matplotlib dependency to version 3.6 or higher.
+* :x: The StatsBomb ``tactics_formation`` is changed from a numeric dtype to a string dtype, \
+e.g. 442 changed to '442'
+
+### Changes
+* :ok: Added the new pitch attributes ``positional_alpha`` and ``shade_alpha`` for \
+controlling the transparency of the positional lines and shaded block in the middle of the pitch. \
+Previously, the alpha was controlled by the ``line_alpha`` attribute.
+
+### Fixes
+* Fixed some deprecation warnings for Matplotlib (get_cmap) and Seaborn (kdeplot).
+
 :rocket: Version 1.1.12
 ----------------------
 

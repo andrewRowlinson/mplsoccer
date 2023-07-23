@@ -42,7 +42,7 @@ kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=ax,
                     fill=True, levels=100,
                     # shade the lowest area so it looks smooth
                     # so even if there are no events it gets some color
-                    shade_lowest=True,
+                    thresh=0,
                     cut=4,  # extended the cut so it reaches the bottom edge
                     cmap=flamingo_cmap)
 
@@ -77,7 +77,7 @@ kde = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'],
                     fill=True, levels=100,
                     # shade the lowest area so it looks smooth
                     # so even if there are no events it gets some color
-                    shade_lowest=True,
+                    thresh=0,
                     cut=4,  # extended the cut so it reaches the bottom edge
                     cmap=flamingo_cmap)
 axs['endnote'].text(1, 0.5, '@your_twitter_handle', va='center', ha='right', fontsize=15,
@@ -100,11 +100,11 @@ ax_sb_logo = add_image(sb_logo, fig,
 fig, axs = pitch.grid(ncols=2, axis=False, endnote_height=0.05)
 
 kde_before = pitch.kdeplot(df_before_false9.x, df_before_false9.y, ax=axs['pitch'][0],
-                           fill=True, levels=100, shade_lowest=True,
+                           fill=True, levels=100, thresh=0,
                            cut=4, cmap='Reds')
 
 kde_after = pitch.kdeplot(df_false9.x, df_false9.y, ax=axs['pitch'][1],
-                          fill=True, levels=100, shade_lowest=True,
+                          fill=True, levels=100, thresh=0,
                           cut=4, cmap='Blues')
 
 ax_sb_logo = add_image(sb_logo, fig,

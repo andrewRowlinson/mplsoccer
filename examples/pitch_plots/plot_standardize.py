@@ -133,7 +133,7 @@ df_wyscout = dataset.to_pandas(
 # -----------------------------------------------------
 # You can use any of the supported pitches in the pitch_from/ pitch_to here.
 # They are currently: ``statsbomb``, ``tracab``, ``opta``, ``wyscout``, ``uefa``,
-# ``metricasports``, ``custom``, ``skillcorner``, and ``secondspectrum``.
+# ``metricasports``, ``custom``, ``skillcorner``, ``impect``, and ``secondspectrum``.
 #
 # If the pitch size varies (``tracab``, ``metricasports``, ``custom``,
 # ``skillcorner``, ``secondspectrum``)

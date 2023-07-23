@@ -24,11 +24,25 @@ IMAGE_URL = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeri
 image = Image.open(urlopen(IMAGE_URL))
 
 ##############################################################################
+# Inset image
+# ###########
+#
+# You can use ``ax_image`` to create an inset_axes on a pitch and then plot an image.
+pitch = Pitch(line_zorder=2)
+fig, ax = pitch.draw(figsize=(16, 9), tight_layout=False)
+ax_image = pitch.inset_image(40, 60, image, height=20, ax=ax)
+
+##############################################################################
+# Photo from: https://en.wikipedia.org/wiki/Lionel_Messi#/media/File:Messi_vs_Nigeria_2018.jpg;
+# License: https://creativecommons.org/licenses/by-sa/3.0/;
+# Creator: Кирилл Венедиктов
+
+##############################################################################
 # Plotting an image over a pitch
 # ##############################
 #
-# To plot images you use ``Axes.imshow()`` in matplotlib.
-# We are going to draw a pitch and then overlay ontop an image of Messi on a new axis.
+# You can also use ``add_image``, which uses figure coordinates instead of the pitch coordinates
+# for placing the axes.
 
 # draw the pitch
 pitch = Pitch(line_zorder=2)
@@ -37,11 +51,6 @@ fig, ax = pitch.draw(figsize=(16, 9), tight_layout=False)
 # add an image
 ax_image = add_image(image, fig, left=0.55, bottom=0.2, width=0.2,
                      alpha=0.9, interpolation='hanning')
-
-##############################################################################
-# Photo from: https://en.wikipedia.org/wiki/Lionel_Messi#/media/File:Messi_vs_Nigeria_2018.jpg;
-# License: https://creativecommons.org/licenses/by-sa/3.0/;
-# Creator: Кирилл Венедиктов
 
 ##############################################################################
 # More control over the images and axis

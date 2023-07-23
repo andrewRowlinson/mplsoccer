@@ -1,7 +1,7 @@
 """ Colormap functions."""
 
 import numpy as np
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, to_rgba
 
 __all__ = ['create_transparent_cmap', 'grass_cmap']
@@ -54,7 +54,7 @@ def create_transparent_cmap(color=None, cmap=None, n_segments=100, alpha_start=0
         cmap = np.tile(np.array(cmap), (n_segments, 1))
     else:
         if isinstance(cmap, str):
-            cmap = get_cmap(cmap)
+            cmap = colormaps.get_cmap(cmap)
         if not isinstance(cmap, (ListedColormap, LinearSegmentedColormap)):
             raise ValueError("cmap: not a recognised cmap type.")
         cmap = cmap(np.linspace(0, 1, n_segments))

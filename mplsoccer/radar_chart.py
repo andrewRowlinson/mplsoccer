@@ -165,14 +165,14 @@ class Radar:
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
 
         >>> from mplsoccer import Radar
         >>> import matplotlib.pyplot as plt
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = plt.subplots(figsize=(12, 12))
         >>> radar.setup_axis(ax=ax)
         """
@@ -202,8 +202,8 @@ max_range=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         """
@@ -264,13 +264,14 @@ max_range=[10, 10, 10])
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
-        >>> radar_poly, vertices = radar.draw_radar_solid(values, ax=ax, \
-kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6})
+        >>> radar_poly, vertices = radar.draw_radar_solid(values, ax=ax,
+        ...                                               kwargs={'facecolor': '#00f2c1',
+        ...                                                       'alpha': 0.6})
         """
         validate_ax(ax)
         if kwargs is None:
@@ -307,14 +308,16 @@ kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
-        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
-kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6}, \
-kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
+        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax,
+        ...                                                kwargs_radar={'facecolor': '#00f2c1',
+        ...                                                              'alpha': 0.6},
+        ...                                                kwargs_rings={'facecolor': '#d80499',
+        ...                                                              'alpha': 0.6})
         """
         validate_ax(ax)
         if kwargs_radar is None:
@@ -362,15 +365,17 @@ kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
         >>> compare_values = [10, 4, 3]
-        >>> radar_output = radar.draw_radar_compare(values, compare_values, ax=ax, \
-kwargs_radar={'facecolor': '#00f2c1', 'alpha': 0.6}, \
-kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
+        >>> radar_output = radar.draw_radar_compare(values, compare_values, ax=ax,
+        ...                                         kwargs_radar={'facecolor': '#00f2c1',
+        ...                                                       'alpha': 0.6},
+        ...                                         kwargs_compare={'facecolor': '#d80499',
+        ...                                                         'alpha': 0.6})
         """
         validate_ax(ax)
         if kwargs_radar is None:
@@ -417,16 +422,16 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-                          max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
-        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
-                                                           kwargs_radar={'facecolor': '#00f2c1', \
-                                                                         'alpha': 0.6}, \
-                                                           kwargs_rings={'facecolor': '#d80499', \
-                                                                         'alpha': 0.6})
+        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax,
+        ...                                                kwargs_radar={'facecolor': '#00f2c1',
+        ...                                                              'alpha': 0.6},
+        ...                                                kwargs_rings={'facecolor': '#d80499',
+        ...                                                              'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         """
         validate_ax(ax)
@@ -450,7 +455,7 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         label_radius = np.linspace(self.ring_width,
                                    self.ring_width * self.num_rings,
                                    self.num_rings)
-        label_radius = (self.center_circle_radius + offset + label_radius)
+        label_radius = self.center_circle_radius + offset + label_radius
         label_xs = np.tile(label_radius, self.num_labels) * np.repeat(self.rotation_sin,
                                                                       label_radius.size)
         label_ys = np.tile(label_radius, self.num_labels) * np.repeat(self.rotation_cos,
@@ -484,16 +489,16 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-                          max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
-        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
-                                                           kwargs_radar={'facecolor': '#00f2c1', \
-                                                                         'alpha': 0.6}, \
-                                                           kwargs_rings={'facecolor': '#d80499', \
-                                                                         'alpha': 0.6})
+        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax,
+        ...                                                kwargs_radar={'facecolor': '#00f2c1',
+        ...                                                              'alpha': 0.6},
+        ...                                                kwargs_rings={'facecolor': '#d80499',
+        ...                                                              'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         >>> param_labels = radar.draw_param_labels(ax=ax)
         """
@@ -530,16 +535,16 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         Examples
         --------
         >>> from mplsoccer import Radar
-        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0], \
-                          max_range=[10, 10, 10])
+        >>> radar = Radar(params=['Agility', 'Speed', 'Strength'], min_range=[0, 0, 0],
+        ...               max_range=[10, 10, 10])
         >>> fig, ax = radar.setup_axis()
         >>> rings_inner = radar.draw_circles(ax=ax, facecolor='#ffb2b2', edgecolor='#fc5f5f')
         >>> values = [5, 3, 10]
-        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax, \
-                                                           kwargs_radar={'facecolor': '#00f2c1', \
-                                                                         'alpha': 0.6}, \
-                                                           kwargs_rings={'facecolor': '#d80499', \
-                                                                         'alpha': 0.6})
+        >>> radar_poly, rings, vertices = radar.draw_radar(values, ax=ax,
+        ...                                                kwargs_radar={'facecolor': '#00f2c1',
+        ...                                                              'alpha': 0.6},
+        ...                                                kwargs_rings={'facecolor': '#d80499',
+        ...                                                              'alpha': 0.6})
         >>> range_labels = radar.draw_range_labels(ax=ax)
         >>> param_labels = radar.draw_param_labels(ax=ax)
         >>> spokes = radar.spoke(ax=ax)
@@ -664,12 +669,12 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         >>> lower, upper, mu, sigma = 0, 1, 0.35, 0.25
         >>> X = stats.truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
         >>> values = X.rvs((1000, 11))
-        >>> params = ['Expected goals', 'Total shots', \
-                      'Touches in attacking penalty area', 'Pass completion %', \
-                      'Crosses into the 18-yard box (excluding set pieces)', \
-                      'Expected goals assisted', 'Fouls drawn', 'Successful dribbles', \
-                      'Successful pressures', 'Non-penalty expected goals per shot', \
-                      'Miscontrols/ Dispossessed']
+        >>> params = ['Expected goals', 'Total shots',
+        ...           'Touches in attacking penalty area', 'Pass completion %',
+        ...           'Crosses into the 18-yard box (excluding set pieces)',
+        ...           'Expected goals assisted', 'Fouls drawn', 'Successful dribbles',
+        ...           'Successful pressures', 'Non-penalty expected goals per shot',
+        ...           'Miscontrols/ Dispossessed']
         >>> df = pd.DataFrame(values)
         >>> df.columns = params
         >>> df['player_name'] = np.arange(1000)
@@ -678,13 +683,13 @@ kwargs_compare={'facecolor': '#d80499', 'alpha': 0.6})
         >>> radar = Radar(params, low, high, num_rings=4)
         >>> player_values = df.loc[df.player_name == 23, params].values[0]
         >>> fig, ax = radar.setup_axis()
-        >>> turbine_output = radar.turbine(player_values, df[params].values, ax=ax, \
-                                           kwargs_inner={'edgecolor': 'black'},
-                                           kwargs_inner_gradient={'cmap': 'Blues'},
-                                           kwargs_outer={'facecolor': '#b2b2b2',
-                                           'edgecolor': 'black'})
-        >>> rings_inner = radar.draw_circles(ax=ax, facecolor='None', \
-                                             edgecolor='black', linestyle='--')
+        >>> turbine_output = radar.turbine(player_values, df[params].values, ax=ax,
+        ...                                kwargs_inner={'edgecolor': 'black'},
+        ...                                kwargs_inner_gradient={'cmap': 'Blues'},
+        ...                                kwargs_outer={'facecolor': '#b2b2b2',
+        ...                                'edgecolor': 'black'})
+        >>> rings_inner = radar.draw_circles(ax=ax, facecolor='None',
+        ...                                  edgecolor='black', linestyle='--')
         >>> range_labels = radar.draw_range_labels(ax=ax, fontsize=15, zorder=2)
         >>> param_labels = radar.draw_param_labels(ax=ax, fontsize=15, zorder=2)
         """

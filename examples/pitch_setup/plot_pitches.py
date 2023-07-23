@@ -160,7 +160,8 @@ fig, ax = pitch.draw(figsize=(10, 7.727))
 ##############################################################################
 # Juego de Posición
 # -----------------
-# You can add the Juego de Posición pitch lines and shade the middle third
+# You can add the Juego de Posición pitch lines and shade the middle third.
+# You can also adjust the transparency via ``shade_alpha`` and ``positional_alpha``.
 
 pitch = Pitch(positional=True, shade_middle=True, positional_color='#eadddd', shade_color='#f2f2f2')
 fig, ax = pitch.draw()

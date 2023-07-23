@@ -71,7 +71,7 @@ events.groupby('team_name').tactics_formation.unique()
 # Filter passes by chosen formation, then group all passes and receipts to
 # calculate avg x, avg y, count of events for each slot in the formation
 
-FORMATION = 433
+FORMATION = '433'
 pass_cols = ['id', 'position_abbreviation', 'position_abbreviation_receipt']
 passes_formation = events.loc[(events.team_name == TEAM) & (events.type_name == 'Pass') &
                               (events.tactics_formation == FORMATION) &

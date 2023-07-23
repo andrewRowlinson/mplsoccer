@@ -3,6 +3,7 @@
 # The FontManager is taken from the ridge_map package by Colin Carroll (@colindcarroll)
 # ridge_map is available here: https://github.com/ColCarroll/ridge_map
 
+import warnings
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
@@ -12,7 +13,9 @@ from PIL import Image
 
 from mplsoccer import dimensions
 
-__all__ = ['add_image', 'validate_ax', 'set_visible', 'Standardizer', 'FontManager', 'set_labels']
+__all__ = ['add_image', 'validate_ax', 'inset_axes',
+           'set_visible', 'Standardizer', 'FontManager',
+           'set_labels', 'get_aspect', 'inset_image']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -78,11 +81,169 @@ def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
     return ax_image
 
 
+def inset_image(x, y, image, width=None, height=None, vertical=False, ax=None, **kwargs):
+    """ Adds an image as an inset_axes.
+
+    Parameters
+    ----------
+    x, y: float
+    image: array-like or PIL image
+        The image data.
+    width, height: float, default None
+        The width, height of the inset_axes for plotting the image.
+        By default in the data coordinates.
+    vertical : bool, default False
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
+    ax : matplotlib.axes.Axes, default None
+        The axis to plot on.
+
+    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from PIL import Image
+    >>> from urllib.request import urlopen
+    >>> from mplsoccer import inset_image
+    >>> fig, ax = plt.subplots()
+    >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+    >>> image = urlopen(image_url)
+    >>> image = Image.open(image)
+    >>> ax_image = inset_image(0.5, 0.5, image, width=0.2, ax=ax)
+    """
+    validate_ax(ax)
+
+    if isinstance(image, Image.Image):
+        image_width, image_height = image.size
+    else:
+        image_height, image_width = image.shape[:2]
+    image_aspect = image_height / image_width
+
+    ax_aspect = ax.get_aspect()
+    if ax_aspect == 'auto':
+        ax_aspect = get_aspect(ax)
+
+    if vertical:
+        x, y = y, x
+
+    if height is not None and width is not None:
+        raise TypeError('Invalid argument: you must only give one of height or width not both')
+    if height is None and width is None:
+        raise TypeError('Invalid argument: you must supply one of height or width')
+
+    if width is None:
+        width = height / image_aspect * ax_aspect
+    elif height is None:
+        height = width * image_aspect / ax_aspect
+
+    bbox = (x - width / 2, y - height / 2, width, height)
+    ax_inset = ax.inset_axes(bbox, transform=ax.transData, xlim=(0, image_width),
+                             ylim=(image_height, 0), **kwargs)
+    ax_inset.imshow(image, **kwargs)
+    ax_inset.axis('off')
+    return ax_inset
+
+
 def validate_ax(ax):
     """ Error message when ax is missing."""
     if ax is None:
         msg = "Missing 1 required argument: ax. A Matplotlib axis is required for plotting."
         raise TypeError(msg)
+
+
+def get_aspect(ax):
+    """ Get the aspect ratio of an axes.
+    From Stackoverflow post by askewchan:
+    https://stackoverflow.com/questions/41597177/get-aspect-ratio-of-axes
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes, default None
+    Returns
+    -------
+    float
+    """
+    left_bottom, right_top = ax.get_position() * ax.figure.get_size_inches()
+    width, height = right_top - left_bottom
+    return height / width * ax.get_data_ratio()
+
+
+def inset_axes(x, y, width=None, height=None, aspect=None, polar=False, vertical=False, ax=None,
+               **kwargs):
+    """ A function to create an inset axes.
+
+    Parameters
+    ----------
+    x, y: float
+        The x/y coordinate of the center of the inset axes.
+    width : float, default None
+        The width of the inset axes in the x data coordinates.
+    height : float, default None
+        The height of the inset axes in the y data coordinates.
+    aspect : float or str ('pitch'), default None
+        You can specify a combination of height and aspect or width and aspect.
+        This will make the axes visually have the given aspect ratio (width/height).
+        For example, if you want an inset axes to appear square set aspect = 1.
+        For polar plots, this is defaulted to 1.
+    polar : bool, default False
+        Whether the inset axes if a polar projection.
+    vertical : bool, default False
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
+    ax : matplotlib.axes.Axes, default None
+        The axis to plot on.
+    **kwargs : All other keyword arguments are passed on to the inset_axes.
+
+    Returns
+    --------
+    ax : matplotlib.axes.Axes
+
+    Examples
+    --------
+    >>> from mplsoccer import inset_axes
+    >>> import matplotlib.pyplot as plt
+    >>> fig, ax = plt.subplots()
+    >>> inset_ax = inset_axes(0.5, 0.5, height=0.2, aspect=1, ax=ax)
+    """
+    validate_ax(ax)
+    xlim = kwargs.pop('xlim', (0, 1))
+    ylim = kwargs.pop('ylim', (0, 1))
+    ax_aspect = ax.get_aspect()
+    if not isinstance(polar, bool):
+        raise TypeError(f"Invalid 'polar' argument: '{polar}' should be bool.")
+    if ax_aspect == 'auto':
+        ax_aspect = get_aspect(ax)
+    if polar and aspect is not None and aspect != 1:
+        warnings.warn('aspect is ignored for polar plots (defaults to 1)', UserWarning)
+    if polar:
+        aspect = 1
+    if vertical:
+        x, y = y, x
+        width, height = height, width
+    if vertical and aspect is not None:
+        aspect = 1 / aspect
+
+    if polar and height is not None and width is not None:
+        raise TypeError('Invalid argument: for polar axes provide only one of width or height')
+    if aspect is not None and width is not None and height is not None:
+        raise TypeError('Invalid argument: if using aspect you cannot use both width and height')
+    if ((width is not None) + (height is not None) + (aspect is not None)) != 2:
+        raise TypeError(
+            'Invalid argument: must give the arguments width and height,'
+            ' or width and aspect, or height and aspect')
+
+    if aspect is not None and width is None:
+        width = height / aspect * ax_aspect
+    elif aspect is not None and height is None:
+        height = width * aspect / ax_aspect
+
+    bbox = (x - width / 2, y - height / 2, width, height)
+    return ax.inset_axes(bbox, transform=ax.transData,
+                         xlim=xlim, ylim=ylim, polar=polar,
+                         **kwargs)
 
 
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
@@ -160,13 +321,14 @@ class Standardizer:
     Examples
     --------
     >>> from mplsoccer import Standardizer
-    >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom', \
-                                length_to=105, width_to=68)
+    >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom',
+    ...                         length_to=105, width_to=68)
     >>> x = [20, 30]
     >>> y = [50, 80]
     >>> x_std, y_std = standard.transform(x, y)
 
     """
+
     def __init__(self, pitch_from, pitch_to, length_from=None,
                  width_from=None, length_to=None, width_to=None):
 
@@ -276,8 +438,8 @@ class FontManager:
         'https://github.com/google/fonts/blob/main/ofl/cinzel/static/Cinzel-Regular.ttf?raw=true'
         Note 1: make sure the ?raw=true is at the end.
         Note 2: urls like 'https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/static/Cinzel-Regular.ttf'
-                allow Cross-Origin Resource Sharing, and work in browser environments
-                based on PyOdide (e.g. JupyterLite). Those urls don't need the ?raw=true at the end
+        allow Cross-Origin Resource Sharing, and work in browser environments
+        based on PyOdide (e.g. JupyterLite). Those urls don't need the ?raw=true at the end
 
     Examples
     --------

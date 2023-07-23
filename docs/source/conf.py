@@ -40,6 +40,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.imgmath',
               'sphinx.ext.viewcode',
               'sphinx_gallery.gen_gallery',
+              'sphinx.ext.autosectionlabel',
               'sphinx.ext.napoleon',
               'numpydoc']
 

@@ -28,7 +28,7 @@ df = df.loc[mask_chelsea_pressure, ['x', 'y']]
 
 ##############################################################################
 # cmasher colormaps
-# -----------------------
+# -----------------
 # Cmasher colormaps are scientific colormaps that have been designed to be
 # perceptually uniform (i.e. color changes visually look the same as the value changes)
 # and mostly colorblind friendly. A great choice
