@@ -122,6 +122,7 @@ df_team1['x'] = pitch.dim.right - df_team1.x
 
 ##############################################################################
 # Get colors
+# ----------
 # We are using Reds and Blues colormaps below and select a color just over half
 # way (60%) through the colormap for use in the charts.
 

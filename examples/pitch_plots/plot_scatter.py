@@ -146,7 +146,7 @@ txt = ax.text(x=40, y=80, s='Barcelona shots\nversus Sevilla',
 # Another method popularized by `@petermckeever <https://twitter.com/petermckeever>`_.
 # is to use hatch patterns to show where something was not-successful versus successful.
 # There are lots of different hatch patterns.
-# See: matplotlib.org/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_hatch
+# See set_hatch: https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Patch.html
 # This is typically combined with the highlight-text package
 # by `@danzn1 <https://twitter.com/danzn1>`_.
 
@@ -329,7 +329,7 @@ title2 = axs['title'].text(0.5, 0.25, "versus Sevilla", color=pitch.line_color,
 # In a horizontal pitch, 0 degrees is this way →, in a vertical pitch, 0 degrees is this way ↑
 #
 # We are going to plot pass data as an arrowhead marker with the
-# arrow facing in the direction of the pass
+# arrow facing in the direction of the pass.
 # The marker size is going to relate to the pass distance,
 # so larger markers mean the pass was longer.
 pitch = Pitch()

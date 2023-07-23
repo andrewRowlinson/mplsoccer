@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Creating some random data
 # -------------------------
-# Here we create some random data from a truncated normal distribution
-# In real life the values would be an array or dataframe of
+# Here we create some random data from a truncated normal distribution.
+# In real life, the values would be an array or dataframe of
 # shape number of players * number of skills
 lower, upper, mu, sigma = 0, 1, 0.35, 0.25
 X = stats.truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)

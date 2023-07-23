@@ -6,9 +6,8 @@ StatsBomb
 mplsoccer contains functions to return StatsBomb data in a flat, tidy dataframe.
 However, if you want to flatten the json into a dictionary you can also set ``dataframe=False``.
 
-Please be responsible with Statsbomb data.
-`Register your details <https://www.statsbomb.com/resource-centre>`_ and
-read the user agreement carefully (on the same page).
+You can read more about the Statsbomb open-data on their
+`resource centre <https://www.statsbomb.com/resource-centre>`_ page.
 
 It can be used with the StatBomb `open-data <https://github.com/statsbomb/open-data>`_
 or the StatsBomb API if you are lucky enough to have access:
@@ -62,7 +61,7 @@ df_competition.info()
 ##############################################################################
 #  Match data
 # -----------
-# Get the match data as a dataframe
+# Get the match data as a dataframe.
 # Note there is a mismatch between the length of this file
 # and the number of event files because some event files don't have match data in the open-data.
 df_match = parser.match(competition_id=11, season_id=1)
