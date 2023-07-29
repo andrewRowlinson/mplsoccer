@@ -24,7 +24,7 @@ df_lineup = df_lineup[['player_id', 'jersey_number', 'team_name']].copy()
 ##############################################################################
 # Subset a shot
 
-SHOT_ID = '8bb8bbc2-68a6-4c01-93de-53a194e7a1cf'
+SHOT_ID = '974211ad-df10-4fac-a61c-6329e0c32af8'
 df_freeze_frame = df_freeze[df_freeze.id == SHOT_ID].copy()
 df_shot_event = df_event[df_event.id == SHOT_ID].dropna(axis=1, how='all').copy()
 
