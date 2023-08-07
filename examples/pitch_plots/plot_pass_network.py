@@ -174,3 +174,114 @@ axs['title'].text(0.5, 0.25, OPPONENT, color='#c7d5cc',
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_pass_network_002.png'
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
+
+##############################################################################
+# Alternative Passing Network Theme
+# --------------
+#
+# The theme below is inspired by `@SergioMinuto90 <https://twitter.com/SergioMinuto90>`_ 
+# and his `friends of tracking tutorial on passing networks <https://github.com/Friends-of-Tracking-Data-FoTD/passing-networks-in-python>`_.
+
+##############################################################################
+# Import the path_effects module for the text stroke
+import matplotlib.patheffects as path_effects
+
+##############################################################################
+# Get oswald font
+URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf"
+oswald_regular = FontManager(URL)
+
+##############################################################################
+# Plot the chart with a title
+pitch = Pitch(
+    pitch_type="statsbomb", pitch_color="white", line_color="black", linewidth=1,
+)
+fig, axs = pitch.grid(
+    figheight=10,
+    title_height=0.08,
+    endnote_space=0,
+    # Turn off the endnote/title axis. I usually do this after
+    # I am happy with the chart layout and text placement
+    axis=False,
+    title_space=0,
+    grid_height=0.82,
+    endnote_height=0.01,
+)
+fig.set_facecolor("white")
+pass_lines = pitch.lines(
+    passes_between.x,
+    passes_between.y,
+    passes_between.x_end,
+    passes_between.y_end,
+    lw=passes_between.width,
+    color="#BF616A",
+    zorder=1,
+    ax=axs["pitch"],
+)
+pass_nodes = pitch.scatter(
+    average_locs_and_count.x,
+    average_locs_and_count.y,
+    s=average_locs_and_count.marker_size,
+    color="#BF616A",
+    edgecolors="black",
+    linewidth=0.5,
+    alpha=1,
+    ax=axs["pitch"],
+)
+pass_nodes_internal = pitch.scatter(
+    average_locs_and_count.x,
+    average_locs_and_count.y,
+    s=average_locs_and_count.marker_size / 2,
+    color="white",
+    edgecolors="black",
+    linewidth=0.5,
+    alpha=1,
+    ax=axs["pitch"],
+)
+for index, row in average_locs_and_count.iterrows():
+    text = pitch.annotate(
+        row.name,
+        xy=(row.x, row.y),
+        c="black",
+        va="center",
+        ha="center",
+        size=15,
+        weight="bold",
+        ax=axs["pitch"],
+        fontproperties=oswald_regular.prop,
+    )
+    text.set_path_effects([path_effects.withStroke(linewidth=1, foreground="white")])
+
+axs["endnote"].text(
+    1,
+    1,
+    "@your_twitter_handle",
+    color="black",
+    va="center",
+    ha="right",
+    fontsize=15,
+    fontproperties=oswald_regular.prop,
+)
+TITLE_TEXT = f"{TEAM}, {FORMATION} formation"
+axs["title"].text(
+    0.5,
+    0.7,
+    TITLE_TEXT,
+    color="black",
+    va="center",
+    ha="center",
+    fontproperties=oswald_regular.prop,
+    fontsize=30,
+)
+axs["title"].text(
+    0.5,
+    0.15,
+    OPPONENT,
+    color="black",
+    va="center",
+    ha="center",
+    fontproperties=oswald_regular.prop,
+    fontsize=18,
+)
+
+plt.show()  # If you are using a Jupyter notebook you do not need this line
