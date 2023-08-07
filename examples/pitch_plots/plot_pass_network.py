@@ -180,7 +180,8 @@ plt.show()  # If you are using a Jupyter notebook you do not need this line
 # --------------
 # By @francescozonaro
 #
-# The theme below is inspired by @SergioMinuto90 Friends of Tracking tutorial.
+# The theme below is inspired by `@SergioMinuto90 <https://twitter.com/SergioMinuto90>`_ 
+# and his `friends of tracking tutorial on passing networks <https://github.com/Friends-of-Tracking-Data-FoTD/passing-networks-in-python>`_.
 
 ##############################################################################
 # Import the path_effects module for the text stroke
