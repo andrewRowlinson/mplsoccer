@@ -197,3 +197,80 @@ pitch.arrows(df_pass.x[mask], df_pass.y[mask], df_pass.end_x[mask], df_pass.end_
 pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9', alpha=0.5)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
+
+##############################################################################
+# Comparing different heatmaps sharing the same color scale.
+# ---------------
+
+##############################################################################
+# Get your favourite font
+
+URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
+custom_font = FontManager(URL)
+
+##############################################################################
+# Get the data. Specifically, we'll use the EURO2020 data.
+
+parser = Sbopen()
+matches = parser.match(competition_id=55, season_id=43)
+
+teams_to_match_ids = {
+    "Italy": [],
+    "Spain": [],
+    "England": [],
+    "Denmark": []
+}
+
+for team_name in teams_to_match_ids:
+    team_matches = matches[(matches["home_team_name"] == team_name) | (matches["away_team_name"] == team_name)]
+    teams_to_match_ids[team_name] = list(team_matches.match_id)
+
+##############################################################################
+# Process data for each team. We cannot directly plot the heatmaps because
+# we need the information about the overall min/max value to generate 
+# a common cmap for each plot. Note that the data is normalized per 90 minutes
+# because naturally teams that played more matches will have more events.
+
+teams = ["Italy", "Spain", "England", "Denmark"]
+
+pitch = Pitch(pitch_type="statsbomb", pitch_color="white", line_color="black", linewidth=1, line_zorder=3)
+
+fig, axs = pitch.grid(figheight=18, ncols=4, axis=False, endnote_space=0, title_space=0)
+bin_statistic_list = []
+
+for team in teams:
+    events = pd.concat([parser.event(file)[0] for file in teams_to_match_ids[team]])  # 0 index is the event file
+    mask_data = (events.team_name == team) & (events.type_name == 'Ball Recovery')
+    df = events.loc[mask_data].reset_index(drop=True)
+    bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(3, 1))
+    bin_statistic['statistic'] /= len(teams_to_match_ids[team]) # Normalization
+    bin_statistic_list.append(bin_statistic)
+
+##############################################################################
+# Compute the min/max and plot all the heatmaps. We will derive the cmap
+# using the white and purple from the (beautiful) 
+# `Nord palette <https://www.nordtheme.com/docs/colors-and-palettes/>`_ 
+
+overall_max = np.max([statistic['statistic'].max() for statistic in bin_statistic_list])
+overall_min = np.min([statistic['statistic'].min() for statistic in bin_statistic_list])
+
+for i, (team, bin_statistic, ax) in enumerate(zip(teams, bin_statistic_list, axs['pitch'].flat[:len(teams)])):
+    cmap = LinearSegmentedColormap.from_list("Nord Palette - Nord6 to Nord15", ['#ECEFF4', '#B48EAD'], N=100)
+    pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, edgecolors='white', linewidth=0.6, vmin=overall_min, vmax=overall_max)
+    ax.set_title(team, fontproperties=custom_font.prop.set_weight('bold'), fontsize=30)  # Set subplot title
+
+##############################################################################
+# Let's add the endnote and the colorbar to help contextualize the visual.
+
+cax = axs['title'].inset_axes([0.25, 0.5, 0.5, 0.1])
+cbar = plt.colorbar(pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, vmin=overall_min, vmax=overall_max), cax=cax, orientation='horizontal')
+cbar.ax.xaxis.set_label_position('top')
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.ax.tick_params(labelsize=30)
+
+endnote = axs['endnote'].text(1, 0.5, '@your_twitter_handle',
+                                   va='center', ha='right', fontsize=30,
+                                   fontproperties=custom_font.prop.set_weight('bold'), color='black')
+
+plt.tight_layout()
+plt.show() # No need for this in a jupyter notebook
