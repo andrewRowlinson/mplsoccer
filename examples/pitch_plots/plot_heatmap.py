@@ -229,7 +229,9 @@ for team_name in teams_to_match_ids:
 # Process data for each team. We cannot directly plot the heatmaps because
 # we need the information about the overall min/max value to generate 
 # a common cmap for each plot. Note that the data is normalized per 90 minutes
-# because naturally teams that played more matches will have more events.
+# because naturally teams that played more matches will have more events. 
+# We will derive the cmap using the white and purple from the (beautiful) 
+# `Nord palette <https://www.nordtheme.com/docs/colors-and-palettes/>`_ 
 
 teams = ["Italy", "Spain", "England", "Denmark"]
 
@@ -246,10 +248,7 @@ for team in teams:
     bin_statistic['statistic'] /= len(teams_to_match_ids[team]) # Normalization
     bin_statistic_list.append(bin_statistic)
 
-##############################################################################
-# Compute the min/max and plot all the heatmaps. We will derive the cmap
-# using the white and purple from the (beautiful) 
-# `Nord palette <https://www.nordtheme.com/docs/colors-and-palettes/>`_ 
+# Compute the min/max and plot all the heatmaps.
 
 overall_max = np.max([statistic['statistic'].max() for statistic in bin_statistic_list])
 overall_min = np.min([statistic['statistic'].min() for statistic in bin_statistic_list])
