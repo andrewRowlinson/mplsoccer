@@ -202,9 +202,7 @@ plt.show()  # If you are using a Jupyter notebook you do not need this line
 # Comparing different heatmaps sharing the same color scale.
 # ---------------
 
-##############################################################################
 # Get your favourite font
-
 URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
 custom_font = FontManager(URL)
 
@@ -237,7 +235,7 @@ teams = ["Italy", "Spain", "England", "Denmark"]
 
 pitch = Pitch(pitch_type="statsbomb", pitch_color="white", line_color="black", linewidth=1, line_zorder=3)
 
-fig, axs = pitch.grid(figheight=18, ncols=4, axis=False, endnote_space=0, title_space=0)
+fig, axs = pitch.grid(ncols=2, nrows=2, axis=False, endnote_space=0, title_space=0)
 bin_statistic_list = []
 
 for team in teams:
@@ -256,20 +254,19 @@ overall_min = np.min([statistic['statistic'].min() for statistic in bin_statisti
 for i, (team, bin_statistic, ax) in enumerate(zip(teams, bin_statistic_list, axs['pitch'].flat[:len(teams)])):
     cmap = LinearSegmentedColormap.from_list("Nord Palette - Nord6 to Nord15", ['#ECEFF4', '#B48EAD'], N=100)
     pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, edgecolors='white', linewidth=0.6, vmin=overall_min, vmax=overall_max)
-    ax.set_title(team, fontproperties=custom_font.prop.set_weight('bold'), fontsize=30)  # Set subplot title
+    ax.set_title(team, fontproperties=custom_font.prop.set_weight('bold'), fontsize=15)  # Set subplot title
 
-##############################################################################
 # Let's add the endnote and the colorbar to help contextualize the visual.
 
-cax = axs['title'].inset_axes([0.25, 0.5, 0.5, 0.1])
+cax = axs['title'].inset_axes([0.25, 0.5, 0.5, 0.2])
 cbar = plt.colorbar(pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, vmin=overall_min, vmax=overall_max), cax=cax, orientation='horizontal')
+cbar.set_label('Ball Recoveries x 90 minutes', fontsize=12, labelpad=10)
 cbar.ax.xaxis.set_label_position('top')
-cbar.ax.xaxis.set_ticks_position('top')
-cbar.ax.tick_params(labelsize=30)
+cbar.ax.xaxis.set_ticks_position('bottom')
+cbar.ax.tick_params(labelsize=10)
 
 endnote = axs['endnote'].text(1, 0.5, '@your_twitter_handle',
-                                   va='center', ha='right', fontsize=30,
+                                   va='center', ha='right', fontsize=12,
                                    fontproperties=custom_font.prop.set_weight('bold'), color='black')
 
-plt.tight_layout()
 plt.show() # No need for this in a jupyter notebook
