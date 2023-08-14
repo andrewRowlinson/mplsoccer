@@ -154,3 +154,172 @@ for text in legend.get_texts():
     text.set_fontsize(25)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
+
+##############################################################################
+# Alternative Theme + Shot contribution detection
+# --------------
+# Colors from the `Nord palette <https://www.nordtheme.com/>`_.
+
+# @francescozonaro
+rcParams['font.family'] = 'montserrat'
+rcParams['text.color'] = 'black'
+
+# Get event dataframe for game 7478
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
+
+##############################################################################
+# Find the distance between the pass and the subsequent shot, checking
+# that possession isn't lost.
+
+df['distance_to_shot'] = 9999  # Initialize the new column
+
+for idx, row in df.iterrows():
+    if row['type_name'] == 'Pass':
+        current_team = row['possession_team_name']
+        current_team_name = row['team_name']
+        
+        next_shot_idx = idx + 1
+        while next_shot_idx < len(df):
+            next_event = df.iloc[next_shot_idx]
+            if (next_event['type_name'] == 'Shot' and
+                next_event['possession_team_name'] == current_team and
+                next_event['team_name'] == current_team_name):
+                distance = next_shot_idx - idx
+                df.at[idx, 'distance_to_shot'] = distance
+                break
+            elif next_event['possession_team_name'] != current_team:
+                break
+            next_shot_idx += 1
+
+df['distance_to_shot'] = 100/df['distance_to_shot']
+old_min = df['distance_to_shot'].min()
+old_max = df['distance_to_shot'].max()
+new_min = 45
+new_max = 200
+
+df['distance_to_shot'] = ((df['distance_to_shot'] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
+
+##############################################################################
+# Boolean mask for filtering all the passes from a single player
+
+team1, team2 = df.team_name.unique()
+player = "Megan Anna Rapinoe"
+mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1) & (df.player_name == player)
+
+##############################################################################
+# Filter dataset to only include one player passes and get boolean mask for the completed passes
+
+df_pass = df.loc[mask_team1, ['x', 'y', 'end_x', 'end_y', 'outcome_name', 'distance_to_shot']]
+mask_complete = df_pass.outcome_name.isnull()
+mask_shot_complete = (df_pass.outcome_name.isnull()) & (df_pass.distance_to_shot > new_min)
+
+##############################################################################
+# View the pass dataframe.
+df_pass.head()
+
+##############################################################################
+# Plotting
+
+# Set up the pitch
+pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
+fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
+fig.set_facecolor('white')
+
+# Plot the completed passes
+pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
+             df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
+             lw=2, color='#A3BE8C', ax=ax)
+pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
+             s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
+pitch.scatter(df_pass[~mask_shot_complete].end_x, df_pass[~mask_shot_complete].end_y,
+             s=45,edgecolor='black', color='#A3BE8C', marker='X', ax=ax, zorder=9)
+
+
+# Plot the other passes
+pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+             df_pass[~mask_complete].end_x, df_pass[~mask_complete].end_y,
+             lw=2, color='#BF616A', ax=ax)
+pitch.scatter(df_pass[~mask_complete].end_x, df_pass[~mask_complete].end_y,
+             s=45, edgecolor='black', color='#BF616A', marker='X', ax=ax, zorder=9)
+
+# Set the legend and the endnotes
+legend_elements = [
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#A3BE8C",
+            zorder=7,
+            marker="s",
+            label="Completed pass",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#BF616A",
+            zorder=7,
+            marker="s",
+            label="Other pass",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#ECEFF4",
+            zorder=7,
+            marker="o",
+            label="Contribution to shot",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#ECEFF4",
+            zorder=7,
+            marker="X",
+            label="No shot",
+        ),
+    ]
+
+legend = ax.legend(
+    facecolor="white",
+    handles=legend_elements,
+    loc="center",
+    ncol=len(legend_elements),
+    bbox_to_anchor=(0.5, 0.99),
+    fontsize=15,
+    fancybox=True,
+    frameon=True,
+    handletextpad=0.05,
+    handleheight=1
+)
+
+ax.text(99.5, 82, "@your_twitter_handle", fontsize=12, va="center")
+ax.text(
+    0,
+    82,
+    f"{team1} vs {team2} ~ All {player} passes.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+ax.text(
+    0,
+    84,
+    f"The quicker the shot happened after the pass, the bigger is the circle.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+
+plt.show()
