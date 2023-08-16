@@ -159,8 +159,8 @@ plt.show()  # If you are using a Jupyter notebook you do not need this line
 # Alternative Theme + Shot contribution detection
 # --------------
 # Colors from the `Nord palette <https://www.nordtheme.com/>`_.
+# Written by @francescozonaro.
 
-# @francescozonaro
 rcParams['font.family'] = 'montserrat'
 rcParams['text.color'] = 'black'
 
@@ -169,10 +169,11 @@ parser = Sbopen()
 df, related, freeze, tactics = parser.event(7478)
 
 ##############################################################################
-# Find the distance between the pass and the subsequent shot, checking
-# that possession isn't lost.
+# Find the temporal distance between the pass and the subsequent shot 
+# (if present), checking that there is no possession loss in the build 
+# up to the shot.
 
-df['distance_to_shot'] = 9999  # Initialize the new column
+df['distance_to_shot'] = 9999
 
 for idx, row in df.iterrows():
     if row['type_name'] == 'Pass':
@@ -185,8 +186,8 @@ for idx, row in df.iterrows():
             if (next_event['type_name'] == 'Shot' and
                 next_event['possession_team_name'] == current_team and
                 next_event['team_name'] == current_team_name):
-                distance = next_shot_idx - idx
-                df.at[idx, 'distance_to_shot'] = distance
+                time_distance = (next_event['minute'] - row['minute'])*60 + (next_event['second'] - row['second'])
+                df.at[idx, 'distance_to_shot'] = time_distance
                 break
             elif next_event['possession_team_name'] != current_team:
                 break
@@ -195,7 +196,7 @@ for idx, row in df.iterrows():
 df['distance_to_shot'] = 100/df['distance_to_shot']
 old_min = df['distance_to_shot'].min()
 old_max = df['distance_to_shot'].max()
-new_min = 45
+new_min = 25
 new_max = 200
 
 df['distance_to_shot'] = ((df['distance_to_shot'] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
@@ -205,14 +206,17 @@ df['distance_to_shot'] = ((df['distance_to_shot'] - old_min) / (old_max - old_mi
 
 team1, team2 = df.team_name.unique()
 player = "Megan Anna Rapinoe"
-mask_team1 = (df.type_name == 'Pass') & (df.team_name == team1) & (df.player_name == player)
+mask_player = (df.type_name == 'Pass') & (df.team_name == team1) & (df.player_name == player)
 
 ##############################################################################
-# Filter dataset to only include one player passes and get boolean mask for the completed passes
+# Filter the dataset to only include passes from one player, then get the 
+# boolean mask for the completed passes, passes that were part of a chain to 
+# a shot and completed passes that did not end with a shot.
 
-df_pass = df.loc[mask_team1, ['x', 'y', 'end_x', 'end_y', 'outcome_name', 'distance_to_shot']]
+df_pass = df.loc[mask_player, ['x', 'y', 'end_x', 'end_y', 'outcome_name', 'distance_to_shot']]
 mask_complete = df_pass.outcome_name.isnull()
 mask_shot_complete = (df_pass.outcome_name.isnull()) & (df_pass.distance_to_shot > new_min)
+mask_shot_not_complete = (df_pass.outcome_name.isnull()) & (df_pass.distance_to_shot <= new_min)
 
 ##############################################################################
 # View the pass dataframe.
@@ -226,15 +230,14 @@ pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
 fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
 fig.set_facecolor('white')
 
-# Plot the completed passes
+# Plot the completed passes and a different marker if the build up resulted in a shot
 pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
              df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
              lw=2, color='#A3BE8C', ax=ax)
 pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
              s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
-pitch.scatter(df_pass[~mask_shot_complete].end_x, df_pass[~mask_shot_complete].end_y,
+pitch.scatter(df_pass[mask_shot_not_complete].end_x, df_pass[mask_shot_not_complete].end_y,
              s=45,edgecolor='black', color='#A3BE8C', marker='X', ax=ax, zorder=9)
-
 
 # Plot the other passes
 pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
@@ -289,6 +292,168 @@ legend_elements = [
             marker="X",
             label="No shot",
         ),
+    ]
+
+legend = ax.legend(
+    facecolor="white",
+    handles=legend_elements,
+    loc="center",
+    ncol=len(legend_elements),
+    bbox_to_anchor=(0.5, 0.99),
+    fontsize=15,
+    fancybox=True,
+    frameon=True,
+    handletextpad=0.05,
+    handleheight=1
+)
+
+ax.text(99.5, 82, "@your_twitter_handle", fontsize=12, va="center")
+ax.text(
+    0,
+    82,
+    f"{team1} vs {team2} ~ All {player} passes.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+ax.text(
+    0,
+    84,
+    f"The quicker the shot happened after the pass, the bigger is the circle.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+
+plt.show()
+
+##############################################################################
+# You could also focus on completed passes only
+
+# Set up the pitch
+pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
+fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
+fig.set_facecolor('white')
+
+# Plot the completed passes and a different marker if the build up resulted in a shot
+pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
+             df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
+             lw=2, color='#A3BE8C', ax=ax)
+pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
+             s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
+pitch.scatter(df_pass[mask_shot_not_complete].end_x, df_pass[mask_shot_not_complete].end_y,
+             s=45,edgecolor='black', color='#A3BE8C', marker='X', ax=ax, zorder=9)
+
+# Set the legend and the endnotes
+legend_elements = [
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#A3BE8C",
+            zorder=7,
+            marker="s",
+            label="Completed pass",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#ECEFF4",
+            zorder=7,
+            marker="o",
+            label="Contribution to shot",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#ECEFF4",
+            zorder=7,
+            marker="X",
+            label="No shot",
+        ),
+    ]
+
+legend = ax.legend(
+    facecolor="white",
+    handles=legend_elements,
+    loc="center",
+    ncol=len(legend_elements),
+    bbox_to_anchor=(0.5, 0.99),
+    fontsize=15,
+    fancybox=True,
+    frameon=True,
+    handletextpad=0.05,
+    handleheight=1
+)
+
+ax.text(99.5, 82, "@your_twitter_handle", fontsize=12, va="center")
+ax.text(
+    0,
+    82,
+    f"{team1} vs {team2} ~ All {player} passes.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+ax.text(
+    0,
+    84,
+    f"The quicker the shot happened after the pass, the bigger is the circle.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+
+plt.show()
+
+##############################################################################
+# Or you could also plot only the passes that were part of a chain resulting
+# in a shot
+
+# Set up the pitch
+pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
+fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
+fig.set_facecolor('white')
+
+# Plot the completed passes that were part of a shot building chain
+pitch.lines(df_pass[mask_shot_complete].x, df_pass[mask_shot_complete].y,
+             df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
+             lw=2, color='#A3BE8C', ax=ax)
+pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
+             s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
+
+# Set the legend and the endnotes
+legend_elements = [
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#A3BE8C",
+            zorder=7,
+            marker="s",
+            label="Completed pass",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#ECEFF4",
+            zorder=7,
+            marker="o",
+            label="Contribution to shot",
+        )
     ]
 
 legend = ax.legend(
