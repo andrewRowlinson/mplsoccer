@@ -159,7 +159,6 @@ plt.show()  # If you are using a Jupyter notebook you do not need this line
 # Alternative Theme + Shot contribution detection
 # --------------
 # Colors from the `Nord palette <https://www.nordtheme.com/>`_.
-# Written by @francescozonaro.
 
 rcParams['font.family'] = 'montserrat'
 rcParams['text.color'] = 'black'
