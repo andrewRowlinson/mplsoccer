@@ -199,15 +199,18 @@ pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9', alpha=0.5)
 plt.show()  # If you are using a Jupyter notebook you do not need this line
 
 ##############################################################################
-# Comparing different heatmaps sharing the same color scale.
+# Comparing different heatmaps sharing the same color scale
 # ---------------
+# Attention to normalization and color mapping across different 
+# heatmaps allows for accurate and reliable comparisons, enhancing the 
+# effectiveness of visual data analysis and interpretation.
 
 # Get your favourite font
 URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
 custom_font = FontManager(URL)
 
 ##############################################################################
-# Get the data. Specifically, we'll use the EURO2020 data.
+# Get the data. Specifically, we'll use EURO2020 data from the top 4 teams.
 
 parser = Sbopen()
 matches = parser.match(competition_id=55, season_id=43)
@@ -219,17 +222,16 @@ teams_to_match_ids = {
     "Denmark": []
 }
 
+# Get the match_ids for each team.
 for team_name in teams_to_match_ids:
     team_matches = matches[(matches["home_team_name"] == team_name) | (matches["away_team_name"] == team_name)]
     teams_to_match_ids[team_name] = list(team_matches.match_id)
 
 ##############################################################################
-# Process data for each team. We cannot directly plot the heatmaps because
+# Process data for each team. We cannot plot the heatmaps right away because
 # we need the information about the overall min/max value to generate 
 # a common cmap for each plot. Note that the data is normalized per 90 minutes
-# because naturally teams that played more matches will have more events. 
-# We will derive the cmap using the white and purple from the (beautiful) 
-# `Nord palette <https://www.nordtheme.com/docs/colors-and-palettes/>`_ 
+# because naturally teams that played more matches will have more events.
 
 teams = ["Italy", "Spain", "England", "Denmark"]
 

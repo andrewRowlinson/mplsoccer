@@ -8,7 +8,7 @@ This example shows how to plot all passes from a team in a match as lines.
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-
+from matplotlib.colors import LinearSegmentedColormap
 from mplsoccer import Pitch, VerticalPitch, FontManager, Sbopen
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
@@ -156,9 +156,8 @@ for text in legend.get_texts():
 plt.show()  # If you are using a Jupyter notebook you do not need this line
 
 ##############################################################################
-# Alternative Theme + Shot contribution detection
+# Alternative Light Theme
 # --------------
-# Colors from the `Nord palette <https://www.nordtheme.com/>`_.
 
 rcParams['font.family'] = 'montserrat'
 rcParams['text.color'] = 'black'
@@ -166,39 +165,6 @@ rcParams['text.color'] = 'black'
 # Get event dataframe for game 7478
 parser = Sbopen()
 df, related, freeze, tactics = parser.event(7478)
-
-##############################################################################
-# Find the temporal distance between the pass and the subsequent shot 
-# (if present), checking that there is no possession loss in the build 
-# up to the shot.
-
-df['distance_to_shot'] = 9999
-
-for idx, row in df.iterrows():
-    if row['type_name'] == 'Pass':
-        current_team = row['possession_team_name']
-        current_team_name = row['team_name']
-        
-        next_shot_idx = idx + 1
-        while next_shot_idx < len(df):
-            next_event = df.iloc[next_shot_idx]
-            if (next_event['type_name'] == 'Shot' and
-                next_event['possession_team_name'] == current_team and
-                next_event['team_name'] == current_team_name):
-                time_distance = (next_event['minute'] - row['minute'])*60 + (next_event['second'] - row['second'])
-                df.at[idx, 'distance_to_shot'] = time_distance
-                break
-            elif next_event['possession_team_name'] != current_team:
-                break
-            next_shot_idx += 1
-
-df['distance_to_shot'] = 100/df['distance_to_shot']
-old_min = df['distance_to_shot'].min()
-old_max = df['distance_to_shot'].max()
-new_min = 25
-new_max = 200
-
-df['distance_to_shot'] = ((df['distance_to_shot'] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
 
 ##############################################################################
 # Boolean mask for filtering all the passes from a single player
@@ -209,13 +175,10 @@ mask_player = (df.type_name == 'Pass') & (df.team_name == team1) & (df.player_na
 
 ##############################################################################
 # Filter the dataset to only include passes from one player, then get the 
-# boolean mask for the completed passes, passes that were part of a chain to 
-# a shot and completed passes that did not end with a shot.
+# boolean mask for the completed passes.
 
-df_pass = df.loc[mask_player, ['x', 'y', 'end_x', 'end_y', 'outcome_name', 'distance_to_shot']]
+df_pass = df.loc[mask_player, ['x', 'y', 'end_x', 'end_y', 'outcome_name']]
 mask_complete = df_pass.outcome_name.isnull()
-mask_shot_complete = (df_pass.outcome_name.isnull()) & (df_pass.distance_to_shot > new_min)
-mask_shot_not_complete = (df_pass.outcome_name.isnull()) & (df_pass.distance_to_shot <= new_min)
 
 ##############################################################################
 # View the pass dataframe.
@@ -229,21 +192,15 @@ pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
 fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
 fig.set_facecolor('white')
 
-# Plot the completed passes and a different marker if the build up resulted in a shot
+# Plot the completed passes
 pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
              df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
-             lw=2, color='#A3BE8C', ax=ax)
-pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
-             s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
-pitch.scatter(df_pass[mask_shot_not_complete].end_x, df_pass[mask_shot_not_complete].end_y,
-             s=45,edgecolor='black', color='#A3BE8C', marker='X', ax=ax, zorder=9)
+             lw=3, color='#A3BE8C', transparent=True, comet=True, ax=ax)
 
 # Plot the other passes
 pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
              df_pass[~mask_complete].end_x, df_pass[~mask_complete].end_y,
-             lw=2, color='#BF616A', ax=ax)
-pitch.scatter(df_pass[~mask_complete].end_x, df_pass[~mask_complete].end_y,
-             s=45, edgecolor='black', color='#BF616A', marker='X', ax=ax, zorder=9)
+             lw=3, color='#BF616A', transparent=True, comet=True, ax=ax)
 
 # Set the legend and the endnotes
 legend_elements = [
@@ -268,190 +225,6 @@ legend_elements = [
             zorder=7,
             marker="s",
             label="Other pass",
-        ),
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#ECEFF4",
-            zorder=7,
-            marker="o",
-            label="Contribution to shot",
-        ),
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#ECEFF4",
-            zorder=7,
-            marker="X",
-            label="No shot",
-        ),
-    ]
-
-legend = ax.legend(
-    facecolor="white",
-    handles=legend_elements,
-    loc="center",
-    ncol=len(legend_elements),
-    bbox_to_anchor=(0.5, 0.99),
-    fontsize=15,
-    fancybox=True,
-    frameon=True,
-    handletextpad=0.05,
-    handleheight=1
-)
-
-ax.text(99.5, 82, "@your_twitter_handle", fontsize=12, va="center")
-ax.text(
-    0,
-    82,
-    f"{team1} vs {team2} ~ All {player} passes.",
-    fontsize=11,
-    va="center",
-    ha="left",
-)
-ax.text(
-    0,
-    84,
-    f"The quicker the shot happened after the pass, the bigger is the circle.",
-    fontsize=11,
-    va="center",
-    ha="left",
-)
-
-plt.show()
-
-##############################################################################
-# You could also focus on completed passes only
-
-# Set up the pitch
-pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
-fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
-fig.set_facecolor('white')
-
-# Plot the completed passes and a different marker if the build up resulted in a shot
-pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
-             df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
-             lw=2, color='#A3BE8C', ax=ax)
-pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
-             s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
-pitch.scatter(df_pass[mask_shot_not_complete].end_x, df_pass[mask_shot_not_complete].end_y,
-             s=45,edgecolor='black', color='#A3BE8C', marker='X', ax=ax, zorder=9)
-
-# Set the legend and the endnotes
-legend_elements = [
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#A3BE8C",
-            zorder=7,
-            marker="s",
-            label="Completed pass",
-        ),
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#ECEFF4",
-            zorder=7,
-            marker="o",
-            label="Contribution to shot",
-        ),
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#ECEFF4",
-            zorder=7,
-            marker="X",
-            label="No shot",
-        ),
-    ]
-
-legend = ax.legend(
-    facecolor="white",
-    handles=legend_elements,
-    loc="center",
-    ncol=len(legend_elements),
-    bbox_to_anchor=(0.5, 0.99),
-    fontsize=15,
-    fancybox=True,
-    frameon=True,
-    handletextpad=0.05,
-    handleheight=1
-)
-
-ax.text(99.5, 82, "@your_twitter_handle", fontsize=12, va="center")
-ax.text(
-    0,
-    82,
-    f"{team1} vs {team2} ~ All {player} passes.",
-    fontsize=11,
-    va="center",
-    ha="left",
-)
-ax.text(
-    0,
-    84,
-    f"The quicker the shot happened after the pass, the bigger is the circle.",
-    fontsize=11,
-    va="center",
-    ha="left",
-)
-
-plt.show()
-
-##############################################################################
-# Or you could also plot only the passes that were part of a chain resulting
-# in a shot
-
-# Set up the pitch
-pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
-fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
-fig.set_facecolor('white')
-
-# Plot the completed passes that were part of a shot building chain
-pitch.lines(df_pass[mask_shot_complete].x, df_pass[mask_shot_complete].y,
-             df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
-             lw=2, color='#A3BE8C', ax=ax)
-pitch.scatter(df_pass[mask_shot_complete].end_x, df_pass[mask_shot_complete].end_y,
-             s=df_pass[mask_shot_complete].distance_to_shot,edgecolor='black', color='#A3BE8C', ax=ax, zorder=9)
-
-# Set the legend and the endnotes
-legend_elements = [
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#A3BE8C",
-            zorder=7,
-            marker="s",
-            label="Completed pass",
-        ),
-        plt.scatter(
-            [],
-            [],
-            s=55,
-            edgecolor="black",
-            linewidth=1,
-            facecolor="#ECEFF4",
-            zorder=7,
-            marker="o",
-            label="Contribution to shot",
         )
     ]
 
@@ -480,7 +253,7 @@ ax.text(
 ax.text(
     0,
     84,
-    f"The quicker the shot happened after the pass, the bigger is the circle.",
+    f"Statsbomb open data.",
     fontsize=11,
     va="center",
     ha="left",
