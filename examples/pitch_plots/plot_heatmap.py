@@ -242,9 +242,9 @@ bin_statistic_list = []
 
 for team in teams:
     events = pd.concat([parser.event(file)[0] for file in teams_to_match_ids[team]])  # 0 index is the event file
-    mask_data = (events.team_name == team) & (events.type_name == 'Ball Recovery')
+    mask_data = (events.team_name == team) & (events.type_name == 'Pressure')
     df = events.loc[mask_data].reset_index(drop=True)
-    bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(3, 1))
+    bin_statistic = pitch.bin_statistic(df.x, df.y, statistic='count', bins=(5, 1))
     bin_statistic['statistic'] /= len(teams_to_match_ids[team]) # Normalization
     bin_statistic_list.append(bin_statistic)
 
@@ -255,14 +255,14 @@ overall_min = np.min([statistic['statistic'].min() for statistic in bin_statisti
 
 for i, (team, bin_statistic, ax) in enumerate(zip(teams, bin_statistic_list, axs['pitch'].flat[:len(teams)])):
     cmap = LinearSegmentedColormap.from_list("Nord Palette - Nord6 to Nord15", ['#ECEFF4', '#B48EAD'], N=100)
-    pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, edgecolors='white', linewidth=0.6, vmin=overall_min, vmax=overall_max)
+    pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, edgecolors='none', linewidth=0.6, vmin=overall_min, vmax=overall_max)
     ax.set_title(team, fontproperties=custom_font.prop.set_weight('bold'), fontsize=15)  # Set subplot title
 
 # Let's add the endnote and the colorbar to help contextualize the visual.
 
 cax = axs['title'].inset_axes([0.25, 0.5, 0.5, 0.2])
 cbar = plt.colorbar(pitch.heatmap(bin_statistic, ax=ax, cmap=cmap, vmin=overall_min, vmax=overall_max), cax=cax, orientation='horizontal')
-cbar.set_label('Ball Recoveries x 90 minutes', fontsize=12, labelpad=10)
+cbar.set_label('Pressures x 90 minutes', fontsize=12, labelpad=10)
 cbar.ax.xaxis.set_label_position('top')
 cbar.ax.xaxis.set_ticks_position('bottom')
 cbar.ax.tick_params(labelsize=10)
