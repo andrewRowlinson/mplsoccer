@@ -21,7 +21,7 @@ from scipy.interpolate import make_interp_spline
 # The only thing that changes is the fact that we need the columns of "minute" and "team_name" to plot match momentum correctly.
 # You may add them where the list "cols" is defined in the other tutorial.
 
-match_events = pd.read_csv("https://raw.githubusercontent.com/lanusStats/futbol-data-visualizacion/main/archivos/streams-videos/archivos/xt_match_example.csv")
+match_events = pd.read_csv("https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/xt_match_example.csv")
 
 ##############################################################################
 # Calculating the moving averages of Expected Threat
