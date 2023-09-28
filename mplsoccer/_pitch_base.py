@@ -1569,7 +1569,8 @@ class BasePitch(ABC):
         """ Implement a heatmap for the Juegos de posición zones."""
 
     @abstractmethod
-    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, ax=None, **kwargs):
+    def label_heatmap(self, stats, str_format=None, exclude_zeros=False,
+                      xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Implement a heatmap labeller."""
 
     @abstractmethod
