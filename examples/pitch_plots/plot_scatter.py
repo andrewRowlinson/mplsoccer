@@ -212,7 +212,7 @@ sc2 = pitch.scatter(df_goals_barca.x, df_goals_barca.y,
                     # size varies between 100 and 1900 (points squared)
                     s=(df_goals_barca.shot_statsbomb_xg * 1900) + 100,
                     edgecolors='#b94b75',
-                    linewidth=0.6,
+                    linewidths=0.6,
                     c='white',
                     marker='football',
                     ax=ax)

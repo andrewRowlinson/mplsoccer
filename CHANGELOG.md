@@ -1,3 +1,10 @@
+:rocket: Version 1.2.2
+----------------------
+
+### Fixed
+* Fixed an import error for matplotlib.docstring, which has been depreciated as an external module.
+* Fixed a pandas depreciation warning for the StatsBomb module.
+
 :rocket: Version 1.2.0
 ----------------------
 

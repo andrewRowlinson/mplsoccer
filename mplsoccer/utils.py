@@ -14,8 +14,8 @@ from PIL import Image
 from mplsoccer import dimensions
 
 __all__ = ['add_image', 'validate_ax', 'inset_axes',
-           'set_visible', 'Standardizer', 'FontManager',
-           'set_labels', 'get_aspect', 'inset_image']
+           'set_visible', 'Standardizer', 'FontManager', 'set_labels', 'get_aspect',
+           'copy_doc', 'inset_image']
 
 
 def add_image(image, fig, left, bottom, width=None, height=None, **kwargs):
@@ -466,3 +466,13 @@ class FontManager:
 
     def __repr__(self):
         return f'{self.__class__.__name__}(font_url={self.url})'
+
+def copy_doc(func):
+    """ Decorator to copy a docstring to a new function/method. 
+    Inspired by estnani's answer: https://stackoverflow.com/questions/4056983/how-do-i-programmatically-set-the-docstring
+    """
+    def _doc(new_func):
+        new_func.__doc__ = func.__doc__
+        return new_func
+    return _doc
+

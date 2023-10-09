@@ -4,7 +4,6 @@ from collections import namedtuple
 
 import numpy as np
 import seaborn as sns
-from matplotlib import docstring
 from matplotlib import patches
 from matplotlib import rcParams
 from scipy.spatial import Voronoi, ConvexHull
@@ -15,7 +14,7 @@ from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, 
 from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
 from mplsoccer.scatterutils import scatter_football, scatter_rotation
-from mplsoccer.utils import validate_ax
+from mplsoccer.utils import validate_ax, copy_doc
 
 _BinnedStatisticResult = namedtuple('BinnedStatisticResult',
                                     ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
@@ -376,24 +375,24 @@ class BasePitchPlot(BasePitch):
         x, y = self._reverse_if_vertical(x, y)
         return ax.text(x, y, s, **kwargs)
 
-    @docstring.copy(bin_statistic)
+    @copy_doc(bin_statistic)
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
                       normalize=False, standardized=False):
         return bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
                              bins=bins, normalize=normalize, standardized=standardized)
 
-    @docstring.copy(heatmap)
+    @copy_doc(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
-    @docstring.copy(bin_statistic_positional)
+    @copy_doc(bin_statistic_positional)
     def bin_statistic_positional(self, x, y, values=None, positional='full',
                                  statistic='count', normalize=False):
         return bin_statistic_positional(x, y, values=values,
                                         dim=self.dim, positional=positional,
                                         statistic=statistic, normalize=normalize)
 
-    @docstring.copy(heatmap_positional)
+    @copy_doc(heatmap_positional)
     def heatmap_positional(self, stats, ax=None, **kwargs):
         return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
 
@@ -464,12 +463,12 @@ class BasePitchPlot(BasePitch):
 
         return annotation_list
 
-    @docstring.copy(arrows)
+    @copy_doc(arrows)
     def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
         validate_ax(ax)
         return arrows(xstart, ystart, xend, yend, *args, ax=ax, vertical=self.vertical, **kwargs)
 
-    @docstring.copy(lines)
+    @copy_doc(lines)
     def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
               comet=False, transparent=False, alpha_start=0.01,
               alpha_end=1, cmap=None, ax=None, **kwargs):
