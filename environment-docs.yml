@@ -9,6 +9,7 @@ dependencies:
   - pandas
   - pillow
   - pyarrow
+  - python<3.12
   - requests
   - scipy
   - seaborn

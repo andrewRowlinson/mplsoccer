@@ -195,6 +195,12 @@ pitch = Pitch(linewidth=3,
 fig, ax = pitch.draw()
 
 ##############################################################################
+# The center and penalty spots can also be changed to a square to avoid clashes with scatter points.
+
+pitch = Pitch(spot_type='square', spot_scale=0.01)
+fig, ax = pitch.draw()
+
+##############################################################################
 # If you need to lift the pitch markings above other elements of the chart.
 # You can do this via ``line_zorder``, ``stripe_zorder``,
 # ``positional_zorder``, and ``shade_zorder``.

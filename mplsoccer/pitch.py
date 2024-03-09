@@ -71,6 +71,15 @@ class Pitch(BasePitchPlot):
         ax.add_patch(rectangle)
         return rectangle
 
+    def _draw_centered_rectangle(self, ax, x, y, width, height, **kwargs):
+        if self.dim.invert_y:
+            height = - height
+        x = x - width / 2
+        y = y - height / 2
+        rectangle = patches.Rectangle((x, y), width, height, **kwargs)
+        ax.add_patch(rectangle)
+        return rectangle
+
     def _draw_line(self, ax, x, y, **kwargs):
         line = Line2D(x, y, **kwargs)
         ax.add_artist(line)
@@ -174,6 +183,15 @@ class VerticalPitch(BasePitchPlot):
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         if self.dim.invert_y:
             height = - height
+        rectangle = patches.Rectangle((y, x), height, width, **kwargs)
+        ax.add_patch(rectangle)
+        return rectangle
+
+    def _draw_centered_rectangle(self, ax, x, y, width, height, **kwargs):
+        if self.dim.invert_y:
+            height = - height
+        x = x - width / 2
+        y = y - height / 2
         rectangle = patches.Rectangle((y, x), height, width, **kwargs)
         ax.add_patch(rectangle)
         return rectangle
