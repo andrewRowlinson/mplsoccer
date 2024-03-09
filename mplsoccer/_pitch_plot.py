@@ -396,7 +396,7 @@ class BasePitchPlot(BasePitch):
     def heatmap_positional(self, stats, ax=None, **kwargs):
         return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
 
-    def label_heatmap(self, stats, str_format=None, exclude_zeros=False,
+    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
@@ -450,6 +450,8 @@ class BasePitchPlot(BasePitch):
             mask_clip = mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
             if exclude_zeros:
                 mask_clip = mask_clip | (np.isclose(bin_stat['statistic'], 0.))
+            if exclude_nan:
+                mask_clip = mask_clip | np.isnan(bin_stat['statistic'])
             mask_clip = np.ravel(mask_clip)
 
             text = np.ravel(bin_stat['statistic'])[~mask_clip]
@@ -802,6 +804,9 @@ class BasePitchPlot(BasePitch):
         pass
 
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
+        pass
+
+    def _draw_centered_rectangle(self, ax, x, y, width, height, **kwargs):
         pass
 
     def _draw_line(self, ax, x, y, **kwargs):

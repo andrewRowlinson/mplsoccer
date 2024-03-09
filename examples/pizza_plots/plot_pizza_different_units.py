@@ -29,12 +29,12 @@ from mplsoccer import PyPizza, FontManager
 # We borrowed the FontManager from the excellent
 # `ridge_map library <https://github.com/ColCarroll/ridge_map>`_.
 
-font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
-                          'Roboto%5Bwdth,wght%5D.ttf')
-font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
-                          'Roboto-Italic%5Bwdth,wght%5D.ttf')
+font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/robotomono/'
+                          'RobotoMono[wght].ttf')
+font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/robotomono/'
+                          'RobotoMono-Italic[wght].ttf')
 font_bold = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/'
-                        'RobotoSlab%5Bwght%5D.ttf')
+                        'RobotoSlab[wght].ttf')
 
 ##############################################################################
 # Different Units

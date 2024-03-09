@@ -50,6 +50,8 @@ class BasePitch(ABC):
         Artists with lower zorder values are drawn first.
     spot_scale : float, default 0.002
         The size of the penalty and center spots relative to the pitch length.
+    spot_type : str, default 'circle'
+        Whether to display the spots as a 'circle' or 'square'.
     stripe : bool, default False
         Whether to show pitch stripes.
     stripe_color : any Matplotlib color, default '#c2d59d'
@@ -112,7 +114,7 @@ class BasePitch(ABC):
 
     def __init__(self, pitch_type='statsbomb', half=False,
                  pitch_color=None, line_color=None, line_alpha=1, linewidth=2,
-                 linestyle=None, line_zorder=0.9, spot_scale=0.002,
+                 linestyle=None, line_zorder=0.9, spot_scale=0.002, spot_type='circle',
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
@@ -134,6 +136,7 @@ class BasePitch(ABC):
         self.linewidth = linewidth
         self.linestyle = linestyle
         self.spot_scale = spot_scale
+        self.spot_type = spot_type
         self.line_zorder = line_zorder
         self.stripe = stripe
         self.stripe_color = stripe_color
@@ -255,6 +258,7 @@ class BasePitch(ABC):
                 f'goal_type={self.goal_type!r}, goal_alpha={self.goal_alpha!r}, '
                 f'line_alpha={self.line_alpha!r}, label={self.label!r}, '
                 f'tick={self.tick!r}, axis={self.axis!r}, spot_scale={self.spot_scale!r}, '
+                f'spot_type={self.spot_type!r}), '
                 f'corner_arcs={self.corner_arcs!r})'
                 )
 
@@ -279,6 +283,10 @@ class BasePitch(ABC):
         valid_goal_type = ['line', 'box', 'circle']
         if self.goal_type not in valid_goal_type:
             raise TypeError(f'Invalid argument: goal_type should be in {valid_goal_type}')
+
+        valid_spot_type = ['circle', 'square']
+        if self.spot_type not in valid_spot_type:
+            raise TypeError(f'Invalid argument: spot_type should be in {valid_spot_type}')
 
         # axis/ label warnings
         if (self.axis is False) and self.label:
@@ -545,18 +553,22 @@ class BasePitch(ABC):
 
         # draw center and penalty spots
         if self.spot_scale > 0:
-            self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
-                               self.diameter_spot1, self.diameter_spot2,
-                               alpha=self.line_alpha, color=self.line_color,
-                               zorder=self.line_zorder)
-            self._draw_ellipse(ax, self.dim.penalty_left, self.dim.center_width,
-                               self.diameter_spot1, self.diameter_spot2,
-                               alpha=self.line_alpha, color=self.line_color,
-                               zorder=self.line_zorder)
-            self._draw_ellipse(ax, self.dim.penalty_right, self.dim.center_width,
-                               self.diameter_spot1, self.diameter_spot2,
-                               alpha=self.line_alpha, color=self.line_color,
-                               zorder=self.line_zorder)
+            if self.spot_type == 'circle':
+                spot_func = self._draw_ellipse
+            else:
+                spot_func = self._draw_centered_rectangle
+            spot_func(ax, self.dim.center_length, self.dim.center_width,
+                      self.diameter_spot1, self.diameter_spot2,
+                      alpha=self.line_alpha, color=self.line_color,
+                      zorder=self.line_zorder)
+            spot_func(ax, self.dim.penalty_left, self.dim.center_width,
+                      self.diameter_spot1, self.diameter_spot2,
+                      alpha=self.line_alpha, color=self.line_color,
+                      zorder=self.line_zorder)
+            spot_func(ax, self.dim.penalty_right, self.dim.center_width,
+                      self.diameter_spot1, self.diameter_spot2,
+                      alpha=self.line_alpha, color=self.line_color,
+                      zorder=self.line_zorder)
 
     def _draw_goals(self, ax):
         if self.goal_type == 'box':
@@ -985,8 +997,7 @@ class BasePitch(ABC):
 
         # validate the offsets are the same length as the number of players
         if (((len(formation_positions) != xoffset.size) and xoffset.size > 1) or
-                ((len(formation_positions) != yoffset.size) and yoffset.size > 1)
-        ):
+                ((len(formation_positions) != yoffset.size) and yoffset.size > 1)):
             raise ValueError(
                 f'There are {len(formation_positions)} players in the formation, but you have '
                 f'provided {xoffset.size} xoffset and {yoffset.size} yoffset. '
@@ -1476,6 +1487,10 @@ class BasePitch(ABC):
         """ Implement a method to draw rectangles on an axes."""
 
     @abstractmethod
+    def _draw_centered_rectangle(self, ax, x, y, width, height, **kwargs):
+        """ Implement a method to draw centered rectangles on an axes."""
+
+    @abstractmethod
     def _draw_line(self, ax, x, y, **kwargs):
         """ Implement a method to draw lines on an axes."""
 
@@ -1569,7 +1584,8 @@ class BasePitch(ABC):
         """ Implement a heatmap for the Juegos de posición zones."""
 
     @abstractmethod
-    def label_heatmap(self, stats, str_format=None, exclude_zeros=False,
+    def label_heatmap(self, stats, str_format=None, 
+                      exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Implement a heatmap labeller."""
 

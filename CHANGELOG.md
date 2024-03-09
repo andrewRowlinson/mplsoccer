@@ -1,3 +1,14 @@
+:rocket: Version 1.2.3
+----------------------
+
+### Added
+* Added the ``exclude_nan`` argument to ``Pitch.label_heatmap`` to exclude nan from text labels.
+* Added a ``spot_type`` argument to the ``Pitch`` class to enable plotting penalty and center \
+spots as squares as well as circles.
+
+### Fixed
+* Fixed broken FontManager links.
+
 :rocket: Version 1.2.2
 ----------------------
 
