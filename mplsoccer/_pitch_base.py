@@ -1470,6 +1470,37 @@ class BasePitch(ABC):
 
         return fig, axs
 
+    def flip_side(self, x, y, flip):
+        """ A method to flip the coordinates to the other side of the pitch.
+
+        Parameters
+        ----------
+        x, y : float
+            The x, y coordinates that you want to flip.
+        flip : array-like of boolean or boolean
+            Whether to flip each individual coordinate.
+
+        Returns
+        -------
+        x, y
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> new_x, new_y = pitch.flip_side(20, 20, True)
+        """
+        x = np.ravel(x)
+        y = np.ravel(y)
+        flip = np.ravel(flip)
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+        if flip.size != x.size:
+            raise ValueError("x and flip must be the same size")
+        new_x = np.where(flip, np.where(self.dim.origin_center, -x, self.dim.length - x), x)
+        new_y = np.where(flip, np.where(self.dim.origin_center, -y, self.dim.width - y), y)
+        return new_x, new_y
+
     # The methods below for drawing/ setting attributes for some pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
     # as they differ for horizontal/ vertical pitches
@@ -1584,7 +1615,7 @@ class BasePitch(ABC):
         """ Implement a heatmap for the Juegos de posición zones."""
 
     @abstractmethod
-    def label_heatmap(self, stats, str_format=None, 
+    def label_heatmap(self, stats, str_format=None,
                       exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Implement a heatmap labeller."""
