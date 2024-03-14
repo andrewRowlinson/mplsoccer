@@ -1,3 +1,13 @@
+:rocket: Version 1.2.4
+----------------------
+
+### Added
+* Added the ``flip_side`` method to ``Pitch`` to flip coordinates to the other side of the pitch.
+
+### Fixed
+* Fixed the ``424`` formation so the front line is a line of four \
+rather than two strikers and two attacking wingers.
+
 :rocket: Version 1.2.3
 ----------------------
 
