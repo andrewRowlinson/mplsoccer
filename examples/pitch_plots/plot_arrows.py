@@ -1,6 +1,6 @@
 """
 =======================
-Pass plot using arrrows
+Pass plot using arrows
 =======================
 
 This example shows how to plot all passes from a team in a match as arrows.

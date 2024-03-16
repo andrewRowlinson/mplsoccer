@@ -8,7 +8,7 @@ This example shows how to plot all passes from a team in a match as lines.
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-
+from matplotlib.colors import LinearSegmentedColormap
 from mplsoccer import Pitch, VerticalPitch, FontManager, Sbopen
 
 rcParams['text.color'] = '#c7d5cc'  # set the default text color
@@ -154,3 +154,109 @@ for text in legend.get_texts():
     text.set_fontsize(25)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
+
+##############################################################################
+# Alternative Light Theme
+# --------------
+
+rcParams['font.family'] = 'montserrat'
+rcParams['text.color'] = 'black'
+
+# Get event dataframe for game 7478
+parser = Sbopen()
+df, related, freeze, tactics = parser.event(7478)
+
+##############################################################################
+# Boolean mask for filtering all the passes from a single player
+
+team1, team2 = df.team_name.unique()
+player = "Megan Anna Rapinoe"
+mask_player = (df.type_name == 'Pass') & (df.team_name == team1) & (df.player_name == player)
+
+##############################################################################
+# Filter the dataset to only include passes from one player, then get the 
+# boolean mask for the completed passes.
+
+df_pass = df.loc[mask_player, ['x', 'y', 'end_x', 'end_y', 'outcome_name']]
+mask_complete = df_pass.outcome_name.isnull()
+
+##############################################################################
+# View the pass dataframe.
+df_pass.head()
+
+##############################################################################
+# Plotting
+
+# Set up the pitch
+pitch = Pitch(pitch_type='statsbomb', pitch_color='white', line_color='#4C566A')
+fig, ax = pitch.draw(figsize=(12, 10), constrained_layout=True, tight_layout=True)
+fig.set_facecolor('white')
+
+# Plot the completed passes
+pitch.lines(df_pass[mask_complete].x, df_pass[mask_complete].y,
+             df_pass[mask_complete].end_x, df_pass[mask_complete].end_y,
+             lw=3, color='#A3BE8C', transparent=True, comet=True, ax=ax)
+
+# Plot the other passes
+pitch.lines(df_pass[~mask_complete].x, df_pass[~mask_complete].y,
+             df_pass[~mask_complete].end_x, df_pass[~mask_complete].end_y,
+             lw=3, color='#BF616A', transparent=True, comet=True, ax=ax)
+
+# Set the legend and the endnotes
+legend_elements = [
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#A3BE8C",
+            zorder=7,
+            marker="s",
+            label="Completed pass",
+        ),
+        plt.scatter(
+            [],
+            [],
+            s=55,
+            edgecolor="black",
+            linewidth=1,
+            facecolor="#BF616A",
+            zorder=7,
+            marker="s",
+            label="Other pass",
+        )
+    ]
+
+legend = ax.legend(
+    facecolor="white",
+    handles=legend_elements,
+    loc="center",
+    ncol=len(legend_elements),
+    bbox_to_anchor=(0.5, 0.99),
+    fontsize=15,
+    fancybox=True,
+    frameon=True,
+    handletextpad=0.05,
+    handleheight=1
+)
+
+ax.text(99.5, 82, "@your_twitter_handle", fontsize=12, va="center")
+ax.text(
+    0,
+    82,
+    f"{team1} vs {team2} ~ All {player} passes.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+ax.text(
+    0,
+    84,
+    f"Statsbomb open data.",
+    fontsize=11,
+    va="center",
+    ha="left",
+)
+
+plt.show()
