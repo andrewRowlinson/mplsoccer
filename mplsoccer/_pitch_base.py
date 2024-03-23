@@ -1556,6 +1556,11 @@ class BasePitch(ABC):
         """ Calculate 2d binned statistics for arbritary shaped bins."""
 
     @abstractmethod
+    def bin_statistic_sonar(self, x, y, angle, values=None, statistic='count', bins=(5, 4, 10),
+                            normalize=False, standardized=False, center=True):
+        """ Calculate binned statistics sonars for arbritary shaped bins."""
+
+    @abstractmethod
     def heatmap(self, stats, ax=None, **kwargs):
         """ Implement drawing heatmaps for arbritary shaped bins."""
 
