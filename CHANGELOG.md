@@ -1,3 +1,9 @@
+:rocket: Version 1.3.1
+----------------------
+### Added
+* Added the ``pitch_type = 'center_scale'`` argument to ``Pitch``. Draws a pitch centered at (0, 0) \
+with x/y coodinates from -1 to +1.
+
 :rocket: Version 1.2.4
 ----------------------
 

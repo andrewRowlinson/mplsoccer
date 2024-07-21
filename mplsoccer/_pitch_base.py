@@ -28,7 +28,7 @@ class BasePitch(ABC):
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
-        and 'impect'.
+        'center_scale' and 'impect'.
     half : bool, default False
         Whether to display half of the pitch.
     pitch_color : any Matplotlib color, default None
@@ -90,10 +90,10 @@ class BasePitch(ABC):
         Artists with lower zorder values are drawn first.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum' and 'custom' pitch_type.
+        'skillcorner', 'secondspectrum', 'center_scale', and 'custom' pitch_type.
     pitch_width : float, default None
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum' and 'custom' pitch_type
+        'skillcorner', 'secondspectrum', 'center_scale', and 'custom' pitch_type
     goal_type : str, default 'line'
         Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
     goal_alpha : float, default 1
@@ -204,12 +204,9 @@ class BasePitch(ABC):
         # for tracab multiply the padding by 100
         for pad in ['pad_left', 'pad_right', 'pad_bottom', 'pad_top']:
             if getattr(self, pad) is None:
-                if pitch_type != 'metricasports':
-                    setattr(self, pad, 4)
-                else:
-                    setattr(self, pad, 0.04)
-            if pitch_type == 'tracab':
-                setattr(self, pad, getattr(self, pad) * 100)
+                setattr(self, pad, self.dim.pad_default)
+            if self.dim.pad_multiplier != 1:
+                setattr(self, pad, getattr(self, pad) * self.dim.pad_multiplier)
 
         # scale the padding where the aspect is not equal to one
         # this means that you can easily set the padding the same
@@ -226,8 +223,8 @@ class BasePitch(ABC):
         self._validate_pad()
 
         # calculate locations of arcs and circles.
-        # Where the pitch has an unequal aspect ratio we need to do this seperately
-        if (self.dim.aspect == 1) and (self.pitch_type != 'metricasports'):
+        # Where the pitch has an unequal aspect ratio we need to calculate them separately
+        if self.dim.aspect_equal:
             self._init_circles_and_arcs()
 
         # set the positions of the goal posts
@@ -334,12 +331,13 @@ class BasePitch(ABC):
         # calculate the point that the arc intersects the penalty area
         radius_length = radius * self.dim.length / self.dim.pitch_length
         radius_width = radius * self.dim.width / self.dim.pitch_width
+        penalty_spot_distance = self.dim.right - self.dim.penalty_right
         intersection = self.dim.center_width - ((radius_width * radius_length *
                                                  (radius_length ** 2 -
                                                   (self.dim.penalty_area_length -
-                                                   self.dim.penalty_left) ** 2) ** 0.5) /
+                                                   penalty_spot_distance) ** 2) ** 0.5) /
                                                 radius_length ** 2)
-        arc_pen_top1 = (self.dim.penalty_area_length, intersection)
+        arc_pen_top1 = (self.dim.penalty_area_left, intersection)
         spot_xy = (self.dim.penalty_left, self.dim.center_width)
         # to ax coordinates
         arc_pen_top1 = self._to_ax_coord(ax, ax.transAxes, arc_pen_top1)
@@ -351,6 +349,7 @@ class BasePitch(ABC):
         self.arc1_theta1 = 360 - self.arc1_theta2
         self.arc2_theta1 = 180 - self.arc1_theta2
         self.arc2_theta2 = 180 + self.arc1_theta2
+
 
     def _init_circles_and_arcs_equal_aspect(self, ax):
         radius_center = self.dim.circle_diameter / 2

@@ -746,8 +746,8 @@ class BasePitchPlot(BasePitch):
                                       statistic=circmean, bins=bins, standardized=standardized)
 
         # calculate the arrow length
-        if self.pitch_type == 'tracab':
-            arrow_length = arrow_length * 100
+        if self.dim.pad_multiplier != 1:
+            arrow_length = arrow_length * self.dim.pad_multiplie
         if arrow_type == 'scale':
             new_d = (bs_distance['statistic'] * arrow_length /
                      np.nan_to_num(bs_distance['statistic']).max(initial=None))
