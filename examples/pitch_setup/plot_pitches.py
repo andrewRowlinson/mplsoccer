@@ -32,12 +32,13 @@ pitch.draw(ax=axs[1])
 ##############################################################################
 # Supported data providers
 # ------------------------
-# mplsoccer supports 10 pitch types by specifying the ``pitch_type`` argument:
+# mplsoccer supports 11 pitch types by specifying the ``pitch_type`` argument:
 # 'statsbomb', 'opta', 'tracab', 'wyscout', 'uefa', 'metricasports', 'custom',
-# 'skillcorner', 'secondspectrum' and 'impect'.
+# 'skillcorner', 'secondspectrum', 'center_scale', and 'impect'.
 # If you are using tracking data or the custom pitch ('metricasports', 'tracab',
-# 'skillcorner', 'secondspectrum' or 'custom'), you also need to specify the
-# ``pitch_length`` and ``pitch_width``, which are typically 105 and 68 respectively.
+# 'skillcorner', 'secondspectrum', 'center_scale' or 'custom'),
+# you also need to specify the ``pitch_length`` and ``pitch_width``,
+# which are typically 105 and 68 respectively.
 
 pitch = Pitch(pitch_type='opta')  # example plotting an Opta/ Stats Perform pitch
 fig, ax = pitch.draw()
