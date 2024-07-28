@@ -383,6 +383,7 @@ class MetricasportsDims(BaseDims):
         self.six_yard_length = round(self.six_yard_length / self.pitch_length, 4)
         self.penalty_area_width = round(self.penalty_area_width / self.pitch_width, 4)
         self.penalty_area_length = round(self.penalty_area_length / self.pitch_length, 4)
+        self.penalty_spot_distance = round(self.penalty_spot_distance / self.pitch_length, 4)
         self.goal_length = round(self.goal_length / self.pitch_length, 4)
         self.goal_width = round(self.goal_width / self.pitch_width, 4)
         self.penalty_left = round(self.penalty_spot_distance / self.pitch_length, 4)
@@ -405,6 +406,7 @@ class ScaleCenterDims(BaseDims):
         self.penalty_area_left = self.left + self.penalty_area_length
         self.six_yard_left = self.left + self.six_yard_length
         self.penalty_left = self.left + round(self.penalty_spot_distance / self.pitch_length * self.length, 4)
+        self.penalty_spot_distance = round(self.penalty_spot_distance / self.pitch_length * self.length, 4)
         self.penalty_area_right = - self.penalty_area_left
         self.six_yard_right = - self.six_yard_left
         self.penalty_right = - self.penalty_left
