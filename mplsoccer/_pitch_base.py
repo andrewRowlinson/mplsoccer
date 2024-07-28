@@ -340,11 +340,10 @@ class BasePitch(ABC):
         # calculate the point that the arc intersects the penalty area
         radius_length = radius * self.dim.length / self.dim.pitch_length
         radius_width = radius * self.dim.width / self.dim.pitch_width
-        penalty_spot_distance = self.dim.right - self.dim.penalty_right
         intersection = self.dim.center_width - ((radius_width * radius_length *
                                                  (radius_length ** 2 -
                                                   (self.dim.penalty_area_length -
-                                                   penalty_spot_distance) ** 2) ** 0.5) /
+                                                   self.dim.penalty_spot_distance) ** 2) ** 0.5) /
                                                 radius_length ** 2)
         arc_pen_top1 = (self.dim.penalty_area_left, intersection)
         spot_xy = (self.dim.penalty_left, self.dim.center_width)

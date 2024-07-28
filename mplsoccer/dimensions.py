@@ -100,6 +100,7 @@ class BaseDims:
     six_yard_right: Optional[float] = None
     six_yard_bottom: Optional[float] = None
     six_yard_top: Optional[float] = None
+    penalty_spot_distance: Optional[float] = None
     penalty_left: Optional[float] = None
     penalty_right: Optional[float] = None
     penalty_area_left: Optional[float] = None
@@ -340,9 +341,8 @@ class FixedDims(BaseDims):
 class VariableCenterDims(BaseDims):
     """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
     'tracab', 'skillcorner', 'impect', and 'secondspectrum'."""
-    penalty_spot_distance: InitVar[float] = None
 
-    def __post_init__(self, penalty_spot_distance):
+    def __post_init__(self):
         self.left = - self.pitch_length / 2
         self.right = - self.left
         self.bottom = - self.pitch_width / 2
@@ -351,8 +351,8 @@ class VariableCenterDims(BaseDims):
         self.length = self.pitch_length
         self.six_yard_left = self.left + self.six_yard_length
         self.six_yard_right = - self.six_yard_left
-        self.penalty_left = self.left + penalty_spot_distance
-        self.penalty_right = self.right - penalty_spot_distance
+        self.penalty_left = self.left + self.penalty_spot_distance
+        self.penalty_right = self.right - self.penalty_spot_distance
         self.penalty_area_left = self.left + self.penalty_area_length
         self.penalty_area_right = - self.penalty_area_left
         self.setup_dims()
@@ -362,14 +362,13 @@ class VariableCenterDims(BaseDims):
 class CustomDims(BaseDims):
     """ Dataclass holding the dimension for the custom pitch.
     This is a pitch where the dimensions (width/length) vary and the origin is (left, bottom)."""
-    penalty_spot_distance: InitVar[float] = None
 
-    def __post_init__(self, penalty_spot_distance):
+    def __post_init__(self):
         self.top = self.pitch_width
         self.right = self.pitch_length
         self.center_width = self.pitch_width / 2
         self.center_length = self.pitch_length / 2
-        self.penalty_left = penalty_spot_distance
+        self.penalty_left = self.penalty_spot_distance
         self.penalty_box_dims()
         self.setup_dims()
 
@@ -377,9 +376,8 @@ class CustomDims(BaseDims):
 @dataclass
 class MetricasportsDims(BaseDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
-    penalty_spot_distance: InitVar[float] = None
 
-    def __post_init__(self, penalty_spot_distance):
+    def __post_init__(self):
         self.aspect = self.pitch_width / self.pitch_length
         self.six_yard_width = round(self.six_yard_width / self.pitch_width, 4)
         self.six_yard_length = round(self.six_yard_length / self.pitch_length, 4)
@@ -387,7 +385,7 @@ class MetricasportsDims(BaseDims):
         self.penalty_area_length = round(self.penalty_area_length / self.pitch_length, 4)
         self.goal_length = round(self.goal_length / self.pitch_length, 4)
         self.goal_width = round(self.goal_width / self.pitch_width, 4)
-        self.penalty_left = round(penalty_spot_distance / self.pitch_length, 4)
+        self.penalty_left = round(self.penalty_spot_distance / self.pitch_length, 4)
         self.penalty_box_dims()
         self.setup_dims()
 
@@ -395,9 +393,8 @@ class MetricasportsDims(BaseDims):
 @dataclass
 class ScaleCenterDims(BaseDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
-    penalty_spot_distance: InitVar[float] = None
 
-    def __post_init__(self, penalty_spot_distance):
+    def __post_init__(self):
         self.aspect = self.pitch_width / self.pitch_length
         self.six_yard_width = round(self.six_yard_width / self.pitch_width * self.width, 4)
         self.six_yard_length = round(self.six_yard_length / self.pitch_length * self.length, 4)
@@ -407,7 +404,7 @@ class ScaleCenterDims(BaseDims):
         self.goal_length = round(self.goal_length / self.pitch_length * self.length, 4)
         self.penalty_area_left = self.left + self.penalty_area_length
         self.six_yard_left = self.left + self.six_yard_length
-        self.penalty_left = self.left + round(penalty_spot_distance / self.pitch_length * self.length, 4)
+        self.penalty_left = self.left + round(self.penalty_spot_distance / self.pitch_length * self.length, 4)
         self.penalty_area_right = - self.penalty_area_left
         self.six_yard_right = - self.six_yard_left
         self.penalty_right = - self.penalty_left
@@ -427,7 +424,7 @@ def opta_dims():
                      goal_width=9.6, goal_length=1.9, goal_bottom=45.2, goal_top=54.8,
                      six_yard_width=26.4, six_yard_length=5.8, six_yard_left=5.8,
                      six_yard_right=94.2, six_yard_bottom=36.8, six_yard_top=63.2,
-                     penalty_left=11.5, penalty_right=88.5,
+                     penalty_left=11.5, penalty_right=88.5, penalty_spot_distance=11.5,
                      penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
                      penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
                      center_width=50., center_length=50., circle_diameter=17.68,
@@ -442,7 +439,7 @@ def wyscout_dims():
                      goal_width=12., goal_length=1.9, goal_bottom=56., goal_top=44.,
                      six_yard_width=26., six_yard_length=6., six_yard_left=6.,
                      six_yard_right=94., six_yard_bottom=63., six_yard_top=37.,
-                     penalty_left=10., penalty_right=90.,
+                     penalty_left=10., penalty_right=90., penalty_spot_distance=10.,
                      penalty_area_width=62., penalty_area_length=16., penalty_area_left=16.,
                      penalty_area_right=84., penalty_area_bottom=81., penalty_area_top=19.,
                      center_width=50., center_length=50., circle_diameter=17.68,
@@ -457,7 +454,7 @@ def uefa_dims():
                      goal_width=7.32, goal_length=2., goal_bottom=30.34, goal_top=37.66,
                      six_yard_width=18.32, six_yard_length=5.5, six_yard_left=5.5,
                      six_yard_right=99.5, six_yard_bottom=24.84, six_yard_top=43.16,
-                     penalty_left=11., penalty_right=94.,
+                     penalty_left=11., penalty_right=94., penalty_spot_distance=11.,
                      penalty_area_width=40.32, penalty_area_length=16.5, penalty_area_left=16.5,
                      penalty_area_right=88.5, penalty_area_bottom=13.84, penalty_area_top=54.16,
                      center_width=34., center_length=52.5, circle_diameter=18.3, corner_diameter=2.,
@@ -472,7 +469,7 @@ def statsbomb_dims():
                      goal_width=8., goal_length=2.4, goal_bottom=44., goal_top=36.,
                      six_yard_width=20., six_yard_length=6., six_yard_left=6.,
                      six_yard_right=114., six_yard_bottom=50., six_yard_top=30.,
-                     penalty_left=12., penalty_right=108.,
+                     penalty_left=12., penalty_right=108., penalty_spot_distance=12.,
                      penalty_area_width=44., penalty_area_length=18., penalty_area_left=18.,
                      penalty_area_right=102., penalty_area_bottom=62., penalty_area_top=18.,
                      center_width=40., center_length=60., circle_diameter=20.,
