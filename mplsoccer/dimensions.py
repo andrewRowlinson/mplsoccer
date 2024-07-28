@@ -384,9 +384,9 @@ class MetricasportsDims(BaseDims):
         self.penalty_area_width = round(self.penalty_area_width / self.pitch_width, 4)
         self.penalty_area_length = round(self.penalty_area_length / self.pitch_length, 4)
         self.penalty_spot_distance = round(self.penalty_spot_distance / self.pitch_length, 4)
+        self.penalty_left = self.penalty_spot_distance
         self.goal_length = round(self.goal_length / self.pitch_length, 4)
         self.goal_width = round(self.goal_width / self.pitch_width, 4)
-        self.penalty_left = round(self.penalty_spot_distance / self.pitch_length, 4)
         self.penalty_box_dims()
         self.setup_dims()
 
