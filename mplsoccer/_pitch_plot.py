@@ -747,7 +747,7 @@ class BasePitchPlot(BasePitch):
 
         # calculate the arrow length
         if self.dim.pad_multiplier != 1:
-            arrow_length = arrow_length * self.dim.pad_multiplie
+            arrow_length = arrow_length * self.dim.pad_multiplier
         if arrow_type == 'scale':
             new_d = (bs_distance['statistic'] * arrow_length /
                      np.nan_to_num(bs_distance['statistic']).max(initial=None))
