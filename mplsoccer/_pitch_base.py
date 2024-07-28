@@ -24,11 +24,12 @@ class BasePitch(ABC):
 
     Parameters
     ----------
-    pitch_type : str, default 'statsbomb'
+    pitch_type : str or sub class of dimensions.BaseDims, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
-        'center_scale' and 'impect'.
+        'center_scale' and 'impect'. Alternatively, you can pass a custom dimensions
+        object by creating a sub class of dimensions.BaseDims.
     half : bool, default False
         Whether to display half of the pitch.
     pitch_color : any Matplotlib color, default None
@@ -62,11 +63,13 @@ class BasePitch(ABC):
     pad_left, pad_right : float, default None
         Adjusts the left xlim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        If None set to 0.04 for 'metricasports' pitch,
+        0.08 for 'center_scale' and 4 otherwise.
     pad_bottom, pad_top : float, default None
         Adjusts the bottom ylim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
-        If None set to 0.04 for 'metricasports' pitch and 4 otherwise.
+        If None set to 0.04 for 'metricasports' pitch,
+        0.08 for 'center_scale' and 4 otherwise.
     positional : bool, default False
         Whether to draw Juego de Posición lines.
     positional_zorder : float, default 0.8
@@ -198,7 +201,10 @@ class BasePitch(ABC):
         self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
                                          length_from=pitch_length, pitch_to='uefa')
         # set pitch dimensions
-        self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
+        if issubclass(type(pitch_type), dimensions.BaseDims):
+            self.dim = pitch_type
+        else:
+            self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
 
         # if the padding is None set it to 4 on all sides, or 0.04 in the case of metricasports
         # for tracab multiply the padding by 100
@@ -261,8 +267,11 @@ class BasePitch(ABC):
 
     def _validation_checks(self):
         # pitch validation
-        if self.pitch_type not in dimensions.valid:
-            raise TypeError(f'Invalid argument: pitch_type should be in {dimensions.valid}')
+        if (self.pitch_type not in dimensions.valid and
+            not issubclass(type(self.pitch_type), dimensions.BaseDims)
+           ):
+            raise TypeError(f'Invalid argument: pitch_type should be in {dimensions.valid} '
+                            'or a subclass of dimensions.BaseDims.')
         if (self.pitch_length is None or self.pitch_width is None) \
                 and self.pitch_type in dimensions.size_varies:
             raise TypeError("Invalid argument: pitch_length and pitch_width must be specified.")

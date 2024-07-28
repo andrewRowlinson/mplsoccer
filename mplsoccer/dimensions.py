@@ -399,15 +399,15 @@ class ScaleCenterDims(BaseDims):
 
     def __post_init__(self, penalty_spot_distance):
         self.aspect = self.pitch_width / self.pitch_length
-        self.six_yard_width = round(self.six_yard_width / self.pitch_width * 2, 4)
-        self.six_yard_length = round(self.six_yard_length / self.pitch_length * 2, 4)
-        self.penalty_area_width = round(self.penalty_area_width / self.pitch_width * 2, 4)
-        self.penalty_area_length = round(self.penalty_area_length / self.pitch_length * 2, 4)
-        self.goal_length = round(self.goal_length / self.pitch_length * 2, 4)
-        self.goal_width = round(self.goal_width / self.pitch_width * 2, 4)
+        self.six_yard_width = round(self.six_yard_width / self.pitch_width * self.width, 4)
+        self.six_yard_length = round(self.six_yard_length / self.pitch_length * self.length, 4)
+        self.penalty_area_width = round(self.penalty_area_width / self.pitch_width * self.width, 4)
+        self.penalty_area_length = round(self.penalty_area_length / self.pitch_length * self.length, 4)
+        self.goal_width = round(self.goal_width / self.pitch_width * self.width, 4)
+        self.goal_length = round(self.goal_length / self.pitch_length * self.length, 4)
         self.penalty_area_left = self.left + self.penalty_area_length
         self.six_yard_left = self.left + self.six_yard_length
-        self.penalty_left = self.left + round(penalty_spot_distance / self.pitch_length * 2, 4)
+        self.penalty_left = self.left + round(penalty_spot_distance / self.pitch_length * self.length, 4)
         self.penalty_area_right = - self.penalty_area_left
         self.six_yard_right = - self.six_yard_left
         self.penalty_right = - self.penalty_left
@@ -542,16 +542,16 @@ def custom_dims(pitch_width, pitch_length):
                       pad_default=4, pad_multiplier=1, aspect_equal=True)
 
 
-def custom_center_scale_dims(pitch_width, pitch_length):
+def custom_center_scale_dims(pitch_width, pitch_length, width, length):
     """ Create 'custom' dimensions."""
-    return ScaleCenterDims(top=1., bottom=-1., left=-1., right=1.,
+    return ScaleCenterDims(top=width/2., bottom=-width/2., left=-length/2., right=length/2.,
                            pitch_width=pitch_width, pitch_length=pitch_length,
-                           width=2., center_width=0., length=2., center_length=0.,
+                           width=width, center_width=0., length=length, center_length=0.,
                            six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                            penalty_area_width=40.32, penalty_area_length=16.5,
                            circle_diameter=18.3, corner_diameter=2., goal_length=2.,
                            goal_width=7.32, arc=None, invert_y=False, origin_center=True,
-                           pad_default=0.08, pad_multiplier=1, aspect_equal=False)
+                           pad_default=0.04 * width, pad_multiplier=1, aspect_equal=False)
 
 
 def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
@@ -588,7 +588,7 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     if pitch_type in ['skillcorner', 'secondspectrum']:
         return skillcorner_secondspectrum_dims(pitch_width, pitch_length)
     if pitch_type == 'center_scale':
-        return  custom_center_scale_dims(pitch_width, pitch_length)
+        return  custom_center_scale_dims(pitch_width, pitch_length, width=2, length=2)
     if pitch_type == 'tracab':
         pitch_width = pitch_width * 100.
         pitch_length = pitch_length * 100.

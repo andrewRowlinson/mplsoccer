@@ -307,10 +307,12 @@ class Standardizer:
 
     Parameters
     ----------
-    pitch_from, pitch_to : str, default 'statsbomb'
+    pitch_from, pitch_to: str or sub class of dimensions.BaseDims, default 'statsbomb'
         The pitch to convert the coordinates from (pitch_from) and to (pitch_to).
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
-        'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
+        'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
+        'center_scale' and 'impect'. Alternatively, you can pass a custom dimension
+        object by creating a sub class of dimensions.BaseDims.
     length_from, length_to : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
         'skillcorner', 'secondspectrum' and 'custom' pitch_type.
@@ -332,13 +334,19 @@ class Standardizer:
     def __init__(self, pitch_from, pitch_to, length_from=None,
                  width_from=None, length_to=None, width_to=None):
 
-        if pitch_from not in dimensions.valid:
+        if (pitch_from not in dimensions.valid and
+            not issubclass(type(pitch_from), dimensions.BaseDims)
+           ):
             raise TypeError(f'Invalid argument: pitch_from should be in {dimensions.valid}')
+
+        if (pitch_to not in dimensions.valid and
+            not issubclass(type(pitch_to), dimensions.BaseDims)
+           ):
+            raise TypeError(f'Invalid argument: pitch_to should be in {dimensions.valid}')
+
         if (length_from is None or width_from is None) and pitch_from in dimensions.size_varies:
             raise TypeError("Invalid argument: width_from and length_from must be specified.")
 
-        if pitch_to not in dimensions.valid:
-            raise TypeError(f'Invalid argument: pitch_to should be in {dimensions.valid}')
         if (length_to is None or width_to is None) and pitch_to in dimensions.size_varies:
             raise TypeError("Invalid argument: width_to and length_to must be specified.")
 
@@ -349,12 +357,19 @@ class Standardizer:
         self.length_to = length_to
         self.width_to = width_to
 
-        self.dim_from = dimensions.create_pitch_dims(pitch_type=pitch_from,
-                                                     pitch_length=length_from,
-                                                     pitch_width=width_from)
-        self.dim_to = dimensions.create_pitch_dims(pitch_type=pitch_to,
-                                                   pitch_length=length_to,
-                                                   pitch_width=width_to)
+        if issubclass(type(pitch_from), dimensions.BaseDims):
+            self.dim_from = pitch_from
+        else:
+            self.dim_from = dimensions.create_pitch_dims(pitch_type=pitch_from,
+                                                         pitch_length=length_from,
+                                                         pitch_width=width_from)
+
+        if issubclass(type(pitch_to), dimensions.BaseDims):
+            self.dim_to = pitch_to
+        else:
+            self.dim_to = dimensions.create_pitch_dims(pitch_type=pitch_to,
+                                                       pitch_length=length_to,
+                                                       pitch_width=width_to)
 
     def transform(self, x, y, reverse=False):
         """ Transform the coordinates.
