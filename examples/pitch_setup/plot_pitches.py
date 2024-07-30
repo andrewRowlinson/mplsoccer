@@ -34,9 +34,9 @@ pitch.draw(ax=axs[1])
 # ------------------------
 # mplsoccer supports 11 pitch types by specifying the ``pitch_type`` argument:
 # 'statsbomb', 'opta', 'tracab', 'wyscout', 'uefa', 'metricasports', 'custom',
-# 'skillcorner', 'secondspectrum', 'center_scale', and 'impect'.
+# 'skillcorner', 'secondspectrum', 'datafactory', and 'impect'.
 # If you are using tracking data or the custom pitch ('metricasports', 'tracab',
-# 'skillcorner', 'secondspectrum', 'center_scale' or 'custom'),
+# 'skillcorner', 'secondspectrum', 'datafactory' or 'custom'),
 # you also need to specify the ``pitch_length`` and ``pitch_width``,
 # which are typically 105 and 68 respectively.
 
