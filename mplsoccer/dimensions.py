@@ -63,8 +63,8 @@ from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
-         'impect', 'center_scale']
-size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum', 'center_scale']
+         'impect', 'datafactory']
+size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum', 'datafactory']
 
 
 @dataclass
@@ -541,16 +541,35 @@ def custom_dims(pitch_width, pitch_length):
                       pad_default=4, pad_multiplier=1, aspect_equal=True)
 
 
-def custom_center_scale_dims(pitch_width, pitch_length, width, length):
-    """ Create 'custom' dimensions."""
-    return ScaleCenterDims(top=width/2., bottom=-width/2., left=-length/2., right=length/2.,
+def center_scale_dims(pitch_width, pitch_length, limit=2, invert_y=False):
+    """ Create pitch dimensions.
+
+    Parameters
+    ----------
+    pitch_width, pitch_length : float, default None
+        The pitch width and length in meters.
+        Sets the aspect ratio of the pitch and the location of the pitch markings.
+    limit : float, default 2
+        The pitch axis limits are set from -limit/2 to limit/2
+    invert_y : boolean, default False
+        Whether the y-axis is inverted
+
+    Returns
+    -------
+    ScaleCenterDims
+        A dataclass holding the pitch dimensions.
+    """
+    top, bottom = limit/2, -limit/2
+    if invert_y:
+        top, bottom = bottom, top
+    return ScaleCenterDims(top=top, bottom=bottom, left=-limit/2., right=limit/2.,
                            pitch_width=pitch_width, pitch_length=pitch_length,
-                           width=width, center_width=0., length=length, center_length=0.,
+                           width=limit, center_width=0., length=limit, center_length=0.,
                            six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                            penalty_area_width=40.32, penalty_area_length=16.5,
                            circle_diameter=18.3, corner_diameter=2., goal_length=2.,
-                           goal_width=7.32, arc=None, invert_y=False, origin_center=True,
-                           pad_default=0.04 * width, pad_multiplier=1, aspect_equal=False)
+                           goal_width=7.32, arc=None, invert_y=invert_y, origin_center=True,
+                           pad_default=0.04 * limit, pad_multiplier=1, aspect_equal=False)
 
 
 def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
@@ -564,10 +583,10 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum' and 'custom' pitch_type.
+        'skillcorner', 'secondspectrum', 'datafactory' and 'custom' pitch_type.
     pitch_width : float, default None
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum' and 'custom' pitch_type
+        'skillcorner', 'secondspectrum', 'datafactory' and 'custom' pitch_type
 
     Returns
     -------
@@ -586,8 +605,8 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
         return metricasports_dims(pitch_width, pitch_length)
     if pitch_type in ['skillcorner', 'secondspectrum']:
         return skillcorner_secondspectrum_dims(pitch_width, pitch_length)
-    if pitch_type == 'center_scale':
-        return  custom_center_scale_dims(pitch_width, pitch_length, width=2, length=2)
+    if pitch_type == 'datafactory':
+        return  center_scale_dims(pitch_width, pitch_length, limit=2)
     if pitch_type == 'tracab':
         pitch_width = pitch_width * 100.
         pitch_length = pitch_length * 100.
