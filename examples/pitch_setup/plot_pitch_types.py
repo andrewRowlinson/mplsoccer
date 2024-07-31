@@ -26,8 +26,8 @@ fig, axs = pitch.draw()
 # Tracab
 # ------
 # `Tracab <https://tracab.com/>`_ are centered pitches for tracking data.
-# The xaxis limits are -pitch_length/2 * 100 to pitch_length/2.
-# The yaxis limits are -pitch_width/2 * 100 to pitch_width/2.
+# The xaxis limits are -pitch_length/2 * 100 to pitch_length/2 * 100.
+# The yaxis limits are -pitch_width/2 * 100 to pitch_width/2 * 100.
 pitch = Pitch(pitch_type='tracab', pitch_width=68, pitch_length=105,
               axis=True, label=True)
 fig, axs = pitch.draw()
@@ -68,8 +68,8 @@ fig, axs = pitch.draw()
 ##############################################################################
 # Metricasports
 # -------------
-# `Metrica Sports <https://metrica-sports.com/>`_ 
-# pitches limits are between 0 and 1, but the y-axis is inverted.
+# `Metrica Sports <https://metrica-sports.com/>`_ has
+# pitch limits are between 0 and 1, but the y-axis is inverted.
 pitch = Pitch(pitch_type='metricasports', pitch_length=105, pitch_width=68,
               axis=True, label=True)
 fig, axs = pitch.draw()
@@ -87,7 +87,7 @@ fig, axs = pitch.draw()
 ##############################################################################
 # Second Spectrum
 # ---------------
-# `Second Spectrum <https://www.secondspectrum.com/index.html>`_ has 
+# `Second Spectrum <https://www.secondspectrum.com/index.html>`_ also has 
 # centered pitches from -pitch_width/2 to pitch_width/2 and
 # -pitch_length/2 to pitch_length/2.
 pitch = Pitch(pitch_type='secondspectrum', pitch_length=105, pitch_width=68,

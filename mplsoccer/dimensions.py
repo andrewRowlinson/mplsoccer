@@ -64,8 +64,7 @@ from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect']
-size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner',
-               'secondspectrum']
+size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
 
 @dataclass
