@@ -53,10 +53,10 @@ invert_y = If true, the origin starts at (left, top)
 origin_center = If true, the origin starts at (center length, center width)
 """
 
-from dataclasses import dataclass, InitVar
+from dataclasses import dataclass
+from typing import Optional, Dict
 
 import numpy as np
-from typing import Optional, Dict
 
 from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
     PositionLine5WithSecondStriker, Coordinate
@@ -64,7 +64,8 @@ from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect', 'center_scale2']
-size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum', 'center_scale2']
+size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner',
+               'secondspectrum', 'center_scale2']
 
 
 @dataclass
@@ -400,12 +401,14 @@ class ScaleCenterDims(BaseDims):
         self.six_yard_width = round(self.six_yard_width / self.pitch_width * self.width, 4)
         self.six_yard_length = round(self.six_yard_length / self.pitch_length * self.length, 4)
         self.penalty_area_width = round(self.penalty_area_width / self.pitch_width * self.width, 4)
-        self.penalty_area_length = round(self.penalty_area_length / self.pitch_length * self.length, 4)
+        self.penalty_area_length = round(self.penalty_area_length /
+                                         self.pitch_length * self.length, 4)
         self.goal_width = round(self.goal_width / self.pitch_width * self.width, 4)
         self.goal_length = round(self.goal_length / self.pitch_length * self.length, 4)
         self.penalty_area_left = self.left + self.penalty_area_length
         self.six_yard_left = self.left + self.six_yard_length
-        self.penalty_spot_distance = round(self.penalty_spot_distance / self.pitch_length * self.length, 4)
+        self.penalty_spot_distance = round(self.penalty_spot_distance /
+                                           self.pitch_length * self.length, 4)
         self.penalty_left = self.left + self.penalty_spot_distance
         self.penalty_area_right = - self.penalty_area_left
         self.six_yard_right = - self.six_yard_left
