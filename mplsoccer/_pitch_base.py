@@ -356,7 +356,6 @@ class BasePitch(ABC):
         self.arc2_theta1 = 180 - self.arc1_theta2
         self.arc2_theta2 = 180 + self.arc1_theta2
 
-
     def _init_circles_and_arcs_equal_aspect(self, ax):
         radius_center = self.dim.circle_diameter / 2
         radius_corner = self.dim.corner_diameter / 2

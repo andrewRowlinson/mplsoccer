@@ -1,11 +1,7 @@
 :rocket: Version 1.3.0
 ----------------------
 ### Added
-* :new: Added the ``pitch_type = 'center_scale2'`` argument to ``Pitch``. \
-Draws a pitch centered at (0, 0) with x/y coodinates from -1 to +1.
-
-### Changes
-* :ok: The ``pitch_type`` argument now accepts custom dimensions in additon to strings ('statsbomb'). \
+* :new: The ``pitch_type`` argument now accepts custom dimensions in additon to strings ('statsbomb'). \
 For example: \
 from mplsoccer.dimensions import center_scale_dims \
 from mplsoccer import Pitch \
