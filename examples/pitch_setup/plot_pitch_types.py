@@ -126,7 +126,7 @@ fig, ax = pitch.draw()
 # Aditionally, you can create your own arbitrary dimensions.
 # See the `mplsoccer.dimensions module <https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/mplsoccer/dimensions.py>`_
 # for examples of how to define the dimensions. 
-# The custom dimensions must be a subclass of ``mplsoccer.dimensions.BaseDims``
+# The custom dimensions object must be a subclass of ``mplsoccer.dimensions.BaseDims``
 # and can then be passed to the ``pitch_type`` argument.
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
