@@ -311,7 +311,7 @@ class Standardizer:
         The pitch to convert the coordinates from (pitch_from) and to (pitch_to).
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
-        'center_scale2' and 'impect'. Alternatively, you can pass a custom dimension
+        and 'impect'. Alternatively, you can pass a custom dimension
         object by creating a subclass of dimensions.BaseDims.
     length_from, length_to : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',

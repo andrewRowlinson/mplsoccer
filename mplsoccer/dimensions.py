@@ -63,9 +63,9 @@ from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
-         'impect', 'center_scale2']
+         'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner',
-               'secondspectrum', 'center_scale2']
+               'secondspectrum']
 
 
 @dataclass
@@ -586,10 +586,10 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum', 'center_scale2' and 'custom' pitch_type.
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type.
     pitch_width : float, default None
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum', 'center_scale2' and 'custom' pitch_type
+        'skillcorner', 'secondspectrum', and 'custom' pitch_type
 
     Returns
     -------
@@ -608,8 +608,6 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
         return metricasports_dims(pitch_width, pitch_length)
     if pitch_type in ['skillcorner', 'secondspectrum']:
         return skillcorner_secondspectrum_dims(pitch_width, pitch_length)
-    if pitch_type == 'center_scale2':
-        return  center_scale_dims(pitch_width, pitch_length, width=2, length=2)
     if pitch_type == 'tracab':
         pitch_width = pitch_width * 100.
         pitch_length = pitch_length * 100.
