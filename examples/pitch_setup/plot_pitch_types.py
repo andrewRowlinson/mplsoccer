@@ -12,13 +12,13 @@ The current supported pitch types are printed below.
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
 from mplsoccer.dimensions import valid
-print('Valid pitches:', valid)
+print(valid)
 
 ##############################################################################
 # StatsBomb
 # ---------
 # The default pitch is `StatsBomb <https://statsbomb.com/>`_
-# The xaxis limits are 0 to 120 and the yaxis limits are 80 to 0 (inverted)
+# The xaxis limits are 0 to 120 and the yaxis limits are 80 to 0 (inverted).
 pitch = Pitch(pitch_type='statsbomb', axis=True, label=True)
 fig, axs = pitch.draw()
 
@@ -52,7 +52,7 @@ fig, axs = pitch.draw()
 # Custom
 # ------
 # The custom pitch allows you to set the limits of the pitch in meters
-# by changing the pitch_length and pitch_width
+# by changing the pitch_length and pitch_width.
 pitch = Pitch(pitch_type='custom', pitch_width=68, pitch_length=105,
               axis=True, label=True)
 fig, axs = pitch.draw()
@@ -61,7 +61,7 @@ fig, axs = pitch.draw()
 # Uefa
 # ----
 # The uefa pitch is a special case of the custom pitch with the pitch_length
-# and pitch_width set to Uefa's standard (105m * 65m)
+# and pitch_width set to Uefa's standard (105m * 65m).
 pitch = Pitch(pitch_type='uefa', axis=True, label=True)
 fig, axs = pitch.draw()
 
@@ -98,15 +98,15 @@ fig, axs = pitch.draw()
 # Impect
 # ------
 # `Impect <https://www.impect.com/en/>`_
-# has centered pitches from -52.5 to 52.5 (x-axis) and -34 to 34 (y-axis)
+# has centered pitches from -52.5 to 52.5 (x-axis) and -34 to 34 (y-axis).
 pitch = Pitch(pitch_type='impect', axis=True, label=True)
 fig, axs = pitch.draw()
 
 ##############################################################################
 # Standardized coordinates
 # ------------------------
-# Version 1.3.0 onwards also allows custom dimensions to be passed to the 
-# ``pitch_type`` argument.
+# Mplsoccer version 1.3.0 onwards also allows custom dimensions
+# to be passed to the ``pitch_type`` argument.
 # It is common in some machine learning methods to standardize values, e.g. coordinates.
 # However, you might still want to plot the standarized coordinates.
 # You can use the center_scale_dims function to create custom centered pitch dimensions
