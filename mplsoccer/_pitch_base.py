@@ -28,7 +28,7 @@ class BasePitch(ABC):
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
-        'datafactory' and 'impect'. Alternatively, you can pass a custom dimensions
+        'center_scale2' and 'impect'. Alternatively, you can pass a custom dimensions
         object by creating a sub class of dimensions.BaseDims.
     half : bool, default False
         Whether to display half of the pitch.
@@ -64,12 +64,12 @@ class BasePitch(ABC):
         Adjusts the left xlim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch,
-        0.08 for 'datafactory' and 4 otherwise.
+        0.08 for 'center_scale2' and 4 otherwise.
     pad_bottom, pad_top : float, default None
         Adjusts the bottom ylim of the axis. Positive values increase the plot area,
         while negative values decrease the plot area.
         If None set to 0.04 for 'metricasports' pitch,
-        0.08 for 'datafactory' and 4 otherwise.
+        0.08 for 'center_scale2' and 4 otherwise.
     positional : bool, default False
         Whether to draw Juego de Posición lines.
     positional_zorder : float, default 0.8
@@ -93,10 +93,10 @@ class BasePitch(ABC):
         Artists with lower zorder values are drawn first.
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum', 'datafactory', and 'custom' pitch_type.
+        'skillcorner', 'secondspectrum', 'center_scale2', and 'custom' pitch_type.
     pitch_width : float, default None
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
-        'skillcorner', 'secondspectrum', 'datafactory', and 'custom' pitch_type
+        'skillcorner', 'secondspectrum', 'center_scale2', and 'custom' pitch_type
     goal_type : str, default 'line'
         Whether to display the goals as a 'line', 'box', 'circle' or to not display it at all (None)
     goal_alpha : float, default 1

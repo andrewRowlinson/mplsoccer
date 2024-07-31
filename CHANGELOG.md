@@ -1,7 +1,7 @@
-:rocket: Version 1.3.1
+:rocket: Version 1.3.0
 ----------------------
 ### Added
-* :new: Added the ``pitch_type = 'datafactory'`` argument to ``Pitch``. \
+* :new: Added the ``pitch_type = 'center_scale2'`` argument to ``Pitch``. \
 Draws a pitch centered at (0, 0) with x/y coodinates from -1 to +1.
 
 ### Changes
@@ -9,13 +9,11 @@ Draws a pitch centered at (0, 0) with x/y coodinates from -1 to +1.
 For example: \
 from mplsoccer.dimensions import center_scale_dims \
 from mplsoccer import Pitch \
-dim = center_scale_dims(pitch_width=68, pitch_length=105) \
+dim = center_scale_dims(pitch_width=68, pitch_length=105, width=2, length=2) \
 pitch = Pitch(pitch_type=dim, label=True, axis=True) \
 fig, ax = pitch.draw() \
 See the ``mplsoccer.dimensions`` module for examples of how to define the dimensions.
 The custom dimensions must be a subclass of ``mplsoccer.dimensions.BaseDims``.
-
-###
 
 :rocket: Version 1.2.4
 ----------------------
