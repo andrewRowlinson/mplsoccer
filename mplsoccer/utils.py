@@ -490,4 +490,3 @@ def copy_doc(func):
         new_func.__doc__ = func.__doc__
         return new_func
     return _doc
-

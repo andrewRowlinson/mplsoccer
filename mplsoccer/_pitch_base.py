@@ -3,12 +3,12 @@
 import warnings
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import rcParams
-from typing import List
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
