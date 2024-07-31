@@ -24,12 +24,12 @@ class BasePitch(ABC):
 
     Parameters
     ----------
-    pitch_type : str or sub class of dimensions.BaseDims, default 'statsbomb'
+    pitch_type : str or subclass of dimensions.BaseDims, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
         'center_scale2' and 'impect'. Alternatively, you can pass a custom dimensions
-        object by creating a sub class of dimensions.BaseDims.
+        object by creating a subclass of dimensions.BaseDims.
     half : bool, default False
         Whether to display half of the pitch.
     pitch_color : any Matplotlib color, default None

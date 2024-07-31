@@ -91,7 +91,7 @@ def inset_image(x, y, image, width=None, height=None, vertical=False, ax=None, *
         The image data.
     width, height: float, default None
         The width, height of the inset_axes for plotting the image.
-        By default in the data coordinates.
+        By default, in the data coordinates.
     vertical : bool, default False
         If the orientation is vertical (True), then the code switches the x and y coordinates.
     ax : matplotlib.axes.Axes, default None
@@ -307,12 +307,12 @@ class Standardizer:
 
     Parameters
     ----------
-    pitch_from, pitch_to: str or sub class of dimensions.BaseDims, default 'statsbomb'
+    pitch_from, pitch_to: str or subclass of dimensions.BaseDims, default 'statsbomb'
         The pitch to convert the coordinates from (pitch_from) and to (pitch_to).
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
         'center_scale2' and 'impect'. Alternatively, you can pass a custom dimension
-        object by creating a sub class of dimensions.BaseDims.
+        object by creating a subclass of dimensions.BaseDims.
     length_from, length_to : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
         'skillcorner', 'secondspectrum' and 'custom' pitch_type.
