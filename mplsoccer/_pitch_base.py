@@ -187,6 +187,7 @@ class BasePitch(ABC):
         self.extent = None
         self.visible_pitch = None
         self.ax_aspect = None
+        self.aspect = None
         self.kde_clip = None
         self.hexbin_gridsize = None
         self.hex_extent = None
@@ -212,10 +213,12 @@ class BasePitch(ABC):
             if self.dim.pad_multiplier != 1:
                 setattr(self, pad, getattr(self, pad) * self.dim.pad_multiplier)
 
+        self._set_aspect()
+
         # scale the padding where the aspect is not equal to one
         # this means that you can easily set the padding the same
         # all around the pitch (e.g. when using an Opta pitch)
-        if self.dim.aspect != 1:
+        if not self.dim.aspect_equal:
             self._scale_pad()
 
         # set the extent (takes into account padding)
@@ -463,7 +466,7 @@ class BasePitch(ABC):
         # set limits and aspect
         ax.set_xlim(self.extent[0], self.extent[1])
         ax.set_ylim(self.extent[2], self.extent[3])
-        ax.set_aspect(self.dim.aspect)
+        ax.set_aspect(self.aspect)
 
     def _set_background(self, ax):
         if self.pitch_color != 'grass':
@@ -474,7 +477,7 @@ class BasePitch(ABC):
             pitch_color = np.random.normal(size=(1000, 1000))
             if self.stripe:
                 pitch_color = self._draw_stripe_grass(pitch_color)
-            ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.dim.aspect)
+            ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
 
     def _plain_stripes(self, ax):
         for i in range(len(self.dim.stripe_locations) - 1):

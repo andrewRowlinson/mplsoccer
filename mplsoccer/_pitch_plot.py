@@ -560,7 +560,7 @@ class BasePitchPlot(BasePitch):
         if teams.size != x.size:
             raise ValueError("x and team must be the same size")
 
-        if self.dim.aspect != 1:
+        if not self.dim.aspect_equal:
             standardized = True
             x, y = self.standardizer.transform(x, y)
             extent = np.array([0, 105, 0, 68])
@@ -730,7 +730,7 @@ class BasePitchPlot(BasePitch):
         ...                 headaxislength=2, ax=ax)
         """
         validate_ax(ax)
-        if self.dim.aspect != 1:
+        if not self.dim.aspect_equal:
             standardized = True
             xstart, ystart = self.standardizer.transform(xstart, ystart)
             xend, yend = self.standardizer.transform(xend, yend)
