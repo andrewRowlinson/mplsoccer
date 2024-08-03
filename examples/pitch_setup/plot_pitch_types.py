@@ -9,10 +9,11 @@ different data providers by changing the ``pitch_type`` argument.
 The current supported pitch types are printed below.
 """
 
+import pprint
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
 from mplsoccer.dimensions import valid
-print(valid)
+pprint.pp(valid)
 
 ##############################################################################
 # StatsBomb
@@ -37,6 +38,9 @@ fig, ax = pitch.draw()
 # ----
 # `Opta data from Stats Perform <https://www.statsperform.com/opta/>`_ has
 # both the x and y limits between 0 and 100.
+# Opta pitch coordinates are used by
+# `Sofascore <https://www.sofascore.com/>`_ and
+# `WhoScored <https://www.whoscored.com/>`_
 pitch = Pitch(pitch_type='opta', axis=True, label=True)
 fig, ax = pitch.draw()
 
