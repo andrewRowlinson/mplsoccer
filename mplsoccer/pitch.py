@@ -18,6 +18,16 @@ class Pitch(BasePitchPlot):
         self.pad_left = self.pad_left * self.aspect
         self.pad_right = self.pad_right * self.aspect
 
+    def _validate_pad(self):
+        # make sure padding not too large for the pitch
+        if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length:
+            raise ValueError("pad_left/pad_right too negative for pitch length")
+        if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.dim.width:
+            raise ValueError("pad_top/pad_bottom too negative for pitch width")
+        if self.half:
+            if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length / 2:
+                raise ValueError("pad_left/pad_right too negative for pitch length")
+
     def _set_extent(self):
         extent = np.array([self.dim.left, self.dim.right,
                            self.dim.bottom, self.dim.top], dtype=np.float32)
@@ -133,8 +143,18 @@ class VerticalPitch(BasePitchPlot):
         self.aspect = 1 / self.dim.aspect
 
     def _scale_pad(self):
-        self.pad_bottom = self.pad_bottom * self.aspect
-        self.pad_top = self.pad_top * self.aspect
+        self.pad_bottom = self.pad_bottom / self.aspect
+        self.pad_top = self.pad_top / self.aspect
+
+    def _validate_pad(self):
+        # make sure padding not too large for the pitch
+        if abs(min(self.pad_bottom, 0) + min(self.pad_top, 0)) >= self.dim.length:
+            raise ValueError("pad_bottom/pad_top too negative for pitch length")
+        if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.width:
+            raise ValueError("pad_left/pad_right too negative for pitch width")
+        if self.half:
+            if abs(min(self.pad_bottom, 0) + min(self.pad_top, 0)) >= self.dim.length / 2:
+                raise ValueError("pad_bottom/pad_top too negative for pitch length")
 
     def _set_extent(self):
         extent = np.array([self.dim.top, self.dim.bottom,

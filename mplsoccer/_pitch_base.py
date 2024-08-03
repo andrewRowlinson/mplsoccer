@@ -212,7 +212,6 @@ class BasePitch(ABC):
                 setattr(self, pad, self.dim.pad_default)
             if self.dim.pad_multiplier != 1:
                 setattr(self, pad, getattr(self, pad) * self.dim.pad_multiplier)
-
         self._set_aspect()
 
         # scale the padding where the aspect is not equal to one
@@ -300,16 +299,6 @@ class BasePitch(ABC):
             warnings.warn("Labels will not be shown unless axis=True")
         if (self.axis is False) and self.tick:
             warnings.warn("Ticks will not be shown unless axis=True")
-
-    def _validate_pad(self):
-        # make sure padding not too large for the pitch
-        if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length:
-            raise ValueError("pad_left/pad_right too negative for pitch length")
-        if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.dim.width:
-            raise ValueError("pad_top/pad_bottom too negative for pitch width")
-        if self.half:
-            if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length / 2:
-                raise ValueError("pad_left/pad_right too negative for pitch length")
 
     def _init_circles_and_arcs(self):
         self.diameter1 = self.dim.circle_diameter
@@ -1519,6 +1508,10 @@ class BasePitch(ABC):
     def _set_extent(self):
         """ Implement a method to set the pitch extents, stripe locations,
          and attributes to help plot on different orientations."""
+
+    @abstractmethod
+    def _validate_pad(self):
+        """ Implement a method to validate the pad values."""
 
     @abstractmethod
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
