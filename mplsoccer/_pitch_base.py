@@ -3,12 +3,12 @@
 import warnings
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import rcParams
-from typing import List
 
 from mplsoccer import dimensions
 from mplsoccer.cm import grass_cmap
@@ -24,11 +24,12 @@ class BasePitch(ABC):
 
     Parameters
     ----------
-    pitch_type : str, default 'statsbomb'
+    pitch_type : str or subclass of dimensions.BaseDims, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
-        and 'impect'.
+        and 'impect'. Alternatively, you can pass a custom dimensions
+        object by creating a subclass of dimensions.BaseDims.
     half : bool, default False
         Whether to display half of the pitch.
     pitch_color : any Matplotlib color, default None
@@ -186,6 +187,7 @@ class BasePitch(ABC):
         self.extent = None
         self.visible_pitch = None
         self.ax_aspect = None
+        self.aspect = None
         self.kde_clip = None
         self.hexbin_gridsize = None
         self.hex_extent = None
@@ -198,23 +200,24 @@ class BasePitch(ABC):
         self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
                                          length_from=pitch_length, pitch_to='uefa')
         # set pitch dimensions
-        self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
+        if issubclass(type(pitch_type), dimensions.BaseDims):
+            self.dim = pitch_type
+        else:
+            self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
 
         # if the padding is None set it to 4 on all sides, or 0.04 in the case of metricasports
         # for tracab multiply the padding by 100
         for pad in ['pad_left', 'pad_right', 'pad_bottom', 'pad_top']:
             if getattr(self, pad) is None:
-                if pitch_type != 'metricasports':
-                    setattr(self, pad, 4)
-                else:
-                    setattr(self, pad, 0.04)
-            if pitch_type == 'tracab':
-                setattr(self, pad, getattr(self, pad) * 100)
+                setattr(self, pad, self.dim.pad_default)
+            if self.dim.pad_multiplier != 1:
+                setattr(self, pad, getattr(self, pad) * self.dim.pad_multiplier)
+        self._set_aspect()
 
         # scale the padding where the aspect is not equal to one
         # this means that you can easily set the padding the same
         # all around the pitch (e.g. when using an Opta pitch)
-        if self.dim.aspect != 1:
+        if not self.dim.aspect_equal:
             self._scale_pad()
 
         # set the extent (takes into account padding)
@@ -226,8 +229,8 @@ class BasePitch(ABC):
         self._validate_pad()
 
         # calculate locations of arcs and circles.
-        # Where the pitch has an unequal aspect ratio we need to do this seperately
-        if (self.dim.aspect == 1) and (self.pitch_type != 'metricasports'):
+        # Where the pitch has an unequal aspect ratio we need to calculate them separately
+        if self.dim.aspect_equal:
             self._init_circles_and_arcs()
 
         # set the positions of the goal posts
@@ -264,8 +267,11 @@ class BasePitch(ABC):
 
     def _validation_checks(self):
         # pitch validation
-        if self.pitch_type not in dimensions.valid:
-            raise TypeError(f'Invalid argument: pitch_type should be in {dimensions.valid}')
+        if (self.pitch_type not in dimensions.valid and
+            not issubclass(type(self.pitch_type), dimensions.BaseDims)
+           ):
+            raise TypeError(f'Invalid argument: pitch_type should be in {dimensions.valid} '
+                            'or a subclass of dimensions.BaseDims.')
         if (self.pitch_length is None or self.pitch_width is None) \
                 and self.pitch_type in dimensions.size_varies:
             raise TypeError("Invalid argument: pitch_length and pitch_width must be specified.")
@@ -293,16 +299,6 @@ class BasePitch(ABC):
             warnings.warn("Labels will not be shown unless axis=True")
         if (self.axis is False) and self.tick:
             warnings.warn("Ticks will not be shown unless axis=True")
-
-    def _validate_pad(self):
-        # make sure padding not too large for the pitch
-        if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length:
-            raise ValueError("pad_left/pad_right too negative for pitch length")
-        if abs(min(self.pad_top, 0) + min(self.pad_bottom, 0)) >= self.dim.width:
-            raise ValueError("pad_top/pad_bottom too negative for pitch width")
-        if self.half:
-            if abs(min(self.pad_left, 0) + min(self.pad_right, 0)) >= self.dim.length / 2:
-                raise ValueError("pad_left/pad_right too negative for pitch length")
 
     def _init_circles_and_arcs(self):
         self.diameter1 = self.dim.circle_diameter
@@ -337,9 +333,9 @@ class BasePitch(ABC):
         intersection = self.dim.center_width - ((radius_width * radius_length *
                                                  (radius_length ** 2 -
                                                   (self.dim.penalty_area_length -
-                                                   self.dim.penalty_left) ** 2) ** 0.5) /
+                                                   self.dim.penalty_spot_distance) ** 2) ** 0.5) /
                                                 radius_length ** 2)
-        arc_pen_top1 = (self.dim.penalty_area_length, intersection)
+        arc_pen_top1 = (self.dim.penalty_area_left, intersection)
         spot_xy = (self.dim.penalty_left, self.dim.center_width)
         # to ax coordinates
         arc_pen_top1 = self._to_ax_coord(ax, ax.transAxes, arc_pen_top1)
@@ -459,7 +455,7 @@ class BasePitch(ABC):
         # set limits and aspect
         ax.set_xlim(self.extent[0], self.extent[1])
         ax.set_ylim(self.extent[2], self.extent[3])
-        ax.set_aspect(self.dim.aspect)
+        ax.set_aspect(self.aspect)
 
     def _set_background(self, ax):
         if self.pitch_color != 'grass':
@@ -470,7 +466,7 @@ class BasePitch(ABC):
             pitch_color = np.random.normal(size=(1000, 1000))
             if self.stripe:
                 pitch_color = self._draw_stripe_grass(pitch_color)
-            ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.dim.aspect)
+            ax.imshow(pitch_color, cmap=grass_cmap(), extent=self.extent, aspect=self.aspect)
 
     def _plain_stripes(self, ax):
         for i in range(len(self.dim.stripe_locations) - 1):
@@ -1509,9 +1505,17 @@ class BasePitch(ABC):
         """ Implement a method to scale padding for equal aspect pitches."""
 
     @abstractmethod
+    def _set_aspect(self):
+        """ Implement a method to set the aspect attribute."""
+
+    @abstractmethod
     def _set_extent(self):
         """ Implement a method to set the pitch extents, stripe locations,
          and attributes to help plot on different orientations."""
+
+    @abstractmethod
+    def _validate_pad(self):
+        """ Implement a method to validate the pad values."""
 
     @abstractmethod
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):

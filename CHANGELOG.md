@@ -1,3 +1,20 @@
+:rocket: Version 1.3.0
+----------------------
+### Added
+* :new: The ``pitch_type`` argument now accepts custom dimensions in addition to strings ('statsbomb'). \
+For example: \
+from mplsoccer.dimensions import center_scale_dims \
+from mplsoccer import Pitch \
+dim = center_scale_dims(pitch_width=68, pitch_length=105, width=2, length=2) \
+pitch = Pitch(pitch_type=dim, label=True, axis=True) \
+fig, ax = pitch.draw() \
+See the ``mplsoccer.dimensions`` module for examples of how to define the dimensions.
+The custom dimensions must be a subclass of ``mplsoccer.dimensions.BaseDims``.
+
+### Fixed
+* Fixed the padding validation for vertical pitches.
+* Fixed the padding scaling for vertical pitches with unequal aspect ratios.
+
 :rocket: Version 1.2.4
 ----------------------
 

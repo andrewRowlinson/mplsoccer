@@ -26,7 +26,7 @@ for idx, pt in enumerate(pitch_types):
         pitch = Pitch(pitch_type=pt, **pitch_kwargs)
     pitch.draw(axes[idx])
     xmin, xmax, ymin, ymax = pitch.extent
-    if pitch.dim.aspect != 1:
+    if not pitch.dim.aspect_equal:
         TEXT = 'data coordinates \n are square (1:1) \n scale up to a real-pitch size'
         axes[idx].annotate(TEXT, xy=(xmin, ymin), xytext=(0 + (xmax - xmin)/2, ymin),
                            **font_kwargs)

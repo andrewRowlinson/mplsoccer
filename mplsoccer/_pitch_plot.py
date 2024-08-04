@@ -560,7 +560,7 @@ class BasePitchPlot(BasePitch):
         if teams.size != x.size:
             raise ValueError("x and team must be the same size")
 
-        if self.dim.aspect != 1:
+        if not self.dim.aspect_equal:
             standardized = True
             x, y = self.standardizer.transform(x, y)
             extent = np.array([0, 105, 0, 68])
@@ -730,7 +730,7 @@ class BasePitchPlot(BasePitch):
         ...                 headaxislength=2, ax=ax)
         """
         validate_ax(ax)
-        if self.dim.aspect != 1:
+        if not self.dim.aspect_equal:
             standardized = True
             xstart, ystart = self.standardizer.transform(xstart, ystart)
             xend, yend = self.standardizer.transform(xend, yend)
@@ -746,8 +746,8 @@ class BasePitchPlot(BasePitch):
                                       statistic=circmean, bins=bins, standardized=standardized)
 
         # calculate the arrow length
-        if self.pitch_type == 'tracab':
-            arrow_length = arrow_length * 100
+        if self.dim.pad_multiplier != 1:
+            arrow_length = arrow_length * self.dim.pad_multiplier
         if arrow_type == 'scale':
             new_d = (bs_distance['statistic'] * arrow_length /
                      np.nan_to_num(bs_distance['statistic']).max(initial=None))
@@ -800,7 +800,13 @@ class BasePitchPlot(BasePitch):
     def _scale_pad(self):
         pass
 
+    def _set_aspect(self):
+        pass
+
     def _set_extent(self):
+        pass
+
+    def _validate_pad(self):
         pass
 
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):

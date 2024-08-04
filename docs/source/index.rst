@@ -94,6 +94,7 @@ mplsoccer was inspired by:
    
    installation
    gallery/pitch_setup/plot_pitches
+   gallery/pitch_setup/plot_pitch_types
    gallery/radar/plot_radar
    gallery/bumpy_charts/plot_bumpy
    gallery/statsbomb/plot_statsbomb_data
