@@ -1,7 +1,7 @@
 :rocket: Version 1.3.0
 ----------------------
 ### Added
-* :new: The ``pitch_type`` argument now accepts custom dimensions in additon to strings ('statsbomb'). \
+* :new: The ``pitch_type`` argument now accepts custom dimensions in addition to strings ('statsbomb'). \
 For example: \
 from mplsoccer.dimensions import center_scale_dims \
 from mplsoccer import Pitch \
