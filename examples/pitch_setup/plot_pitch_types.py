@@ -112,11 +112,13 @@ fig, ax = pitch.draw()
 # Mplsoccer version 1.3.0 onwards also allows custom dimensions
 # to be passed to the ``pitch_type`` argument.
 # It is common in some machine learning methods to standardize values, e.g. coordinates.
-# However, you might still want to plot the standarized coordinates.
+# However, you might still want to plot the standardized coordinates to check your transforms work.
 # You can use the center_scale_dims function to create custom centered pitch dimensions
 # and pass this to the ``pitch_type`` argument.
-# Below we create a pitch with limits between -1 and 1.
-# You can also change the width and length arguments to get different pitch limits.
+# Below we create a pitch with limits between -1 and 1 (``width``/2 and ``length``/2).
+# You can also change the ``width`` and ``length`` arguments to get different pitch limits.
+# The visual layout of the pitch is controlled by the ``pitch_width`` and ``pitch_length``
+# arguments.
 from mplsoccer.dimensions import center_scale_dims
 from mplsoccer import Pitch
 dim = center_scale_dims(pitch_width=68, pitch_length=105,
