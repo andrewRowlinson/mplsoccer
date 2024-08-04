@@ -1505,6 +1505,10 @@ class BasePitch(ABC):
         """ Implement a method to scale padding for equal aspect pitches."""
 
     @abstractmethod
+    def _set_aspect(self):
+        """ Implement a method to set the aspect attribute."""
+
+    @abstractmethod
     def _set_extent(self):
         """ Implement a method to set the pitch extents, stripe locations,
          and attributes to help plot on different orientations."""

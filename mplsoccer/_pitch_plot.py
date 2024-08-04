@@ -800,7 +800,13 @@ class BasePitchPlot(BasePitch):
     def _scale_pad(self):
         pass
 
+    def _set_aspect(self):
+        pass
+
     def _set_extent(self):
+        pass
+
+    def _validate_pad(self):
         pass
 
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):

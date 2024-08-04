@@ -11,6 +11,10 @@ fig, ax = pitch.draw() \
 See the ``mplsoccer.dimensions`` module for examples of how to define the dimensions.
 The custom dimensions must be a subclass of ``mplsoccer.dimensions.BaseDims``.
 
+### Fixed
+* Fixed the padding validation for vertical pitches.
+* Fixed the padding scaling for vertical pitches with unequal aspect ratios.
+
 :rocket: Version 1.2.4
 ----------------------
 
