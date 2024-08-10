@@ -41,7 +41,7 @@ pitch = Pitch(pitch_type='statsbomb', line_zorder=2,
 fig, ax = pitch.draw(figsize=(6.6, 4.125))
 fig.set_facecolor('#22312b')
 bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count', bins=(25, 25))
-bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], 1)
+bin_statistic.statistic = gaussian_filter(bin_statistic.statistic, 1)
 pcm = pitch.heatmap(bin_statistic, ax=ax, cmap='hot', edgecolors='#22312b')
 # Add the colorbar and format off-white
 cbar = fig.colorbar(pcm, ax=ax, shrink=0.6)
@@ -79,7 +79,7 @@ fig.set_facecolor('#22312b')
 
 # plot heatmap
 bin_statistic = pitch.bin_statistic(df_pressure.x, df_pressure.y, statistic='count', bins=(25, 25))
-bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], 1)
+bin_statistic.statistic = gaussian_filter(bin_statistic.statistic, 1)
 pcm = pitch.heatmap(bin_statistic, ax=axs['pitch'], cmap='hot', edgecolors='#22312b')
 
 # add cbar

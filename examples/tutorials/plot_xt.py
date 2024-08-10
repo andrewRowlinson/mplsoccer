@@ -125,12 +125,12 @@ goal_heatmap = pitch.heatmap(goal_probability, ax=ax)
 # so the dataframe only contains actions inside the pitch.
 move = event[event['move']].copy()
 bin_start_locations = pitch.bin_statistic(move['x'], move['y'], bins=bins)
-move = move[bin_start_locations['inside']].copy()
+move = move[bin_start_locations.inside].copy()
 
 # get the successful moves, which filters out the events that ended outside the pitch
 # or where not successful (null)
 bin_end_locations = pitch.bin_statistic(move['end_x'], move['end_y'], bins=bins)
-move_success = move[(bin_end_locations['inside']) & (move['outcome_name'].isnull())].copy()
+move_success = move[(bin_end_locations.inside) & (move['outcome_name'].isnull())].copy()
 
 # get a dataframe of the successful moves
 # and the grid cells they started and ended in

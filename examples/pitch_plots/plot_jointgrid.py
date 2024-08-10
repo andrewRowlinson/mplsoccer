@@ -169,12 +169,12 @@ fig, axs = pitch.jointgrid(figheight=10, left=None, bottom=0.075, grid_height=0.
 bs1 = pitch.bin_statistic(df_team1.x, df_team1.y, bins=(18, 12))
 bs2 = pitch.bin_statistic(df_team2.x, df_team2.y, bins=(18, 12))
 # get the min/ max values for normalizing across both teams
-vmax = max(bs2['statistic'].max(), bs1['statistic'].max())
-vmin = max(bs2['statistic'].min(), bs1['statistic'].min())
+vmax = max(bs2.statistic.max(), bs1.statistic.max())
+vmin = max(bs2.statistic.min(), bs1.statistic.min())
 # set values where zero shots to nan values so it does not show up in the heatmap
 # i.e. zero values take the background color
-bs1['statistic'][bs1['statistic'] == 0] = np.nan
-bs2['statistic'][bs2['statistic'] == 0] = np.nan
+bs1.statistic[bs1.statistic == 0] = np.nan
+bs2.statistic[bs2.statistic == 0] = np.nan
 # set the vmin/ vmax so the colors depend on the minimum/maximum value for both teams
 hm1 = pitch.heatmap(bs1, ax=axs['pitch'], cmap='Reds', vmin=vmin, vmax=vmax, edgecolor='#f9f9f9')
 hm2 = pitch.heatmap(bs2, ax=axs['pitch'], cmap='Blues', vmin=vmin, vmax=vmax, edgecolor='#f9f9f9')

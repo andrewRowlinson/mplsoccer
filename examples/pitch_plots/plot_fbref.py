@@ -86,7 +86,7 @@ for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
             fontproperties=fm.prop)
 
     # fill in the bin statistics from df and plot the heatmap
-    bin_statistic['statistic'] = df.loc[df.Squad == teams[i], touches_cols].values
+    bin_statistic.statistic = df.loc[df.Squad == teams[i], touches_cols].values
     heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='coolwarm', vmin=vmin, vmax=vmax)
     annotate = pitch.label_heatmap(bin_statistic, color='white', fontproperties=fm.prop,
                                    path_effects=path_eff, fontsize=50, ax=ax,
@@ -143,7 +143,7 @@ for i, ax in enumerate(axs['pitch'].flat[:len(teams)]):
     ax.text(60, -10, teams[i], ha='center', va='center', fontsize=50, fontproperties=fm.prop)
 
     # fill in the bin statistics from df and plot the heatmap
-    bin_statistic['statistic'] = df.loc[df.Squad == teams[i], touches_cols].values
+    bin_statistic.statistic = df.loc[df.Squad == teams[i], touches_cols].values
     heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='coolwarm', vmin=vmin, vmax=vmax)
     annotate = pitch.label_heatmap(bin_statistic, color='white', fontproperties=fm.prop,
                                    path_effects=path_eff, str_format='{0:.0f}%', fontsize=50,
