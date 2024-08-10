@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from functools import partial
 
 import numpy as np
-from scipy.stats import binned_statistic_2d, circmean
+from scipy.stats import binned_statistic_2d, binned_statistic_dd, circmean
 from typing import Optional
 
 from mplsoccer.utils import validate_ax
@@ -247,9 +247,9 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
     if normalize:
         statistic = statistic / statistic.sum()
 
-    x_edge, y_edge, angle_edge = bin_edges
+    x_edge, y_edge, angle_grid = bin_edges
     if center:
-        angle_edge = angle_edge - width / 2
+        angle_grid = angle_grid - width / 2
 
     x_grid, y_grid = np.meshgrid(x_edge, y_edge)
     cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
@@ -272,12 +272,12 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
 
     # remove last edge as not needed for sonars
     # we only need the start locations for each segment
-    angle_edge = angle_edge[:-1]
+    angle_grid = angle_grid[:-1]
 
     inside = np.logical_and(~mask_x_out, ~mask_y_out)
     stats = asdict(BinnedStatisticResult(statistic, x_grid, y_grid,
                                          cx, cy, binnumber=binnumber,
-                                         inside=inside, angle_edge=angle_edge))
+                                         inside=inside, angle_grid=angle_grid))
     return stats
 
 
