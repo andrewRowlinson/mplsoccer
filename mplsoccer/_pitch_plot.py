@@ -16,9 +16,6 @@ from mplsoccer.quiver import arrows
 from mplsoccer.scatterutils import scatter_football, scatter_rotation
 from mplsoccer.utils import validate_ax, copy_doc
 
-_BinnedStatisticResult = namedtuple('BinnedStatisticResult',
-                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
-
 
 class BasePitchPlot(BasePitch):
 
@@ -362,7 +359,7 @@ class BasePitchPlot(BasePitch):
 
         Returns
         -------
-        annotation : matplotlib.text.Text
+        text : matplotlib.text.Text
 
         Examples
         --------
@@ -413,11 +410,11 @@ class BasePitchPlot(BasePitch):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
 
-        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
+        **kwargs : All other keyword arguments are passed on to matplotlib.text.Text.
 
         Returns
         -------
-        annotations : A list of matplotlib.text.Annotation.
+        text : A list of matplotlib.text.Text.
 
         Examples
         --------
@@ -430,12 +427,13 @@ class BasePitchPlot(BasePitch):
         >>> y = np.random.uniform(low=0, high=80, size=100)
         >>> stats = pitch.bin_statistic(x, y)
         >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
-        >>> stats['statistic'] = stats['statistic'].astype(int)
         >>> path_eff = [path_effects.Stroke(linewidth=0.5, foreground='#22312b')]
         >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center',
-        ...                            va='center', path_effects=path_eff)
+        ...                            va='center', path_effects=path_eff, str_format='{:.0f}')
         """
         validate_ax(ax)
+        va = kwargs.pop('va', 'center')
+        ha = kwargs.pop('ha', 'center')
 
         if not isinstance(stats, list):
             stats = [stats]
@@ -443,24 +441,24 @@ class BasePitchPlot(BasePitch):
         annotation_list = []
         for bin_stat in stats:
             # remove labels outside the plot extents
-            mask_x_outside1 = bin_stat['cx'] < self.dim.pitch_extent[0]
-            mask_x_outside2 = bin_stat['cx'] > self.dim.pitch_extent[1]
-            mask_y_outside1 = bin_stat['cy'] < self.dim.pitch_extent[2]
-            mask_y_outside2 = bin_stat['cy'] > self.dim.pitch_extent[3]
+            mask_x_outside1 = bin_stat.cx < self.dim.pitch_extent[0]
+            mask_x_outside2 = bin_stat.cx > self.dim.pitch_extent[1]
+            mask_y_outside1 = bin_stat.cy < self.dim.pitch_extent[2]
+            mask_y_outside2 = bin_stat.cy > self.dim.pitch_extent[3]
             mask_clip = mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
             if exclude_zeros:
-                mask_clip = mask_clip | (np.isclose(bin_stat['statistic'], 0.))
+                mask_clip = mask_clip | (np.isclose(bin_stat.statistic, 0.))
             if exclude_nan:
-                mask_clip = mask_clip | np.isnan(bin_stat['statistic'])
+                mask_clip = mask_clip | np.isnan(bin_stat.statistic)
             mask_clip = np.ravel(mask_clip)
 
-            text = np.ravel(bin_stat['statistic'])[~mask_clip]
-            cx = np.ravel(bin_stat['cx'])[~mask_clip] + xoffset
-            cy = np.ravel(bin_stat['cy'])[~mask_clip] + yoffset
+            text = np.ravel(bin_stat.statistic)[~mask_clip]
+            cx = np.ravel(bin_stat.cx)[~mask_clip] + xoffset
+            cy = np.ravel(bin_stat.cy)[~mask_clip] + yoffset
             for idx, text_str in enumerate(text):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
-                annotation = self.annotate(text_str, (cx[idx], cy[idx]), ax=ax, **kwargs)
+                annotation = self.text(cx[idx], cy[idx], text_str, va=va, ha=ha, ax=ax, **kwargs)
                 annotation_list.append(annotation)
 
         return annotation_list
@@ -749,25 +747,25 @@ class BasePitchPlot(BasePitch):
         if self.dim.pad_multiplier != 1:
             arrow_length = arrow_length * self.dim.pad_multiplier
         if arrow_type == 'scale':
-            new_d = (bs_distance['statistic'] * arrow_length /
-                     np.nan_to_num(bs_distance['statistic']).max(initial=None))
+            new_d = (bs_distance.statistic * arrow_length /
+                     np.nan_to_num(bs_distance.statistic).max(initial=None))
         elif arrow_type == 'same':
             new_d = arrow_length
         elif arrow_type == 'average':
-            new_d = bs_distance['statistic']
+            new_d = bs_distance.statistic
         else:
             valid_arrows = ['scale', 'same', 'average']
             raise TypeError(f'Invalid argument: arrow_type should be in {valid_arrows}')
 
         # calculate the end positions of the arrows
-        endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d)
+        endx = bs_angle.cx + (np.cos(bs_angle.statistic) * new_d)
         if self.dim.invert_y and not standardized:
-            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d)  # invert_y
+            endy = bs_angle.cy - (np.sin(bs_angle.statistic) * new_d)  # invert_y
         else:
-            endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
+            endy = bs_angle.cy + (np.sin(bs_angle.statistic) * new_d)
 
         # get coordinates and convert back to the pitch coordinates if necessary
-        cx, cy = bs_angle['cx'], bs_angle['cy']
+        cx, cy = bs_angle.cx, bs_angle.cy
         if standardized:
             cx, cy = self.standardizer.transform(cx, cy, reverse=True)
             endx, endy = self.standardizer.transform(endx, endy, reverse=True)
@@ -777,7 +775,7 @@ class BasePitchPlot(BasePitch):
             return self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)
         bs_count = self.bin_statistic(xstart, ystart, statistic='count',
                                       bins=bins, standardized=standardized)
-        return self.arrows(cx, cy, endx, endy, bs_count['statistic'], ax=ax, **kwargs)
+        return self.arrows(cx, cy, endx, endy, bs_count.statistic, ax=ax, **kwargs)
 
     def triplot(self, x, y, ax=None, **kwargs):
         """ Utility wrapper around matplotlib.axes.Axes.triplot

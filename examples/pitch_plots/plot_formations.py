@@ -183,6 +183,8 @@ ax_scatter = pitch.formation(formation, positions=starting_xi.position_id, kind=
 # Pitch of pitches
 # ----------------
 # You can plot the formations as pitches using the ``kind='pitch'`` argument.
+# I believe `UtdArena <https://twitter.com/UtdArena>`_ was the first
+# person to introduce this type of visualization.
 # Additional keyword arguments amend the inset pitch's appearance, e.g. ``line_color``.
 #
 # In this example, it is the first game that Messi played as a false-nine.
