@@ -8,7 +8,8 @@ from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
-from mplsoccer.heatmap import bin_statistic, bin_statistic_positional, heatmap, heatmap_positional
+from mplsoccer.heatmap import (bin_statistic, bin_statistic_positional,
+                               bin_statistic_sonar, heatmap, heatmap_positional)
 from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
 from mplsoccer.scatterutils import scatter_football, scatter_rotation
@@ -375,6 +376,15 @@ class BasePitchPlot(BasePitch):
                       normalize=False, standardized=False):
         return bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
                              bins=bins, normalize=normalize, standardized=standardized)
+
+    @copy_doc(bin_statistic)
+    def bin_statistic_sonar(self, x, y, angle, values=None,
+                            statistic='count', bins=(5, 4, 10),
+                            normalize=False, standardized=False, center=True):
+        return bin_statistic_sonar(x, y, angle, values=values, dim=self.dim,
+                                   statistic=statistic, bins=bins,
+                                   normalize=normalize, standardized=standardized,
+                                   center=center)
 
     @copy_doc(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
