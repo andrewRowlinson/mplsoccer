@@ -456,7 +456,8 @@ class BasePitchPlot(BasePitch):
             for idx, text_str in enumerate(text):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
-                annotation = self.text(cx[idx], cy[idx], text_str, ax=ax, **kwargs)
+                annotation = self.text(cx[idx], cy[idx], text_str, ax=ax,
+                                       va=va, ha=ha, **kwargs)
                 annotation_list.append(annotation)
 
         return annotation_list
