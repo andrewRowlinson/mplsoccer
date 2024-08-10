@@ -1,7 +1,5 @@
 """ Module adds the plotting methods to the BasePitch abstract class."""
 
-from collections import namedtuple
-
 import numpy as np
 import seaborn as sns
 from matplotlib import patches
@@ -15,9 +13,6 @@ from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
 from mplsoccer.scatterutils import scatter_football, scatter_rotation
 from mplsoccer.utils import validate_ax, copy_doc
-
-_BinnedStatisticResult = namedtuple('BinnedStatisticResult',
-                                    ('statistic', 'x_grid', 'y_grid', 'cx', 'cy'))
 
 
 class BasePitchPlot(BasePitch):
@@ -362,7 +357,7 @@ class BasePitchPlot(BasePitch):
 
         Returns
         -------
-        annotation : matplotlib.text.Text
+        text : matplotlib.text.Text
 
         Examples
         --------
@@ -413,11 +408,11 @@ class BasePitchPlot(BasePitch):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
 
-        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.annotate.
+        **kwargs : All other keyword arguments are passed on to matplotlib.text.Text.
 
         Returns
         -------
-        annotations : A list of matplotlib.text.Annotation.
+        text : A list of matplotlib.text.Text.
 
         Examples
         --------
@@ -430,12 +425,13 @@ class BasePitchPlot(BasePitch):
         >>> y = np.random.uniform(low=0, high=80, size=100)
         >>> stats = pitch.bin_statistic(x, y)
         >>> pitch.heatmap(stats, edgecolors='black', cmap='hot', ax=ax)
-        >>> stats['statistic'] = stats['statistic'].astype(int)
         >>> path_eff = [path_effects.Stroke(linewidth=0.5, foreground='#22312b')]
         >>> text = pitch.label_heatmap(stats, color='white', ax=ax, fontsize=20, ha='center',
-        ...                            va='center', path_effects=path_eff)
+        ...                            va='center', path_effects=path_eff, str_format='{:.0f}')
         """
         validate_ax(ax)
+        va = kwargs.pop('va', 'center')
+        ha = kwargs.pop('ha', 'center')
 
         if not isinstance(stats, list):
             stats = [stats]
@@ -460,7 +456,7 @@ class BasePitchPlot(BasePitch):
             for idx, text_str in enumerate(text):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
-                annotation = self.annotate(text_str, (cx[idx], cy[idx]), ax=ax, **kwargs)
+                annotation = self.text(cx[idx], cy[idx], text_str, ax=ax, **kwargs)
                 annotation_list.append(annotation)
 
         return annotation_list

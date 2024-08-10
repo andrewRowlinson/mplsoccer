@@ -1,16 +1,47 @@
 """ A module with functions for binning data into 2d bins and plotting heatmaps.´´."""
 
-from collections import namedtuple
+from dataclasses import dataclass, asdict
 from functools import partial
 
 import numpy as np
 from scipy.stats import binned_statistic_2d, circmean
+from typing import Optional
 
 from mplsoccer.utils import validate_ax
 
-_BinnedStatisticResult = namedtuple('BinnedStatisticResult',
-                                    ('statistic', 'x_grid', 'y_grid',
-                                     'cx', 'cy', 'binnumber', 'inside'))
+
+@dataclass
+class BinnedStatisticResult:
+    """ Dataclass for the bin_statistic results."""
+    statistic: np.ndarray
+    x_grid: np.ndarray
+    y_grid: np.ndarray
+    cx: np.ndarray
+    cy: np.ndarray
+    binnumber: Optional[np.ndarray] = None
+    inside: Optional[np.ndarray] = None
+    angle_grid: Optional[np.ndarray] = None
+
+
+def _nan_safe(statistic):
+    """ Make the statistic nan safe"""
+    if statistic == 'mean':
+        statistic = np.nanmean
+    elif statistic == 'std':
+        statistic = np.nanstd
+    elif statistic == 'median':
+        statistic = np.nanmedian
+    elif statistic == 'sum':
+        statistic = np.nansum
+    elif statistic == 'min':
+        statistic = np.nanmin
+    elif statistic == 'max':
+        statistic = np.nanmax
+    elif statistic == 'circmean':
+        statistic = partial(circmean, nan_policy='omit')
+    else:
+        statistic = statistic
+    return statistic
 
 
 def bin_statistic(x, y, values=None, dim=None, statistic='count',
@@ -75,20 +106,7 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count',
     y = np.ravel(y)
     if x.size != y.size:
         raise ValueError("x and y must be the same size")
-    if statistic == 'mean':
-        statistic = np.nanmean
-    elif statistic == 'std':
-        statistic = np.nanstd
-    elif statistic == 'median':
-        statistic = np.nanmedian
-    elif statistic == 'sum':
-        statistic = np.nansum
-    elif statistic == 'min':
-        statistic = np.nanmin
-    elif statistic == 'max':
-        statistic = np.nanmax
-    elif statistic == 'circmean':
-        statistic = partial(circmean, nan_policy='omit')
+    statistic = _nan_safe(statistic)
     if (values is None) & (statistic == 'count'):
         values = x
     if (values is None) & (statistic != 'count'):
@@ -131,7 +149,9 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count',
     binnumber[1, mask_y_out] = -1
     binnumber[1, ~mask_y_out] = binnumber[1, ~mask_y_out] - 1
     inside = np.logical_and(~mask_x_out, ~mask_y_out)
-    return _BinnedStatisticResult(statistic, x_grid, y_grid, cx, cy, binnumber, inside)._asdict()
+    return asdict(BinnedStatisticResult(statistic, x_grid, y_grid,
+                                        cx, cy, binnumber=binnumber,
+                                        inside=inside))
 
 
 def heatmap(stats, ax=None, vertical=False, **kwargs):
@@ -228,53 +248,43 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full',
         yedge1 = dim.positional_y[[0, 1, 4, 5]]
         bin_statistic1 = bin_statistic(x, y, values, dim=dim, statistic=statistic,
                                        bins=(xedge1, yedge1))
-        result1 = _BinnedStatisticResult(bin_statistic1['statistic'][:1, :],
-                                         bin_statistic1['x_grid'][:2, :],
-                                         bin_statistic1['y_grid'][:2, :],
-                                         bin_statistic1['cx'][0, :],
-                                         bin_statistic1['cy'][0, :],
-                                         None,
-                                         None)._asdict()
-        result2 = _BinnedStatisticResult(bin_statistic1['statistic'][2:, :],
+        result1 = asdict(BinnedStatisticResult(bin_statistic1['statistic'][:1, :],
+                                               bin_statistic1['x_grid'][:2, :],
+                                               bin_statistic1['y_grid'][:2, :],
+                                               bin_statistic1['cx'][0, :],
+                                               bin_statistic1['cy'][0, :]))
+        result2 = asdict(BinnedStatisticResult(bin_statistic1['statistic'][2:, :],
                                          bin_statistic1['x_grid'][2:, :],
                                          bin_statistic1['y_grid'][2:, :],
                                          bin_statistic1['cx'][2, :],
-                                         bin_statistic1['cy'][2, :],
-                                         None,
-                                         None)._asdict()
+                                         bin_statistic1['cy'][2, :]))
 
         # middle of the pitch
         xedge3 = dim.positional_x[[0, 1, 3, 5, 6]]
         yedge3 = dim.positional_y
         bin_statistic3 = bin_statistic(x, y, values, dim=dim, statistic=statistic,
                                        bins=(xedge3, yedge3))
-        result3 = _BinnedStatisticResult(bin_statistic3['statistic'][1:-1, 1:-1],
-                                         bin_statistic3['x_grid'][1:-1:, 1:-1],
-                                         bin_statistic3['y_grid'][1:-1, 1:-1],
-                                         bin_statistic3['cx'][1:-1, 1:-1],
-                                         bin_statistic3['cy'][1:-1, 1:-1],
-                                         None,
-                                         None)._asdict()
+        result3 = asdict(BinnedStatisticResult(bin_statistic3['statistic'][1:-1, 1:-1],
+                                               bin_statistic3['x_grid'][1:-1:, 1:-1],
+                                               bin_statistic3['y_grid'][1:-1, 1:-1],
+                                               bin_statistic3['cx'][1:-1, 1:-1],
+                                               bin_statistic3['cy'][1:-1, 1:-1]))
 
         # penalty areas
         xedge4 = dim.positional_x[[0, 1, 2, 5, 6]]
         yedge4 = dim.positional_y[[0, 1, 4, 5]]
         bin_statistic4 = bin_statistic(x, y, values, dim=dim, statistic=statistic,
                                        bins=(xedge4, yedge4))
-        result4 = _BinnedStatisticResult(bin_statistic4['statistic'][1:-1, :1],
-                                         bin_statistic4['x_grid'][1:-1, 0:2],
-                                         bin_statistic4['y_grid'][1:-1, 0:2],
-                                         bin_statistic4['cx'][1:-1, :1],
-                                         bin_statistic4['cy'][1:-1, :1],
-                                         None,
-                                         None)._asdict()
-        result5 = _BinnedStatisticResult(bin_statistic4['statistic'][1:-1, -1:],
-                                         bin_statistic4['x_grid'][1:-1, -2:],
-                                         bin_statistic4['y_grid'][1:-1, -2:],
-                                         bin_statistic4['cx'][1:-1, -1:],
-                                         bin_statistic4['cy'][1:-1, -1:],
-                                         None,
-                                         None)._asdict()
+        result4 = asdict(BinnedStatisticResult(bin_statistic4['statistic'][1:-1, :1],
+                                               bin_statistic4['x_grid'][1:-1, 0:2],
+                                               bin_statistic4['y_grid'][1:-1, 0:2],
+                                               bin_statistic4['cx'][1:-1, :1],
+                                               bin_statistic4['cy'][1:-1, :1]))
+        result5 = asdict(BinnedStatisticResult(bin_statistic4['statistic'][1:-1, -1:],
+                                               bin_statistic4['x_grid'][1:-1, -2:],
+                                               bin_statistic4['y_grid'][1:-1, -2:],
+                                               bin_statistic4['cx'][1:-1, -1:],
+                                               bin_statistic4['cy'][1:-1, -1:]))
 
         stats = [result1, result2, result3, result4, result5]
 
