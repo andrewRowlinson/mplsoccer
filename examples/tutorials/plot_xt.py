@@ -136,10 +136,10 @@ move_success = move[(bin_end_locations.inside) & (move['outcome_name'].isnull())
 # and the grid cells they started and ended in
 bin_success_start = pitch.bin_statistic(move_success['x'], move_success['y'], bins=bins)
 bin_success_end = pitch.bin_statistic(move_success['end_x'], move_success['end_y'], bins=bins)
-df_bin = pd.DataFrame({'x': bin_success_start['binnumber'][0],
-                       'y': bin_success_start['binnumber'][1],
-                       'end_x': bin_success_end['binnumber'][0],
-                       'end_y': bin_success_end['binnumber'][1]})
+df_bin = pd.DataFrame({'x': bin_success_start.binnumber[0],
+                       'y': bin_success_start.binnumber[1],
+                       'end_x': bin_success_end.binnumber[0],
+                       'end_y': bin_success_end.binnumber[1]})
 
 # calculate the bin counts for the successful moves, i.e. the number of moves between grid cells
 bin_counts = df_bin.value_counts().reset_index(name='bin_counts')
@@ -219,8 +219,8 @@ grid_start = pitch.bin_statistic(move_success.x, move_success.y, bins=bins)
 grid_end = pitch.bin_statistic(move_success.end_x, move_success.end_y, bins=bins)
 
 # then get the xT values from the start and end grid cell
-start_xt = xt[grid_start['binnumber'][1], grid_start['binnumber'][0]]
-end_xt = xt[grid_end['binnumber'][1], grid_end['binnumber'][0]]
+start_xt = xt[grid_start.binnumber[1], grid_start.binnumber[0]]
+end_xt = xt[grid_end.binnumber[1], grid_end.binnumber[0]]
 
 # then calculate the added xT
 added_xt = end_xt - start_xt
