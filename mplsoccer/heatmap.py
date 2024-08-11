@@ -21,6 +21,7 @@ class BinnedStatisticResult:
     binnumber: Optional[np.ndarray] = None
     inside: Optional[np.ndarray] = None
     angle_grid: Optional[np.ndarray] = None
+    angle_widths: Optional[np.ndarray] = None
 
 
 def _nan_safe(statistic):
@@ -192,9 +193,10 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
     -------
     bin_statistic : BinnedStatisticResultSonar dataclass
         The attributes are statistic (the calculated statistic),
-        x_grid, y_grid, angle_grid (the bin's edges), cx and cy (the bin centers),
-        binnumber (the bin indices each point belongs to) and inside (whether the point is inside
-        the pitch). binnumber is a (2, N) array that represents the bin in which the observation
+        x_grid, y_grid, angle_grid (the bin's edges), angle_widths (the angle bin width),
+        cx and cy (the bin centers), binnumber (the bin indices each point belongs to)
+        and inside (whether the point is inside the pitch).
+        binnumber is a (2, N) array that represents the bin in which the observation
         falls if the observations falls outside the pitch the value is -1 for the dimension. The
         binnumber are zero indexed and start from the top and left handside of the pitch.
     Examples
@@ -215,15 +217,23 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
         raise ValueError("x and y must be the same size")
     if x.size != angle.size:
         raise ValueError("x and angle must be the same size")
-
-    width = 2 * np.pi / bins[2]
-    if center:
-        angle = np.mod(angle + width / 2, 2 * np.pi)
-
     statistic = _nan_safe(statistic)
-
     if (values is None) & (statistic != 'count'):
         raise ValueError("values on which to calculate the statistic are missing")
+
+    if isinstance(bins, int):
+        bins = (bins, bins, bins)
+    if not len(bins) == 3:
+        raise ValueError("bins should be either an int, [int, int, int] or [array, array, array]")
+    if isinstance(bins[2], int):
+        first_width = 2 * np.pi / bins[2]
+    else:
+        if not np.isclose(np.min(bins[2]), 0) or not np.isclose(np.max(bins[2]), 2 * np.pi):
+            raise ValueError("bin angles should be radians between 0 and 2 pi")
+        first_width = np.sort(bins[2])[1]
+
+    if center:
+        angle = np.mod(angle + first_width / 2, 2 * np.pi)
 
     if standardized:
         pitch_range = [[0, 105], [0, 68], [0, 2 * np.pi]]
@@ -249,7 +259,8 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
 
     x_edge, y_edge, angle_grid = bin_edges
     if center:
-        angle_grid = angle_grid - width / 2
+        angle_grid = angle_grid - first_width / 2
+    angle_widths = np.diff(angle_grid)
 
     x_grid, y_grid = np.meshgrid(x_edge, y_edge)
     cx, cy = np.meshgrid(x_edge[:-1] + 0.5 * np.diff(x_edge),
@@ -277,7 +288,8 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
     inside = np.logical_and(~mask_x_out, ~mask_y_out)
     stats = asdict(BinnedStatisticResult(statistic, x_grid, y_grid,
                                          cx, cy, binnumber=binnumber,
-                                         inside=inside, angle_grid=angle_grid))
+                                         inside=inside, angle_grid=angle_grid,
+                                         angle_widths=angle_widths))
     return stats
 
 
