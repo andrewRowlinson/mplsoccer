@@ -197,8 +197,12 @@ class BasePitch(ABC):
         # data checks
         self._validation_checks()
 
-        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
-                                         length_from=pitch_length, pitch_to='uefa')
+        self.standardizer = Standardizer(pitch_from=pitch_type,
+                                         width_from=pitch_width,
+                                         length_from=pitch_length,
+                                         pitch_to='custom',
+                                         width_to=68 if pitch_width is None else pitch_width,
+                                         length_to=105 if pitch_width is None else pitch_length)
         # set pitch dimensions
         if issubclass(type(pitch_type), dimensions.BaseDims):
             self.dim = pitch_type

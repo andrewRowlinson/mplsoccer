@@ -608,8 +608,7 @@ class BasePitchPlot(BasePitch):
 
         return team1, team2
 
-    def calculate_angle_and_distance(self, xstart, ystart, xend, yend,
-                                     standardized=False, degrees=False):
+    def calculate_angle_and_distance(self, xstart, ystart, xend, yend, degrees=False):
         """ Calculates the angle in radians counter-clockwise and the distance
         between a start and end location. Where the angle 0 is this way →
         (the straight line from left to right) in a horizontally orientated pitch
@@ -621,9 +620,6 @@ class BasePitchPlot(BasePitch):
         xstart, ystart, xend, yend: array-like or scalar.
             Commonly, these parameters are 1D arrays.
             These should be the start and end coordinates to calculate the angle between.
-        standardized : bool, default False
-            Whether the x, y values have been standardized to the 'uefa'
-            pitch coordinates (105m x 68m)
         degrees : bool, default False
             If False, the angle is returned in radians counter-clockwise in the range [0, 2pi]
             If True, the angle is returned in degrees clockwise in the range [0, 360].
@@ -649,13 +645,19 @@ class BasePitchPlot(BasePitch):
         ystart = np.ravel(ystart)
         xend = np.ravel(xend)
         yend = np.ravel(yend)
-
         if xstart.size != ystart.size:
             raise ValueError("xstart and ystart must be the same size")
         if xstart.size != xend.size:
             raise ValueError("xstart and xend must be the same size")
         if ystart.size != yend.size:
             raise ValueError("ystart and yend must be the same size")
+
+        if not self.dim.aspect_equal:
+            xstart, ystart = self.standardizer.transform(xstart, ystart)
+            xend, yend = self.standardizer.transform(xend, yend)
+            standardized = True
+        else:
+            standardized = False
 
         x_dist = xend - xstart
         if self.dim.invert_y and standardized is False:
@@ -737,16 +739,21 @@ class BasePitchPlot(BasePitch):
         ...                 headaxislength=2, ax=ax)
         """
         validate_ax(ax)
+        # calculate  the binned statistics
+        angle, distance = self.calculate_angle_and_distance(xstart, ystart, xend, yend)
+
         if not self.dim.aspect_equal:
             standardized = True
+            # slightly inefficient as we also transform the data
+            # in the calculate_angle_and_distance method
+            # but I wanted to make it easier for users as this way they do not need
+            # to know whether their data needs
+            # to be transformed for calculate_angle_and_distance
             xstart, ystart = self.standardizer.transform(xstart, ystart)
             xend, yend = self.standardizer.transform(xend, yend)
         else:
             standardized = False
 
-        # calculate  the binned statistics
-        angle, distance = self.calculate_angle_and_distance(xstart, ystart, xend, yend,
-                                                            standardized=standardized)
         bs_distance = self.bin_statistic(xstart, ystart, values=distance,
                                          statistic='mean', bins=bins, standardized=standardized)
         bs_angle = self.bin_statistic(xstart, ystart, values=angle,
