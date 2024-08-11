@@ -202,7 +202,7 @@ class BasePitch(ABC):
                                          length_from=pitch_length,
                                          pitch_to='custom',
                                          width_to=68 if pitch_width is None else pitch_width,
-                                         length_to=105 if pitch_width is None else pitch_length)
+                                         length_to=105 if pitch_length is None else pitch_length)
         # set pitch dimensions
         if issubclass(type(pitch_type), dimensions.BaseDims):
             self.dim = pitch_type
