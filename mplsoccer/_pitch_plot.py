@@ -387,7 +387,7 @@ class BasePitchPlot(BasePitch):
                                    normalize=normalize, standardized=standardized,
                                    center=center)
 
-    @abstractmethod
+    @staticmethod
     @copy_doc(sonar)
     def sonar(stats_length, xindex=0, yindex=0,
               stats_color=None, cmap=None, vmin=None, vmax=None,

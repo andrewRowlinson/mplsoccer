@@ -1610,6 +1610,27 @@ class BasePitch(ABC):
         """ Calculate 2d binned statistics for arbritary shaped bins."""
 
     @abstractmethod
+    def bin_statistic_sonar(self, x, y, angle, values=None,
+                            statistic='count', bins=(5, 4, 10),
+                            normalize=False, standardized=False, center=True):
+        """ Calculate 3d binned statistics for arbritary shaped bins."""
+
+    @abstractmethod
+    def sonar(stats_length, xindex=0, yindex=0,
+              stats_color=None, cmap=None, vmin=None, vmax=None,
+              rmin=0, rmax=None, sonar_alpha=1, sonar_facecolor='None',
+              axis=False, label=False, ax=None, **kwargs):
+        """ Implement a method to plot an individual bar plot on a Polar axes."""
+
+    @abstractmethod
+    def sonar_grid(self, stats_length, stats_color=None, cmap=None, vmin=None,
+                   vmax=None, rmin=0, rmax=None, sonar_alpha=1,
+                   sonar_facecolor='None', axis=False, label=False, width=None,
+                   height=None, exclude_zeros=True, ax=None, **kwargs):
+        """ Implement a method to plot a grid of inset polar bar charts
+        on an existing axes."""
+
+    @abstractmethod
     def heatmap(self, stats, ax=None, **kwargs):
         """ Implement drawing heatmaps for arbritary shaped bins."""
 
