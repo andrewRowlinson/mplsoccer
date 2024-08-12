@@ -1615,6 +1615,7 @@ class BasePitch(ABC):
                             normalize=False, standardized=False, center=True):
         """ Calculate 3d binned statistics for arbritary shaped bins."""
 
+    @staticmethod
     @abstractmethod
     def sonar(stats_length, xindex=0, yindex=0,
               stats_color=None, cmap=None, vmin=None, vmax=None,
