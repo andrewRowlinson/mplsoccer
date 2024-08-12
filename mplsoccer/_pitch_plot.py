@@ -432,7 +432,8 @@ class BasePitchPlot(BasePitch):
             in the cmap. The default of None sets the values to the minimum value of
             stats_color['statistic'] and the maximum value of stats_color['statistic'].
         rmin, rmax : float, default 0 and None
-            The radial axis limits.
+            The radial axis limits. The default rmax of None sets the values to the maximum
+            of stats_length['statistic'].
         sonar_alpha : float, default 1
             The alpha/ transparency of the sonar axes patch.
         sonar_facecolor : any Matplotlib color, default 'None'
@@ -450,10 +451,24 @@ class BasePitchPlot(BasePitch):
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch, Sbopen
+        >>> parser = Sbopen()
+        >>> df = parser.event(69251)[0]
+        >>> df = df[(df.type_name == 'Pass') &
+        ...         (df.outcome_name.isnull())].copy()
+        >>> pitch = Pitch()
+        >>> angle, distance = pitch.calculate_angle_and_distance(df.x, df.y,
+        ...                                                      df.end_x, df.end_y)
+        >>> bs = pitch.bin_statistic_sonar(df.x, df.y, angle,
+        ...                                bins=(6, 4, 4), center=True)
+        >>> fig, ax = pitch.draw(figsize=(8, 5.5))
+        >>> axs = pitch.sonar_grid(bs, width=10, fc='cornflowerblue',
+        ...                        ec='black', ax=ax)
         """
         validate_ax(ax)
-        if vmax is None:
-            rmax = np.nanmax(stats_length['statistic'])
         mask_zero = np.all(np.isclose(stats_length['statistic'], 0), axis=2)
         axs = np.empty(stats_length['cx'].shape, dtype='O')
         it = np.nditer(stats_length['cx'], flags=['multi_index'])
