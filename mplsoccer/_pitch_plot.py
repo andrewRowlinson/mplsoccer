@@ -9,7 +9,8 @@ from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
 from mplsoccer.heatmap import (bin_statistic, bin_statistic_positional,
-                               bin_statistic_sonar, heatmap, heatmap_positional)
+                               bin_statistic_sonar, sonar, heatmap,
+                               heatmap_positional)
 from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
 from mplsoccer.scatterutils import scatter_football, scatter_rotation
@@ -377,7 +378,7 @@ class BasePitchPlot(BasePitch):
         return bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
                              bins=bins, normalize=normalize, standardized=standardized)
 
-    @copy_doc(bin_statistic)
+    @copy_doc(bin_statistic_sonar)
     def bin_statistic_sonar(self, x, y, angle, values=None,
                             statistic='count', bins=(5, 4, 10),
                             normalize=False, standardized=False, center=True):
@@ -385,6 +386,95 @@ class BasePitchPlot(BasePitch):
                                    statistic=statistic, bins=bins,
                                    normalize=normalize, standardized=standardized,
                                    center=center)
+
+    @abstractmethod
+    @copy_doc(sonar)
+    def sonar(stats_length, xindex=0, yindex=0,
+              stats_color=None, cmap=None, vmin=None, vmax=None,
+              rmin=0, rmax=None,
+              sonar_alpha=1, sonar_facecolor='None',
+              axis=False, label=False,
+              ax=None,
+              **kwargs):
+        return sonar(stats_length, xindex=xindex, yindex=yindex,
+                     stats_color=stats_color, cmap=cmap, vmin=vmin, vmax=vmax,
+                     rmin=rmin, rmax=rmax,
+                     sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                     axis=axis, label=label, ax=ax, **kwargs)
+
+    def sonar_grid(self, stats_length,
+                   stats_color=None, cmap=None, vmin=None, vmax=None,
+                   rmin=0, rmax=None,
+                   sonar_alpha=1, sonar_facecolor='None',
+                   axis=False, label=False,
+                   width=None, height=None,
+                   exclude_zeros=True,
+                   ax=None, **kwargs):
+        """ Plot a grid of polar bar charts on an existing axes.
+
+        Parameters
+        ----------
+        stats_length : dict
+            This should be calculated via bin_statistic_sonar().
+            It controls the length of the bars.
+        stats_color : dict, default None
+            This should be calculated via bin_statistic_sonar().
+            It controls the color of the bars via a cmap. The vmin/vmax
+            arguments will set the boundaries for the cmap.
+            If stats_color is None then the color of the bars is controlled
+            by 'color', 'fc', or 'facecolor' arguments.
+        cmap : str or matplotlib.colros.Colormap, default None
+            Controls the color of the bars via stats_color.
+        vmin, vmax : float, default None
+            The cmap is mapped linearly to the range vmin to vmax, so that values
+            equal to or less than vmin are given the first color in the cmap
+            and values equal to or greater than vmax are given the last color
+            in the cmap. The default of None sets the values to the minimum value of
+            stats_color['statistic'] and the maximum value of stats_color['statistic'].
+        rmin, rmax : float, default 0 and None
+            The radial axis limits.
+        sonar_alpha : float, default 1
+            The alpha/ transparency of the sonar axes patch.
+        sonar_facecolor : any Matplotlib color, default 'None'
+            The facecolor of the sonar axes. The default 'None' makes the axes transparent.
+        axis : bool, default False
+            Whether to set the axis spines to visible.
+        label : bool, default False
+            Whether to include the axis labels.
+        width, height : float, default None
+            The width, height of the inset Polar axes in the x/y data coordinates.
+            You should only provide one of the width or height arguments
+            since the Polar axes are square and the other values is set dynamically.
+        exclude_zeros : bool, default False
+            Whether to draw the Polar axes where all the values are zero for the grid cell.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
+        """
+        validate_ax(ax)
+        if vmax is None:
+            rmax = np.nanmax(stats_length['statistic'])
+        mask_zero = np.all(np.isclose(stats_length['statistic'], 0), axis=2)
+        axs = np.empty(stats_length['cx'].shape, dtype='O')
+        it = np.nditer(stats_length['cx'], flags=['multi_index'])
+        for cx in it:
+            if mask_zero[it.multi_index] and exclude_zeros:
+                ax_inset = None
+            else:
+                ax_inset = self.inset_axes(cx, stats_length['cy'][it.multi_index],
+                                        width=width, height=height, ax=ax, polar=True)
+                sonar(stats_length=stats_length,
+                    xindex=it.multi_index[1], yindex=it.multi_index[0],
+                    stats_color=stats_color, cmap=cmap, vmin=vmin, vmax=vmax,
+                    rmin=rmin, rmax=rmax,
+                    sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                    axis=axis, label=label,
+                    ax=ax_inset, **kwargs)
+            axs[it.multi_index] = ax_inset
+        axs = np.squeeze(axs)
+        if axs.size == 1:
+            axs = axs.item()
+        return axs
 
     @copy_doc(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
