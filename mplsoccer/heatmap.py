@@ -443,13 +443,13 @@ def sonar(stats_length, xindex=0, yindex=0,
         norm_stats_color = norm(stats_color['statistic'][yindex, xindex, :])
         color = cmap(norm_stats_color)
         return ax.bar(stats_length['angle_grid'],
-                      stats_length['statistic'][yindex, xindex, :],
+                      np.nan_to_num(stats_length['statistic'])[yindex, xindex, :],
                       width=stats_length['angle_widths'],
                       color=color,
                       align='edge',
                       **kwargs)
     return ax.bar(stats_length['angle_grid'],
-                  stats_length['statistic'][yindex, xindex, :],
+                  np.nan_to_num(stats_length['statistic'])[yindex, xindex, :],
                   width=stats_length['angle_widths'],
                   align='edge',
                   **kwargs)
