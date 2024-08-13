@@ -6,7 +6,7 @@ Sonars were first introduced by `Eliot McKinley <https://x.com/etmckinley>`_.
 They show more information than heatmaps by introducing the angle of passes, shots
 or other events.
 
-The following examples show how to use the `sonar` method to plot
+The following examples show how to use the ``sonar`` method to plot
 a single sonar. There is more information on how to customize the 
 segments in :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
 """
