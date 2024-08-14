@@ -408,7 +408,7 @@ class BasePitchPlot(BasePitch):
                    sonar_alpha=1, sonar_facecolor='None',
                    axis=False, label=False,
                    width=None, height=None,
-                   exclude_zeros=True,
+                   exclude_zeros=True, exclude_nan=True,
                    ax=None, **kwargs):
         """ Plot a grid of polar bar charts on an existing axes.
 
@@ -446,8 +446,10 @@ class BasePitchPlot(BasePitch):
             The width, height of the inset Polar axes in the x/y data coordinates.
             You should only provide one of the width or height arguments
             since the Polar axes are square and the other values is set dynamically.
-        exclude_zeros : bool, default False
+        exclude_zeros : bool, default True
             Whether to draw the Polar axes where all the values are zero for the grid cell.
+        exclude_nan : bool, default True
+            Whether to draw the Polar axes where all the values are numpy.nan for the grid cell.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
@@ -470,10 +472,13 @@ class BasePitchPlot(BasePitch):
         """
         validate_ax(ax)
         mask_zero = np.all(np.isclose(stats_length['statistic'], 0), axis=2)
+        mask_null = np.all(np.isnan(stats_length['statistic']), axis=2)
         axs = np.empty(stats_length['cx'].shape, dtype='O')
         it = np.nditer(stats_length['cx'], flags=['multi_index'])
         for cx in it:
             if mask_zero[it.multi_index] and exclude_zeros:
+                ax_inset = None
+            elif mask_null[it.multi_index] and exclude_nan:
                 ax_inset = None
             else:
                 ax_inset = self.inset_axes(cx, stats_length['cy'][it.multi_index],
@@ -516,8 +521,10 @@ class BasePitchPlot(BasePitch):
             This should be calculated via bin_statistic_positional() or bin_statistic().
         str_format : str
             A format string passed to str_format.format() to format the labels.
-        exclude_zeros : bool
+        exclude_zeros : bool, default False
             Whether to exclude zeros when labelling the heatmap.
+        exclude_nan : bool, default False
+            Whether to exclude numpy.nan when labelling the heatmap.
         xoffset, yoffset : float, default 0
             The amount in data coordinates to offset the labels from the center of the grid cell.
         ax : matplotlib.axes.Axes, default None
