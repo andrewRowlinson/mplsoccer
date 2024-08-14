@@ -2,8 +2,9 @@
 =====
 Sonar
 =====
-Sonars were first introduced by `Eliot McKinley <https://x.com/etmckinley>`_.
-They show more information than heatmaps by introducing the angle of passes, shots
+There is a great blog on the history of Sonars by
+`StatsBomb <https://statsbomb.com/articles/soccer/a-sneak-peak-at-iq-tactics-a-brief-history-of-radials-sonars-wagon-wheels-in-soccer/>`_.
+Sonars show more information than heatmaps by introducing the angle of passes, shots
 or other events.
 
 The following examples show how to use the ``sonar`` method to plot
