@@ -8,7 +8,9 @@ Sonars show more information than heatmaps by introducing the angle of passes, s
 or other events.
 
 The following examples show how to use the ``sonar_grid`` method to plot
-a grid of sonars.
+a grid of sonars. I have copied the great layout by `Ted Knutson <https://x.com/mixedknuts>`_.
+However, I encourage you to try out your own variations as the API allows you to
+mix and match different metrics for the slice length and colors.
 
 There is more information on how to customize the grid cells
 and segments in :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
