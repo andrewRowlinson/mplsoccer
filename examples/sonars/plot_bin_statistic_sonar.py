@@ -2,14 +2,14 @@
 ===================
 Bin Statistic Sonar
 ===================
-There is a great blog on the history of Sonars by
-`StatsBomb <https://statsbomb.com/articles/soccer/a-sneak-peak-at-iq-tactics-a-brief-history-of-radials-sonars-wagon-wheels-in-soccer/>`_.
-Sonars show more information than heatmaps by introducing the angle of passes, shots
-or other events.
+StatsBomb has a great
+`blog <https://statsbomb.com/articles/soccer/a-sneak-peak-at-iq-tactics-a-brief-history-of-radials-sonars-wagon-wheels-in-soccer/>`_
+on the history of Sonars. Sonars show more information than heatmaps
+by introducing the angle of passes, shots or other events.
 
 The following examples show how to use the ``bin_statistic_sonar`` method to bin
-data by x/y coordinates and angles. There is more information on how to customize the
-plotted sonars in :ref:`sphx_glr_gallery_sonars_plot_sonar_grid.py`
+data by x/y coordinates and angles. More information is available on how to
+customize the plotted sonars in :ref:`sphx_glr_gallery_sonars_plot_sonar_grid.py`
 and :ref:`sphx_glr_gallery_sonars_plot_sonar.py`.
 """
 from mplsoccer import Pitch, VerticalPitch, Sbopen
@@ -27,9 +27,9 @@ df = df[((df.type_name == 'Pass') & (df.outcome_name.isnull()) & # succesful pas
 ##############################################################################
 # Plot a Pass Sonar
 # -----------------
-# Here we calculate the angle and distance for each pass.
-# The data is then binned into 6 by 4 grid cells. Within each grid cell, the
-# angles are binned into 4 segments (360 / 4 = 90 degrees each).
+# Here, we calculate the angle and distance for each pass.
+# We then split the data into 6x4 grid cells. Within each grid cell, we
+# split the data into four equal segments of 90 degrees (360 / 4).
 # The defaults count the number of actions (passes) in each segment.
 pitch = Pitch()
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
@@ -44,7 +44,8 @@ axs = pitch.sonar_grid(bs, width=15, fc='cornflowerblue', ec='black', ax=ax)
 ##############################################################################
 # Center argument
 # ---------------
-# The ``center`` argument controls whether the first segment is centered or not.
+# You can either center the first slice around zero degrees (``center=True``)
+# or start the first segment at zero degrees (``center=False``).
 pitch = VerticalPitch()
 fig, axs = pitch.draw(figsize=(8, 6), nrows=1, ncols=2)
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
@@ -59,10 +60,10 @@ text1 = pitch.text(60, 40, 'center=False', va='center', ha='center', fontsize=15
 # Statistic
 # ---------
 # The default ``statistic='count'`` calculates counts in each segment.
-# You can also use the ``statistic`` and ``values`` arguments for calculating
-# other statistics. Here we calculate the average pass distance and plot this
-# instead of the count. The statistics can also be normalized to 0-1 range
-# with the ``normalize=True`` argument.
+# You can also use the ``statistic`` and ``values`` arguments to calculate
+# other statistics. Here, we calculate the average pass distance
+# and plot this instead of the count of passes.
+# You can also normalize results between 0 to 1 with the ``normalize=True`` argument.
 pitch = Pitch()
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
 bs = pitch.bin_statistic_sonar(df.x, df.y, angle,
@@ -77,10 +78,9 @@ axs = pitch.sonar_grid(bs, width=15, fc='cornflowerblue', ec='black', ax=ax)
 ##############################################################################
 # Bins
 # ----
-# In addition to integer values for ``bins``, you can also pass a sequence.
-# The angle bin should be the angle edges
-# between zero and 2*pi (~6.283), i.e. angles in radians.
-# You can convert from degrees to radians using np.radians.
+# In addition to integer values for ``bins``, you can use a sequence of angle edges.
+# The angle edges should be between zero and 2*pi (~6.283), i.e. the angles
+# in radians. You can convert from degrees to radians using numpy.radians.
 pitch = Pitch()
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
 x_bin = 3 # the bin argument can contain a mix of sequences and integers
@@ -96,9 +96,9 @@ axs = pitch.sonar_grid(bs, width=15, fc='cornflowerblue', ec='black', ax=ax)
 ##############################################################################
 # Binnumber
 # ---------
-# You can also get the binnumbers from the bin_statistic_sonar result.
-# Here we use the ``binnumber`` to filter for the forward passes in the final third
-# and plot them as arrows.
+# You can also get the bin numbers from the bin_statistic_sonar result.
+# Here, we use the ``binnumber`` to filter for the forward passes in the
+# final third and plot them as arrows.
 pitch = Pitch()
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
 bs = pitch.bin_statistic_sonar(df.x, df.y, angle,

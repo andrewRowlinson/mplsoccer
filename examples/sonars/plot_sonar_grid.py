@@ -2,19 +2,20 @@
 ==========
 Sonar Grid
 ==========
-There is a great blog on the history of Sonars by
-`StatsBomb <https://statsbomb.com/articles/soccer/a-sneak-peak-at-iq-tactics-a-brief-history-of-radials-sonars-wagon-wheels-in-soccer/>`_.
-Sonars show more information than heatmaps by introducing the angle of passes, shots
-or other events.
+StatsBomb has a great
+`blog <https://statsbomb.com/articles/soccer/a-sneak-peak-at-iq-tactics-a-brief-history-of-radials-sonars-wagon-wheels-in-soccer/>`_
+on the history of Sonars. Sonars show more information than heatmaps
+by introducing the angle of passes, shots or other events.
 
 The following examples show how to use the ``sonar_grid`` method to plot
 a grid of sonars. I have copied a layout by `Ted Knutson <https://x.com/mixedknuts>`_ the founder
-of StatsBomb. However, I encourage you to try out your own variations as the API allows you to
-mix and match different metrics to set the slice length and colors. Given the huge array of possible
-combinations it is also worth adding a key to you viz as there isn't a single standard for Sonars.
+of StatsBomb. However, I encourage you to try out your variations as the API
+allows you to mix and match different metrics for setting the slice length
+and colors. Given the huge array of possible combinations, you should also
+add a key to explain the viz as there isn’t a single standard for Sonars.
 
-There is more information on how to customize the grid cells
-and segments in :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
+More information is available on how to customize the grid cells and segments in
+:ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
 """
 from mplsoccer import Pitch, VerticalPitch, Sbopen
 import numpy as np
@@ -33,7 +34,7 @@ df_throw = df[df.sub_type_name == 'Throw-in'].copy()
 df_throw['success'] = df_throw['outcome_name'].isnull()
 
 ##############################################################################
-# Calculate the angle and distance and create binned statistics
+# Calculate the angle and distance and create the binned statistics
 pitch = Pitch(line_color='#f0eded')
 angle, distance = pitch.calculate_angle_and_distance(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y)
 throw_angle, throw_distance = pitch.calculate_angle_and_distance(df_throw.x, df_throw.y,
@@ -55,7 +56,7 @@ bs_throw_distance = pitch.bin_statistic_sonar(df_throw.x, df_throw.y, throw_angl
                                               bins=throw_bins, center=False)
 
 ##############################################################################
-# Here we plot a Sonar grid that copies the style of StatsBomb IQ with
+# Here, we plot a Sonar grid that copies the style of StatsBomb IQ with
 # average distance for the slice length and the success rate of the passes for the color.
 fig, ax = pitch.draw(figsize=(8, 5.5))
 axs = pitch.sonar_grid(bs_distance,
@@ -72,7 +73,7 @@ axs = pitch.sonar_grid(bs_distance,
                        ax=ax)
 
 # you can turn on the axis and labels with axis=True and label=True in sonar_grid
-# here we manually make changes so we can change the styling
+# here, we manually make changes so we can change the styling
 for ax in axs.flatten():
     ax.grid(False, axis='x') # Turn off x-axis spokes
     ax.grid(True, axis='y', lw=1, ls='--', color='#969696') # Turn on y-axis rings and change line style
@@ -81,8 +82,8 @@ for ax in axs.flatten():
     ax.spines['polar'].set_color('#202020')
 
 ##############################################################################
-# Another popular variation is to have the number of passes as the slice length
-# and another metric as the color (e.g. success-rate or in this case pass distance).
+# Another popular variation is to have the number of passes as the slice
+# length and another metric as the color (e.g. success rate or pass distance).
 fig, ax = pitch.draw(figsize=(8, 5.5))
 axs = pitch.sonar_grid(bs_count_all,
                        stats_color=bs_distance, cmap='Blues', vmin=0, vmax=50,
@@ -92,7 +93,7 @@ axs = pitch.sonar_grid(bs_count_all,
                        ax=ax)
 
 ##############################################################################
-# Here we plot a Sonar grid for throw-ins.
+# Here, we plot a Sonar grid for throw-ins.
 # The method's defaults do not plot the Sonar grid cell if all the values are numpy_nan
 # (``exclude_nan=True``) or all the values are zero (``exclude_zeros=True``).
 fig, ax = pitch.draw(figsize=(8, 5.5))
@@ -111,7 +112,7 @@ axs = pitch.sonar_grid(bs_throw_distance,
                        ax=ax)
 
 # you can turn on the axis and labels with axis=True and label=True in sonar_grid
-# here we manually make changes so we can change the styling
+# here, we manually make changes so we can change the styling
 for ax in axs.flatten():
     if ax is not None: # a lot of the axis are None as there are no values in the middle of the pitch
         ax.grid(True, axis='y', lw=1, ls='--', color='#969696') # Turn on y-axis rings and change line style
