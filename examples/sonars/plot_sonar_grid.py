@@ -12,7 +12,7 @@ a grid of sonars. I have copied a layout by `Ted Knutson <https://x.com/mixedknu
 of StatsBomb. However, I encourage you to try out your variations as the API
 allows you to mix and match different metrics for setting the slice length
 and colors. Given the huge array of possible combinations, you should also
-add a key to explain the viz as there isn’t a single standard for Sonars.
+add a key to explain the viz because there isn’t a single standard for Sonars.
 
 More information is available on how to customize the grid cells and segments in
 :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.

@@ -20,9 +20,9 @@ import matplotlib.pyplot as plt
 # Load the first game that Messi played as a false-9.
 parser = Sbopen()
 df = parser.event(69249)[0]  # 0 index is the event file
-df = df[((df.type_name == 'Pass') & (df.outcome_name.isnull()) & # succesful passes
-         (df.team_name == 'Barcelona')
-        )].copy()
+df = df[(df.type_name == 'Pass') & (df.team_name == 'Barcelona') &
+        (~df.sub_type_name.isin(['Free Kick', 'Throw-in',
+                                 'Goal Kick', 'Kick Off', 'Corner']))].copy()
 
 ##############################################################################
 # Plot a Pass Sonar
