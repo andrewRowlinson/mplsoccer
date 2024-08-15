@@ -8,9 +8,10 @@ Sonars show more information than heatmaps by introducing the angle of passes, s
 or other events.
 
 The following examples show how to use the ``sonar_grid`` method to plot
-a grid of sonars. I have copied the great layout by `Ted Knutson <https://x.com/mixedknuts>`_.
-However, I encourage you to try out your own variations as the API allows you to
-mix and match different metrics for the slice length and colors.
+a grid of sonars. I have copied a layout by `Ted Knutson <https://x.com/mixedknuts>`_ the founder
+of StatsBomb. However, I encourage you to try out your own variations as the API allows you to
+mix and match different metrics to set the slice length and colors. Given the huge array of possible
+combinations it is also worth adding a key to you viz as there isn't a single standard for Sonars.
 
 There is more information on how to customize the grid cells
 and segments in :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
@@ -23,8 +24,11 @@ import matplotlib.pyplot as plt
 # Load the first game that Messi played as a false-9.
 parser = Sbopen()
 df = parser.event(69249)[0]  # 0 index is the event file
-df_pass = df[(df.type_name == 'Pass') & (df.team_name == 'Barcelona')].copy()
+df_pass = df[(df.type_name == 'Pass') & (df.team_name == 'Barcelona') &
+             (~df.sub_type_name.isin(['Free Kick', 'Throw-in',
+                                      'Goal Kick', 'Kick Off', 'Corner']))].copy()
 df_pass['success'] = df_pass['outcome_name'].isnull()
+# There aren't that many throw-ins in this match so we will plot the data from both teams
 df_throw = df[df.sub_type_name == 'Throw-in'].copy()
 df_throw['success'] = df_throw['outcome_name'].isnull()
 
@@ -34,7 +38,9 @@ pitch = Pitch(line_color='#f0eded')
 angle, distance = pitch.calculate_angle_and_distance(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y)
 throw_angle, throw_distance = pitch.calculate_angle_and_distance(df_throw.x, df_throw.y,
                                                                  df_throw.end_x, df_throw.end_y)
+# stats for passes
 bins = (6, 4, 5)
+bs_count_all = pitch.bin_statistic_sonar(df_pass.x, df_pass.y, angle, bins=bins, center=True)
 bs_success = pitch.bin_statistic_sonar(df_pass.x, df_pass.y, angle, values=df_pass.success,
                                        statistic='mean', bins=bins, center=True)
 bs_distance = pitch.bin_statistic_sonar(df_pass.x, df_pass.y, angle, values=distance,
@@ -73,6 +79,17 @@ for ax in axs.flatten():
     ax.set_yticks(np.arange(0, 51, 10)) # y-axis rings every 10 distance (0, 10, 20, 30, 40, 50)
     ax.spines['polar'].set_visible(True)
     ax.spines['polar'].set_color('#202020')
+
+##############################################################################
+# Another popular variation is to have the number of passes as the slice length
+# and another metric as the color (e.g. success-rate or in this case pass distance).
+fig, ax = pitch.draw(figsize=(8, 5.5))
+axs = pitch.sonar_grid(bs_count_all,
+                       stats_color=bs_distance, cmap='Blues', vmin=0, vmax=50,
+                       width=15,
+                       # set the axis to the next multiple of 5
+                       rmin=0, rmax=np.ceil(bs_count_all['statistic'].max() / 5) * 5,
+                       ax=ax)
 
 ##############################################################################
 # Here we plot a Sonar grid for throw-ins.
