@@ -19,11 +19,15 @@ More information is available on how to customize the grid cells and segments in
 :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
 """
 from mplsoccer import VerticalPitch, Sbopen, FontManager
+import matplotlib.patheffects as path_effects
 import numpy as np
 import matplotlib.pyplot as plt
 
 fm_rubik = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/'
                        'rubikmonoone/RubikMonoOne-Regular.ttf')
+path_eff = [path_effects.Stroke(linewidth=1, foreground='white'),
+            path_effects.Normal()]
+bins = (1, 1, 6)
 
 ##############################################################################
 # Load the first game that Messi played as a false-9.
@@ -59,7 +63,7 @@ player_short_names = {'Víctor Valdés Arribas': 'Víctor Valdés',
 df_start['player_name'] = df_start['player_name'].map(player_short_names).str.replace(' ', '\n')
 
 ##############################################################################
-# Plot the Sonars
+# Plot the Sonars using formations
 pitch = VerticalPitch(line_color='#f0eded')
 angle, distance = pitch.calculate_angle_and_distance(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y)
 
@@ -70,7 +74,6 @@ player_text = pitch.formation(formation, positions=df_start.position_id,
                               text=df_start.player_name.tolist(), va='center', ha='center', fontproperties=fm_rubik.prop,
                               fontsize=9, color='#353535', kind='text', ax=ax)
 
-bins = (1, 1, 6)
 for key in axs.keys():
     player_id = df_start.loc[df_start.position_id == key, 'player_id'].iloc[0]
     mask = df_pass.player_id == player_id
@@ -80,5 +83,29 @@ for key in axs.keys():
                                             bins=bins, center=True)
     pitch.sonar(bs_count_all, stats_color=bs_distance, vmin=0, vmax=30,
                 cmap='Blues', ec='#202020', ax=axs[key])
+
+
+##############################################################################
+# Plot the Sonars using average positions
+pitch = VerticalPitch(line_color='#f0eded', pad_top=-30)
+fig, ax = pitch.draw(figsize=(4.8215, 7))
+for i, row in df_start.iterrows():
+    mask = df_pass.player_id == row.player_id
+    df_player = df_pass[mask]
+    avg_x, avg_y = df_player.x.mean(), df_player.y.mean()
+    ax_player = pitch.inset_axes(avg_x, avg_y, height=13, polar=True, zorder=2, ax=ax)
+    bs_count_all = pitch.bin_statistic_sonar(df_pass[mask].x, df_pass[mask].y, angle[mask], bins=bins, center=True)
+    bs_distance = pitch.bin_statistic_sonar(df_pass[mask].x, df_pass[mask].y, angle[mask],
+                                            values=distance[mask], statistic='mean',
+                                            bins=bins, center=True)
+    pitch.sonar(bs_count_all, stats_color=bs_distance, vmin=0, vmax=30,
+                cmap='Blues', ec='#202020', zorder=3, ax=ax_player)
+    # adjust the text  little to avoid overlaps
+    if row.player_name == 'Andrés\nIniesta':
+        avg_y = avg_y - 6
+    elif row.player_name == "Samuel\nEto'o":
+        avg_y = avg_y + 4
+    pitch.text(avg_x - 6, avg_y, row.player_name, va='center', ha='center', path_effects=path_eff,
+               fontproperties=fm_rubik.prop, fontsize=9, color='#353535', zorder=5, ax=ax)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
