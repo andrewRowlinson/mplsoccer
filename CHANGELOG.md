@@ -10,11 +10,11 @@ methods have been added for plotting the Sonars.
 wonderful Kalle Yrjänä.
 
 ### Changes
-* :x: Changed the default pitch standardizer to a custom pitch (from uefa). \
+* :x: Changed the default pitch standardizer to a 'custom' pitch (from 'uefa'). \
 This makes metricasports coordinate conversions more accurate, e.g. for flow diagrams.
 * :x: Changed the ``label_heatmap`` method to return a  list of matplotlib.text.Text \
 instead of matplotlib.text.Annotation objects.
-* :x: Removed the ``calculate_angle_and_distance`` methods ``standardized`` argument. \
+* :x: Removed the ``calculate_angle_and_distance`` method's ``standardized`` argument. \
 Instead, the data is automatically standardized if the aspect ratio is unequal.
 * :x: Internally the binned_stastics now use the ``BinnedStatisticResult`` \
 dataclass rather than the ``_BinnedStatisticResult`` named tuple.
