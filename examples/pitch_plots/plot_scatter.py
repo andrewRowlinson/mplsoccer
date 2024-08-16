@@ -336,7 +336,7 @@ pitch = Pitch()
 fig, ax = pitch.draw(figsize=(14, 12))
 angle, distance = pitch.calculate_angle_and_distance(df_pass_barca.x, df_pass_barca.y,
                                                      df_pass_barca.end_x, df_pass_barca.end_y,
-                                                     standardized=False, degrees=True)
+                                                     degrees=True)
 sc = pitch.scatter(df_pass_barca.x, df_pass_barca.y, rotation_degrees=angle,
                    c='#b94b75',  # color for scatter in hex format
                    edgecolors='#383838', alpha=0.9,

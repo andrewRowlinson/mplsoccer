@@ -197,8 +197,12 @@ class BasePitch(ABC):
         # data checks
         self._validation_checks()
 
-        self.standardizer = Standardizer(pitch_from=pitch_type, width_from=pitch_width,
-                                         length_from=pitch_length, pitch_to='uefa')
+        self.standardizer = Standardizer(pitch_from=pitch_type,
+                                         width_from=pitch_width,
+                                         length_from=pitch_length,
+                                         pitch_to='custom',
+                                         width_to=68 if pitch_width is None else pitch_width,
+                                         length_to=105 if pitch_length is None else pitch_length)
         # set pitch dimensions
         if issubclass(type(pitch_type), dimensions.BaseDims):
             self.dim = pitch_type
@@ -1604,6 +1608,28 @@ class BasePitch(ABC):
     def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
                       normalize=False, standardized=False):
         """ Calculate 2d binned statistics for arbritary shaped bins."""
+
+    @abstractmethod
+    def bin_statistic_sonar(self, x, y, angle, values=None,
+                            statistic='count', bins=(5, 4, 10),
+                            normalize=False, standardized=False, center=True):
+        """ Calculate 3d binned statistics for arbritary shaped bins."""
+
+    @staticmethod
+    @abstractmethod
+    def sonar(stats_length, xindex=0, yindex=0,
+              stats_color=None, cmap=None, vmin=None, vmax=None,
+              rmin=0, rmax=None, sonar_alpha=1, sonar_facecolor='None',
+              axis=False, label=False, ax=None, **kwargs):
+        """ Implement a method to plot an individual bar plot on a Polar axes."""
+
+    @abstractmethod
+    def sonar_grid(self, stats_length, stats_color=None, cmap=None, vmin=None,
+                   vmax=None, rmin=0, rmax=None, sonar_alpha=1,
+                   sonar_facecolor='None', axis=False, label=False, width=None,
+                   height=None, exclude_zeros=True, ax=None, **kwargs):
+        """ Implement a method to plot a grid of inset polar bar charts
+        on an existing axes."""
 
     @abstractmethod
     def heatmap(self, stats, ax=None, **kwargs):

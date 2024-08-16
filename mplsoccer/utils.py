@@ -241,9 +241,11 @@ def inset_axes(x, y, width=None, height=None, aspect=None, polar=False, vertical
         height = width * aspect / ax_aspect
 
     bbox = (x - width / 2, y - height / 2, width, height)
-    return ax.inset_axes(bbox, transform=ax.transData,
-                         xlim=xlim, ylim=ylim, polar=polar,
-                         **kwargs)
+    inset_axes = ax.inset_axes(bbox, transform=ax.transData, xlim=xlim, ylim=ylim,
+                               polar=polar, **kwargs)
+    if polar and vertical:
+        inset_axes.set_theta_zero_location('N')
+    return inset_axes
 
 
 def set_visible(ax, spine_bottom=False, spine_top=False, spine_left=False, spine_right=False,
