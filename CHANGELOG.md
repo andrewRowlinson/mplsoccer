@@ -1,3 +1,25 @@
+:rocket: Version 1.4.0
+----------------------
+
+### Added
+* :icecream: added Sonars for plotting the angles of football events. \
+The ``bin_statistic_sonar`` method has been added for binning the data \
+by pitch grid cells and the event angles. The ``sonar`` and ``sonar_grid`` \
+methods have been added for plotting the Sonars.
+* :heart_eyes: added football markers for shirts and football boots by the \
+wonderful Kalle Yrjänä.
+
+### Changes
+* :x: Changed the default pitch standardizer to a custom pitch (from uefa). \
+This makes metricasports coordinate conversions more accurate, e.g. for flow diagrams.
+* :x: Changed the ``label_heatmap`` method to return a  list of matplotlib.text.Text \
+instead of matplotlib.text.Annotation objects.
+* :x: Removed the ``calculate_angle_and_distance`` methods ``standardized`` argument. \
+Instead, the data is automatically standardized if the aspect ratio is unequal.
+* :x: Internally the binned_stastics now use the ``BinnedStatisticResult`` \
+dataclass rather than the ``_BinnedStatisticResult`` named tuple.
+* :x: Changed the polar ``inset_axes`` zero location to 'N' for vertical pitches.
+
 :rocket: Version 1.3.0
 ----------------------
 ### Added
@@ -10,8 +32,6 @@ pitch = Pitch(pitch_type=dim, label=True, axis=True) \
 fig, ax = pitch.draw() \
 See the ``mplsoccer.dimensions`` module for examples of how to define the dimensions.
 The custom dimensions must be a subclass of ``mplsoccer.dimensions.BaseDims``.
-* :new: football markers for shirts and football boots added by the \
-wonderful Kalle Yrjänä.
 
 ### Fixed
 * Fixed the padding validation for vertical pitches.
