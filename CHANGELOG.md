@@ -10,6 +10,8 @@ pitch = Pitch(pitch_type=dim, label=True, axis=True) \
 fig, ax = pitch.draw() \
 See the ``mplsoccer.dimensions`` module for examples of how to define the dimensions.
 The custom dimensions must be a subclass of ``mplsoccer.dimensions.BaseDims``.
+* :new: football markers for shirts and football boots added by the \
+wonderful Kalle Yrjänä.
 
 ### Fixed
 * Fixed the padding validation for vertical pitches.

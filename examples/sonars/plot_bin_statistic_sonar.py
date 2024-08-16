@@ -12,9 +12,10 @@ data by x/y coordinates and angles. More information is available on how to
 customize the plotted sonars in :ref:`sphx_glr_gallery_sonars_plot_sonar_grid.py`
 and :ref:`sphx_glr_gallery_sonars_plot_sonar.py`.
 """
-from mplsoccer import Pitch, VerticalPitch, Sbopen
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
+from mplsoccer import Pitch, VerticalPitch, Sbopen
 
 ##############################################################################
 # Load the first game that Messi played as a false-9.
@@ -34,7 +35,7 @@ df = df[(df.type_name == 'Pass') & (df.team_name == 'Barcelona') &
 pitch = Pitch()
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
 bs = pitch.bin_statistic_sonar(df.x, df.y, angle,
-                               bins=(6, 4, 4), # x, y, angle binning
+                               bins=(6, 4, 4),  # x, y, angle binning
                                # center the first angle so it starts
                                # at -45 degrees (90 / 2) rather than 0 degrees
                                center=True)
@@ -83,7 +84,7 @@ axs = pitch.sonar_grid(bs, width=15, fc='cornflowerblue', ec='black', ax=ax)
 # in radians. You can convert from degrees to radians using numpy.radians.
 pitch = Pitch()
 angle, distance = pitch.calculate_angle_and_distance(df.x, df.y, df.end_x, df.end_y)
-x_bin = 3 # the bin argument can contain a mix of sequences and integers
+x_bin = 3  # the bin argument can contain a mix of sequences and integers
 y_bin = pitch.dim.positional_y
 # I use cumsum so I can use widths rather than bin edges.
 # I convert to radians using numpy
@@ -105,10 +106,11 @@ bs = pitch.bin_statistic_sonar(df.x, df.y, angle,
                                bins=(3, 1, 2), center=True)
 fig, ax = pitch.draw(figsize=(8, 5.5))
 axs = pitch.sonar_grid(bs, width=15, fc='cornflowerblue', ec='black', ax=ax)
-mask = np.logical_and(np.logical_and(bs['binnumber'][0] == 2, # x in the final third
-                                     bs['binnumber'][1] == 0), # only one y but here for completeness
-                      bs['binnumber'][2] == 0 # first angle
-                     )
+mask = np.logical_and(np.logical_and(bs['binnumber'][0] == 2,  # x in the final third
+                                     bs['binnumber'][1] == 0),
+                      # only one y but here for completeness
+                      bs['binnumber'][2] == 0  # first angle
+                      )
 arr = pitch.arrows(df[mask].x, df[mask].y, df[mask].end_x, df[mask].end_y, ax=ax)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

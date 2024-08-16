@@ -17,9 +17,10 @@ add a key to explain the viz because there isn’t a single standard for Sonars.
 More information is available on how to customize the grid cells and segments in
 :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py`.
 """
-from mplsoccer import Pitch, VerticalPitch, Sbopen
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
+from mplsoccer import Pitch, Sbopen
 
 ##############################################################################
 # Load the first game that Messi played as a false-9.
@@ -36,7 +37,8 @@ df_throw['success'] = df_throw['outcome_name'].isnull()
 ##############################################################################
 # Calculate the angle and distance and create the binned statistics
 pitch = Pitch(line_color='#f0eded')
-angle, distance = pitch.calculate_angle_and_distance(df_pass.x, df_pass.y, df_pass.end_x, df_pass.end_y)
+angle, distance = pitch.calculate_angle_and_distance(df_pass.x, df_pass.y, df_pass.end_x,
+                                                     df_pass.end_y)
 throw_angle, throw_distance = pitch.calculate_angle_and_distance(df_throw.x, df_throw.y,
                                                                  df_throw.end_x, df_throw.end_y)
 # stats for passes
@@ -68,16 +70,18 @@ axs = pitch.sonar_grid(bs_distance,
                        # the axis minimum and maximum are set automatically to the min/max
                        # here we set it explicity to 0 and 50 units
                        rmin=0, rmax=50,
-                       zorder=3, # slices appear above the axis lines
-                       width=15, # the size of the sonar axis in data coordinates. Can use height instead
+                       zorder=3,  # slices appear above the axis lines
+                       width=15,
+                       # the size of the sonar axis in data coordinates. Can use height instead
                        ax=ax)
 
 # you can turn on the axis and labels with axis=True and label=True in sonar_grid
 # here, we manually make changes so we can change the styling
 for ax in axs.flatten():
-    ax.grid(False, axis='x') # Turn off x-axis spokes
-    ax.grid(True, axis='y', lw=1, ls='--', color='#969696') # Turn on y-axis rings and change line style
-    ax.set_yticks(np.arange(0, 51, 10)) # y-axis rings every 10 distance (0, 10, 20, 30, 40, 50)
+    ax.grid(False, axis='x')  # Turn off x-axis spokes
+    ax.grid(True, axis='y', lw=1, ls='--',
+            color='#969696')  # Turn on y-axis rings and change line style
+    ax.set_yticks(np.arange(0, 51, 10))  # y-axis rings every 10 distance (0, 10, 20, 30, 40, 50)
     ax.spines['polar'].set_visible(True)
     ax.spines['polar'].set_color('#202020')
 
@@ -107,16 +111,19 @@ axs = pitch.sonar_grid(bs_throw_distance,
                        # the axis minimum and maximum are set automatically to the min/max
                        # here we set it explicity to 0 and 50 units
                        rmin=0, rmax=50,
-                       zorder=3, # slices appear above the axis lines
-                       width=15, # the size of the sonar axis in data coordinates. Can use height instead
+                       zorder=3,  # slices appear above the axis lines
+                       width=15,
+                       # the size of the sonar axis in data coordinates. Can use height instead
                        ax=ax)
 
 # you can turn on the axis and labels with axis=True and label=True in sonar_grid
 # here, we manually make changes so we can change the styling
 for ax in axs.flatten():
-    if ax is not None: # a lot of the axis are None as there are no values in the middle of the pitch
-        ax.grid(True, axis='y', lw=1, ls='--', color='#969696') # Turn on y-axis rings and change line style
-        ax.set_yticks(np.arange(0, 51, 10)) # y-axis rings every 10 distance (0, 10, 20, 30, 40, 50)
+    if ax is not None:  # a lot of the axis are None as there are no values in the middle of the pitch
+        ax.grid(True, axis='y', lw=1, ls='--',
+                color='#969696')  # Turn on y-axis rings and change line style
+        ax.set_yticks(
+            np.arange(0, 51, 10))  # y-axis rings every 10 distance (0, 10, 20, 30, 40, 50)
         ax.spines['polar'].set_visible(True)
         ax.spines['polar'].set_color('#202020')
 
