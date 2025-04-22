@@ -6,7 +6,8 @@ build-backend = "hatchling.build"
 name = "mplsoccer"
 description = 'Football pitch plotting library for matplotlib'
 readme = "README.md"
-requires-python = ">=3.7"
+dynamic = ["version"]
+requires-python = ">=3.9"
 license = "MIT"
 keywords = [
   "football",
@@ -20,15 +21,15 @@ authors = [
   { name = "Anmol Durgapal", email = "slothfulwave10@gmail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
   "Framework :: Matplotlib",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = ['matplotlib >= 3.6',
@@ -39,7 +40,6 @@ dependencies = ['matplotlib >= 3.6',
                 'scipy',
                 'seaborn',
 				]
-dynamic = ["version"]
 
 [project.urls]
 Documentation = "https://mplsoccer.readthedocs.io"
@@ -50,6 +50,7 @@ Source = "https://github.com/andrewRowlinson/mplsoccer"
 path = "mplsoccer/__about__.py"
 
 [tool.hatch.envs.default]
+installer = "uv"
 dependencies = [
   "pytest",
   "pytest-cov",
@@ -58,8 +59,29 @@ dependencies = [
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=temporary --cov=tests"
 no-cov = "cov --no-cov"
 
+[dependency-groups]
+docs = ['cmasher',
+        'highlight-text',
+        'kloppy',
+        'lxml',
+        'numpydoc',
+        'pyarrow',
+        'Sphinx',
+        'sphinx-gallery',
+        'sphinx-rtd-theme',
+]
+dev = ['grayskull',
+       'hatch',
+       'jupyterlab',
+       'pylint',
+       'pytest',
+]
+
+[tool.uv]
+default-groups = ['docs']
+
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
+python = ["39", "310", "311", "312", "313", "314"]
 
 [tool.coverage.run]
 branch = true
