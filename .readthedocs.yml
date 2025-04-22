@@ -10,6 +10,7 @@ build:
    apt_packages:
      - libxml2-dev
      - libxslt-dev
+     - python-dev
    tools:
       python: "3.13"
    jobs:
