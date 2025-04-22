@@ -10,6 +10,7 @@ build:
    apt_packages:
      - build-essential
      - python3-lxml
+     - gcc
    tools:
       python: "3.13"
    jobs:
