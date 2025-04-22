@@ -12,7 +12,7 @@ The current supported pitch types are printed below.
 import pprint
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
-from mplsoccer.dimensions import valid
+from mplsoccer.soccer.dimensions import valid
 pprint.pp(valid)
 
 ##############################################################################
