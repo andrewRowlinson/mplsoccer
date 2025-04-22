@@ -128,9 +128,7 @@ for position in axs:
         circ = Circle((0, 0), (i + 1) * 10, ec='#a19e9d', lw=lw, alpha=0.5, fc='None', zorder=3)
         circ_artist = axs[position].add_artist(circ)
 
-    # clip to the last circle. borrowed from the following stackoverflow post:
-    # https://stackoverflow.com/questions/50099960/draw-plot-only-inside-a-circle-with-matplotlib
-    for contour in contours.collections:
-        contour.set_clip_path(circ_artist)
+    # clip to the last circle
+    contours.set_clip_path(circ_artist)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

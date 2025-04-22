@@ -60,7 +60,8 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=tempor
 no-cov = "cov --no-cov"
 
 [dependency-groups]
-docs = ['cmasher',
+docs = ['adjustText',
+        'cmasher',
         'highlight-text',
         'kloppy',
         'lxml',
