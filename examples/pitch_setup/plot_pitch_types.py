@@ -119,7 +119,7 @@ fig, ax = pitch.draw()
 # You can also change the ``width`` and ``length`` arguments to get different pitch limits.
 # The visual layout of the pitch is controlled by the ``pitch_width`` and ``pitch_length``
 # arguments.
-from mplsoccer.dimensions import center_scale_dims
+from mplsoccer.soccer.dimensions import center_scale_dims
 from mplsoccer import Pitch
 dim = center_scale_dims(pitch_width=68, pitch_length=105,
                         width=2, length=2, invert_y=False)
