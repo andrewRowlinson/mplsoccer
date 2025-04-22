@@ -18,7 +18,7 @@ build:
          - asdf global uv latest
          - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv venv --python 3.12
       install:
-         - uv pip install --group docs
+         - uv pip install --editable . --group docs
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
