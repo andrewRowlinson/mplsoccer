@@ -268,11 +268,11 @@ totw_player_data
 ##############################################################################
 # Get the club badges as a dictionary and turn it into a list of badges for each player.
 badge_urls = {
-    'Manchester United': 'https://www.thesportsdb.com/images/media/team/badge/xzqdr11517660252.png',
-    'Chelsea': 'https://www.thesportsdb.com/images/media/team/badge/yvwvtu1448813215.png',
-    'Manchester City': 'https://www.thesportsdb.com/images/media/team/badge/vwpvry1467462651.png',
-    'Reading': 'https://www.thesportsdb.com/images/media/team/badge/tprvtu1448811527.png',
-    'Arsenal': "https://www.thesportsdb.com/images/media/team/badge/uyhbfe1612467038.png",
+    'Manchester United': 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/250px-Manchester_United_FC_crest.svg.png',
+    'Chelsea': 'https://upload.wikimedia.org/wikipedia/en/thumb/c/cc/Chelsea_FC.svg/240px-Chelsea_FC.svg.png',
+    'Manchester City': 'https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/250px-Manchester_City_FC_badge.svg.png',
+    'Reading': 'https://upload.wikimedia.org/wikipedia/en/thumb/1/11/Reading_FC.svg/240px-Reading_FC.svg.png',
+    'Arsenal': "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/250px-Arsenal_FC.svg.png",
 }
 image_dict = {team: Image.open(urlopen(url)) for team, url in badge_urls.items()}
 images = [image_dict[team] for team in totw_player_data.team]

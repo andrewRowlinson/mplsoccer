@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'mplsoccer'
-copyright = '2021, Anmol Durgapal & Andrew Rowlinson'
+copyright = '2025, Anmol Durgapal & Andrew Rowlinson'
 author = 'Anmol Durgapal & Andrew Rowlinson'
 
 # The full version, including alpha/beta/rc tags
