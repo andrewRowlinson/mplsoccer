@@ -8,6 +8,7 @@ version: 2
 build:
    os: ubuntu-24.04
    apt_packages:
+     - build-essential
      - python3-lxml
    tools:
       python: "3.13"
