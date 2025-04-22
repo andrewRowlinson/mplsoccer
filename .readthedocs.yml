@@ -7,6 +7,9 @@ version: 2
 
 build:
    os: ubuntu-24.04
+   apt_packages:
+     - libxml2
+     - libxslt
    tools:
       python: "3.13"
    jobs:
