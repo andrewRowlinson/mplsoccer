@@ -58,7 +58,7 @@ from typing import Optional, Dict
 
 import numpy as np
 
-from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
+from .formations import Formation, PositionLine4, PositionLine5, \
     PositionLine5WithSecondStriker, Coordinate
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
@@ -113,6 +113,7 @@ class BaseDims:
     x_markings_sorted: Optional[np.array] = None
     y_markings_sorted: Optional[np.array] = None
     pitch_extent: Optional[np.array] = None
+    standardized_extent: Optional[np.array] = None
     # defined in juego_de_posicion
     positional_x: Optional[np.array] = None
     positional_y: Optional[np.array] = None
@@ -155,6 +156,8 @@ class BaseDims:
                                            self.six_yard_bottom, self.goal_bottom,
                                            self.goal_top, self.six_yard_top,
                                            self.penalty_area_top, self.top])
+        self.standardized_extent = np.array([0, 105, 0, 68])
+
         if self.invert_y:
             self.y_markings_sorted = np.sort(self.y_markings_sorted)
             self.pitch_extent = np.array([self.left, self.right, self.top, self.bottom])

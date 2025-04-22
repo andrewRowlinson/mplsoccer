@@ -8,12 +8,12 @@ from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
 from mplsoccer._pitch_base import BasePitch
-from mplsoccer.heatmap import (bin_statistic, bin_statistic_positional,
-                               bin_statistic_sonar, sonar, heatmap,
-                               heatmap_positional)
+from mplsoccer.heatmap import bin_statistic, bin_statistic_sonar, sonar, heatmap
+from mplsoccer.soccer.heatmap import bin_statistic_positional, heatmap_positional
 from mplsoccer.linecollection import lines
 from mplsoccer.quiver import arrows
-from mplsoccer.scatterutils import scatter_football, scatter_rotation
+from mplsoccer.soccer.markers import scatter_football
+from mplsoccer.scatterutils import scatter_rotation
 from mplsoccer.utils import validate_ax, copy_doc
 
 

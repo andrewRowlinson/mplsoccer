@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import rcParams
 
-from mplsoccer import dimensions
+from mplsoccer.soccer import dimensions
 from mplsoccer.cm import grass_cmap
 from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
 from mplsoccer.utils import Standardizer, set_visible, inset_axes, inset_image, validate_ax

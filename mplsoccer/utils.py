@@ -11,7 +11,7 @@ import matplotlib.font_manager as fm
 import numpy as np
 from PIL import Image
 
-from mplsoccer import dimensions
+from mplsoccer.soccer import dimensions
 
 __all__ = ['add_image', 'validate_ax', 'inset_axes',
            'set_visible', 'Standardizer', 'FontManager', 'set_labels', 'get_aspect',
