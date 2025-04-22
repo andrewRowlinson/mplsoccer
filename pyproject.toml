@@ -63,7 +63,6 @@ no-cov = "cov --no-cov"
 docs = ['cmasher',
         'highlight-text',
         'kloppy',
-        'lxml',
         'numpydoc',
         'pyarrow',
         'Sphinx',
