@@ -62,12 +62,14 @@ from mplsoccer._dimensions_base import BaseDims
 from mplsoccer.soccer.formations import Formation, PositionLine4, PositionLine5, \
     PositionLine5WithSecondStriker, Coordinate
 
+__all__ = ['Standardizer']
+
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
          'impect']
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
-__all__ = ['Standardizer']
+
 
 @dataclass
 class BaseSoccerDims(BaseDims):

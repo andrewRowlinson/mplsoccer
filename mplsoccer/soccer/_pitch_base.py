@@ -6,6 +6,7 @@ from typing import List
 
 import numpy as np
 import pandas as pd
+from matplotlib import rcParams
 
 from .dimensions import Standardizer, create_pitch_dims, BaseSoccerDims, valid, size_varies
 from .markers import scatter_football
