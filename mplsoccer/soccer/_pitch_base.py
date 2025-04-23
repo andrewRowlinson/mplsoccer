@@ -14,6 +14,7 @@ from .heatmap import bin_statistic_positional, heatmap_positional
 from .._pitch_base import BasePitch
 from ..cm import grass_cmap
 from ..utils import validate_ax, copy_doc
+from ..scatterutils import scatter_rotation
 
 
 class BasePitchSoccer(BasePitch):
