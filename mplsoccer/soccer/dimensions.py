@@ -58,9 +58,10 @@ from typing import Optional, Dict
 
 import numpy as np
 
-from mplsoccer._dimensions_base import BaseDims
-from mplsoccer.soccer.formations import Formation, PositionLine4, PositionLine5, \
+from .formations import Formation, PositionLine4, PositionLine5, \
     PositionLine5WithSecondStriker, Coordinate
+from .._dimensions_base import BaseDims
+
 
 __all__ = ['Standardizer']
 
