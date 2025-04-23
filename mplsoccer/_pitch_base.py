@@ -11,13 +11,12 @@ from matplotlib import rcParams
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
-from mplsoccer.heatmap import bin_statistic, bin_statistic_sonar, sonar, heatmap
-from mplsoccer.linecollection import lines
-from mplsoccer.quiver import arrows
-from mplsoccer.soccer.markers import scatter_football
-from mplsoccer.scatterutils import scatter_rotation
-from mplsoccer.utils import validate_ax, copy_doc, set_visible, inset_axes, inset_image
-from mplsoccer.grid import _grid_dimensions, _draw_grid, grid_dimensions
+from .heatmap import bin_statistic, bin_statistic_sonar, sonar, heatmap
+from .linecollection import lines
+from .quiver import arrows
+from .scatterutils import scatter_rotation
+from .utils import validate_ax, copy_doc, set_visible, inset_axes, inset_image
+from .grid import _grid_dimensions, _draw_grid, grid_dimensions
 
 
 class BasePitch(ABC):
@@ -671,9 +670,6 @@ class BasePitch(ABC):
             The marker style. marker can be either an instance of the class or the
             text shorthand for a particular marker. Defaults to None, in which case it takes
             the value of rcParams["scatter.marker"] (default: 'o') = 'o'.
-            If marker='football' plots a football shape with the pentagons the color
-            of the edgecolors and hexagons the color of the 'c' argument; 'linewidths'
-            also sets the linewidth of the football marker.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
@@ -695,11 +691,6 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> fig, ax = pitch.draw()
         >>> pitch.scatter(30, 30, rotation_degrees=45, marker=arrowhead_marker, ax=ax)
-
-        >>> from mplsoccer import Pitch
-        >>> pitch = Pitch()
-        >>> fig, ax = pitch.draw()
-        >>> pitch.scatter(30, 30, marker='football', ax=ax)
         """
         validate_ax(ax)
         x = np.ma.ravel(x)
@@ -713,11 +704,6 @@ class BasePitch(ABC):
         if marker is None:
             marker = rcParams['scatter.marker']
 
-        if marker == 'football' and rotation_degrees is not None:
-            raise NotImplementedError("rotated football markers are not implemented.")
-
-        if marker == 'football':
-            return scatter_football(x, y, ax=ax, **kwargs)
         if rotation_degrees is not None:
             return scatter_rotation(x, y, rotation_degrees, marker=marker,
                                     vertical=self.vertical, ax=ax, **kwargs)

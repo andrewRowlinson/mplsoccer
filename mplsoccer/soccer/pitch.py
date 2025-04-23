@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import patches
 from matplotlib.lines import Line2D
 
-from mplsoccer.soccer._pitch_base import BasePitchSoccer
+from ._pitch_base import BasePitchSoccer
 
 __all__ = ['Pitch', 'VerticalPitch']
 

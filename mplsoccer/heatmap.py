@@ -10,7 +10,7 @@ from matplotlib.projections.polar import PolarAxes
 from matplotlib import colormaps
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, Normalize
 
-from mplsoccer.utils import validate_ax
+from .utils import validate_ax
 
 
 @dataclass

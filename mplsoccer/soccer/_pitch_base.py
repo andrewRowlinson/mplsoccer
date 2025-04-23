@@ -7,11 +7,12 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from mplsoccer.soccer.heatmap import bin_statistic_positional, heatmap_positional
-from mplsoccer.soccer import dimensions
-from mplsoccer.utils import validate_ax, copy_doc, Standardizer
-from mplsoccer.cm import grass_cmap
-from mplsoccer._pitch_base import BasePitch
+from .dimensions import Standardizer, create_pitch_dims, BaseSoccerDims, valid, size_varies
+from .markers import scatter_football
+from .heatmap import bin_statistic_positional, heatmap_positional
+from .._pitch_base import BasePitch
+from ..cm import grass_cmap
+from ..utils import validate_ax, copy_doc
 
 
 class BasePitchSoccer(BasePitch):
@@ -19,12 +20,12 @@ class BasePitchSoccer(BasePitch):
 
     Parameters
     ----------
-    pitch_type : str or subclass of dimensions.BaseDims, default 'statsbomb'
+    pitch_type : str or subclass of BaseSoccerDims, default 'statsbomb'
         The pitch type used in the plot.
         The supported pitch types are: 'opta', 'statsbomb', 'tracab',
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
         and 'impect'. Alternatively, you can pass a custom dimensions
-        object by creating a subclass of dimensions.BaseDims.
+        object by creating a subclass of BaseSoccerDims.
     half : bool, default False
         Whether to display half of the pitch.
     pitch_color : any Matplotlib color, default None
@@ -169,10 +170,10 @@ class BasePitchSoccer(BasePitch):
                                          width_to=68 if pitch_width is None else pitch_width,
                                          length_to=105 if pitch_length is None else pitch_length)
         # set pitch dimensions
-        if issubclass(type(pitch_type), dimensions.BaseDims):
+        if issubclass(type(pitch_type), BaseSoccerDims):
             self.dim = pitch_type
         else:
-            self.dim = dimensions.create_pitch_dims(pitch_type, pitch_width, pitch_length)
+            self.dim = create_pitch_dims(pitch_type, pitch_width, pitch_length)
 
         # if the padding is None set it to 4 on all sides, or 0.04 in the case of metricasports
         # for tracab multiply the padding by 100
@@ -234,19 +235,90 @@ class BasePitchSoccer(BasePitch):
                 f'corner_arcs={self.corner_arcs!r})'
                 )
 
+    def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
+        """ Utility wrapper around matplotlib.axes.Axes.scatter,
+        which automatically flips the x and y coordinates if the pitch is vertical.
+        You can optionally use a football marker with marker='football' and rotate markers with
+        rotation_degrees.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        rotation_degrees: array-like or scalar, default None.
+            Rotates the marker in degrees, clockwise. 0 degrees is facing the direction of play.
+            In a horizontal pitch, 0 degrees is this way →, in a vertical pitch,
+            0 degrees is this way ↑
+        marker: MarkerStyle, optional
+            The marker style. marker can be either an instance of the class or the
+            text shorthand for a particular marker. Defaults to None, in which case it takes
+            the value of rcParams["scatter.marker"] (default: 'o') = 'o'.
+            If marker='football' plots a football shape with the pentagons the color
+            of the edgecolors and hexagons the color of the 'c' argument; 'linewidths'
+            also sets the linewidth of the football marker.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.scatter.
+
+        Returns
+        -------
+        paths : matplotlib.collections.PathCollection
+                or a tuple of (paths, paths) if marker='football'
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, ax=ax)
+
+        >>> from mplsoccer import Pitch
+        >>> from mplsoccer import arrowhead_marker
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, rotation_degrees=45, marker=arrowhead_marker, ax=ax)
+
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> pitch.scatter(30, 30, marker='football', ax=ax)
+        """
+        # overrides the base method to add marker='football'
+        validate_ax(ax)
+        x = np.ma.ravel(x)
+        y = np.ma.ravel(y)
+
+        if x.size != y.size:
+            raise ValueError("x and y must be the same size")
+
+        x, y = self._reverse_if_vertical(x, y)
+
+        if marker is None:
+            marker = rcParams['scatter.marker']
+
+        if marker == 'football' and rotation_degrees is not None:
+            raise NotImplementedError("rotated football markers are not implemented.")
+
+        if marker == 'football':
+            return scatter_football(x, y, ax=ax, **kwargs)
+        if rotation_degrees is not None:
+            return scatter_rotation(x, y, rotation_degrees, marker=marker,
+                                    vertical=self.vertical, ax=ax, **kwargs)
+        return ax.scatter(x, y, marker=marker, **kwargs)
+
     def _validation_checks(self):
         # pitch validation
-        if (self.pitch_type not in dimensions.valid and
-            not issubclass(type(self.pitch_type), dimensions.BaseDims)
+        if (self.pitch_type not in valid and
+            not issubclass(type(self.pitch_type), BaseSoccerDims)
            ):
-            raise TypeError(f'Invalid argument: pitch_type should be in {dimensions.valid} '
-                            'or a subclass of dimensions.BaseDims.')
+            raise TypeError(f'Invalid argument: pitch_type should be in {valid} '
+                            'or a subclass of BaseSoccerDims.')
         if (self.pitch_length is None or self.pitch_width is None) \
-                and self.pitch_type in dimensions.size_varies:
+                and self.pitch_type in size_varies:
             raise TypeError("Invalid argument: pitch_length and pitch_width must be specified.")
-        if ((self.pitch_type not in dimensions.size_varies) and
+        if ((self.pitch_type not in size_varies) and
                 ((self.pitch_length is not None) or (self.pitch_width is not None))):
-            msg = f"Pitch length and widths are only used for {dimensions.size_varies}" \
+            msg = f"Pitch length and widths are only used for {size_varies}" \
                   f" pitches and will be ignored"
             warnings.warn(msg)
 

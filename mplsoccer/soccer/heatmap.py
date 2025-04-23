@@ -4,8 +4,8 @@ from dataclasses import asdict
 
 import numpy as np
 
-from mplsoccer.utils import validate_ax
-from mplsoccer.heatmap import BinnedStatisticResult, bin_statistic,  heatmap
+from ..utils import validate_ax
+from ..heatmap import BinnedStatisticResult, bin_statistic,  heatmap
 
 
 def bin_statistic_positional(x, y, values=None, dim=None, positional='full',

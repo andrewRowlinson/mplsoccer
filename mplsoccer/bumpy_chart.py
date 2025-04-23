@@ -6,12 +6,11 @@ Author: Anmol_Durgapal(@slothfulwave612)
 import warnings
 
 import matplotlib.pyplot as plt
-# import required packages/modules
 import numpy as np
 from matplotlib import patches
 from matplotlib.path import Path
 
-from mplsoccer.utils import set_labels
+from .utils import set_labels
 
 # ignore UserWarning
 warnings.simplefilter("ignore", UserWarning)
