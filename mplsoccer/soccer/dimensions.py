@@ -58,7 +58,8 @@ from typing import Optional, Dict
 
 import numpy as np
 
-from .formations import Formation, PositionLine4, PositionLine5, \
+from mplsoccer._dimensions_base import BaseDims
+from mplsoccer.soccer.formations import Formation, PositionLine4, PositionLine5, \
     PositionLine5WithSecondStriker, Coordinate
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
@@ -68,10 +69,8 @@ size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectr
 
 
 @dataclass
-class BaseDims:
+class BaseSoccerDims(BaseDims):
     """ Base dataclass to hold pitch dimensions."""
-    pitch_width: float
-    pitch_length: float
     goal_width: float
     goal_length: float
     six_yard_width: float
@@ -81,19 +80,7 @@ class BaseDims:
     circle_diameter: float
     corner_diameter: float
     arc: Optional[float]
-    invert_y: bool
-    origin_center: bool
-    pad_default: float
-    pad_multiplier: float
-    aspect_equal: bool
     # dimensions that can be calculated in __post_init__
-    left: Optional[float] = None
-    right: Optional[float] = None
-    bottom: Optional[float] = None
-    top: Optional[float] = None
-    aspect: Optional[float] = None
-    width: Optional[float] = None
-    length: Optional[float] = None
     goal_bottom: Optional[float] = None
     goal_top: Optional[float] = None
     six_yard_left: Optional[float] = None
@@ -107,13 +94,9 @@ class BaseDims:
     penalty_area_right: Optional[float] = None
     penalty_area_bottom: Optional[float] = None
     penalty_area_top: Optional[float] = None
-    center_width: Optional[float] = None
-    center_length: Optional[float] = None
     # defined in pitch_markings
     x_markings_sorted: Optional[np.array] = None
     y_markings_sorted: Optional[np.array] = None
-    pitch_extent: Optional[np.array] = None
-    standardized_extent: Optional[np.array] = None
     # defined in juego_de_posicion
     positional_x: Optional[np.array] = None
     positional_y: Optional[np.array] = None
@@ -332,7 +315,7 @@ class BaseDims:
 
 
 @dataclass
-class FixedDims(BaseDims):
+class FixedDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for pitches with fixed dimensions:
      'opta', 'wyscout', 'statsbomb' and 'uefa'."""
 
@@ -341,7 +324,7 @@ class FixedDims(BaseDims):
 
 
 @dataclass
-class VariableCenterDims(BaseDims):
+class VariableCenterDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
     'tracab', 'skillcorner', 'impect', and 'secondspectrum'."""
 
@@ -362,7 +345,7 @@ class VariableCenterDims(BaseDims):
 
 
 @dataclass
-class CustomDims(BaseDims):
+class CustomDims(BaseSoccerDims):
     """ Dataclass holding the dimension for the custom pitch.
     This is a pitch where the dimensions (width/length) vary and the origin is (left, bottom)."""
 
@@ -377,7 +360,7 @@ class CustomDims(BaseDims):
 
 
 @dataclass
-class MetricasportsDims(BaseDims):
+class MetricasportsDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
 
     def __post_init__(self):
@@ -395,7 +378,7 @@ class MetricasportsDims(BaseDims):
 
 
 @dataclass
-class ScaleCenterDims(BaseDims):
+class ScaleCenterDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
 
     def __post_init__(self):
