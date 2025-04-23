@@ -4,12 +4,12 @@ import numpy as np
 from matplotlib import patches
 from matplotlib.lines import Line2D
 
-from mplsoccer._pitch_base import BasePitch
+from mplsoccer.soccer._pitch_base import BasePitchSoccer
 
 __all__ = ['Pitch', 'VerticalPitch']
 
 
-class Pitch(BasePitch):
+class Pitch(BasePitchSoccer):
 
     def _set_aspect(self):
         self.aspect = self.dim.aspect
@@ -137,7 +137,7 @@ class Pitch(BasePitch):
         return annotate
 
 
-class VerticalPitch(BasePitch):
+class VerticalPitch(BasePitchSoccer):
 
     def _set_aspect(self):
         self.aspect = 1 / self.dim.aspect
