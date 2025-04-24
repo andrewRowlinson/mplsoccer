@@ -160,6 +160,19 @@ class BasePitchBasketBall(BasePitch):
                    ]
         self._draw_line(ax, xs_main, ys_main, **line_prop)
 
+        # key
+        xs_key_right = [self.dim.right, self.dim.key_right,
+                         self.dim.key_right, self.dim.right,
+                         ]
+        xs_key_left = [self.dim.left, self.dim.key_left,
+                        self.dim.key_left, self.dim.left,
+                        ]
+        ys_key = [self.dim.key_bottom, self.dim.key_bottom,
+                   self.dim.key_top, self.dim.key_top,
+                   ]
+        self._draw_line(ax, xs_key_right, ys_key, **line_prop)
+        self._draw_line(ax, xs_key_left, ys_key, **line_prop)
+
     # The methods below for drawing/ setting attributes for some pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
     # as they differ for horizontal/ vertical pitches
