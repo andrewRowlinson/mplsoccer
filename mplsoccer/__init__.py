@@ -8,6 +8,7 @@ from .soccer.dimensions import Standardizer
 from .cm import *
 from .linecollection import *
 from .soccer.pitch import *
+from .basketball.pitch import *
 from .quiver import *
 from .radar_chart import *
 from .scatterutils import *

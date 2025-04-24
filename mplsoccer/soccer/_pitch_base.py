@@ -84,6 +84,8 @@ class BasePitchSoccer(BasePitch):
          Whether to shade the middle third of the pitch.
     shade_color : any Matplotlib color, default '#f2f2f2'
         The fill color for the shading of the middle third of the pitch.
+    shade_alpha : float, default 1
+        The transparency of the shading of the middle third of the pitch.
     shade_zorder : float, default 0.7
         Set the zorder for the shading of the middle third of the pitch.
         Artists with lower zorder values are drawn first.
@@ -121,15 +123,22 @@ class BasePitchSoccer(BasePitch):
                  pitch_length=None, pitch_width=None,
                  goal_type='line', goal_alpha=1, goal_linestyle=None,
                  axis=False, label=False, tick=False, corner_arcs=False):
-        super().__init__(pitch_type=pitch_type,
-                 half=half,
-                 pitch_color=pitch_color,
-                 line_color=line_color, line_alpha=line_alpha, linewidth=linewidth, linestyle=linestyle, line_zorder=line_zorder,
-                 pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom, pad_top=pad_top,
-                 shade_middle=shade_middle, shade_color=shade_color, shade_alpha=shade_alpha, shade_zorder=shade_zorder,
-                 pitch_length=pitch_length, pitch_width=pitch_width,
-                 axis=axis, label=label, tick=tick,
-                 )
+
+        # set pitch dimensions
+        if issubclass(type(pitch_type), BaseSoccerDims):
+            dim = pitch_type
+        else:
+            dim = create_pitch_dims(pitch_type, pitch_width, pitch_length)
+
+        super().__init__(dim=dim, pitch_type=pitch_type,
+                         half=half,
+                         pitch_color=pitch_color,
+                         line_color=line_color, line_alpha=line_alpha, linewidth=linewidth, linestyle=linestyle, line_zorder=line_zorder,
+                         pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom, pad_top=pad_top,
+                         shade_middle=shade_middle, shade_color=shade_color, shade_alpha=shade_alpha, shade_zorder=shade_zorder,
+                         pitch_length=pitch_length, pitch_width=pitch_width,
+                         axis=axis, label=label, tick=tick,
+                         )
         self.spot_scale = spot_scale
         self.spot_type = spot_type
         self.stripe = stripe
@@ -146,7 +155,6 @@ class BasePitchSoccer(BasePitch):
         self.goal_type = goal_type
         self.goal_alpha = goal_alpha
         self.goal_linestyle = goal_linestyle
-        self.line_alpha = line_alpha
         self.corner_arcs = corner_arcs
 
         # other attributes for plotting circles - completed by
@@ -171,34 +179,6 @@ class BasePitchSoccer(BasePitch):
                                          pitch_to='custom',
                                          width_to=68 if pitch_width is None else pitch_width,
                                          length_to=105 if pitch_length is None else pitch_length)
-        # set pitch dimensions
-        if issubclass(type(pitch_type), BaseSoccerDims):
-            self.dim = pitch_type
-        else:
-            self.dim = create_pitch_dims(pitch_type, pitch_width, pitch_length)
-
-        # if the padding is None set it to 4 on all sides, or 0.04 in the case of metricasports
-        # for tracab multiply the padding by 100
-        for pad in ['pad_left', 'pad_right', 'pad_bottom', 'pad_top']:
-            if getattr(self, pad) is None:
-                setattr(self, pad, self.dim.pad_default)
-            if self.dim.pad_multiplier != 1:
-                setattr(self, pad, getattr(self, pad) * self.dim.pad_multiplier)
-        self._set_aspect()
-
-        # scale the padding where the aspect is not equal to one
-        # this means that you can easily set the padding the same
-        # all around the pitch (e.g. when using an Opta pitch)
-        if not self.dim.aspect_equal:
-            self._scale_pad()
-
-        # set the extent (takes into account padding)
-        # [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
-        # also sets some attributes used for plotting hexbin/ arrows/ lines/ kdeplot/ stripes
-        self._set_extent()
-
-        # validate the padding
-        self._validate_pad()
 
         # calculate locations of arcs and circles.
         # Where the pitch has an unequal aspect ratio we need to calculate them separately

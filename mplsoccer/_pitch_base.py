@@ -22,6 +22,7 @@ from .grid import _grid_dimensions, _draw_grid, grid_dimensions
 class BasePitch(ABC):
 
     def __init__(self,
+                 dim=None,
                  pitch_type=None,
                  half=False,
                  pitch_color=None,
@@ -32,6 +33,7 @@ class BasePitch(ABC):
                  axis=False, label=False, tick=False,
                  ):
         """ Initilize attributes common to all sport."""
+        self.dim = dim
         self.pitch_type = pitch_type
         self.half = half
         self.pitch_color = pitch_color
@@ -59,7 +61,6 @@ class BasePitch(ABC):
         self.tick = tick
 
         # completed by the each Sport's base class
-        self.dim = None
         self.goal_right = None
         self.goal_left = None
         self.standardizer = None
@@ -76,6 +77,29 @@ class BasePitch(ABC):
         self.hex_extent = None
         self.vertical = None
         self.reverse_cmap = None
+
+        # if the padding is None set it to 4 on all sides, or 0.04 in the case of metricasports
+        # for tracab multiply the padding by 100
+        for pad in ['pad_left', 'pad_right', 'pad_bottom', 'pad_top']:
+            if getattr(self, pad) is None:
+                setattr(self, pad, self.dim.pad_default)
+            if self.dim.pad_multiplier != 1:
+                setattr(self, pad, getattr(self, pad) * self.dim.pad_multiplier)
+        self._set_aspect()
+
+        # scale the padding where the aspect is not equal to one
+        # this means that you can easily set the padding the same
+        # all around the pitch (e.g. when using an Opta pitch)
+        if not self.dim.aspect_equal:
+            self._scale_pad()
+
+        # set the extent (takes into account padding)
+        # [xleft, xright, ybottom, ytop] and the aspect ratio of the axis
+        # also sets some attributes used for plotting hexbin/ arrows/ lines/ kdeplot/ stripes
+        self._set_extent()
+
+        # validate the padding
+        self._validate_pad()
 
     @staticmethod
     def _to_ax_coord(ax, coord_system, point):
@@ -1541,15 +1565,6 @@ class BasePitch(ABC):
     @abstractmethod
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
         """ Implement a method to draw arcs on an axes."""
-
-    @abstractmethod
-    def _draw_stripe(self, ax, i):
-        """ Implement a method to draw stripes on a pitch (axvspan/axhspan)."""
-
-    @abstractmethod
-    def _draw_stripe_grass(self, pitch_color):
-        """ Implement a method to draw stripes on a pitch.
-        Increase the array values at stripe locations."""
 
     @staticmethod
     @abstractmethod
