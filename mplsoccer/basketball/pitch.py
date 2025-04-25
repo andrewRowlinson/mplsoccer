@@ -4,12 +4,12 @@ import numpy as np
 from matplotlib import patches
 from matplotlib.lines import Line2D
 
-from mplsoccer._pitch_plot import BasePitchPlot
+from ._pitch_base import BasePitchBasketBall
 
-__all__ = ['Pitch', 'VerticalPitch']
+__all__ = ['BasketBallCourt', 'VerticalBasketBallCourt']
 
 
-class Pitch(BasePitchPlot):
+class BasketBallCourt(BasePitchBasketBall):
 
     def _set_aspect(self):
         self.aspect = self.dim.aspect
@@ -65,18 +65,6 @@ class Pitch(BasePitchPlot):
         # vertical for lines/ arrows
         self.vertical = False
 
-        # stripe
-        total_height = abs(self.extent[3] - self.extent[2])
-        pad_top, pad_bottom = -min(self.pad_top, 0), min(self.pad_bottom, 0)
-        if self.dim.invert_y:
-            pad_top, pad_bottom = -pad_top, -pad_bottom
-        top_side = abs(self.extent[2] - self.dim.top + pad_top)
-        bottom_side = abs(self.extent[2] - self.dim.bottom + pad_bottom)
-        self.stripe_end = top_side / total_height
-        self.stripe_start = bottom_side / total_height
-        self.grass_stripe_end = int((1 - self.stripe_start) * 1000)
-        self.grass_stripe_start = int((1 - self.stripe_end) * 1000)
-
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         if self.dim.invert_y:
             height = - height
@@ -105,25 +93,6 @@ class Pitch(BasePitchPlot):
         arc = patches.Arc((x, y), width, height, theta1=theta1, theta2=theta2, **kwargs)
         ax.add_patch(arc)
 
-    def _draw_stripe(self, ax, i):
-        ax.axvspan(self.dim.stripe_locations[i], self.dim.stripe_locations[i + 1],  # note axvspan
-                   self.stripe_start, self.stripe_end,
-                   facecolor=self.stripe_color, zorder=self.stripe_zorder)
-
-    def _draw_stripe_grass(self, pitch_color):
-        total_width = self.extent[1] - self.extent[0]
-        for i in range(len(self.dim.stripe_locations) - 1):
-            if i % 2 == 0:
-                if ((self.extent[0] <= self.dim.stripe_locations[i] <= self.extent[1]) or
-                        (self.extent[0] <= self.dim.stripe_locations[i + 1] <= self.extent[1])):
-                    start = (int((max(self.dim.stripe_locations[i], self.extent[0]) -
-                                  self.extent[0]) / total_width * 1000))
-                    end = (int((min(self.dim.stripe_locations[i+1], self.extent[1]) -
-                                self.extent[0]) / total_width * 1000))
-                    pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] = \
-                        pitch_color[self.grass_stripe_start: self.grass_stripe_end, start: end] + 2
-        return pitch_color
-
     @staticmethod
     def _reverse_if_vertical(x, y):
         return x, y
@@ -137,7 +106,7 @@ class Pitch(BasePitchPlot):
         return annotate
 
 
-class VerticalPitch(BasePitchPlot):
+class VerticalBasketBallCourt(BasePitchBasketBall):
 
     def _set_aspect(self):
         self.aspect = 1 / self.dim.aspect
@@ -193,18 +162,6 @@ class VerticalPitch(BasePitchPlot):
         # vertical for lines/ arrows
         self.vertical = True
 
-        # stripe
-        total_height = abs(self.extent[1] - self.extent[0])
-        pad_top, pad_bottom = -min(self.pad_left, 0), min(self.pad_right, 0)
-        if self.dim.invert_y:
-            pad_top, pad_bottom = -pad_top, -pad_bottom
-        top_side = abs(self.extent[0] - self.dim.top + pad_top)
-        bottom_side = abs(self.extent[0] - self.dim.bottom + pad_bottom)
-        self.stripe_start = top_side / total_height
-        self.stripe_end = bottom_side / total_height
-        self.grass_stripe_end = int(self.stripe_end * 1000)
-        self.grass_stripe_start = int(self.stripe_start * 1000)
-
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
         if self.dim.invert_y:
             height = - height
@@ -232,27 +189,6 @@ class VerticalPitch(BasePitchPlot):
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
         arc = patches.Arc((y, x), height, width, theta1=theta1 + 90, theta2=theta2 + 90, **kwargs)
         ax.add_patch(arc)
-
-    def _draw_stripe(self, ax, i):
-        ax.axhspan(self.dim.stripe_locations[i], self.dim.stripe_locations[i + 1],  # note axhspan
-                   self.stripe_start, self.stripe_end,
-                   facecolor=self.stripe_color, zorder=self.stripe_zorder)
-
-    def _draw_stripe_grass(self, pitch_color):
-        total_width = self.extent[3] - self.extent[2]
-        for i in range(len(self.dim.stripe_locations) - 1):
-            if i % 2 == 0:
-                if ((self.extent[2] <= self.dim.stripe_locations[i] <= self.extent[3]) or
-                        (self.extent[2] <= self.dim.stripe_locations[i + 1] <= self.extent[3])):
-                    start = (1000 - int((min(self.dim.stripe_locations[i+1],
-                                             self.extent[3]) - self.extent[2])
-                                        / total_width * 1000))
-                    end = (1000 - int((max(self.dim.stripe_locations[i],
-                                           self.extent[2]) - self.extent[2])
-                                      / total_width * 1000))
-                    pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] = \
-                        pitch_color[start: end, self.grass_stripe_start: self.grass_stripe_end] + 2
-        return pitch_color
 
     @staticmethod
     def _reverse_if_vertical(x, y):

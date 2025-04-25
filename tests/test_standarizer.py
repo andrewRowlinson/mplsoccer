@@ -5,7 +5,7 @@ import random
 import numpy as np
 
 from mplsoccer import Standardizer
-from mplsoccer.dimensions import valid, size_varies, create_pitch_dims
+from mplsoccer.soccer.dimensions import valid, size_varies, create_pitch_dims
 
 
 def test_standardizer_multiple():

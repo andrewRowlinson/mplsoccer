@@ -1,0 +1,32 @@
+""" Base pitch dimensions common to many sports."""
+
+from dataclasses import dataclass, KW_ONLY
+from typing import Optional
+
+import numpy as np
+
+
+@dataclass
+class BaseDims:
+    """ Base dataclass to hold pitch dimensions."""
+    pitch_width: float
+    pitch_length: float
+    invert_y: bool
+    origin_center: bool
+    pad_default: float
+    pad_multiplier: float
+    aspect_equal: bool
+
+    # dimensions that can be calculated in __post_init__
+    _: KW_ONLY
+    left: Optional[float] = None
+    right: Optional[float] = None
+    bottom: Optional[float] = None
+    top: Optional[float] = None
+    aspect: Optional[float] = None
+    width: Optional[float] = None
+    length: Optional[float] = None
+    center_width: Optional[float] = None
+    center_length: Optional[float] = None
+    pitch_extent: Optional[np.array] = None
+    standardized_extent: Optional[np.array] = None

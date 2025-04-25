@@ -7,7 +7,7 @@ from matplotlib.legend import Legend
 from matplotlib.legend_handler import HandlerLine2D
 from matplotlib.quiver import Quiver
 
-from mplsoccer.utils import validate_ax
+from .utils import validate_ax
 
 __all__ = ['arrows']
 
