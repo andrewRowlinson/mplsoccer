@@ -335,20 +335,6 @@ class BasePitchSoccer(BasePitch):
         self.arc2_theta1 = 180 - self.dim.arc
         self.arc2_theta2 = 180 + self.dim.arc
 
-    def _diameter_circle_equal_aspect(self, x, y, ax, radius):
-        # coordinates of center/ perimeter
-        center = (x, y)
-        circle_perimeter_length = (x + radius * self.dim.length / self.dim.pitch_length, y)
-        circle_perimeter_width = (x, y + radius * self.dim.width / self.dim.pitch_width)
-        # to ax coordinates
-        center = self._to_ax_coord(ax, ax.transAxes, center)
-        circle_perimeter_length = self._to_ax_coord(ax, ax.transAxes, circle_perimeter_length)
-        circle_perimeter_width = self._to_ax_coord(ax, ax.transAxes, circle_perimeter_width)
-        # calculate diameter
-        diameter1 = (circle_perimeter_length[0] - center[0]) * 2
-        diameter2 = (circle_perimeter_width[1] - center[1]) * 2
-        return diameter1, diameter2
-
     def _arc_angles_equal_aspect(self, ax, radius):
         # calculate the point that the arc intersects the penalty area
         radius_length = radius * self.dim.length / self.dim.pitch_length
