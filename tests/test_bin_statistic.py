@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from mplsoccer import Pitch
-from mplsoccer.dimensions import valid, size_varies
+from mplsoccer.soccer.dimensions import valid, size_varies
 
 
 def test_bin_statistic_points():
