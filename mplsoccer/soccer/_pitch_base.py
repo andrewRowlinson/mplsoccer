@@ -47,7 +47,7 @@ class BasePitchSoccer(BasePitch):
     line_zorder : float, default 0.9
         Set the zorder for the pitch lines (a matplotlib artist).
         Artists with lower zorder values are drawn first.
-    spot_scale : float, default 0.002
+    spot_scale : float, default 0.04
         The size of the penalty and center spots relative to the pitch length.
     spot_type : str, default 'circle'
         Whether to display the spots as a 'circle' or 'square'.
@@ -114,7 +114,7 @@ class BasePitchSoccer(BasePitch):
     """
     def __init__(self, pitch_type='statsbomb', half=False,
                  pitch_color=None, line_color=None, line_alpha=1, linewidth=2,
-                 linestyle=None, line_zorder=0.9, spot_scale=0.002, spot_type='circle',
+                 linestyle=None, line_zorder=0.9, spot_scale=0.04, spot_type='circle',
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
@@ -157,19 +157,6 @@ class BasePitchSoccer(BasePitch):
         self.goal_linestyle = goal_linestyle
         self.corner_arcs = corner_arcs
 
-        # other attributes for plotting circles - completed by
-        # _init_circles_and_arcs / _init_circles_and_arcs_equal_aspect
-        self.diameter1 = None
-        self.diameter2 = None
-        self.diameter_spot1 = None
-        self.diameter_spot2 = None
-        self.diameter_corner1 = None
-        self.diameter_corner2 = None
-        self.arc1_theta1 = None
-        self.arc1_theta2 = None
-        self.arc2_theta1 = None
-        self.arc2_theta2 = None
-
         # data checks
         self._validation_checks()
 
@@ -179,11 +166,6 @@ class BasePitchSoccer(BasePitch):
                                          pitch_to='custom',
                                          width_to=68 if pitch_width is None else pitch_width,
                                          length_to=105 if pitch_length is None else pitch_length)
-
-        # calculate locations of arcs and circles.
-        # Where the pitch has an unequal aspect ratio we need to calculate them separately
-        if self.dim.aspect_equal:
-            self._init_circles_and_arcs()
 
         # set the positions of the goal posts
         self.goal_left = np.array([[self.dim.left, self.dim.goal_bottom],
@@ -323,64 +305,7 @@ class BasePitchSoccer(BasePitch):
         if (self.axis is False) and self.tick:
             warnings.warn("Ticks will not be shown unless axis=True")
 
-    def _init_circles_and_arcs(self):
-        self.diameter1 = self.dim.circle_diameter
-        self.diameter2 = self.dim.circle_diameter
-        self.diameter_spot1 = self.spot_scale * self.dim.length * 2
-        self.diameter_spot2 = self.spot_scale * self.dim.length * 2
-        self.diameter_corner1 = self.dim.corner_diameter
-        self.diameter_corner2 = self.dim.corner_diameter
-        self.arc1_theta1 = -self.dim.arc
-        self.arc1_theta2 = self.dim.arc
-        self.arc2_theta1 = 180 - self.dim.arc
-        self.arc2_theta2 = 180 + self.dim.arc
-
-    def _arc_angles_equal_aspect(self, ax, radius):
-        # calculate the point that the arc intersects the penalty area
-        radius_length = radius * self.dim.length / self.dim.pitch_length
-        radius_width = radius * self.dim.width / self.dim.pitch_width
-        intersection = self.dim.center_width - ((radius_width * radius_length *
-                                                 (radius_length ** 2 -
-                                                  (self.dim.penalty_area_length -
-                                                   self.dim.penalty_spot_distance) ** 2) ** 0.5) /
-                                                radius_length ** 2)
-        arc_pen_top1 = (self.dim.penalty_area_left, intersection)
-        spot_xy = (self.dim.penalty_left, self.dim.center_width)
-        # to ax coordinates
-        arc_pen_top1 = self._to_ax_coord(ax, ax.transAxes, arc_pen_top1)
-        spot_xy = self._to_ax_coord(ax, ax.transAxes, spot_xy)
-        # work out the arc angles
-        adjacent = arc_pen_top1[0] - spot_xy[0]
-        opposite = spot_xy[1] - arc_pen_top1[1]
-        self.arc1_theta2 = np.degrees(np.arctan(opposite / adjacent))
-        self.arc1_theta1 = 360 - self.arc1_theta2
-        self.arc2_theta1 = 180 - self.arc1_theta2
-        self.arc2_theta2 = 180 + self.arc1_theta2
-
-    def _init_circles_and_arcs_equal_aspect(self, ax):
-        radius_center = self.dim.circle_diameter / 2
-        radius_corner = self.dim.corner_diameter / 2
-        radius_spot = self.spot_scale * self.dim.pitch_length
-
-        (self.diameter1,
-         self.diameter2) = self._diameter_circle_equal_aspect(self.dim.center_length,
-                                                              self.dim.center_width,
-                                                              ax, radius_center)
-        (self.diameter_spot1,
-         self.diameter_spot2) = self._diameter_circle_equal_aspect(self.dim.penalty_left,
-                                                                   self.dim.center_width,
-                                                                   ax, radius_spot)
-
-        (self.diameter_corner1,
-         self.diameter_corner2) = self._diameter_circle_equal_aspect(self.dim.left,
-                                                                     self.dim.bottom,
-                                                                     ax, radius_corner)
-
-        self._arc_angles_equal_aspect(ax, radius_center)
-
     def _draw_ax(self, ax):
-        if self.arc1_theta1 is None:
-            self._init_circles_and_arcs_equal_aspect(ax)
         self._set_axes(ax)
         self._set_background(ax)
         self._draw_pitch_markings(ax)
@@ -456,13 +381,13 @@ class BasePitchSoccer(BasePitch):
 
         # draw center circle and penalty area arcs
         self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
-                           self.diameter1, self.diameter2, **circ_prop)
+                           self.dim.circle_diameter_length, self.dim.circle_diameter_width, **circ_prop)
         self._draw_arc(ax, self.dim.penalty_left, self.dim.center_width,
-                       self.diameter1, self.diameter2,
-                       theta1=self.arc1_theta1, theta2=self.arc1_theta2, **circ_prop)
+                       self.dim.circle_diameter_length, self.dim.circle_diameter_width,
+                       theta1=self.dim.arc1_theta1, theta2=self.dim.arc1_theta2, **circ_prop)
         self._draw_arc(ax, self.dim.penalty_right, self.dim.center_width,
-                       self.diameter1, self.diameter2,
-                       theta1=self.arc2_theta1, theta2=self.arc2_theta2, **circ_prop)
+                       self.dim.circle_diameter_length, self.dim.circle_diameter_width,
+                       theta1=self.dim.arc2_theta1, theta2=self.dim.arc2_theta2, **circ_prop)
 
         if self.corner_arcs:
             if self.dim.invert_y:
@@ -477,7 +402,7 @@ class BasePitchSoccer(BasePitch):
                              (self.dim.left, self.dim.bottom)]
             for i, (x, y) in enumerate(corner_points):
                 t1, t2 = thetas[i]
-                self._draw_arc(ax, x, y, self.diameter_corner1, self.diameter_corner2,
+                self._draw_arc(ax, x, y, self.dim.corner_diameter_length, self.dim.corner_diameter_width,
                                theta1=t1, theta2=t2, **circ_prop)
 
         # draw center and penalty spots
@@ -487,15 +412,18 @@ class BasePitchSoccer(BasePitch):
             else:
                 spot_func = self._draw_centered_rectangle
             spot_func(ax, self.dim.center_length, self.dim.center_width,
-                      self.diameter_spot1, self.diameter_spot2,
+                      self.dim.circle_diameter_length * self.spot_scale,
+                      self.dim.circle_diameter_width * self.spot_scale,
                       alpha=self.line_alpha, color=self.line_color,
                       zorder=self.line_zorder)
             spot_func(ax, self.dim.penalty_left, self.dim.center_width,
-                      self.diameter_spot1, self.diameter_spot2,
+                      self.dim.circle_diameter_length * self.spot_scale,
+                      self.dim.circle_diameter_width * self.spot_scale,
                       alpha=self.line_alpha, color=self.line_color,
                       zorder=self.line_zorder)
             spot_func(ax, self.dim.penalty_right, self.dim.center_width,
-                      self.diameter_spot1, self.diameter_spot2,
+                      self.dim.circle_diameter_length * self.spot_scale,
+                      self.dim.circle_diameter_width * self.spot_scale,
                       alpha=self.line_alpha, color=self.line_color,
                       zorder=self.line_zorder)
 

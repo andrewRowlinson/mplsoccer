@@ -101,24 +101,6 @@ class BasePitch(ABC):
         # validate the padding
         self._validate_pad()
 
-    @staticmethod
-    def _to_ax_coord(ax, coord_system, point):
-        return coord_system.inverted().transform(ax.transData.transform_point(point))
-
-    def _diameter_circle_equal_aspect(self, x, y, ax, radius):
-        # coordinates of center/ perimeter
-        center = (x, y)
-        circle_perimeter_length = (x + radius * self.dim.length / self.dim.pitch_length, y)
-        circle_perimeter_width = (x, y + radius * self.dim.width / self.dim.pitch_width)
-        # to ax coordinates
-        center = self._to_ax_coord(ax, ax.transAxes, center)
-        circle_perimeter_length = self._to_ax_coord(ax, ax.transAxes, circle_perimeter_length)
-        circle_perimeter_width = self._to_ax_coord(ax, ax.transAxes, circle_perimeter_width)
-        # calculate diameter
-        diameter1 = (circle_perimeter_length[0] - center[0]) * 2
-        diameter2 = (circle_perimeter_width[1] - center[1]) * 2
-        return diameter1, diameter2
-
     def draw(self, ax=None, figsize=None, nrows=1, ncols=1,
              tight_layout=True, constrained_layout=False):
         """ Draws the specified soccer/ football pitch(es).

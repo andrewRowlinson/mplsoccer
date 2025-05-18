@@ -30,3 +30,17 @@ class BaseDims:
     center_length: Optional[float] = None
     pitch_extent: Optional[np.array] = None
     standardized_extent: Optional[np.array] = None
+
+    @staticmethod
+    def intersection_arc(diameter_length, diameter_width, center_x, center_y, line_x):
+        radius_length = diameter_length / 2
+        radius_width = diameter_width / 2
+        intersection = center_y - ((radius_width * radius_length *
+                                  (radius_length ** 2 -
+                                   (center_x - line_x) ** 2) ** 0.5) /
+                                 radius_length ** 2)
+        arc_intersection = (line_x, intersection)
+        center_xy = (center_x, center_y)
+        adjacent = arc_intersection[0] - center_xy[0]
+        opposite = arc_intersection[1] - center_xy[1]
+        return abs(np.degrees(np.arctan(opposite / adjacent)))

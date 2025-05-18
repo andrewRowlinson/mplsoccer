@@ -154,24 +154,152 @@ class BasePitchBasketBall(BasePitch):
         # main markings (outside of pitch and center line)
         xs_main = [self.dim.center_length, self.dim.center_length, self.dim.right,
                    self.dim.right, self.dim.left, self.dim.left, self.dim.center_length,
+                   # key right
+                   np.nan,
+                   self.dim.right, self.dim.key_right,
+                   self.dim.key_right, self.dim.right,
+                   # key left
+                   np.nan,
+                   self.dim.left, self.dim.key_left,
+                   self.dim.key_left, self.dim.left,
+                   # three point lines left
+                   np.nan,
+                   self.dim.left, self.dim.three_point_left,
+                   np.nan,
+                   self.dim.left, self.dim.three_point_left,
+                   # three point lines right
+                   np.nan,
+                   self.dim.right, self.dim.three_point_right,
+                   np.nan,
+                   self.dim.right, self.dim.three_point_right,
+                   # hashes sideline left
+                   np.nan,
+                   self.dim.hash_sideline_left, self.dim.hash_sideline_left,
+                   np.nan,
+                   self.dim.hash_sideline_left, self.dim.hash_sideline_left,
+                   # hashes sideline right
+                   np.nan,
+                   self.dim.hash_sideline_right, self.dim.hash_sideline_right,
+                   np.nan,
+                   self.dim.hash_sideline_right, self.dim.hash_sideline_right,
+                   # substitution hashes
+                   np.nan,
+                   self.dim.hash_substitution_left, self.dim.hash_substitution_left,
+                   np.nan,
+                   self.dim.hash_substitution_right, self.dim.hash_substitution_right,
                    ]
         ys_main = [self.dim.bottom, self.dim.top, self.dim.top,
                    self.dim.bottom, self.dim.bottom, self.dim.top, self.dim.top,
+                   # key right
+                   np.nan,
+                   self.dim.key_bottom, self.dim.key_bottom,
+                   self.dim.key_top, self.dim.key_top,
+                   # key left
+                   np.nan,
+                   self.dim.key_bottom, self.dim.key_bottom,
+                   self.dim.key_top, self.dim.key_top,
+                   # three point lines left
+                   np.nan,
+                   self.dim.three_point_bottom, self.dim.three_point_bottom,
+                   np.nan,
+                   self.dim.three_point_top, self.dim.three_point_top,
+                   # three point lines right
+                   np.nan,
+                   self.dim.three_point_bottom, self.dim.three_point_bottom,
+                   np.nan,
+                   self.dim.three_point_top, self.dim.three_point_top,
+                   # hashes sideline left
+                   np.nan,
+                   self.dim.bottom, self.dim.hash_sideline_bottom,
+                   np.nan,
+                   self.dim.top, self.dim.hash_sideline_top,
+                   # hashes sideline right
+                   np.nan,
+                   self.dim.bottom, self.dim.hash_sideline_bottom,
+                   np.nan,
+                   self.dim.top, self.dim.hash_sideline_top,
+                   # substitution hashes
+                   np.nan,
+                   self.dim.top, self.dim.hash_substitution_top,
+                   np.nan,
+                   self.dim.top, self.dim.hash_substitution_top,
                    ]
         self._draw_line(ax, xs_main, ys_main, **line_prop)
 
-        # key
-        xs_key_right = [self.dim.right, self.dim.key_right,
-                         self.dim.key_right, self.dim.right,
-                         ]
-        xs_key_left = [self.dim.left, self.dim.key_left,
-                        self.dim.key_left, self.dim.left,
-                        ]
-        ys_key = [self.dim.key_bottom, self.dim.key_bottom,
-                   self.dim.key_top, self.dim.key_top,
-                   ]
-        self._draw_line(ax, xs_key_right, ys_key, **line_prop)
-        self._draw_line(ax, xs_key_left, ys_key, **line_prop)
+
+        circ_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
+                     'color': self.line_color, 'zorder': self.line_zorder,
+                     'linestyle': self.linestyle,
+                     }
+        # center circle
+        self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
+                           self.dim.center_circle_diameter_length,
+                           self.dim.center_circle_diameter_width,
+                           **circ_prop)
+        # keys
+        self._draw_arc(ax, self.dim.key_left, self.dim.center_width,
+                       self.dim.center_circle_diameter_length,
+                       self.dim.center_circle_diameter_width,
+                       270, 90,
+                       **circ_prop)
+        self._draw_arc(ax, self.dim.key_right, self.dim.center_width,
+                       self.dim.center_circle_diameter_length,
+                       self.dim.center_circle_diameter_width,
+                       90, 270,
+                       **circ_prop)
+
+        # theree point curved line
+        self._draw_arc(ax, self.dim.hoop_left, self.dim.center_width,
+                       self.dim.three_point_diameter_length,
+                       self.dim.three_point_diameter_width,
+                       self.dim.arc1_theta1, self.dim.arc1_theta2,
+                       **circ_prop)
+        self._draw_arc(ax, self.dim.hoop_right, self.dim.center_width,
+                       self.dim.three_point_diameter_length,
+                       self.dim.three_point_diameter_width,
+                       self.dim.arc2_theta1, self.dim.arc2_theta2,
+                       **circ_prop)
+
+        # restricted area
+        self._draw_arc(ax, self.dim.hoop_left, self.dim.center_width,
+                       self.dim.restricted_area_diameter_length,
+                       self.dim.restricted_area_diameter_width,
+                       270, 90,
+                       **circ_prop)
+        self._draw_arc(ax, self.dim.hoop_right, self.dim.center_width,
+                       self.dim.restricted_area_diameter_length,
+                       self.dim.restricted_area_diameter_width,
+                       90, 270,
+                       **circ_prop)
+
+        circ_prop2 = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
+                     'color': self.line_color, 'zorder': self.line_zorder,
+                     'linestyle': '--',
+                     }
+        self._draw_arc(ax, self.dim.key_left, self.dim.center_width,
+                           self.dim.center_circle_diameter_length,
+                           self.dim.center_circle_diameter_width,
+                           90, 270,
+                           **circ_prop2)
+        self._draw_arc(ax, self.dim.key_right, self.dim.center_width,
+                           self.dim.center_circle_diameter_length,
+                           self.dim.center_circle_diameter_width,
+                           270, 90,
+                           **circ_prop2)
+
+        # hoop
+        hoop_prop = {'fill': False, 'linewidth': self.linewidth, 'alpha': self.line_alpha,
+                     'color': self.line_color, 'zorder': self.line_zorder,
+                     'linestyle': self.linestyle,
+                     }
+        self._draw_ellipse(ax, self.dim.hoop_left, self.dim.center_width,
+                           self.dim.hoop_diameter_length,
+                           self.dim.hoop_diameter_width,
+                           **hoop_prop)
+        self._draw_ellipse(ax, self.dim.hoop_right, self.dim.center_width,
+                           self.dim.hoop_diameter_length,
+                           self.dim.hoop_diameter_width,
+                           **hoop_prop)
 
     # The methods below for drawing/ setting attributes for some pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)

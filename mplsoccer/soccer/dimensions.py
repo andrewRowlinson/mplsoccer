@@ -81,9 +81,8 @@ class BaseSoccerDims(BaseDims):
     six_yard_length: float
     penalty_area_width: float
     penalty_area_length: float
-    circle_diameter: float
     corner_diameter: float
-    arc: Optional[float]
+    circle_diameter: float
     # dimensions that can be calculated in __post_init__
     goal_bottom: Optional[float] = None
     goal_top: Optional[float] = None
@@ -98,6 +97,14 @@ class BaseSoccerDims(BaseDims):
     penalty_area_right: Optional[float] = None
     penalty_area_bottom: Optional[float] = None
     penalty_area_top: Optional[float] = None
+    circle_diameter_length: Optional[float] = None
+    circle_diameter_width: Optional[float] = None
+    corner_diameter_length: Optional[float] = None
+    corner_diameter_width: Optional[float] = None
+    arc1_theta1: Optional[float] = None
+    arc1_theta2: Optional[float] = None
+    arc2_theta1: Optional[float] = None
+    arc2_theta2: Optional[float] = None
     # defined in pitch_markings
     x_markings_sorted: Optional[np.array] = None
     y_markings_sorted: Optional[np.array] = None
@@ -130,6 +137,7 @@ class BaseSoccerDims(BaseDims):
         self.create_positions_five_per_line_ss()
         self.create_positions_four_per_line_ss()
         self.create_formations()
+        self.diameter_angle()
 
     def pitch_markings(self):
         """ Create sorted pitch dimensions to enable standardization of coordinates.
@@ -317,6 +325,27 @@ class BaseSoccerDims(BaseDims):
                                self.position_line5_with_ss)
         self.formations = formations.formations
 
+    def diameter_angle(self):
+        """ Calculate diameters and angles of circles and arcs."""
+        if self.aspect_equal is False:
+            self.circle_diameter_length = self.circle_diameter / self.pitch_length * self.length
+            self.circle_diameter_width = self.circle_diameter / self.pitch_width * self.width
+            self.corner_diameter_length = self.corner_diameter / self.pitch_length * self.length
+            self.corner_diameter_width = self.corner_diameter / self.pitch_width * self.width
+        else:
+            self.circle_diameter_length = self.circle_diameter
+            self.circle_diameter_width = self.circle_diameter
+            self.corner_diameter_length = self.corner_diameter
+            self.corner_diameter_width = self.corner_diameter
+        self.arc1_theta2 = self.intersection_arc(self.circle_diameter_length,
+                                                 self.circle_diameter_width,
+                                                 self.penalty_left,
+                                                 self.center_width,
+                                                 self.penalty_area_left)
+        self.arc1_theta1 = 360 - self.arc1_theta2
+        self.arc2_theta1 = 180 - self.arc1_theta2
+        self.arc2_theta2 = 180 + self.arc1_theta2
+
 
 @dataclass
 class FixedDims(BaseSoccerDims):
@@ -421,8 +450,9 @@ def opta_dims():
                      penalty_left=11.5, penalty_right=88.5, penalty_spot_distance=11.5,
                      penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
                      penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
-                     center_width=50., center_length=50., circle_diameter=17.68,
-                     corner_diameter=1.94, arc=None, invert_y=False, origin_center=False,
+                     center_width=50., center_length=50.,
+                     circle_diameter=18.3, corner_diameter=2.,
+                     invert_y=False, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=False)
 
 
@@ -436,8 +466,9 @@ def wyscout_dims():
                      penalty_left=10., penalty_right=90., penalty_spot_distance=10.,
                      penalty_area_width=62., penalty_area_length=16., penalty_area_left=16.,
                      penalty_area_right=84., penalty_area_bottom=81., penalty_area_top=19.,
-                     center_width=50., center_length=50., circle_diameter=17.68,
-                     corner_diameter=1.94, arc=None, invert_y=True, origin_center=False,
+                     center_width=50., center_length=50.,
+                     circle_diameter=18.3, corner_diameter=2.,
+                     invert_y=True, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=False)
 
 
@@ -451,8 +482,9 @@ def uefa_dims():
                      penalty_left=11., penalty_right=94., penalty_spot_distance=11.,
                      penalty_area_width=40.32, penalty_area_length=16.5, penalty_area_left=16.5,
                      penalty_area_right=88.5, penalty_area_bottom=13.84, penalty_area_top=54.16,
-                     center_width=34., center_length=52.5, circle_diameter=18.3, corner_diameter=2.,
-                     arc=53.05, invert_y=False, origin_center=False,
+                     center_width=34., center_length=52.5,
+                     circle_diameter=18.3, corner_diameter=2.,
+                     invert_y=False, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=True)
 
 
@@ -466,8 +498,9 @@ def statsbomb_dims():
                      penalty_left=12., penalty_right=108., penalty_spot_distance=12.,
                      penalty_area_width=44., penalty_area_length=18., penalty_area_left=18.,
                      penalty_area_right=102., penalty_area_bottom=62., penalty_area_top=18.,
-                     center_width=40., center_length=60., circle_diameter=20.,
-                     corner_diameter=2.186, arc=53.05, invert_y=True, origin_center=False,
+                     center_width=40., center_length=60.,
+                     circle_diameter=20, corner_diameter=2.186,
+                     invert_y=True, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=True)
 
 
@@ -479,7 +512,7 @@ def metricasports_dims(pitch_width, pitch_length):
                              six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                              penalty_area_width=40.32, penalty_area_length=16.5,
                              circle_diameter=18.3, corner_diameter=2., goal_length=2.,
-                             goal_width=7.32, arc=None, invert_y=True, origin_center=False,
+                             goal_width=7.32, invert_y=True, origin_center=False,
                              pad_default=0.04, pad_multiplier=1, aspect_equal=False)
 
 
@@ -491,7 +524,7 @@ def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
                               six_yard_top=9.16, penalty_spot_distance=11.,
                               penalty_area_width=40.32, penalty_area_length=16.5,
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
-                              center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
+                              center_length=0., circle_diameter=18.3, corner_diameter=2.,
                               invert_y=False, origin_center=True,
                               pad_default=4, pad_multiplier=1, aspect_equal=True)
 
@@ -505,7 +538,7 @@ def tracab_dims(pitch_width, pitch_length):
                               penalty_area_width=4032., penalty_area_length=1650.,
                               penalty_area_bottom=-2016., penalty_area_top=2016.,
                               center_width=0., center_length=0., circle_diameter=1830.,
-                              corner_diameter=200., arc=53.05, invert_y=False, origin_center=True,
+                              corner_diameter=200., invert_y=False, origin_center=True,
                               pad_default=4, pad_multiplier=100, aspect_equal=True)
 
 
@@ -517,7 +550,7 @@ def impect_dims():
                               six_yard_top=9.16, penalty_spot_distance=11.,
                               penalty_area_width=40.32, penalty_area_length=16.5,
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
-                              center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
+                              center_length=0., circle_diameter=18.3, corner_diameter=2.,
                               invert_y=False, origin_center=True,
                               pad_default=4, pad_multiplier=1, aspect_equal=True)
 
@@ -528,7 +561,7 @@ def custom_dims(pitch_width, pitch_length):
                       pitch_length=pitch_length, pitch_width=pitch_width, six_yard_width=18.32,
                       six_yard_length=5.5, penalty_area_width=40.32, penalty_spot_distance=11.,
                       penalty_area_length=16.5, circle_diameter=18.3, corner_diameter=2.,
-                      goal_length=2., goal_width=7.32, arc=53.05, invert_y=False,
+                      goal_length=2., goal_width=7.32, invert_y=False,
                       origin_center=False,
                       pad_default=4, pad_multiplier=1, aspect_equal=True)
 
@@ -560,7 +593,7 @@ def center_scale_dims(pitch_width, pitch_length, width=2, length=2, invert_y=Fal
                            six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                            penalty_area_width=40.32, penalty_area_length=16.5,
                            circle_diameter=18.3, corner_diameter=2., goal_length=2.,
-                           goal_width=7.32, arc=None, invert_y=invert_y, origin_center=True,
+                           goal_width=7.32, invert_y=invert_y, origin_center=True,
                            pad_default=0.04 * width, pad_multiplier=1, aspect_equal=False)
 
 
