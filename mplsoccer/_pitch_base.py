@@ -101,6 +101,10 @@ class BasePitch(ABC):
         # validate the padding
         self._validate_pad()
 
+    @staticmethod
+    def _to_ax_coord(ax, coord_system, point):
+        return coord_system.inverted().transform(ax.transData.transform_point(point))
+
     def draw(self, ax=None, figsize=None, nrows=1, ncols=1,
              tight_layout=True, constrained_layout=False):
         """ Draws the specified soccer/ football pitch(es).

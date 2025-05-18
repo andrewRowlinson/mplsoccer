@@ -465,7 +465,9 @@ class BasePitchSoccer(BasePitch):
             posts = [[self.dim.right, self.dim.goal_bottom], [self.dim.right, self.dim.goal_top],
                      [self.dim.left, self.dim.goal_bottom], [self.dim.left, self.dim.goal_top]]
             for post in posts:
-                self._draw_ellipse(ax, post[0], post[1], self.diameter_spot1, self.diameter_spot2,
+                self._draw_ellipse(ax, post[0], post[1],
+                                   self.dim.circle_diameter_length * self.spot_scale,
+                                   self.dim.circle_diameter_width * self.spot_scale,
                                    alpha=self.goal_alpha, color=self.line_color,
                                    zorder=self.line_zorder)
 
