@@ -1,3 +1,9 @@
+:rocket: Version 1.5.0
+----------------------
+
+### Breaking Changes
+* :x: ``dimension`` module moved to ``soccer.dimensions``.
+
 :rocket: Version 1.4.0
 ----------------------
 

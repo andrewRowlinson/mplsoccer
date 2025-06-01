@@ -58,8 +58,12 @@ from typing import Optional, Dict
 
 import numpy as np
 
-from mplsoccer.formations import Formation, PositionLine4, PositionLine5, \
+from .formations import Formation, PositionLine4, PositionLine5, \
     PositionLine5WithSecondStriker, Coordinate
+from .._dimensions_base import BaseDims
+
+
+__all__ = ['Standardizer']
 
 valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
          'metricasports', 'custom', 'skillcorner', 'secondspectrum',
@@ -67,33 +71,19 @@ valid = ['statsbomb', 'tracab', 'opta', 'wyscout', 'uefa',
 size_varies = ['tracab', 'metricasports', 'custom', 'skillcorner', 'secondspectrum']
 
 
+
 @dataclass
-class BaseDims:
+class BaseSoccerDims(BaseDims):
     """ Base dataclass to hold pitch dimensions."""
-    pitch_width: float
-    pitch_length: float
     goal_width: float
     goal_length: float
     six_yard_width: float
     six_yard_length: float
     penalty_area_width: float
     penalty_area_length: float
-    circle_diameter: float
     corner_diameter: float
-    arc: Optional[float]
-    invert_y: bool
-    origin_center: bool
-    pad_default: float
-    pad_multiplier: float
-    aspect_equal: bool
+    circle_diameter: float
     # dimensions that can be calculated in __post_init__
-    left: Optional[float] = None
-    right: Optional[float] = None
-    bottom: Optional[float] = None
-    top: Optional[float] = None
-    aspect: Optional[float] = None
-    width: Optional[float] = None
-    length: Optional[float] = None
     goal_bottom: Optional[float] = None
     goal_top: Optional[float] = None
     six_yard_left: Optional[float] = None
@@ -107,12 +97,17 @@ class BaseDims:
     penalty_area_right: Optional[float] = None
     penalty_area_bottom: Optional[float] = None
     penalty_area_top: Optional[float] = None
-    center_width: Optional[float] = None
-    center_length: Optional[float] = None
+    circle_diameter_length: Optional[float] = None
+    circle_diameter_width: Optional[float] = None
+    corner_diameter_length: Optional[float] = None
+    corner_diameter_width: Optional[float] = None
+    arc1_theta1: Optional[float] = None
+    arc1_theta2: Optional[float] = None
+    arc2_theta1: Optional[float] = None
+    arc2_theta2: Optional[float] = None
     # defined in pitch_markings
     x_markings_sorted: Optional[np.array] = None
     y_markings_sorted: Optional[np.array] = None
-    pitch_extent: Optional[np.array] = None
     # defined in juego_de_posicion
     positional_x: Optional[np.array] = None
     positional_y: Optional[np.array] = None
@@ -142,6 +137,7 @@ class BaseDims:
         self.create_positions_five_per_line_ss()
         self.create_positions_four_per_line_ss()
         self.create_formations()
+        self.diameter_angle()
 
     def pitch_markings(self):
         """ Create sorted pitch dimensions to enable standardization of coordinates.
@@ -155,6 +151,8 @@ class BaseDims:
                                            self.six_yard_bottom, self.goal_bottom,
                                            self.goal_top, self.six_yard_top,
                                            self.penalty_area_top, self.top])
+        self.standardized_extent = np.array([0, 105, 0, 68])
+
         if self.invert_y:
             self.y_markings_sorted = np.sort(self.y_markings_sorted)
             self.pitch_extent = np.array([self.left, self.right, self.top, self.bottom])
@@ -327,9 +325,30 @@ class BaseDims:
                                self.position_line5_with_ss)
         self.formations = formations.formations
 
+    def diameter_angle(self):
+        """ Calculate diameters and angles of circles and arcs."""
+        if self.aspect_equal is False:
+            self.circle_diameter_length = self.circle_diameter / self.pitch_length * self.length
+            self.circle_diameter_width = self.circle_diameter / self.pitch_width * self.width
+            self.corner_diameter_length = self.corner_diameter / self.pitch_length * self.length
+            self.corner_diameter_width = self.corner_diameter / self.pitch_width * self.width
+        else:
+            self.circle_diameter_length = self.circle_diameter
+            self.circle_diameter_width = self.circle_diameter
+            self.corner_diameter_length = self.corner_diameter
+            self.corner_diameter_width = self.corner_diameter
+        self.arc1_theta2 = self.intersection_arc(self.circle_diameter_length,
+                                                 self.circle_diameter_width,
+                                                 self.penalty_left,
+                                                 self.center_width,
+                                                 self.penalty_area_left)
+        self.arc1_theta1 = 360 - self.arc1_theta2
+        self.arc2_theta1 = 180 - self.arc1_theta2
+        self.arc2_theta2 = 180 + self.arc1_theta2
+
 
 @dataclass
-class FixedDims(BaseDims):
+class FixedDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for pitches with fixed dimensions:
      'opta', 'wyscout', 'statsbomb' and 'uefa'."""
 
@@ -338,7 +357,7 @@ class FixedDims(BaseDims):
 
 
 @dataclass
-class VariableCenterDims(BaseDims):
+class VariableCenterDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
     'tracab', 'skillcorner', 'impect', and 'secondspectrum'."""
 
@@ -359,7 +378,7 @@ class VariableCenterDims(BaseDims):
 
 
 @dataclass
-class CustomDims(BaseDims):
+class CustomDims(BaseSoccerDims):
     """ Dataclass holding the dimension for the custom pitch.
     This is a pitch where the dimensions (width/length) vary and the origin is (left, bottom)."""
 
@@ -374,7 +393,7 @@ class CustomDims(BaseDims):
 
 
 @dataclass
-class MetricasportsDims(BaseDims):
+class MetricasportsDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
 
     def __post_init__(self):
@@ -392,7 +411,7 @@ class MetricasportsDims(BaseDims):
 
 
 @dataclass
-class ScaleCenterDims(BaseDims):
+class ScaleCenterDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
 
     def __post_init__(self):
@@ -431,8 +450,9 @@ def opta_dims():
                      penalty_left=11.5, penalty_right=88.5, penalty_spot_distance=11.5,
                      penalty_area_width=57.8, penalty_area_length=17.0, penalty_area_left=17.,
                      penalty_area_right=83., penalty_area_bottom=21.1, penalty_area_top=78.9,
-                     center_width=50., center_length=50., circle_diameter=17.68,
-                     corner_diameter=1.94, arc=None, invert_y=False, origin_center=False,
+                     center_width=50., center_length=50.,
+                     circle_diameter=18.3, corner_diameter=2.,
+                     invert_y=False, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=False)
 
 
@@ -446,8 +466,9 @@ def wyscout_dims():
                      penalty_left=10., penalty_right=90., penalty_spot_distance=10.,
                      penalty_area_width=62., penalty_area_length=16., penalty_area_left=16.,
                      penalty_area_right=84., penalty_area_bottom=81., penalty_area_top=19.,
-                     center_width=50., center_length=50., circle_diameter=17.68,
-                     corner_diameter=1.94, arc=None, invert_y=True, origin_center=False,
+                     center_width=50., center_length=50.,
+                     circle_diameter=18.3, corner_diameter=2.,
+                     invert_y=True, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=False)
 
 
@@ -461,8 +482,9 @@ def uefa_dims():
                      penalty_left=11., penalty_right=94., penalty_spot_distance=11.,
                      penalty_area_width=40.32, penalty_area_length=16.5, penalty_area_left=16.5,
                      penalty_area_right=88.5, penalty_area_bottom=13.84, penalty_area_top=54.16,
-                     center_width=34., center_length=52.5, circle_diameter=18.3, corner_diameter=2.,
-                     arc=53.05, invert_y=False, origin_center=False,
+                     center_width=34., center_length=52.5,
+                     circle_diameter=18.3, corner_diameter=2.,
+                     invert_y=False, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=True)
 
 
@@ -476,8 +498,9 @@ def statsbomb_dims():
                      penalty_left=12., penalty_right=108., penalty_spot_distance=12.,
                      penalty_area_width=44., penalty_area_length=18., penalty_area_left=18.,
                      penalty_area_right=102., penalty_area_bottom=62., penalty_area_top=18.,
-                     center_width=40., center_length=60., circle_diameter=20.,
-                     corner_diameter=2.186, arc=53.05, invert_y=True, origin_center=False,
+                     center_width=40., center_length=60.,
+                     circle_diameter=20, corner_diameter=2.186,
+                     invert_y=True, origin_center=False,
                      pad_default=4, pad_multiplier=1, aspect_equal=True)
 
 
@@ -489,7 +512,7 @@ def metricasports_dims(pitch_width, pitch_length):
                              six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                              penalty_area_width=40.32, penalty_area_length=16.5,
                              circle_diameter=18.3, corner_diameter=2., goal_length=2.,
-                             goal_width=7.32, arc=None, invert_y=True, origin_center=False,
+                             goal_width=7.32, invert_y=True, origin_center=False,
                              pad_default=0.04, pad_multiplier=1, aspect_equal=False)
 
 
@@ -501,7 +524,7 @@ def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
                               six_yard_top=9.16, penalty_spot_distance=11.,
                               penalty_area_width=40.32, penalty_area_length=16.5,
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
-                              center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
+                              center_length=0., circle_diameter=18.3, corner_diameter=2.,
                               invert_y=False, origin_center=True,
                               pad_default=4, pad_multiplier=1, aspect_equal=True)
 
@@ -515,7 +538,7 @@ def tracab_dims(pitch_width, pitch_length):
                               penalty_area_width=4032., penalty_area_length=1650.,
                               penalty_area_bottom=-2016., penalty_area_top=2016.,
                               center_width=0., center_length=0., circle_diameter=1830.,
-                              corner_diameter=200., arc=53.05, invert_y=False, origin_center=True,
+                              corner_diameter=200., invert_y=False, origin_center=True,
                               pad_default=4, pad_multiplier=100, aspect_equal=True)
 
 
@@ -527,7 +550,7 @@ def impect_dims():
                               six_yard_top=9.16, penalty_spot_distance=11.,
                               penalty_area_width=40.32, penalty_area_length=16.5,
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
-                              center_length=0., circle_diameter=18.3, corner_diameter=2., arc=53.05,
+                              center_length=0., circle_diameter=18.3, corner_diameter=2.,
                               invert_y=False, origin_center=True,
                               pad_default=4, pad_multiplier=1, aspect_equal=True)
 
@@ -538,7 +561,7 @@ def custom_dims(pitch_width, pitch_length):
                       pitch_length=pitch_length, pitch_width=pitch_width, six_yard_width=18.32,
                       six_yard_length=5.5, penalty_area_width=40.32, penalty_spot_distance=11.,
                       penalty_area_length=16.5, circle_diameter=18.3, corner_diameter=2.,
-                      goal_length=2., goal_width=7.32, arc=53.05, invert_y=False,
+                      goal_length=2., goal_width=7.32, invert_y=False,
                       origin_center=False,
                       pad_default=4, pad_multiplier=1, aspect_equal=True)
 
@@ -570,7 +593,7 @@ def center_scale_dims(pitch_width, pitch_length, width=2, length=2, invert_y=Fal
                            six_yard_width=18.32, six_yard_length=5.5, penalty_spot_distance=11.,
                            penalty_area_width=40.32, penalty_area_length=16.5,
                            circle_diameter=18.3, corner_diameter=2., goal_length=2.,
-                           goal_width=7.32, arc=None, invert_y=invert_y, origin_center=True,
+                           goal_width=7.32, invert_y=invert_y, origin_center=True,
                            pad_default=0.04 * width, pad_multiplier=1, aspect_equal=False)
 
 
@@ -614,3 +637,140 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     if pitch_type == 'impect':
         return impect_dims()
     return custom_dims(pitch_width, pitch_length)
+
+
+class Standardizer:
+    """ Convert from one set of coordinates to another.
+
+    Parameters
+    ----------
+    pitch_from, pitch_to: str or subclass of dimensions.BaseDims, default 'statsbomb'
+        The pitch to convert the coordinates from (pitch_from) and to (pitch_to).
+        The supported pitch types are: 'opta', 'statsbomb', 'tracab',
+        'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner', 'secondspectrum'
+        and 'impect'. Alternatively, you can pass a custom dimension
+        object by creating a subclass of dimensions.BaseDims.
+    length_from, length_to : float, default None
+        The pitch length in meters. Only used for the 'tracab' and 'metricasports',
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type.
+    width_from, width_to : float, default None
+        The pitch width in meters. Only used for the 'tracab' and 'metricasports',
+        'skillcorner', 'secondspectrum' and 'custom' pitch_type
+
+    Examples
+    --------
+    >>> from mplsoccer import Standardizer
+    >>> standard = Standardizer(pitch_from='statsbomb', pitch_to='custom',
+    ...                         length_to=105, width_to=68)
+    >>> x = [20, 30]
+    >>> y = [50, 80]
+    >>> x_std, y_std = standard.transform(x, y)
+
+    """
+
+    def __init__(self, pitch_from, pitch_to, length_from=None,
+                 width_from=None, length_to=None, width_to=None):
+
+        if (pitch_from not in valid and
+            not issubclass(type(pitch_from), BaseDims)
+           ):
+            raise TypeError(f'Invalid argument: pitch_from should be in {valid}')
+
+        if (pitch_to not in valid and
+            not issubclass(type(pitch_to), BaseDims)
+           ):
+            raise TypeError(f'Invalid argument: pitch_to should be in {valid}')
+
+        if (length_from is None or width_from is None) and pitch_from in size_varies:
+            raise TypeError("Invalid argument: width_from and length_from must be specified.")
+
+        if (length_to is None or width_to is None) and pitch_to in size_varies:
+            raise TypeError("Invalid argument: width_to and length_to must be specified.")
+
+        self.pitch_from = pitch_from
+        self.pitch_to = pitch_to
+        self.length_from = length_from
+        self.width_from = width_from
+        self.length_to = length_to
+        self.width_to = width_to
+
+        if issubclass(type(pitch_from), BaseDims):
+            self.dim_from = pitch_from
+        else:
+            self.dim_from = create_pitch_dims(pitch_type=pitch_from,
+                                              pitch_length=length_from,
+                                              pitch_width=width_from)
+
+        if issubclass(type(pitch_to), BaseDims):
+            self.dim_to = pitch_to
+        else:
+            self.dim_to = create_pitch_dims(pitch_type=pitch_to,
+                                            pitch_length=length_to,
+                                            pitch_width=width_to)
+
+    def transform(self, x, y, reverse=False):
+        """ Transform the coordinates.
+
+        Parameters
+        ----------
+        x, y : array-like or scalar.
+            Commonly, these parameters are 1D arrays.
+        reverse : bool, default False
+            If reverse=True then reverse the transform. Therefore, the coordinates
+            are converted from pitch_to to pitch_from.
+
+        Returns
+        ----------
+        x_standardized, y_standardized : np.array 1d
+            The coordinates standardized in pitch_to coordinates (or pitch_from if reverse=True).
+        """
+        # to numpy arrays
+        x = np.asarray(x)
+        y = np.asarray(y)
+
+        if reverse:
+            dim_from, dim_to = self.dim_to, self.dim_from
+        else:
+            dim_from, dim_to = self.dim_from, self.dim_to
+
+        # clip outside to pitch extents
+        x = x.clip(min=dim_from.left, max=dim_from.right)
+        y = y.clip(min=dim_from.pitch_extent[2], max=dim_from.pitch_extent[3])
+
+        # for inverted axis flip the coordinates
+        if dim_from.invert_y:
+            y = dim_from.bottom - y
+
+        x_standardized = self._standardize(dim_from.x_markings_sorted,
+                                           dim_to.x_markings_sorted, x)
+        y_standardized = self._standardize(dim_from.y_markings_sorted,
+                                           dim_to.y_markings_sorted, y)
+
+        # for inverted axis flip the coordinates
+        if dim_to.invert_y:
+            y_standardized = dim_to.bottom - y_standardized
+
+        return x_standardized, y_standardized
+
+    @staticmethod
+    def _standardize(markings_from, markings_to, coordinate):
+        """" Helper method to standardize the data"""
+        # to deal with nans set nans to zero temporarily
+        mask_nan = np.isnan(coordinate)
+        coordinate[mask_nan] = 0
+        pos = np.searchsorted(markings_from, coordinate)
+        low_from = markings_from[pos - 1]
+        high_from = markings_from[pos]
+        proportion_of_way_between = (coordinate - low_from) / (high_from - low_from)
+        low_to = markings_to[pos - 1]
+        high_to = markings_to[pos]
+        standardized_coordinate = low_to + ((high_to - low_to) * proportion_of_way_between)
+        # then set nans back to nan
+        standardized_coordinate[mask_nan] = np.nan
+        return standardized_coordinate
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'pitch_from={self.pitch_from}, pitch_to={self.pitch_to}, '
+                f'length_from={self.length_from}, width_from={self.width_from}, '
+                f'length_to={self.length_to}, width_to={self.width_to})')

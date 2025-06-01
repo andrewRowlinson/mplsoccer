@@ -13,7 +13,7 @@ import seaborn as sns
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon, Wedge
 
-from mplsoccer.utils import set_visible, validate_ax
+from .utils import set_visible, validate_ax
 
 __all__ = ['Radar']
 

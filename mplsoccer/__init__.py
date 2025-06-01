@@ -2,10 +2,13 @@
 from mplsoccer import Pitch."""
 
 from .__about__ import __version__
-from .statsbomb import Sbopen, Sbapi,  Sblocal
+from .soccer.statsbomb import Sbopen, Sbapi,  Sblocal
+from .soccer.markers import *
+from .soccer.dimensions import Standardizer
 from .cm import *
 from .linecollection import *
-from .pitch import *
+from .soccer.pitch import *
+from .basketball.pitch import *
 from .quiver import *
 from .radar_chart import *
 from .scatterutils import *
