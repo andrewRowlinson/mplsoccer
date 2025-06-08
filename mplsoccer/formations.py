@@ -170,10 +170,10 @@ class Formation:
         """ Create formations from the player positions."""
         self.formations = {
             '442': [Position('GK', self.position_line5.GK, statsbomb=[1], opta=1, wyscout='gk'),
-                    Position('RB', self.position_line5.RB, statsbomb=[2], opta=2, wyscout='rb'),
-                    Position('RCB', self.position_line5.RCB, statsbomb=[3], opta=5, wyscout='rcb'),
-                    Position('LCB', self.position_line5.LCB, statsbomb=[5], opta=6, wyscout='lcb'),
-                    Position('LB', self.position_line5.LB, statsbomb=[6], opta=3, wyscout='lb'),
+                    Position('RB', self.position_line4.RB, statsbomb=[2], opta=2, wyscout='rb'),
+                    Position('RCB', self.position_line4.RCB, statsbomb=[3], opta=5, wyscout='rcb'),
+                    Position('LCB', self.position_line4.LCB, statsbomb=[5], opta=6, wyscout='lcb'),
+                    Position('LB', self.position_line4.LB, statsbomb=[6], opta=3, wyscout='lb'),
                     Position('RM', self.position_line4.RM, statsbomb=[12, 17], opta=7,
                              wyscout='rw'),
                     Position('RCM', self.position_line4.RCM, statsbomb=[13, 9], opta=4,
