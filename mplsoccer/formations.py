@@ -350,7 +350,7 @@ class Formation:
                     Position('RCF', self.position_line4.RCF, statsbomb=[22], opta=10, wyscout='ss'),
                     Position('LCF', self.position_line4.LCF, statsbomb=[24], opta=9, wyscout='cf'),
                     ],
-            '352flat': [Position('GK', self.position_line5.GK, statsbomb=[1], opta=1, wyscout='gk'),
+            '532flat': [Position('GK', self.position_line5.GK, statsbomb=[1], opta=1, wyscout='gk'),
                     Position('RCB', self.position_line5.RCB, statsbomb=[3], opta=6, wyscout='rcb3'),
                     Position('CB', self.position_line5.CB, statsbomb=[4], opta=5, wyscout='cb'),
                     Position('LCB', self.position_line5.LCB, statsbomb=[5], opta=4, wyscout='lcb3'),
@@ -807,7 +807,7 @@ class Formation:
                       Position('RCF', self.position_line5.RCF, statsbomb=[22]),
                       Position('LCF', self.position_line5.LCF, statsbomb=[24]),
                       ],
-            '32122flat': [Position('GK', self.position_line5.GK, statsbomb=[1]),
+            '3222': [Position('GK', self.position_line5.GK, statsbomb=[1]),
                       Position('RCB', self.position_line5.RCB, statsbomb=[3]),
                       Position('CB', self.position_line5.CB, statsbomb=[4]),
                       Position('LCB', self.position_line5.LCB, statsbomb=[5]),
@@ -1104,3 +1104,4 @@ class Formation:
                     Position('ST', self.position_line5.ST),
                     ]
         }
+
