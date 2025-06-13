@@ -1,3 +1,15 @@
+:rocket: Version 1.5.0
+----------------------
+
+### Added
+* :icecream: Adds 15 formations: `532flat`, `343flat`, `3511flat`, \
+`3421flat`, `3412flat`, `3322`, `1234`, `1324`, `1432`, `1423`, \
+ `2422`, `2413`, `2431`, `2332`, and `2233`.
+
+### Changes
+* :x: Changes two formations `541` (wing backs changed to flat back 5) \
+and `541` (center attacking midfielders changed to center forwards).
+
 :rocket: Version 1.4.0
 ----------------------
 
