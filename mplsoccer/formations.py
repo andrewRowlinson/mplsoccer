@@ -807,7 +807,7 @@ class Formation:
                       Position('RCF', self.position_line5.RCF, statsbomb=[22]),
                       Position('LCF', self.position_line5.LCF, statsbomb=[24]),
                       ],
-            '3222': [Position('GK', self.position_line5.GK, statsbomb=[1]),
+            '3322': [Position('GK', self.position_line5.GK, statsbomb=[1]),
                       Position('RCB', self.position_line5.RCB, statsbomb=[3]),
                       Position('CB', self.position_line5.CB, statsbomb=[4]),
                       Position('LCB', self.position_line5.LCB, statsbomb=[5]),
