@@ -1,7 +1,0 @@
-matplotlib >= 3.6
-numpy
-seaborn
-scipy
-pandas
-requests
-Pillow
