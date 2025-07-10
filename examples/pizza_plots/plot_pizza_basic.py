@@ -352,7 +352,7 @@ percentile_values = [99, 99, 87, 51, 62, 58, 45, 40, 27, 74, 77, 73]
 # actual raw values to display on the chart
 actual_values = [
     41, 39.2, 0.31, 7.8, 3.2,
-    4.1, 2.8, 1.5, 0.9, 
+    4.1, 2.8, 1.5, 0.9,
     13.2, 9.1, 3.8
 ]
 

@@ -100,8 +100,10 @@ class PyPizza:
                 f'other_circle_lw={self.other_circle_lw}, '
                 f'other_circle_ls={self.other_circle_ls}, ')
 
-    def make_pizza(self, values, alt_text_values=None, compare_values=None, alt_text_compare_values=None,
-                   bottom=0.0, figsize=(24, 16), ax=None, param_location=108, slice_colors=None, value_colors=None,
+    def make_pizza(self, values, alt_text_values=None, compare_values=None,
+                   alt_text_compare_values=None,
+                   bottom=0.0, figsize=(24, 16), ax=None, param_location=108,
+                   slice_colors=None, value_colors=None,
                    compare_colors=None, value_bck_colors=None, compare_value_colors=None,
                    compare_value_bck_colors=None, color_blank_space=None, blank_alpha=0.5,
                    kwargs_slices=None, kwargs_compare=None, kwargs_params=None, kwargs_values=None,
@@ -289,7 +291,8 @@ class PyPizza:
 
         if alt_text_compare_values is not None:
             if len(alt_text_compare_values) != len(compare_values):
-                raise Exception("Length of alt_text_compare_values and compare_values are not equal!!!")
+                raise_text = "Length of alt_text_compare_values and compare_values are not equal!!!"
+                raise Exception(raise_text)
             text_compare_values = alt_text_compare_values
         else:
             text_compare_values = compare_values
@@ -473,7 +476,7 @@ class PyPizza:
         range_max = np.maximum(self.min_range, self.max_range)
         values_clipped = np.minimum(np.maximum(values, range_min), range_max)
         proportion = np.abs(values_clipped - self.min_range) / label_range
-        vertices = (proportion * 100)
+        vertices = proportion * 100
 
         return vertices
 

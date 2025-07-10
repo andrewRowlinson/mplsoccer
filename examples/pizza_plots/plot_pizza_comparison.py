@@ -229,8 +229,8 @@ plt.show()
 # Using Alternative Text Values for Comparison
 # --------------------------------------------
 # Sometimes you want to display actual values on the comparison pizza chart
-# while still using percentiles for the visual representation. The 
-# ``alt_text_values`` and ``alt_text_compare_values`` parameters allow you 
+# while still using percentiles for the visual representation. The
+# ``alt_text_values`` and ``alt_text_compare_values`` parameters allow you
 # to specify different values to display on the chart for both players
 # while keeping the percentile calculations for the slice sizes.
 
