@@ -1,3 +1,14 @@
+:rocket: Version 1.5.1
+----------------------
+
+### Added
+* :icecream: Adds alternative text values to PyPizza through the \
+arguments `alt_text_values` and `alt_text_compare_values`. \
+Sometimes you want to display actual values on the pizza chart, while \
+still using percentiles for the visual representation. The additional \
+arguments allow you to specify different values to display on the chart \
+while keeping the percentile calculations for the slice sizes.
+
 :rocket: Version 1.5.0
 ----------------------
 

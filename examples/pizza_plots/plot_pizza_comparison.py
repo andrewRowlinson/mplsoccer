@@ -224,3 +224,102 @@ fig.text(
 )
 
 plt.show()
+
+##############################################################################
+# Using Alternative Text Values for Comparison
+# --------------------------------------------
+# Sometimes you want to display actual values on the comparison pizza chart
+# while still using percentiles for the visual representation. The
+# ``alt_text_values`` and ``alt_text_compare_values`` parameters allow you
+# to specify different values to display on the chart for both players
+# while keeping the percentile calculations for the slice sizes.
+
+# parameter list
+params = [
+    "Non-Penalty Goals", "npxG", "npxG per Shot", "xA",
+    "Open Play\nShot Creating Actions", "\nPenalty Area\nEntries",
+    "Progressive Passes", "Progressive Carries", "Successful Dribbles",
+    "\nTouches\nper Turnover", "pAdj\nPress Regains", "Aerials Won"
+]
+
+# percentile values for visualization (slice sizes)
+lewandowski_percentiles = [99, 99, 87, 51, 62, 58, 45, 40, 27, 74, 77, 73]
+salah_percentiles = [83, 75, 55, 62, 72, 92, 92, 79, 64, 92, 68, 31]
+
+# actual raw values to display for Lewandowski
+lewandowski_actual = [41, 39.2, 0.31, 7.8, 3.2, 4.1, 2.8, 1.5, 0.9, 13.2, 9.1, 3.8]
+
+# actual raw values to display for Salah
+salah_actual = [31, 24.8, 0.21, 8.9, 4.1, 5.8, 5.2, 3.2, 1.8, 16.3, 7.2, 1.9]
+
+# instantiate PyPizza class
+baker = PyPizza(
+    params=params,                  # list of parameters
+    background_color="#EBEBE9",     # background color
+    straight_line_color="#222222",  # color for straight lines
+    straight_line_lw=1,             # linewidth for straight lines
+    last_circle_lw=1,               # linewidth of last circle
+    last_circle_color="#222222",    # color of last circle
+    other_circle_ls="-.",           # linestyle for other circles
+    other_circle_lw=1               # linewidth for other circles
+)
+
+# plot pizza with alternative text values for both players
+fig, ax = baker.make_pizza(
+    lewandowski_percentiles,              # list of percentile values for Player 1
+    compare_values=salah_percentiles,     # percentile values for Player 2
+    alt_text_values=lewandowski_actual,   # actual values to display for Player 1
+    alt_text_compare_values=salah_actual, # actual values to display for Player 2
+    figsize=(8, 8),                       # adjust figsize according to your need
+    kwargs_slices=dict(
+        facecolor="#1A78CF", edgecolor="#222222",
+        zorder=2, linewidth=1
+    ),                                    # values to be used when plotting slices
+    kwargs_compare=dict(
+        facecolor="#FF9300", edgecolor="#222222",
+        zorder=2, linewidth=1,
+    ),
+    kwargs_params=dict(
+        color="#000000", fontsize=12,
+        fontproperties=font_normal.prop, va="center"
+    ),                                    # values to be used when adding parameter
+    kwargs_values=dict(
+        color="#000000", fontsize=11,
+        fontproperties=font_normal.prop, zorder=3,
+        bbox=dict(
+            edgecolor="#000000", facecolor="#1A78CF",
+            boxstyle="round,pad=0.2", lw=1
+        )
+    ),                                    # values to be used when adding parameter-values labels
+    kwargs_compare_values=dict(
+        color="#000000", fontsize=11, fontproperties=font_normal.prop, zorder=3,
+        bbox=dict(edgecolor="#000000", facecolor="#FF9300", boxstyle="round,pad=0.2", lw=1)
+    ),                                    # values to be used when adding parameter-values labels
+)
+
+# add title
+fig_text(
+    0.515, 0.99, "<Robert Lewandowski> vs <Mohamed Salah>", size=17, fig=fig,
+    highlight_textprops=[{"color": '#1A78CF'}, {"color": '#EE8900'}],
+    ha="center", fontproperties=font_bold.prop, color="#000000"
+)
+
+# add subtitle
+fig.text(
+    0.515, 0.942,
+    "Actual Values Displayed | Percentile Rank vs Top-Five League Forwards | Season 2020-21",
+    size=14,
+    ha="center", fontproperties=font_bold.prop, color="#000000"
+)
+
+# add credits
+CREDIT_1 = "data: statsbomb viz fbref"
+CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
+fig.text(
+    0.99, 0.005, f"{CREDIT_1}\n{CREDIT_2}", size=9,
+    fontproperties=font_italic.prop, color="#000000",
+    ha="right"
+)
+
+plt.show()

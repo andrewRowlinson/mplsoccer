@@ -327,3 +327,91 @@ fig.text(
 )
 
 plt.show()
+
+##############################################################################
+# Using Alternative Text Values
+# -----------------------------
+# Sometimes you want to display actual values on the pizza chart while still
+# using percentiles for the visual representation. The ``alt_text_values``
+# parameter allows you to specify different values to display on the chart
+# while keeping the percentile calculations for the slice sizes.
+
+# Let's create an example where we show actual match statistics
+# but calculate percentiles for the visual representation
+
+# parameter list (same as before)
+params = [
+    "Non-Penalty Goals", "npxG", "npxG per Shot", "xA", "Open Play\nShot Creating Actions",
+    "\nPenalty Area\nEntries", "Progressive Passes", "Progressive Carries",
+    "Successful Dribbles", "\nTouches\nper Turnover", "pAdj\nPress Regains", "Aerials Won"
+]
+
+# percentile values for visualization (slice sizes)
+percentile_values = [99, 99, 87, 51, 62, 58, 45, 40, 27, 74, 77, 73]
+
+# actual raw values to display on the chart
+actual_values = [
+    41, 39.2, 0.31, 7.8, 3.2,
+    4.1, 2.8, 1.5, 0.9,
+    13.2, 9.1, 3.8
+]
+
+# instantiate PyPizza class
+baker = PyPizza(
+    params=params,                  # list of parameters
+    straight_line_color="#F2F2F2",  # color for straight lines
+    straight_line_lw=1,             # linewidth for straight lines
+    last_circle_lw=0,               # linewidth of last circle
+    other_circle_lw=0,              # linewidth for other circles
+)
+
+# plot pizza with alternative text values
+fig, ax = baker.make_pizza(
+    percentile_values,               # list of percentile values for slice sizes
+    figsize=(8, 8),                  # adjust figsize according to your need
+    alt_text_values=actual_values,   # actual values to display on chart
+    color_blank_space="same",        # use same color to fill blank space
+    blank_alpha=0.4,                 # alpha for blank-space colors
+    kwargs_slices=dict(
+        facecolor="lightcoral", edgecolor="#F2F2F2",
+        zorder=2, linewidth=1
+    ),                               # values to be used when plotting slices
+    kwargs_params=dict(
+        color="#000000", fontsize=12,
+        fontproperties=font_normal.prop, va="center"
+    ),                               # values to be used when adding parameter
+    kwargs_values=dict(
+        color="#000000", fontsize=11,
+        fontproperties=font_normal.prop, zorder=3,
+        bbox=dict(
+            edgecolor="#000000", facecolor="lightcoral",
+            boxstyle="round,pad=0.2", lw=1
+        )
+    )                                # values to be used when adding parameter-values
+)
+
+# add title
+fig.text(
+    0.515, 0.97, "Robert Lewandowski - FC Bayern Munich", size=18,
+    ha="center", fontproperties=font_bold.prop, color="#000000"
+)
+
+# add subtitle
+fig.text(
+    0.515, 0.942,
+    "Actual Values Displayed | Percentile Rank vs Top-Five League Forwards | Season 2020-21",
+    size=14,
+    ha="center", fontproperties=font_bold.prop, color="#000000"
+)
+
+# add credits
+CREDIT_1 = "data: statsbomb viz fbref"
+CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+
+fig.text(
+    0.99, 0.005, f"{CREDIT_1}\n{CREDIT_2}", size=9,
+    fontproperties=font_italic.prop, color="#000000",
+    ha="right"
+)
+
+plt.show()
