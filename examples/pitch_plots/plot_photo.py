@@ -6,7 +6,7 @@ Photos
 This example shows how to plot photos in your charts.
 """
 
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -21,7 +21,9 @@ plt.style.use('dark_background')
 
 # load the image
 IMAGE_URL = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-image = Image.open(urlopen(IMAGE_URL))
+request = Request(IMAGE_URL)
+request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+image = Image.open(urlopen(request))
 
 ##############################################################################
 # Inset image

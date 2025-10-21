@@ -21,7 +21,7 @@ The formations can be plotted as various options by using the ``kind`` argument:
 * ``kind='text'``
 """
 import math
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 import matplotlib as mpl
 import matplotlib.patheffects as path_effects
@@ -136,7 +136,11 @@ image_urls = {
     # https://en.wikipedia.org/wiki/Samuel_Eto%27o#/media/File:Etoo_Joan_Gamper_Trophy_2008.jpg
     "Samuel Eto'o": 'https://upload.wikimedia.org/wikipedia/commons/7/77/Etoo_Joan_Gamper_Trophy_2008.jpg',
 }
-images = [Image.open(urlopen(url)) for url in starting_xi.player_name.map(image_urls)]
+images = []
+for url in starting_xi.player_name.map(image_urls):
+    request = Request(url)
+    request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+    images.append(Image.open(urlopen(request)))
 
 ##############################################################################
 # Formation of images
@@ -274,7 +278,11 @@ badge_urls = {
     'Reading': 'https://upload.wikimedia.org/wikipedia/en/thumb/1/11/Reading_FC.svg/240px-Reading_FC.svg.png',
     'Arsenal': "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/250px-Arsenal_FC.svg.png",
 }
-image_dict = {team: Image.open(urlopen(url)) for team, url in badge_urls.items()}
+image_dict = {}
+for team, url in badge_urls.items():
+    request = Request(url)
+    request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+    image_dict[team] = Image.open(urlopen(request))
 images = [image_dict[team] for team in totw_player_data.team]
 
 ##############################################################################
@@ -295,12 +303,6 @@ axes['title'].axis('off')
 axes['title'].text(0.5, 0.6, 'WSL Team of the Week', ha='center', va='center', color='white',
                    fontsize=20)
 axes['title'].text(0.5, 0.3, 'Round 9', ha='center', va='center', color='white', fontsize=14)
-
-# plot the league logo using the inset_image method for utils
-LEAGUE_URL = 'https://www.thesportsdb.com/images/media/league/badge/kxo7zf1656519439.png'
-image = Image.open(urlopen(LEAGUE_URL))
-title_image = inset_image(0.9, 0.5, image, height=1, ax=axes['title'])
-
 text_names = pitch.formation('433', kind='text', positions=totw_player_data.position_id,
                              text=totw_player_data.player, ax=axes['pitch'],
                              xoffset=-2,  # offset the player names from the centers

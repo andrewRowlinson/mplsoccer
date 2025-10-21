@@ -5,7 +5,7 @@ FBRef Touches
 
 This example shows how to scrape touches events from FBRef.com and plot them as a heatmap.
 """
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
@@ -43,7 +43,9 @@ df.sort_values(['Att 3rd', 'Def 3rd'], ascending=[True, False], inplace=True)
 # Get Stats Perform's logo and Fonts
 
 SP_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/commons/d/d5/StatsPerform_Logo_Primary_01.png')
-sp_logo = Image.open(urlopen(SP_LOGO_URL))
+request = Request(SP_LOGO_URL)
+request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+sp_logo = Image.open(urlopen(request))
 
 # a FontManager object for using a google font (default Robotto)
 fm = FontManager()

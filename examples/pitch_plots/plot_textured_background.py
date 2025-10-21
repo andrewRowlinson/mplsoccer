@@ -6,7 +6,7 @@ Textured background
 This example shows how to plot a pitch with a textured background behind it.
 """
 
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -19,7 +19,9 @@ from mplsoccer.utils import add_image
 # available at: https://commons.wikimedia.org/wiki/File:ISS-40_Thunderheads_near_Borneo.jpg
 IMAGE_URL = ('https://upload.wikimedia.org/wikipedia/commons/'
              '1/1d/ISS-40_Thunderheads_near_Borneo.jpg')
-image = Image.open(urlopen(IMAGE_URL))
+request = Request(IMAGE_URL)
+request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+image = Image.open(urlopen(request))
 
 pitch = Pitch(pitch_color='None')
 fig, ax = pitch.draw(tight_layout=False)
