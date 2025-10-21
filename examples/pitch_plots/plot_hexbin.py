@@ -6,7 +6,7 @@ Hexbin plot
 This example shows how to plot the location of events occurring in a match
 using hexbins.
 """
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
@@ -51,7 +51,9 @@ robboto_bold = FontManager(URL2)
 
 # Load the StatsBomb logo and Messi picture
 MESSI_URL = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-messi_image = Image.open(urlopen(MESSI_URL))
+request = Request(MESSI_URL)
+request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+messi_image = Image.open(urlopen(request))
 SB_LOGO_URL = ('https://raw.githubusercontent.com/statsbomb/open-data/'
                'master/img/SB%20-%20Icon%20Lockup%20-%20Colour%20positive.png')
 sb_logo = Image.open(urlopen(SB_LOGO_URL))
