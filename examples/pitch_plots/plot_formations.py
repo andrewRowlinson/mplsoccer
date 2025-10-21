@@ -279,7 +279,7 @@ badge_urls = {
     'Arsenal': "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/250px-Arsenal_FC.svg.png",
 }
 image_dict = {}
-for team, url in badge_urls.items()
+for team, url in badge_urls.items():
     request = Request(url)
     request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
     image_dict[team] = Image.open(urlopen(request))
