@@ -19,7 +19,7 @@ the `highlight_text package <https://github.com/znstrider/highlight_text>`_
 by `@danzn1 <https://twitter.com/danzn1>`_.
 """
 
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 import warnings
 
 import cmasher as cmr
@@ -195,13 +195,19 @@ fm_scada = FontManager('https://raw.githubusercontent.com/googlefonts/scada/main
 # these are the property of the respective clubs/ StatsBomb.
 BARCA_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/en/thumb/4/47/'
                   'FC_Barcelona_%28crest%29.svg/142px-FC_Barcelona_%28crest%29.svg.png')
+request_barca = Request(BARCA_LOGO_URL)
+request_barca.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+barca_logo = Image.open(urlopen(request_barca))
+
 DEPORTIVO_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/en/thumb/f/f8/'
                       'Deportivo_Alaves_logo_%282020%29.svg/'
                       '300px-Deportivo_Alaves_logo_%282020%29.svg.png')
+request_deportivo = Request(DEPORTIVO_LOGO_URL)
+request_deportivo.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+deportivo_logo = Image.open(urlopen(request_deportivo))
+
 SB_LOGO_URL = ('https://raw.githubusercontent.com/statsbomb/open-data/'
                'master/img/SB%20-%20Icon%20Lockup%20-%20Colour%20positive.png')
-barca_logo = Image.open(urlopen(BARCA_LOGO_URL))
-deportivo_logo = Image.open(urlopen(DEPORTIVO_LOGO_URL))
 sb_logo = Image.open(urlopen(SB_LOGO_URL))
 
 ##############################################################################
