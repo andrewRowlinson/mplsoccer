@@ -54,7 +54,7 @@ fig, ax = pitch.draw()
 # -------------------------
 # mplsoccer also plots on grids by specifying nrows and ncols.
 # The default is to use
-# tight_layout. See: https://matplotlib.org/stable/tutorials/intermediate/tight_layout_guide.html.
+# tight_layout. See: https://matplotlib.org/stable/users/explain/axes/tight_layout_guide.html.
 
 pitch = Pitch()
 fig, axs = pitch.draw(nrows=2, ncols=3)
@@ -62,7 +62,7 @@ fig, axs = pitch.draw(nrows=2, ncols=3)
 ##############################################################################
 # But you can also use constrained layout
 # by setting ``constrained_layout=True`` and ``tight_layout=False``, which may look better.
-# See: https://matplotlib.org/stable/tutorials/intermediate/constrainedlayout_guide.html.
+# See: https://matplotlib.org/stable/users/explain/axes/constrainedlayout_guide.html.
 
 pitch = Pitch()
 fig, axs = pitch.draw(nrows=2, ncols=3, tight_layout=False, constrained_layout=True)
@@ -191,13 +191,13 @@ pitch.draw(axs[2])
 
 pitch = Pitch(linewidth=3,
               # the size of the penalty and center spots relative to the pitch_length
-              spot_scale=0.01)
+              spot_scale=0.1)
 fig, ax = pitch.draw()
 
 ##############################################################################
 # The center and penalty spots can also be changed to a square to avoid clashes with scatter points.
 
-pitch = Pitch(spot_type='square', spot_scale=0.01)
+pitch = Pitch(spot_type='square', spot_scale=0.1)
 fig, ax = pitch.draw()
 
 ##############################################################################

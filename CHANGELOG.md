@@ -3,6 +3,11 @@
 
 ### Breaking Changes
 * :x: ``dimension`` module moved to ``soccer.dimensions``.
+* :x: ``spot_scale`` argument of ``Pitch`` classes default changed \
+to 0.04 from 0.002. This produces approximately the same size center \
+spots as previously. The spot scale is now set in relation to the \
+center circle, i.e. 4% of the center circle diameter, rather than the \
+previous length of the pitch.
 
 :rocket: Version 1.5.1
 ----------------------
