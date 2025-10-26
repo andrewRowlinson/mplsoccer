@@ -47,8 +47,8 @@ class BasePitchSoccer(BasePitch):
     line_zorder : float, default 0.9
         Set the zorder for the pitch lines (a matplotlib artist).
         Artists with lower zorder values are drawn first.
-    spot_scale : float, default 0.04
-        The size of the penalty and center spots relative to the pitch length.
+    spot_scale : float, default 0.024
+        The size of the penalty and center spots relative to the center circle.
     spot_type : str, default 'circle'
         Whether to display the spots as a 'circle' or 'square'.
     stripe : bool, default False
@@ -114,7 +114,7 @@ class BasePitchSoccer(BasePitch):
     """
     def __init__(self, pitch_type='statsbomb', half=False,
                  pitch_color=None, line_color=None, line_alpha=1, linewidth=2,
-                 linestyle=None, line_zorder=0.9, spot_scale=0.04, spot_type='circle',
+                 linestyle=None, line_zorder=0.9, spot_scale=0.024, spot_type='circle',
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
                  positional=False, positional_zorder=0.8, positional_linewidth=None,
