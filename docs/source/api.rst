@@ -4,9 +4,9 @@ API
 .. toctree::
    :maxdepth: 2
 
-   mplsoccer.pitch
+   mplsoccer.soccer.pitch
    mplsoccer.radar_chart
-   mplsoccer.statsbomb
+   mplsoccer.soccer.statsbomb
    mplsoccer.bumpy_chart
    mplsoccer.py_pizza
    mplsoccer.utils

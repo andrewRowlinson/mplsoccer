@@ -177,7 +177,7 @@ plt.show()  # If you are using a Jupyter notebook you do not need this line
 
 ##############################################################################
 # Alternative Passing Network Theme
-# --------------
+# ---------------------------------
 #
 # The theme below is inspired by `@SergioMinuto90 <https://twitter.com/SergioMinuto90>`_ 
 # and his `friends of tracking tutorial on passing networks <https://github.com/Friends-of-Tracking-Data-FoTD/passing-networks-in-python>`_.

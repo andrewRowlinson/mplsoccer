@@ -10,8 +10,8 @@ from matplotlib.colors import to_rgba_array
 from matplotlib.legend import Legend
 from matplotlib.legend_handler import HandlerLineCollection
 
-from mplsoccer.cm import create_transparent_cmap
-from mplsoccer.utils import validate_ax
+from .cm import create_transparent_cmap
+from .utils import validate_ax
 
 __all__ = ['lines']
 

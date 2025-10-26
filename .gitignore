@@ -160,3 +160,6 @@ desktop.ini
 data/
 
 *idea/
+
+#ignore uv.lock
+uv.lock

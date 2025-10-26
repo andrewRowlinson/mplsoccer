@@ -25,7 +25,7 @@ Plot a StatsBomb pitch:
 
 .. code-block:: python
 
-    from mplsoccer.pitch import Pitch
+    from mplsoccer import Pitch
     pitch = Pitch(pitch_color='grass', line_color='white', stripe=True)
     fig, ax = pitch.draw()
 	
@@ -78,7 +78,7 @@ mplsoccer was inspired by:
 - `Peter McKeever <https://petermckeever.com/>`_ heavily inspired the API design
 - `ggsoccer <https://github.com/Torvaney/ggsoccer>`_ influenced the design and Standardizer
 - `lastrow's <https://twitter.com/lastrowview>`_ legendary animations
-- `fcrstats' <https://twitter.com/FC_rstats>`_ tutorials for using football data
+- `fcrstats' <https://github.com/FCrSTATS>`_ tutorials for using football data
 - `fcpython's <https://fcpython.com/>`_ Python tutorials for using football data
 - `Karun Singh's <https://twitter.com/karun1710>`_ expected threat (xT) visualizations
 - `StatsBomb's <https://statsbomb.com/>`_ great visual design and free open-data

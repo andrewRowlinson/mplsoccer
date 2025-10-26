@@ -12,7 +12,7 @@ The current supported pitch types are printed below.
 import pprint
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
-from mplsoccer.dimensions import valid
+from mplsoccer.soccer.dimensions import valid
 pprint.pp(valid)
 
 ##############################################################################
@@ -119,7 +119,7 @@ fig, ax = pitch.draw()
 # You can also change the ``width`` and ``length`` arguments to get different pitch limits.
 # The visual layout of the pitch is controlled by the ``pitch_width`` and ``pitch_length``
 # arguments.
-from mplsoccer.dimensions import center_scale_dims
+from mplsoccer.soccer.dimensions import center_scale_dims
 from mplsoccer import Pitch
 dim = center_scale_dims(pitch_width=68, pitch_length=105,
                         width=2, length=2, invert_y=False)
@@ -130,7 +130,7 @@ fig, ax = pitch.draw()
 # Other custom dimensions
 # -----------------------
 # Aditionally, you can create your own arbitrary dimensions.
-# See the `mplsoccer.dimensions module <https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/mplsoccer/dimensions.py>`_
+# See the `mplsoccer.soccer.dimensions module
 # for examples of how to define the dimensions. 
 # The custom dimensions object must be a subclass of ``mplsoccer.dimensions.BaseDims``
 # and can then be passed to the ``pitch_type`` argument.

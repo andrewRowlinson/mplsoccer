@@ -1,5 +1,5 @@
 mplsoccer.utils module
-==========================
+======================
 
 .. automodule:: mplsoccer.utils
    :members:
