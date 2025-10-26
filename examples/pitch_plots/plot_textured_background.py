@@ -11,7 +11,7 @@ from urllib.request import urlopen, Request
 from PIL import Image
 import matplotlib.pyplot as plt
 
-from mplsoccer.pitch import Pitch
+from mplsoccer import Pitch
 from mplsoccer.utils import add_image
 
 # opening the background image
