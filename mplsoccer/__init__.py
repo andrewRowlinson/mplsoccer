@@ -4,7 +4,7 @@ from mplsoccer import Pitch."""
 from .__about__ import __version__
 from .soccer.statsbomb import Sbopen, Sbapi,  Sblocal
 from .soccer.markers import *
-from .soccer.dimensions import Standardidizer
+from .soccer.dimensions import Standardizer
 from .soccer.pitch import *
 from .cm import *
 from .linecollection import *
