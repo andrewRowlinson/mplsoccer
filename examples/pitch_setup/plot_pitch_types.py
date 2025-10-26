@@ -1,5 +1,4 @@
-### Breaking Changes
-* :x: ``dimension`` module moved to ``soccer.dimensions``"""
+"""
 ===========
 Pitch Types
 ===========
@@ -131,7 +130,7 @@ fig, ax = pitch.draw()
 # Other custom dimensions
 # -----------------------
 # Aditionally, you can create your own arbitrary dimensions.
-# See the `mplsoccer.dimensions module <https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/mplsoccer/dimensions.py>`_
+# See the `mplsoccer.soccer.dimensions module
 # for examples of how to define the dimensions. 
 # The custom dimensions object must be a subclass of ``mplsoccer.dimensions.BaseDims``
 # and can then be passed to the ``pitch_type`` argument.

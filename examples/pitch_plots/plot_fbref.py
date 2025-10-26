@@ -15,16 +15,24 @@ from PIL import Image
 from mplsoccer import Pitch, FontManager, add_image
 
 ##############################################################################
-# Scrape the data via a link to a specific table.
-# To get the link for a different league,
-# find the table you want from the website. Then click "Share & more" and copy the link from
-# the option "Modify & Share Table". Then "click url for sharing" and get the table as a url.
-URL = 'https://fbref.com/en/share/LdLSY'
-df = pd.read_html(URL)[0]
-# select a subset of the columns (Squad and touches columns)
-df = df[['Unnamed: 0_level_0', 'Touches']].copy()
-df.columns = df.columns.droplevel()  # drop the top-level of the multi-index
-df = df.drop(["Def Pen", "Att Pen", "Live"], axis = 1) # drop the def pen, att pen, live touches column
+# For illustrative purposes we are showing some data from the 2024-25 Bundesliga season.
+# The data is from the fantastic resource https://fbref.com/.
+df = pd.DataFrame({'Squad': ['Augsburg', 'Bayern Munich', 'Bochum',
+                             'Dortmund', 'Eint Frankfurt', 'Freiburg',
+                             'Gladbach', 'Heidenheim', 'Hoffenheim',
+                             'Holstein Kiel', 'Leverkusen', 'Mainz 05',
+                             'RB Leipzig', 'St. Pauli', 'Stuttgart',
+                             'Union Berlin', 'Werder Bremen', 'Wolfsburg'],
+                   'Def 3rd': [6126, 6130, 6257, 6972, 7332, 6656, 8283,
+                               7356, 6644, 7924, 5876, 6705, 6793, 6816,
+                               6719, 6285, 7701, 6603],
+                   'Mid 3rd': [8404, 14825, 8021, 11525, 9549, 9166, 9361,
+                               7915, 9219, 7386, 12171, 9124, 10962, 8232,
+                               11421, 7721, 9226, 8190],
+                   'Att 3rd': [4701, 8664, 4198, 5921, 4619, 4504, 4035,
+                               3789, 4904, 3022, 7188, 5015, 4856, 4244,
+                               5572, 3997, 4721, 4491],
+                  })
 
 ##############################################################################
 # Get the league average percentages
@@ -115,7 +123,7 @@ add_image(sp_logo, fig,
           left=axs['endnote'].get_position().x0,
           bottom=axs['endnote'].get_position().y0,
           height=axs['endnote'].get_position().height)
-title = axs['title'].text(0.5, 0.5, 'Touches events %, Bundesliga, 2022/23',
+title = axs['title'].text(0.5, 0.5, 'Touches events %, Bundesliga, 2024/25',
                           ha='center', va='center', fontsize=70)
 
 ##############################################################################
@@ -172,7 +180,7 @@ add_image(sp_logo, fig,
           left=axs['endnote'].get_position().x0,
           bottom=axs['endnote'].get_position().y0,
           height=axs['endnote'].get_position().height)
-TITLE = 'Touches events, percentage point difference\nfrom the Bundesliga average 2022/23'
+TITLE = 'Touches events, percentage point difference\nfrom the Bundesliga average 2024/25'
 title = axs['title'].text(0.5, 0.5, TITLE, ha='center', va='center', fontsize=60)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line
