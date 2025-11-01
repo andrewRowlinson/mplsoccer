@@ -7,7 +7,7 @@ name = "mplsoccer"
 description = 'Football pitch plotting library for matplotlib'
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = [
   "football",
