@@ -1,7 +1,15 @@
+:rocket: Version 1.6.1
+----------------------
+
+### Changes
+* Updated the minimum Python version to 3.10 as version 1.6.0 imports  \
+'KW_ONLY' from 'dataclasses, which is not available in python 3.9.
+
 :rocket: Version 1.6.0
 ----------------------
 
 ### Breaking Changes
+* Requires Python 3.10 or above.
 * :x: ``dimension`` module moved to ``soccer.dimensions``.
 * :x: ``spot_scale`` argument of ``Pitch`` classes default changed \
 to 0.024 from 0.002. This produces approximately the same size center \
