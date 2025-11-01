@@ -135,7 +135,6 @@ class BasePitchSoccer(BasePitch):
                          pitch_color=pitch_color,
                          line_color=line_color, line_alpha=line_alpha, linewidth=linewidth, linestyle=linestyle, line_zorder=line_zorder,
                          pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom, pad_top=pad_top,
-                         shade_middle=shade_middle, shade_color=shade_color, shade_alpha=shade_alpha, shade_zorder=shade_zorder,
                          pitch_length=pitch_length, pitch_width=pitch_width,
                          axis=axis, label=label, tick=tick,
                          )
@@ -156,6 +155,10 @@ class BasePitchSoccer(BasePitch):
         self.goal_alpha = goal_alpha
         self.goal_linestyle = goal_linestyle
         self.corner_arcs = corner_arcs
+        self.shade_middle = shade_middle
+        self.shade_color = shade_color
+        self.shade_alpha = shade_alpha
+        self.shade_zorder = shade_zorder
 
         # data checks
         self._validation_checks()

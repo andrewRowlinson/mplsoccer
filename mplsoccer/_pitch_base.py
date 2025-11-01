@@ -28,7 +28,6 @@ class BasePitch(ABC):
                  pitch_color=None,
                  line_color=None, line_alpha=1, linewidth=2, linestyle=None, line_zorder=0.9,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
-                 shade_middle=False, shade_color='#f2f2f2', shade_alpha=1, shade_zorder=0.7,
                  pitch_length=None, pitch_width=None,
                  axis=False, label=False, tick=False,
                  ):
@@ -50,10 +49,6 @@ class BasePitch(ABC):
         self.pad_right = pad_right
         self.pad_bottom = pad_bottom
         self.pad_top = pad_top
-        self.shade_middle = shade_middle
-        self.shade_color = shade_color
-        self.shade_alpha = shade_alpha
-        self.shade_zorder = shade_zorder
         self.pitch_length = pitch_length
         self.pitch_width = pitch_width
         self.axis = axis

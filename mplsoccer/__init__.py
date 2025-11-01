@@ -6,6 +6,7 @@ from .soccer.statsbomb import Sbopen, Sbapi,  Sblocal
 from .soccer.markers import *
 from .soccer.dimensions import Standardizer
 from .soccer.pitch import *
+from .american_football.pitch import *
 from .cm import *
 from .linecollection import *
 from .quiver import *

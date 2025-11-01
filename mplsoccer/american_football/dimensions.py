@@ -1,3 +1,5 @@
+""" American Football pitch dimensions. """
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -24,7 +26,8 @@ class BaseAmericanFootballDims(BaseDims):
     hash_mark_bottom: float
     hash_mark_top: float
     hash_mark_size: float
-    goal_width: Optional[float] = None
+    goal_bottom: float
+    goal_top: float
     number_marks: Optional[np.array] = None
     yard_lines_major: Optional[np.array] = None
     yard_lines_minor: Optional[np.array] = None
@@ -50,7 +53,9 @@ def statsbomb_dims():
                                     aspect=1, aspect_equal=True,
                                     pad_default=4, pad_multiplier=1,
                                     center_width=26.67, center_length=50,
-                                    goal_line_left=0, goal_line_right=100, goal_width=18.5/3,
+                                    goal_line_left=0, goal_line_right=100,
+                                    goal_bottom=26.67+18.5/3,
+                                    goal_top=26.67-18.5/3,
                                     yard_number_top=10, yard_number_bottom=43.33,
                                     hash_mark_bottom=53.33-70.75/3, hash_mark_top=70.75/3,
                                     yard_line_minor_size=2/3, hash_mark_size=2/3,
