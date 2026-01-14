@@ -5,6 +5,8 @@ Author: Anmol_Durgapal(@slothfulwave612)
 The idea is inspired by Tom Worville, Football Slices, Soma Zero FC and Soumyajit Bose.
 """
 
+import textwrap
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -107,7 +109,10 @@ class PyPizza:
                    compare_colors=None, value_bck_colors=None, compare_value_colors=None,
                    compare_value_bck_colors=None, color_blank_space=None, blank_alpha=0.5,
                    kwargs_slices=None, kwargs_compare=None, kwargs_params=None, kwargs_values=None,
-                   kwargs_compare_values=None):
+                   kwargs_compare_values=None,
+                   wrap=None, curved_params=False, curved_line_spacing=None,
+                   curved_letter_spacing=0, curved_align="center",
+                   curved_direction="auto", curved_radii="outward"):
         """To make the pizza plot.
 
             Parameters
@@ -159,6 +164,23 @@ class PyPizza:
                               for adding values.
             **kwargs_compare_values : All keyword arguments are passed on to axes.Axes.text
                               for adding comparison-values.
+            wrap : int, default None
+                If not None, wrap the parameter labels so that every line is at most ``wrap``
+                characters long (long words are not broken).
+            curved_params : bool, default False
+                If True, draw the parameter labels as curved text along the pizza perimeter.
+            curved_line_spacing : float, default None
+                The spacing between wrapped lines in points (only used when ``curved_params=True``).
+                If None, defaults to ``fontsize * linespacing``.
+            curved_letter_spacing : float, default 0
+                Extra spacing between characters in points (only used when ``curved_params=True``).
+            curved_align : {'center', 'start', 'end'}, default 'center'
+                How to align the curved label relative to the slice angle.
+            curved_direction : {'auto', 'clockwise', 'counterclockwise'}, default 'auto'
+                Direction to lay out characters along the arc. ``'auto'`` flips direction for the
+                lower half so labels stay readable.
+            curved_radii : {'outward', 'center'}, default 'outward'
+                How to position wrapped lines radially (only used when ``curved_params=True``).
 
             Returns
             -------
@@ -303,7 +325,12 @@ class PyPizza:
             temp_values=temp_values, temp_compare_values=temp_compare_values,
             compare_value_bck_colors=compare_value_bck_colors,
             kwargs_params=kwargs_params, kwargs_values=kwargs_values,
-            kwargs_compare_values=kwargs_compare_values
+            kwargs_compare_values=kwargs_compare_values,
+            wrap=wrap, curved_params=curved_params,
+            curved_line_spacing=curved_line_spacing,
+            curved_letter_spacing=curved_letter_spacing,
+            curved_align=curved_align, curved_direction=curved_direction,
+            curved_radii=curved_radii
         )
 
         if return_fig_ax:
@@ -368,7 +395,10 @@ class PyPizza:
                     value_colors=None, value_bck_colors=None,
                     compare_values=None, compare_value_colors=None,
                     compare_value_bck_colors=None,
-                    kwargs_params=None, kwargs_values=None, kwargs_compare_values=None):
+                    kwargs_params=None, kwargs_values=None, kwargs_compare_values=None,
+                    wrap=None, curved_params=False, curved_line_spacing=None,
+                    curved_letter_spacing=0, curved_align="center",
+                    curved_direction="auto", curved_radii="outward"):
         """To make the pizza plot.
 
             Parameters
@@ -425,15 +455,38 @@ class PyPizza:
         rotation[mask_flip_label] = rotation[mask_flip_label] + np.pi
         rotation_degrees = -np.rad2deg(rotation)
 
-        # plot params
-        for x, rotation, label in zip(self.theta, rotation_degrees, self.params):
-            temp_text = ax.text(
-                x, param_location, label,
-                rotation=rotation, rotation_mode="anchor",
-                ha="center", **kwargs_params
-            )
+        if curved_params:
+            from .curved_text import PolarCurvedText
 
-            self.param_texts.append(temp_text)
+            for x, label in zip(self.theta, self.params):
+                if wrap is not None:
+                    label = "\n".join(textwrap.wrap(label, wrap, break_long_words=False))
+                curved_text = PolarCurvedText(
+                    ax=ax,
+                    text=label,
+                    radius=param_location,
+                    theta=x,
+                    align=curved_align,
+                    direction=curved_direction,
+                    radii=curved_radii,
+                    line_spacing=curved_line_spacing,
+                    letter_spacing=curved_letter_spacing,
+                    **kwargs_params,
+                )
+                ax.add_artist(curved_text)
+                self.param_texts.append(curved_text)
+        else:
+            # plot params
+            for x, rotation, label in zip(self.theta, rotation_degrees, self.params):
+                if wrap is not None:
+                    label = "\n".join(textwrap.wrap(label, wrap, break_long_words=False))
+                temp_text = ax.text(
+                    x, param_location, label,
+                    rotation=rotation, rotation_mode="anchor",
+                    ha="center", **kwargs_params
+                )
+
+                self.param_texts.append(temp_text)
 
         # plot values
         for i, (x, value, rotation) in enumerate(zip(self.theta, values, rotation_degrees)):
