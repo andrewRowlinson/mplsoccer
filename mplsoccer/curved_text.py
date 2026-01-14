@@ -126,6 +126,7 @@ class CurvedText(Artist):
                 artist.set_usetex(False)
                 artist.set_figure(self.figure)
                 artist.axes = self.axes
+                assert self.axes is not None
                 artist.set_transform(self.axes.transData)
                 artist.set_horizontalalignment("center")
                 artist.set_verticalalignment("center")
@@ -152,6 +153,7 @@ class CurvedText(Artist):
             return
 
         center_x, center_y = self._center
+        assert self.axes is not None
         center_px = self.axes.transData.transform((center_x, center_y))
         edge_px = self.axes.transData.transform((center_x + radius_data, center_y))
         radius_px = float(np.hypot(*(edge_px - center_px)))
