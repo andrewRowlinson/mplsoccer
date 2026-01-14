@@ -102,7 +102,8 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop)  # draw the range labels
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
-                                       fontproperties=robotto_thin.prop)  # draw the param labels
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # draw the (curved) param labels
 
 ##############################################################################
 # Adding lines from the center to the edge

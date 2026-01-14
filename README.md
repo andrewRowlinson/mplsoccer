@@ -54,6 +54,8 @@ radar_poly, rings, vertices = radar.draw_radar(values, ax=ax,
                                                kwargs_rings={'facecolor': '#d80499', 'alpha': 0.6})
 range_labels = radar.draw_range_labels(ax=ax)
 param_labels = radar.draw_param_labels(ax=ax)
+# curved labels (optional)
+# param_labels = radar.draw_param_labels(ax=ax, curved=True)
 plt.show()
 ```
 ![mplsoccer radar](https://raw.githubusercontent.com/andrewRowlinson/mplsoccer/main/docs/quick_start_radar.png)

@@ -468,7 +468,10 @@ class Radar:
             label_list.append(text)
         return label_list
 
-    def draw_param_labels(self, ax=None, wrap=15, offset=1, **kwargs):
+    def draw_param_labels(self, ax=None, wrap=15, offset=1, *, curved=False,
+                          curved_line_spacing=None, curved_letter_spacing=0,
+                          curved_align='center', curved_direction='auto',
+                          curved_radii='outward', **kwargs):
         """ Draw the parameter labels (e.g. 'Key Passes') on the edge of the chart.
 
         Parameters
@@ -480,11 +483,25 @@ class Radar:
         wrap : int, default 15
             Wrap the labels so that every line is at most ``wrap`` characters long
             (long words are not broken).
+        curved : bool, default False
+            If True, draw curved labels following the radar perimeter.
+        curved_line_spacing : float, default None
+            The spacing between wrapped lines in points (only used when ``curved=True``).
+            If None, defaults to ``fontsize * linespacing``.
+        curved_letter_spacing : float, default 0
+            Extra spacing between characters in points (only used when ``curved=True``).
+        curved_align : {'center', 'start', 'end'}, default 'center'
+            How to align the curved label relative to the spoke angle.
+        curved_direction : {'auto', 'clockwise', 'counterclockwise'}, default 'auto'
+            Direction to lay out characters along the arc. ``'auto'`` flips direction for the
+            lower half so labels stay readable.
+        curved_radii : {'outward', 'center'}, default 'outward'
+            How to position wrapped lines radially (only used when ``curved=True``).
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text.
 
         Returns
         -------
-        label_list : list of matplotlib.text.Text
+        label_list : list of matplotlib.text.Text or list of mplsoccer.curved_text.CurvedText
 
         Examples
         --------
@@ -507,9 +524,35 @@ class Radar:
         # default places one-and-a-half units (offset) away from the edge of the last circle
 
         param_radius = self.outer_ring + offset
+        label_list = []
+
+        if curved:
+            from .curved_text import CurvedText
+
+            # use the un-flipped spoke angles (theta=0 at top, increasing clockwise)
+            thetas = (2 * np.pi / self.num_labels) * np.arange(self.num_labels)
+
+            for idx, label in enumerate(self.params):
+                if wrap is not None:
+                    label = '\n'.join(textwrap.wrap(label, wrap, break_long_words=False))
+                curved_text = CurvedText(
+                    ax=ax,
+                    text=label,
+                    radius=param_radius,
+                    theta=thetas[idx],
+                    align=curved_align,
+                    direction=curved_direction,
+                    radii=curved_radii,
+                    line_spacing=curved_line_spacing,
+                    letter_spacing=curved_letter_spacing,
+                    **kwargs,
+                )
+                ax.add_artist(curved_text)
+                label_list.append(curved_text)
+            return label_list
+
         param_xs = param_radius * self.rotation_sin
         param_ys = param_radius * self.rotation_cos
-        label_list = []
         # write the labels on the axis
         for idx, label in enumerate(self.params):
             if wrap is not None:

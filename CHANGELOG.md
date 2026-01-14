@@ -1,3 +1,16 @@
+:rocket: Version 1.7.0
+----------------------
+
+### Added
+* :heart_eyes: Added curved text labels for radar charts by \
+[PGupta-Git](https://github.com/PGupta-Git). The ``curved=True`` argument \
+in ``Radar.draw_param_labels()`` curves parameter labels around the radar \
+perimeter instead of using straight rotated text. Includes support for \
+multi-line labels with automatic visual ordering, configurable alignment \
+(``curved_align``), direction (``curved_direction``), line spacing \
+(``curved_line_spacing``), letter spacing (``curved_letter_spacing``), \
+and radial positioning (``curved_radii``). Partially Fixes #35.
+
 :rocket: Version 1.6.1
 ----------------------
 
@@ -158,8 +171,8 @@ the parsers still work.
 ----------------------
 
 ### Fixes
-* Fixed positional pitch marking to remove extraneous lines when ``Pitch`` is created with 
-``positional=True`` 
+* Fixed positional pitch marking to remove extraneous lines when ``Pitch`` is created with
+``positional=True``
 
 :rocket: Version 1.1.8
 ----------------------
@@ -301,7 +314,7 @@ and fixed the standardizer example so that it works with the lastest version of 
 
 :rocket: Version 1.0.5
 ----------------------
-  
+
 ### Fixes
 * Fixed the install process (setup.py) so it does not import mplsoccer. The version number is now \
 contained in the _version.py file.
@@ -323,12 +336,12 @@ All the keyword arguments are passed for setting ticklabels and labels.
 the the text overlaps through ``get_compare_value_texts``. \
 Four new methods have been added to ``PyPizza`` to enable this:
   * ``get_param_texts()`` : To fetch list of ``axes.text`` for params.
-  * ``get_value_texts()`` : To fetch list of ``axes.text`` for values. 
+  * ``get_value_texts()`` : To fetch list of ``axes.text`` for values.
   * ``get_compare_value_texts()`` : To fetch list of ``axes.text`` for comparison-values.
   * ``get_theta()`` : To fetch list containing theta values (``float``) (x-coordinate for each text).
 * added line_alpha to control the transparency of the pitch lines.
 * added a cyberpunk example with glowing pitch lines.
-  
+
 ### Changes
 * increased the ``goal_alpha`` default to 1. ``goal_alpha`` can now be used with all goal_types.
 
@@ -338,7 +351,7 @@ Four new methods have been added to ``PyPizza`` to enable this:
 :rocket: Version 1.0.2
 ----------------------
 
-This release is a major refactor of mplsoccer and a merger with 
+This release is a major refactor of mplsoccer and a merger with
 [soccerplots](https://github.com/Slothfulwave612/soccerplots) for plotting Radars.
 
 ---
@@ -465,7 +478,7 @@ Fixed statsbomb read_event to read the z location, as StatsBomb recently changed
 ### Added
 1) added a method calculate_angles_and_distance to calculate the angle and distance from start and end locations.
 2) added an example for plotting a pass network contributed by DymondFormation.
-3) added parameters to shade the middle section of the pitch and draw Juego de posición pitch markings. 
+3) added parameters to shade the middle section of the pitch and draw Juego de posición pitch markings.
 4) added a method flow to plot a pass flow map and a new example using this method
 
 :rocket: Version 0.0.20
@@ -494,9 +507,9 @@ Fixed statsbomb read_event to read the z location, as StatsBomb recently changed
 ### Changed
 1) combined the StatsBomb technique columns (pass_technique, goalkeeper_technique, shot_technique) into techique_id and technique_name
 2) combined the Statsbomb type columns (pass_type, duel_type_id, goalkeeper_type, shot_type) into event_type_name and event_type_id
-3) removed StatsBomb columns that repeat other columns: pass_through_ball, pass_outswinging, pass_inswinging, 
-clearance_head, clearance_left_foot, clearance_right_foot, pass_straight, clearance_other, goalkeeper_punched_out, 
-goalkeeper_shot_saved_off_target, shot_saved_off_target, goalkeeper_shot_saved_to_post, shot_saved_to_post, 
+3) removed StatsBomb columns that repeat other columns: pass_through_ball, pass_outswinging, pass_inswinging,
+clearance_head, clearance_left_foot, clearance_right_foot, pass_straight, clearance_other, goalkeeper_punched_out,
+goalkeeper_shot_saved_off_target, shot_saved_off_target, goalkeeper_shot_saved_to_post, shot_saved_to_post,
 goalkeeper_lost_out, goalkeeper_lost_in_play, goalkeeper_success_out, goalkeeper_success_in_play, goalkeeper_saved_to_post,
 shot_kick_off, goalkeeper_penalty_saved_to_post
 
@@ -518,7 +531,7 @@ shot_kick_off, goalkeeper_penalty_saved_to_post
 -----------------------
 
 ### Changed
-1) changed the wyscout goal posts y locations to 45/ 55 for consistency with [socceraction](https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py). 
+1) changed the wyscout goal posts y locations to 45/ 55 for consistency with [socceraction](https://github.com/ML-KULeuven/socceraction/blob/master/socceraction/spadl/wyscout.py).
 
 :rocket: Version 0.0.11
 -----------------------
@@ -586,7 +599,7 @@ shot_kick_off, goalkeeper_penalty_saved_to_post
 7) Pitch.bin_statistic_positional() and Pitch.bin_statistic() return dictionaries rather than named tuples.
 8) Pitch defaults changed to tight_layout=True and constrained_layout=False.
 9) Default penalty and center spot size now smaller and can be adjusted.
-10) Pitch default colors changed, pitch_color is now not plotted by default ('None') and pitch lines are taken from the rcParams 'grid.color'.  
+10) Pitch default colors changed, pitch_color is now not plotted by default ('None') and pitch lines are taken from the rcParams 'grid.color'.
 
 :rocket: Version 0.0.3
 ----------------------
@@ -625,7 +638,7 @@ Minor pep8 fixes.
 ----------------------
 ### Fixed
 1) Fixed the README so it loads pictures from the raw GitHub files.
-    
+
 :rocket: Version 0.0.0
 ----------------------
 
