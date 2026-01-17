@@ -1,4 +1,4 @@
-""" Base class for drawing the soccer/ football pitch."""
+"""Base class for drawing the soccer/ football pitch."""
 
 import warnings
 from abc import ABC, abstractmethod
@@ -20,25 +20,38 @@ from .grid import _grid_dimensions, _draw_grid, grid_dimensions
 
 
 class BasePitch(ABC):
-
-    def __init__(self,
-                 dim=None,
-                 pitch_type=None,
-                 half=False,
-                 pitch_color=None,
-                 line_color=None, line_alpha=1, linewidth=2, linestyle=None, line_zorder=0.9,
-                 pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
-                 shade_middle=False, shade_color='#f2f2f2', shade_alpha=1, shade_zorder=0.7,
-                 pitch_length=None, pitch_width=None,
-                 axis=False, label=False, tick=False,
-                 ):
-        """ Initilize attributes common to all sport."""
+    def __init__(
+        self,
+        dim=None,
+        pitch_type=None,
+        half=False,
+        pitch_color=None,
+        line_color=None,
+        line_alpha=1,
+        linewidth=2,
+        linestyle=None,
+        line_zorder=0.9,
+        pad_left=None,
+        pad_right=None,
+        pad_bottom=None,
+        pad_top=None,
+        shade_middle=False,
+        shade_color="#f2f2f2",
+        shade_alpha=1,
+        shade_zorder=0.7,
+        pitch_length=None,
+        pitch_width=None,
+        axis=False,
+        label=False,
+        tick=False,
+    ):
+        """Initilize attributes common to all sport."""
         self.dim = dim
         self.pitch_type = pitch_type
         self.half = half
         self.pitch_color = pitch_color
         if self.pitch_color is None:
-            self.pitch_color = rcParams['axes.facecolor']
+            self.pitch_color = rcParams["axes.facecolor"]
         self.line_color = line_color
         if self.line_color is None:
             self.line_color = rcParams["grid.color"]
@@ -80,7 +93,7 @@ class BasePitch(ABC):
 
         # if the padding is None set it to 4 on all sides, or 0.04 in the case of metricasports
         # for tracab multiply the padding by 100
-        for pad in ['pad_left', 'pad_right', 'pad_bottom', 'pad_top']:
+        for pad in ["pad_left", "pad_right", "pad_bottom", "pad_top"]:
             if getattr(self, pad) is None:
                 setattr(self, pad, self.dim.pad_default)
             if self.dim.pad_multiplier != 1:
@@ -105,9 +118,16 @@ class BasePitch(ABC):
     def _to_ax_coord(ax, coord_system, point):
         return coord_system.inverted().transform(ax.transData.transform_point(point))
 
-    def draw(self, ax=None, figsize=None, nrows=1, ncols=1,
-             tight_layout=True, constrained_layout=False):
-        """ Draws the specified soccer/ football pitch(es).
+    def draw(
+        self,
+        ax=None,
+        figsize=None,
+        nrows=1,
+        ncols=1,
+        tight_layout=True,
+        constrained_layout=False,
+    ):
+        """Draws the specified soccer/ football pitch(es).
         If an ax is specified the pitch is drawn on an existing axis.
 
         Parameters
@@ -142,12 +162,14 @@ class BasePitch(ABC):
         >>> pitch.draw(ax=ax)
         """
         if constrained_layout and tight_layout:
-            msg = ('You have set constrained_layout==True and tight_layout==True,'
-                   ' set one to False as they are incompatible.')
+            msg = (
+                "You have set constrained_layout==True and tight_layout==True,"
+                " set one to False as they are incompatible."
+            )
             warnings.warn(msg)
 
         if figsize is None:
-            figsize = rcParams['figure.figsize']
+            figsize = rcParams["figure.figsize"]
         if ax is None:
             fig, axs = self._setup_subplots(nrows, ncols, figsize, constrained_layout)
             fig.set_tight_layout(tight_layout)
@@ -162,38 +184,51 @@ class BasePitch(ABC):
 
     @staticmethod
     def _setup_subplots(nrows, ncols, figsize, constrained_layout):
-        fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize,
-                                constrained_layout=constrained_layout)
+        fig, axs = plt.subplots(
+            nrows=nrows,
+            ncols=ncols,
+            figsize=figsize,
+            constrained_layout=constrained_layout,
+        )
         if (nrows == 1) and (ncols == 1):
             axs = np.array([axs])
         return fig, axs
 
     def _draw_ax(self, ax):
-        """ Implement method to draw the pitch."""
+        """Implement method to draw the pitch."""
 
     def _set_axes(self, ax):
         # set axis on/off, labels, grid, and ticks
-        set_visible(ax, spine_bottom=self.axis, spine_top=self.axis, spine_left=self.axis,
-                    spine_right=self.axis, grid=False, tick=self.tick, label=self.label)
+        set_visible(
+            ax,
+            spine_bottom=self.axis,
+            spine_top=self.axis,
+            spine_left=self.axis,
+            spine_right=self.axis,
+            grid=False,
+            tick=self.tick,
+            label=self.label,
+        )
         # set limits and aspect
         ax.set_xlim(self.extent[0], self.extent[1])
         ax.set_ylim(self.extent[2], self.extent[3])
         ax.set_aspect(self.aspect)
 
     def _set_background(self, ax):
-        """ Implement method to set the pitch background."""
+        """Implement method to set the pitch background."""
 
     def _draw_pitch_markings(self, ax):
-        """ Implement method to draw the pitch markings."""
+        """Implement method to draw the pitch markings."""
 
     def _set_multiple_attributes(self, kwargs):
         for key in kwargs:
             if hasattr(self, key):
                 setattr(self, key, kwargs[key])
 
-    def inset_axes(self, x, y, width=None, height=None, aspect=None, polar=False,
-                   ax=None, **kwargs):
-        """ A function to create an inset axes.
+    def inset_axes(
+        self, x, y, width=None, height=None, aspect=None, polar=False, ax=None, **kwargs
+    ):
+        """A function to create an inset axes.
         This method produces the same axes
         with VerticalPitch and Pitch when
         the arguments are the same.
@@ -226,12 +261,21 @@ class BasePitch(ABC):
         >>> fig, ax = pitch.draw()
         >>> inset_axes = pitch.inset_axes(60, 40, width=20, aspect=1, ax=ax)
         """
-        return inset_axes(x=x, y=y, height=height, width=width, aspect=aspect,
-                          polar=polar, vertical=self.vertical, ax=ax, **kwargs)
+        return inset_axes(
+            x=x,
+            y=y,
+            height=height,
+            width=width,
+            aspect=aspect,
+            polar=polar,
+            vertical=self.vertical,
+            ax=ax,
+            **kwargs,
+        )
 
     def inset_image(self, x, y, image, width=None, height=None, ax=None, **kwargs):
-        """ Adds an image as an inset_axes
-    
+        """Adds an image as an inset_axes
+
         Parameters
         ----------
         x, y: float
@@ -242,32 +286,54 @@ class BasePitch(ABC):
             By default, in the data coordinates.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
-    
+
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.imshow.
-    
+
         Returns
         -------
         matplotlib.axes.Axes
-    
+
         Examples
         --------
         >>> from mplsoccer import VerticalPitch
-        >>> from urllib.request import urlopen
+        >>> from urllib.request import urlopen, Request
         >>> from PIL import Image
         >>> pitch = VerticalPitch()
         >>> fig, ax = pitch.draw()
         >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-        >>> image = urlopen(image_url)
-        >>> image = Image.open(image)
+        >>> request = Request(image_url)
+        >>> request.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
+        >>> image = Image.open(urlopen(request))
         >>> ax_image = pitch.inset_image(60, 40, image, width=30, ax=ax)
         """
-        return inset_image(x=x, y=y, image=image, width=width, height=height,
-                           vertical=self.vertical, ax=ax, **kwargs)
+        return inset_image(
+            x=x,
+            y=y,
+            image=image,
+            width=width,
+            height=height,
+            vertical=self.vertical,
+            ax=ax,
+            **kwargs,
+        )
 
-    def grid(self, figheight=9, nrows=1, ncols=1, grid_height=0.715, grid_width=0.95, space=0.05,
-             left=None, bottom=None, endnote_height=0.065, endnote_space=0.01,
-             title_height=0.15, title_space=0.01, axis=True):
-        """ A helper to create a grid of pitches in a specified location
+    def grid(
+        self,
+        figheight=9,
+        nrows=1,
+        ncols=1,
+        grid_height=0.715,
+        grid_width=0.95,
+        space=0.05,
+        left=None,
+        bottom=None,
+        endnote_height=0.065,
+        endnote_space=0.01,
+        title_height=0.15,
+        title_space=0.01,
+        axis=True,
+    ):
+        """A helper to create a grid of pitches in a specified location
 
         Parameters
         ----------
@@ -324,20 +390,39 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> fig, axs = pitch.grid(nrows=3, ncols=3, grid_height=0.7, figheight=14)
         """
-        dim = _grid_dimensions(ax_aspect=self.ax_aspect, figheight=figheight, nrows=nrows,
-                               ncols=ncols, grid_height=grid_height, grid_width=grid_width,
-                               space=space, left=left, bottom=bottom,
-                               endnote_height=endnote_height, endnote_space=endnote_space,
-                               title_height=title_height, title_space=title_space)
-        left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
-                    np.abs(self.extent[1] - self.extent[0])) * dim['axwidth']
-        right_pad = (np.abs(self.visible_pitch - self.extent)[1] /
-                     np.abs(self.extent[1] - self.extent[0])) * dim['axwidth']
-        fig, axs = _draw_grid(dimensions=dim, left_pad=left_pad, right_pad=right_pad,
-                              axis=axis, grid_key='pitch')
+        dim = _grid_dimensions(
+            ax_aspect=self.ax_aspect,
+            figheight=figheight,
+            nrows=nrows,
+            ncols=ncols,
+            grid_height=grid_height,
+            grid_width=grid_width,
+            space=space,
+            left=left,
+            bottom=bottom,
+            endnote_height=endnote_height,
+            endnote_space=endnote_space,
+            title_height=title_height,
+            title_space=title_space,
+        )
+        left_pad = (
+            np.abs(self.visible_pitch - self.extent)[0]
+            / np.abs(self.extent[1] - self.extent[0])
+        ) * dim["axwidth"]
+        right_pad = (
+            np.abs(self.visible_pitch - self.extent)[1]
+            / np.abs(self.extent[1] - self.extent[0])
+        ) * dim["axwidth"]
+        fig, axs = _draw_grid(
+            dimensions=dim,
+            left_pad=left_pad,
+            right_pad=right_pad,
+            axis=axis,
+            grid_key="pitch",
+        )
 
         if endnote_height > 0 or title_height > 0:
-            for ax in np.asarray(axs['pitch']).flat:
+            for ax in np.asarray(axs["pitch"]).flat:
                 self.draw(ax=ax)
         else:
             for ax in np.asarray(axs).flat:
@@ -346,7 +431,7 @@ class BasePitch(ABC):
         return fig, axs
 
     def grid_dimensions(self, figwidth, figheight, nrows, ncols, max_grid, space):
-        """ A helper method to propose a grid_width and grid_height for grid based on the inputs.
+        """A helper method to propose a grid_width and grid_height for grid based on the inputs.
 
         Parameters
         ----------
@@ -373,19 +458,37 @@ class BasePitch(ABC):
         ...                                                 nrows=1, ncols=1,
         ...                                                 max_grid=1,  space=0)
         """
-        grid_width, grid_height = grid_dimensions(self.ax_aspect, figwidth=figwidth,
-                                                  figheight=figheight,
-                                                  nrows=nrows, ncols=ncols,
-                                                  max_grid=max_grid, space=space)
+        grid_width, grid_height = grid_dimensions(
+            self.ax_aspect,
+            figwidth=figwidth,
+            figheight=figheight,
+            nrows=nrows,
+            ncols=ncols,
+            max_grid=max_grid,
+            space=space,
+        )
         return grid_width, grid_height
 
-    def jointgrid(self, figheight=9, left=None, grid_width=0.95,
-                  bottom=None, endnote_height=0.065, endnote_space=0.01,
-                  grid_height=0.715, title_space=0.01, title_height=0.15,
-                  space=0, marginal=0.1,
-                  ax_left=True, ax_top=True, ax_right=True, ax_bottom=False,
-                  axis=True):
-        """ Create a grid with a pitch at the center and (marginal) axes at the sides of the pitch.
+    def jointgrid(
+        self,
+        figheight=9,
+        left=None,
+        grid_width=0.95,
+        bottom=None,
+        endnote_height=0.065,
+        endnote_space=0.01,
+        grid_height=0.715,
+        title_space=0.01,
+        title_height=0.15,
+        space=0,
+        marginal=0.1,
+        ax_left=True,
+        ax_top=True,
+        ax_right=True,
+        ax_bottom=False,
+        axis=True,
+    ):
+        """Create a grid with a pitch at the center and (marginal) axes at the sides of the pitch.
 
         Parameters
         ----------
@@ -463,13 +566,19 @@ class BasePitch(ABC):
         if endnote_height == 0:
             endnote_space = 0
 
-        error_msg_height = ('The axes extends past the figure height. '
-                            'Reduce one of the bottom, endnote_height, endnote_space, grid_height, '
-                            'title_space or title_height so the total is ≤ 1.')
-        error_msg_width = ('The grid axes extends past the figure width. '
-                           'Reduce one of the grid_width or left so the total is ≤ 1.')
+        error_msg_height = (
+            "The axes extends past the figure height. "
+            "Reduce one of the bottom, endnote_height, endnote_space, grid_height, "
+            "title_space or title_height so the total is ≤ 1."
+        )
+        error_msg_width = (
+            "The grid axes extends past the figure width. "
+            "Reduce one of the grid_width or left so the total is ≤ 1."
+        )
 
-        axes_height = endnote_height + endnote_space + grid_height + title_space + title_height
+        axes_height = (
+            endnote_height + endnote_space + grid_height + title_space + title_height
+        )
         if axes_height > 1:
             raise ValueError(error_msg_height)
 
@@ -497,11 +606,20 @@ class BasePitch(ABC):
             marginal_bottom = marginal_height
 
         # calculate the figwidth
-        pitch_height = grid_height - space_top - space_bottom - marginal_top - marginal_bottom
-        figwidth = (figheight / grid_width *
-                    (ax_left * marginal_height + ax_right * marginal_height +
-                     pitch_height * self.ax_aspect +
-                     ax_left * space_height + ax_right * space_height))
+        pitch_height = (
+            grid_height - space_top - space_bottom - marginal_top - marginal_bottom
+        )
+        figwidth = (
+            figheight
+            / grid_width
+            * (
+                ax_left * marginal_height
+                + ax_right * marginal_height
+                + pitch_height * self.ax_aspect
+                + ax_left * space_height
+                + ax_right * space_height
+            )
+        )
 
         # calculate the total pitch, marginal and space width
         fig_aspect = figwidth / figheight
@@ -522,14 +640,22 @@ class BasePitch(ABC):
             marginal_right = marginal_width
 
         # calculate the padding either side of the pitch (so the axes line up with the sides)
-        left_pad = (np.abs(self.visible_pitch - self.extent)[0] /
-                    np.abs(self.extent[1] - self.extent[0])) * pitch_width
-        right_pad = (np.abs(self.visible_pitch - self.extent)[1] /
-                     np.abs(self.extent[1] - self.extent[0])) * pitch_width
-        bottom_pad = (np.abs(self.visible_pitch - self.extent)[2] /
-                      np.abs(self.extent[3] - self.extent[2])) * pitch_height
-        top_pad = (np.abs(self.visible_pitch - self.extent)[3] /
-                   np.abs(self.extent[3] - self.extent[2])) * pitch_height
+        left_pad = (
+            np.abs(self.visible_pitch - self.extent)[0]
+            / np.abs(self.extent[1] - self.extent[0])
+        ) * pitch_width
+        right_pad = (
+            np.abs(self.visible_pitch - self.extent)[1]
+            / np.abs(self.extent[1] - self.extent[0])
+        ) * pitch_width
+        bottom_pad = (
+            np.abs(self.visible_pitch - self.extent)[2]
+            / np.abs(self.extent[3] - self.extent[2])
+        ) * pitch_height
+        top_pad = (
+            np.abs(self.visible_pitch - self.extent)[3]
+            / np.abs(self.extent[3] - self.extent[2])
+        ) * pitch_height
 
         # axes limits
         x0, x1, y0, y1 = self.visible_pitch
@@ -544,81 +670,112 @@ class BasePitch(ABC):
         # create the axes
         axs = {}
         if title_height > 0:
-            ax_title = fig.add_axes((title_left, grid_bottom + grid_height + title_space,
-                                     title_width, title_height))
+            ax_title = fig.add_axes(
+                (
+                    title_left,
+                    grid_bottom + grid_height + title_space,
+                    title_width,
+                    title_height,
+                )
+            )
             if axis is False:
-                ax_title.axis('off')
-            axs['title'] = ax_title
+                ax_title.axis("off")
+            axs["title"] = ax_title
 
         if endnote_height > 0:
-            ax_endnote = fig.add_axes((title_left, bottom,
-                                       title_width, endnote_height))
+            ax_endnote = fig.add_axes((title_left, bottom, title_width, endnote_height))
             if axis is False:
-                ax_endnote.axis('off')
-            axs['endnote'] = ax_endnote
+                ax_endnote.axis("off")
+            axs["endnote"] = ax_endnote
 
         if ax_left:
-            ax_0 = fig.add_axes((left,
-                                 grid_bottom + marginal_bottom + space_bottom + bottom_pad,
-                                 marginal_left,
-                                 pitch_height - bottom_pad - top_pad))
+            ax_0 = fig.add_axes(
+                (
+                    left,
+                    grid_bottom + marginal_bottom + space_bottom + bottom_pad,
+                    marginal_left,
+                    pitch_height - bottom_pad - top_pad,
+                )
+            )
             ax_0.set_ylim(y0, y1)
             ax_0.invert_xaxis()
             if axis is False:
-                ax_0.axis('off')
+                ax_0.axis("off")
             else:
                 set_visible(ax_0, spine_right=True)
-            axs['left'] = ax_0
+            axs["left"] = ax_0
 
         if ax_top:
-            ax_1 = fig.add_axes((left + marginal_left + space_left + left_pad,
-                                 (grid_bottom + marginal_bottom + space_bottom +
-                                  pitch_height + space_top),
-                                 pitch_width - left_pad - right_pad,
-                                 marginal_top))
+            ax_1 = fig.add_axes(
+                (
+                    left + marginal_left + space_left + left_pad,
+                    (
+                        grid_bottom
+                        + marginal_bottom
+                        + space_bottom
+                        + pitch_height
+                        + space_top
+                    ),
+                    pitch_width - left_pad - right_pad,
+                    marginal_top,
+                )
+            )
             ax_1.set_xlim(x0, x1)
             if axis is False:
-                ax_1.axis('off')
+                ax_1.axis("off")
             else:
                 set_visible(ax_1, spine_bottom=True)
-            axs['top'] = ax_1
+            axs["top"] = ax_1
 
         if ax_right:
-            ax_2 = fig.add_axes((left + marginal_left + space_left + pitch_width + space_right,
-                                 grid_bottom + marginal_bottom + space_bottom + bottom_pad,
-                                 marginal_right,
-                                 pitch_height - bottom_pad - top_pad))
+            ax_2 = fig.add_axes(
+                (
+                    left + marginal_left + space_left + pitch_width + space_right,
+                    grid_bottom + marginal_bottom + space_bottom + bottom_pad,
+                    marginal_right,
+                    pitch_height - bottom_pad - top_pad,
+                )
+            )
             ax_2.set_ylim(y0, y1)
             if axis is False:
-                ax_2.axis('off')
+                ax_2.axis("off")
             else:
                 set_visible(ax_2, spine_left=True)
-            axs['right'] = ax_2
+            axs["right"] = ax_2
 
         if ax_bottom:
-            ax_3 = fig.add_axes((left + marginal_left + space_left + left_pad,
-                                 grid_bottom,
-                                 pitch_width - left_pad - right_pad,
-                                 marginal_bottom))
+            ax_3 = fig.add_axes(
+                (
+                    left + marginal_left + space_left + left_pad,
+                    grid_bottom,
+                    pitch_width - left_pad - right_pad,
+                    marginal_bottom,
+                )
+            )
             ax_3.set_xlim(x0, x1)
             ax_3.invert_yaxis()
             if axis is False:
-                ax_3.axis('off')
+                ax_3.axis("off")
             else:
                 set_visible(ax_3, spine_top=True)
-            axs['bottom'] = ax_3
+            axs["bottom"] = ax_3
 
         # create the pitch axes
-        ax_pitch = fig.add_axes((left + marginal_left + space_left,
-                                 grid_bottom + marginal_bottom + space_bottom,
-                                 pitch_width, pitch_height))
+        ax_pitch = fig.add_axes(
+            (
+                left + marginal_left + space_left,
+                grid_bottom + marginal_bottom + space_bottom,
+                pitch_width,
+                pitch_height,
+            )
+        )
         self.draw(ax=ax_pitch)
-        axs['pitch'] = ax_pitch
+        axs["pitch"] = ax_pitch
 
         return fig, axs
 
     def flip_side(self, x, y, flip):
-        """ A method to flip the coordinates to the other side of the pitch.
+        """A method to flip the coordinates to the other side of the pitch.
 
         Parameters
         ----------
@@ -644,12 +801,16 @@ class BasePitch(ABC):
             raise ValueError("x and y must be the same size")
         if flip.size != x.size:
             raise ValueError("x and flip must be the same size")
-        new_x = np.where(flip, np.where(self.dim.origin_center, -x, self.dim.length - x), x)
-        new_y = np.where(flip, np.where(self.dim.origin_center, -y, self.dim.width - y), y)
+        new_x = np.where(
+            flip, np.where(self.dim.origin_center, -x, self.dim.length - x), x
+        )
+        new_y = np.where(
+            flip, np.where(self.dim.origin_center, -y, self.dim.width - y), y
+        )
         return new_x, new_y
 
     def plot(self, x, y, ax=None, **kwargs):
-        """ Utility wrapper around matplotlib.axes.Axes.plot,
+        """Utility wrapper around matplotlib.axes.Axes.plot,
         which automatically flips the x and y coordinates if the pitch is vertical.
 
         Parameters
@@ -675,9 +836,8 @@ class BasePitch(ABC):
         x, y = self._reverse_if_vertical(x, y)
         return ax.plot(x, y, **kwargs)
 
-
     def scatter(self, x, y, rotation_degrees=None, marker=None, ax=None, **kwargs):
-        """ Utility wrapper around matplotlib.axes.Axes.scatter,
+        """Utility wrapper around matplotlib.axes.Axes.scatter,
         which automatically flips the x and y coordinates if the pitch is vertical.
         You can optionally use a football marker with marker='football' and rotate markers with
         rotation_degrees.
@@ -726,27 +886,37 @@ class BasePitch(ABC):
         x, y = self._reverse_if_vertical(x, y)
 
         if marker is None:
-            marker = rcParams['scatter.marker']
+            marker = rcParams["scatter.marker"]
 
         if rotation_degrees is not None:
-            return scatter_rotation(x, y, rotation_degrees, marker=marker,
-                                    vertical=self.vertical, ax=ax, **kwargs)
+            return scatter_rotation(
+                x,
+                y,
+                rotation_degrees,
+                marker=marker,
+                vertical=self.vertical,
+                ax=ax,
+                **kwargs,
+            )
         return ax.scatter(x, y, marker=marker, **kwargs)
 
     def _reflect_2d(self, x, y, standardized=False):
-        """ Reflect data in the pitch lines."""
+        """Reflect data in the pitch lines."""
         x = np.ravel(x)
         y = np.ravel(y)
         if standardized:
             x_limits, y_limits = [0, 105], [0, 68]
         else:
-            x_limits, y_limits = [self.dim.left, self.dim.right], [self.dim.bottom, self.dim.top]
+            x_limits, y_limits = (
+                [self.dim.left, self.dim.right],
+                [self.dim.bottom, self.dim.top],
+            )
         reflected_data_x = np.r_[x, 2 * x_limits[0] - x, 2 * x_limits[1] - x, x, x]
         reflected_data_y = np.r_[y, y, y, 2 * y_limits[0] - y, 2 * y_limits[1] - y]
         return reflected_data_x, reflected_data_y
 
     def kdeplot(self, x, y, ax=None, **kwargs):
-        """ Utility wrapper around seaborn.kdeplot,
+        """Utility wrapper around seaborn.kdeplot,
         which automatically flips the x and y coordinates
         if the pitch is vertical and clips to the pitch boundaries.
 
@@ -784,7 +954,7 @@ class BasePitch(ABC):
         return sns.kdeplot(x=x, y=y, ax=ax, clip=self.kde_clip, **kwargs)
 
     def hexbin(self, x, y, ax=None, **kwargs):
-        """ Utility wrapper around matplotlib.axes.Axes.hexbin,
+        """Utility wrapper around matplotlib.axes.Axes.hexbin,
         which automatically flips the x and y coordinates if the pitch is vertical and
         clips to the pitch boundaries.
 
@@ -828,20 +998,24 @@ class BasePitch(ABC):
         y = y[~mask]
 
         x, y = self._reverse_if_vertical(x, y)
-        mincnt = kwargs.pop('mincnt', 1)
-        gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
-        extent = kwargs.pop('extent', self.hex_extent)
-        hexbin = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
-        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
-                                 self.visible_pitch[1] - self.visible_pitch[0],
-                                 self.visible_pitch[3] - self.visible_pitch[2],
-                                 fill=False)
+        mincnt = kwargs.pop("mincnt", 1)
+        gridsize = kwargs.pop("gridsize", self.hexbin_gridsize)
+        extent = kwargs.pop("extent", self.hex_extent)
+        hexbin = ax.hexbin(
+            x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs
+        )
+        rect = patches.Rectangle(
+            (self.visible_pitch[0], self.visible_pitch[2]),
+            self.visible_pitch[1] - self.visible_pitch[0],
+            self.visible_pitch[3] - self.visible_pitch[2],
+            fill=False,
+        )
         ax.add_patch(rect)
         hexbin.set_clip_path(rect)
         return hexbin
 
     def polygon(self, verts, ax=None, **kwargs):
-        """ Plot polygons.
+        """Plot polygons.
         Automatically flips the x and y vertices if the pitch is vertical.
 
         Parameters
@@ -878,8 +1052,8 @@ class BasePitch(ABC):
             ax.add_patch(polygon)
         return patch_list
 
-    def goal_angle(self, x, y, ax=None, goal='right', **kwargs):
-        """ Plot a polygon with the angle to the goal using matplotlib.patches.Polygon.
+    def goal_angle(self, x, y, ax=None, goal="right", **kwargs):
+        """Plot a polygon with the angle to the goal using matplotlib.patches.Polygon.
         See: https://matplotlib.org/stable/api/collections_api.html.
         Valid Collection keyword arguments: edgecolors, facecolors, linewidths, antialiaseds,
         transOffset, norm, cmap
@@ -907,14 +1081,14 @@ class BasePitch(ABC):
         >>> pitch.goal_angle(100, 30, alpha=0.5, color='red', ax=ax)
         """
         validate_ax(ax)
-        valid_goal = ['left', 'right']
+        valid_goal = ["left", "right"]
         if goal not in valid_goal:
-            raise TypeError(f'Invalid argument: goal should be in {valid_goal}')
+            raise TypeError(f"Invalid argument: goal should be in {valid_goal}")
         x = np.ravel(x)
         y = np.ravel(y)
         if x.size != y.size:
             raise ValueError("x and y must be the same size")
-        goal_coordinates = self.goal_right if goal == 'right' else self.goal_left
+        goal_coordinates = self.goal_right if goal == "right" else self.goal_left
         verts = np.zeros((x.size, 3, 2))
         verts[:, 0, 0] = x
         verts[:, 0, 1] = y
@@ -922,7 +1096,7 @@ class BasePitch(ABC):
         return self.polygon(verts, ax=ax, **kwargs)
 
     def annotate(self, text, xy, xytext=None, ax=None, **kwargs):
-        """ Utility wrapper around ax.annotate
+        """Utility wrapper around ax.annotate
         which automatically flips the xy and xytext coordinates if the pitch is vertical.
 
         Annotate the point xy with text.
@@ -959,7 +1133,7 @@ class BasePitch(ABC):
         return ax.annotate(text, xy, xytext, **kwargs)
 
     def text(self, x, y, s, ax=None, **kwargs):
-        """ Utility wrapper around ax.text
+        """Utility wrapper around ax.text
         which automatically flips the x/y coordinates if the pitch is vertical.
 
         See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.text.html
@@ -990,44 +1164,111 @@ class BasePitch(ABC):
         return ax.text(x, y, s, **kwargs)
 
     @copy_doc(bin_statistic)
-    def bin_statistic(self, x, y, values=None, statistic='count', bins=(5, 4),
-                      normalize=False, standardized=False):
-        return bin_statistic(x, y, values=values, dim=self.dim, statistic=statistic,
-                             bins=bins, normalize=normalize, standardized=standardized)
+    def bin_statistic(
+        self,
+        x,
+        y,
+        values=None,
+        statistic="count",
+        bins=(5, 4),
+        normalize=False,
+        standardized=False,
+    ):
+        return bin_statistic(
+            x,
+            y,
+            values=values,
+            dim=self.dim,
+            statistic=statistic,
+            bins=bins,
+            normalize=normalize,
+            standardized=standardized,
+        )
 
     @copy_doc(bin_statistic_sonar)
-    def bin_statistic_sonar(self, x, y, angle, values=None,
-                            statistic='count', bins=(5, 4, 10),
-                            normalize=False, standardized=False, center=True):
-        return bin_statistic_sonar(x, y, angle, values=values, dim=self.dim,
-                                   statistic=statistic, bins=bins,
-                                   normalize=normalize, standardized=standardized,
-                                   center=center)
+    def bin_statistic_sonar(
+        self,
+        x,
+        y,
+        angle,
+        values=None,
+        statistic="count",
+        bins=(5, 4, 10),
+        normalize=False,
+        standardized=False,
+        center=True,
+    ):
+        return bin_statistic_sonar(
+            x,
+            y,
+            angle,
+            values=values,
+            dim=self.dim,
+            statistic=statistic,
+            bins=bins,
+            normalize=normalize,
+            standardized=standardized,
+            center=center,
+        )
 
     @staticmethod
     @copy_doc(sonar)
-    def sonar(stats_length, xindex=0, yindex=0,
-              stats_color=None, cmap=None, vmin=None, vmax=None,
-              rmin=0, rmax=None,
-              sonar_alpha=1, sonar_facecolor='None',
-              axis=False, label=False,
-              ax=None,
-              **kwargs):
-        return sonar(stats_length, xindex=xindex, yindex=yindex,
-                     stats_color=stats_color, cmap=cmap, vmin=vmin, vmax=vmax,
-                     rmin=rmin, rmax=rmax,
-                     sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
-                     axis=axis, label=label, ax=ax, **kwargs)
+    def sonar(
+        stats_length,
+        xindex=0,
+        yindex=0,
+        stats_color=None,
+        cmap=None,
+        vmin=None,
+        vmax=None,
+        rmin=0,
+        rmax=None,
+        sonar_alpha=1,
+        sonar_facecolor="None",
+        axis=False,
+        label=False,
+        ax=None,
+        **kwargs,
+    ):
+        return sonar(
+            stats_length,
+            xindex=xindex,
+            yindex=yindex,
+            stats_color=stats_color,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            rmin=rmin,
+            rmax=rmax,
+            sonar_alpha=sonar_alpha,
+            sonar_facecolor=sonar_facecolor,
+            axis=axis,
+            label=label,
+            ax=ax,
+            **kwargs,
+        )
 
-    def sonar_grid(self, stats_length,
-                   stats_color=None, cmap=None, vmin=None, vmax=None,
-                   rmin=0, rmax=None,
-                   sonar_alpha=1, sonar_facecolor='None',
-                   axis=False, label=False,
-                   width=None, height=None,
-                   exclude_zeros=True, exclude_nan=True,
-                   ax=None, **kwargs):
-        """ Plot a grid of polar bar charts on an existing axes.
+    def sonar_grid(
+        self,
+        stats_length,
+        stats_color=None,
+        cmap=None,
+        vmin=None,
+        vmax=None,
+        rmin=0,
+        rmax=None,
+        sonar_alpha=1,
+        sonar_facecolor="None",
+        axis=False,
+        label=False,
+        width=None,
+        height=None,
+        exclude_zeros=True,
+        exclude_nan=True,
+        ax=None,
+        **kwargs,
+    ):
+        """Plot a grid of polar bar charts on an existing axes.
 
         Parameters
         ----------
@@ -1088,25 +1329,41 @@ class BasePitch(ABC):
         ...                        ec='black', ax=ax)
         """
         validate_ax(ax)
-        mask_zero = np.all(np.isclose(stats_length['statistic'], 0), axis=2)
-        mask_null = np.all(np.isnan(stats_length['statistic']), axis=2)
-        axs = np.empty(stats_length['cx'].shape, dtype='O')
-        it = np.nditer(stats_length['cx'], flags=['multi_index'])
+        mask_zero = np.all(np.isclose(stats_length["statistic"], 0), axis=2)
+        mask_null = np.all(np.isnan(stats_length["statistic"]), axis=2)
+        axs = np.empty(stats_length["cx"].shape, dtype="O")
+        it = np.nditer(stats_length["cx"], flags=["multi_index"])
         for cx in it:
             if mask_zero[it.multi_index] and exclude_zeros:
                 ax_inset = None
             elif mask_null[it.multi_index] and exclude_nan:
                 ax_inset = None
             else:
-                ax_inset = self.inset_axes(cx, stats_length['cy'][it.multi_index],
-                                        width=width, height=height, ax=ax, polar=True)
-                sonar(stats_length=stats_length,
-                    xindex=it.multi_index[1], yindex=it.multi_index[0],
-                    stats_color=stats_color, cmap=cmap, vmin=vmin, vmax=vmax,
-                    rmin=rmin, rmax=rmax,
-                    sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
-                    axis=axis, label=label,
-                    ax=ax_inset, **kwargs)
+                ax_inset = self.inset_axes(
+                    cx,
+                    stats_length["cy"][it.multi_index],
+                    width=width,
+                    height=height,
+                    ax=ax,
+                    polar=True,
+                )
+                sonar(
+                    stats_length=stats_length,
+                    xindex=it.multi_index[1],
+                    yindex=it.multi_index[0],
+                    stats_color=stats_color,
+                    cmap=cmap,
+                    vmin=vmin,
+                    vmax=vmax,
+                    rmin=rmin,
+                    rmax=rmax,
+                    sonar_alpha=sonar_alpha,
+                    sonar_facecolor=sonar_facecolor,
+                    axis=axis,
+                    label=label,
+                    ax=ax_inset,
+                    **kwargs,
+                )
             axs[it.multi_index] = ax_inset
         axs = np.squeeze(axs)
         if axs.size == 1:
@@ -1117,9 +1374,18 @@ class BasePitch(ABC):
     def heatmap(self, stats, ax=None, **kwargs):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
-    def label_heatmap(self, stats, str_format=None, exclude_zeros=False, exclude_nan=False,
-                      xoffset=0, yoffset=0, ax=None, **kwargs):
-        """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
+    def label_heatmap(
+        self,
+        stats,
+        str_format=None,
+        exclude_zeros=False,
+        exclude_nan=False,
+        xoffset=0,
+        yoffset=0,
+        ax=None,
+        **kwargs,
+    ):
+        """Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
         Parameters
         ----------
@@ -1158,8 +1424,8 @@ class BasePitch(ABC):
         ...                            va='center', path_effects=path_eff, str_format='{:.0f}')
         """
         validate_ax(ax)
-        va = kwargs.pop('va', 'center')
-        ha = kwargs.pop('ha', 'center')
+        va = kwargs.pop("va", "center")
+        ha = kwargs.pop("ha", "center")
 
         if not isinstance(stats, list):
             stats = [stats]
@@ -1167,25 +1433,28 @@ class BasePitch(ABC):
         annotation_list = []
         for bin_stat in stats:
             # remove labels outside the plot extents
-            mask_x_outside1 = bin_stat['cx'] < self.dim.pitch_extent[0]
-            mask_x_outside2 = bin_stat['cx'] > self.dim.pitch_extent[1]
-            mask_y_outside1 = bin_stat['cy'] < self.dim.pitch_extent[2]
-            mask_y_outside2 = bin_stat['cy'] > self.dim.pitch_extent[3]
-            mask_clip = mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
+            mask_x_outside1 = bin_stat["cx"] < self.dim.pitch_extent[0]
+            mask_x_outside2 = bin_stat["cx"] > self.dim.pitch_extent[1]
+            mask_y_outside1 = bin_stat["cy"] < self.dim.pitch_extent[2]
+            mask_y_outside2 = bin_stat["cy"] > self.dim.pitch_extent[3]
+            mask_clip = (
+                mask_x_outside1 | mask_x_outside2 | mask_y_outside1 | mask_y_outside2
+            )
             if exclude_zeros:
-                mask_clip = mask_clip | (np.isclose(bin_stat['statistic'], 0.))
+                mask_clip = mask_clip | (np.isclose(bin_stat["statistic"], 0.0))
             if exclude_nan:
-                mask_clip = mask_clip | np.isnan(bin_stat['statistic'])
+                mask_clip = mask_clip | np.isnan(bin_stat["statistic"])
             mask_clip = np.ravel(mask_clip)
 
-            text = np.ravel(bin_stat['statistic'])[~mask_clip]
-            cx = np.ravel(bin_stat['cx'])[~mask_clip] + xoffset
-            cy = np.ravel(bin_stat['cy'])[~mask_clip] + yoffset
+            text = np.ravel(bin_stat["statistic"])[~mask_clip]
+            cx = np.ravel(bin_stat["cx"])[~mask_clip] + xoffset
+            cy = np.ravel(bin_stat["cy"])[~mask_clip] + yoffset
             for idx, text_str in enumerate(text):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
-                annotation = self.text(cx[idx], cy[idx], text_str, ax=ax,
-                                       va=va, ha=ha, **kwargs)
+                annotation = self.text(
+                    cx[idx], cy[idx], text_str, ax=ax, va=va, ha=ha, **kwargs
+                )
                 annotation_list.append(annotation)
 
         return annotation_list
@@ -1193,20 +1462,48 @@ class BasePitch(ABC):
     @copy_doc(arrows)
     def arrows(self, xstart, ystart, xend, yend, *args, ax=None, **kwargs):
         validate_ax(ax)
-        return arrows(xstart, ystart, xend, yend, *args, ax=ax, vertical=self.vertical, **kwargs)
+        return arrows(
+            xstart, ystart, xend, yend, *args, ax=ax, vertical=self.vertical, **kwargs
+        )
 
     @copy_doc(lines)
-    def lines(self, xstart, ystart, xend, yend, color=None, n_segments=100,
-              comet=False, transparent=False, alpha_start=0.01,
-              alpha_end=1, cmap=None, ax=None, **kwargs):
+    def lines(
+        self,
+        xstart,
+        ystart,
+        xend,
+        yend,
+        color=None,
+        n_segments=100,
+        comet=False,
+        transparent=False,
+        alpha_start=0.01,
+        alpha_end=1,
+        cmap=None,
+        ax=None,
+        **kwargs,
+    ):
         validate_ax(ax)
-        return lines(xstart, ystart, xend, yend, color=color, n_segments=n_segments,
-                     comet=comet, transparent=transparent, alpha_start=alpha_start,
-                     alpha_end=alpha_end, cmap=cmap, ax=ax, vertical=self.vertical,
-                     reverse_cmap=self.reverse_cmap, **kwargs)
+        return lines(
+            xstart,
+            ystart,
+            xend,
+            yend,
+            color=color,
+            n_segments=n_segments,
+            comet=comet,
+            transparent=transparent,
+            alpha_start=alpha_start,
+            alpha_end=alpha_end,
+            cmap=cmap,
+            ax=ax,
+            vertical=self.vertical,
+            reverse_cmap=self.reverse_cmap,
+            **kwargs,
+        )
 
     def convexhull(self, x, y):
-        """ Get lines of Convex Hull for a set of coordinates
+        """Get lines of Convex Hull for a set of coordinates
 
         Parameters
         ----------
@@ -1233,7 +1530,7 @@ class BasePitch(ABC):
         return points[hull.vertices].reshape(1, -1, 2)
 
     def voronoi(self, x, y, teams):
-        """ Get Voronoi vertices for a set of coordinates.
+        """Get Voronoi vertices for a set of coordinates.
         Uses a trick by Dan Nichol (@D4N__ on Twitter) where points are reflected in the pitch lines
         before calculating the Voronoi. This means that the Voronoi extends to
         the edges of the pitch. See:
@@ -1305,8 +1602,8 @@ class BasePitch(ABC):
         vor = Voronoi(reflect)
 
         # get region vertices
-        regions = vor.point_region[:x.size]
-        regions = np.array(vor.regions, dtype='object')[regions]
+        regions = vor.point_region[: x.size]
+        regions = np.array(vor.regions, dtype="object")[regions]
         region_vertices = []
         for region in regions:
             verts = vor.vertices[region]
@@ -1314,11 +1611,13 @@ class BasePitch(ABC):
             verts[:, 1] = np.clip(verts[:, 1], a_min=extent[2], a_max=extent[3])
             # convert coordinates back if previously standardized
             if standardized:
-                x_std, y_std = self.standardizer.transform(verts[:, 0], verts[:, 1], reverse=True)
+                x_std, y_std = self.standardizer.transform(
+                    verts[:, 0], verts[:, 1], reverse=True
+                )
                 verts[:, 0] = x_std
                 verts[:, 1] = y_std
             region_vertices.append(verts)
-        region_vertices = np.array(region_vertices, dtype='object')
+        region_vertices = np.array(region_vertices, dtype="object")
 
         # seperate team1/ team2 vertices
         team1 = region_vertices[teams == 1]
@@ -1327,7 +1626,7 @@ class BasePitch(ABC):
         return team1, team2
 
     def calculate_angle_and_distance(self, xstart, ystart, xend, yend, degrees=False):
-        """ Calculates the angle in radians counter-clockwise and the distance
+        """Calculates the angle in radians counter-clockwise and the distance
         between a start and end location. Where the angle 0 is this way →
         (the straight line from left to right) in a horizontally orientated pitch
         and this way ↑ in a vertically orientated pitch.
@@ -1393,13 +1692,24 @@ class BasePitch(ABC):
             # but gives the postive angle in degrees
             angle = np.mod(-np.degrees(angle), 360)
 
-        distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
+        distance = (x_dist**2 + y_dist**2) ** 0.5
 
         return angle, distance
 
-    def flow(self, xstart, ystart, xend, yend, bins=(5, 4), arrow_type='same', arrow_length=5,
-             color=None, ax=None, **kwargs):
-        """ Create a flow map by binning the data into cells and calculating the average
+    def flow(
+        self,
+        xstart,
+        ystart,
+        xend,
+        yend,
+        bins=(5, 4),
+        arrow_type="same",
+        arrow_length=5,
+        color=None,
+        ax=None,
+        **kwargs,
+    ):
+        """Create a flow map by binning the data into cells and calculating the average
         angles and distances.
 
         Parameters
@@ -1472,34 +1782,49 @@ class BasePitch(ABC):
         else:
             standardized = False
 
-        bs_distance = self.bin_statistic(xstart, ystart, values=distance,
-                                         statistic='mean', bins=bins, standardized=standardized)
-        bs_angle = self.bin_statistic(xstart, ystart, values=angle,
-                                      statistic=circmean, bins=bins, standardized=standardized)
+        bs_distance = self.bin_statistic(
+            xstart,
+            ystart,
+            values=distance,
+            statistic="mean",
+            bins=bins,
+            standardized=standardized,
+        )
+        bs_angle = self.bin_statistic(
+            xstart,
+            ystart,
+            values=angle,
+            statistic=circmean,
+            bins=bins,
+            standardized=standardized,
+        )
 
         # calculate the arrow length
         if self.dim.pad_multiplier != 1:
             arrow_length = arrow_length * self.dim.pad_multiplier
-        if arrow_type == 'scale':
-            new_d = (bs_distance['statistic'] * arrow_length /
-                     np.nan_to_num(bs_distance['statistic']).max(initial=None))
-        elif arrow_type == 'same':
+        if arrow_type == "scale":
+            new_d = (
+                bs_distance["statistic"]
+                * arrow_length
+                / np.nan_to_num(bs_distance["statistic"]).max(initial=None)
+            )
+        elif arrow_type == "same":
             new_d = arrow_length
-        elif arrow_type == 'average':
-            new_d = bs_distance['statistic']
+        elif arrow_type == "average":
+            new_d = bs_distance["statistic"]
         else:
-            valid_arrows = ['scale', 'same', 'average']
-            raise TypeError(f'Invalid argument: arrow_type should be in {valid_arrows}')
+            valid_arrows = ["scale", "same", "average"]
+            raise TypeError(f"Invalid argument: arrow_type should be in {valid_arrows}")
 
         # calculate the end positions of the arrows
-        endx = bs_angle['cx'] + (np.cos(bs_angle['statistic']) * new_d)
+        endx = bs_angle["cx"] + (np.cos(bs_angle["statistic"]) * new_d)
         if self.dim.invert_y and not standardized:
-            endy = bs_angle['cy'] - (np.sin(bs_angle['statistic']) * new_d)  # invert_y
+            endy = bs_angle["cy"] - (np.sin(bs_angle["statistic"]) * new_d)  # invert_y
         else:
-            endy = bs_angle['cy'] + (np.sin(bs_angle['statistic']) * new_d)
+            endy = bs_angle["cy"] + (np.sin(bs_angle["statistic"]) * new_d)
 
         # get coordinates and convert back to the pitch coordinates if necessary
-        cx, cy = bs_angle['cx'], bs_angle['cy']
+        cx, cy = bs_angle["cx"], bs_angle["cy"]
         if standardized:
             cx, cy = self.standardizer.transform(cx, cy, reverse=True)
             endx, endy = self.standardizer.transform(endx, endy, reverse=True)
@@ -1507,12 +1832,13 @@ class BasePitch(ABC):
         # plot arrows
         if color is not None:
             return self.arrows(cx, cy, endx, endy, color=color, ax=ax, **kwargs)
-        bs_count = self.bin_statistic(xstart, ystart, statistic='count',
-                                      bins=bins, standardized=standardized)
-        return self.arrows(cx, cy, endx, endy, bs_count['statistic'], ax=ax, **kwargs)
+        bs_count = self.bin_statistic(
+            xstart, ystart, statistic="count", bins=bins, standardized=standardized
+        )
+        return self.arrows(cx, cy, endx, endy, bs_count["statistic"], ax=ax, **kwargs)
 
     def triplot(self, x, y, ax=None, **kwargs):
-        """ Utility wrapper around matplotlib.axes.Axes.triplot
+        """Utility wrapper around matplotlib.axes.Axes.triplot
 
         Parameters
         ----------
@@ -1531,52 +1857,52 @@ class BasePitch(ABC):
     # as they differ for horizontal/ vertical pitches
     @abstractmethod
     def _scale_pad(self):
-        """ Implement a method to scale padding for equal aspect pitches."""
+        """Implement a method to scale padding for equal aspect pitches."""
 
     @abstractmethod
     def _set_aspect(self):
-        """ Implement a method to set the aspect attribute."""
+        """Implement a method to set the aspect attribute."""
 
     @abstractmethod
     def _set_extent(self):
-        """ Implement a method to set the pitch extents, stripe locations,
-         and attributes to help plot on different orientations."""
+        """Implement a method to set the pitch extents, stripe locations,
+        and attributes to help plot on different orientations."""
 
     @abstractmethod
     def _validate_pad(self):
-        """ Implement a method to validate the pad values."""
+        """Implement a method to validate the pad values."""
 
     @abstractmethod
     def _draw_rectangle(self, ax, x, y, width, height, **kwargs):
-        """ Implement a method to draw rectangles on an axes."""
+        """Implement a method to draw rectangles on an axes."""
 
     @abstractmethod
     def _draw_centered_rectangle(self, ax, x, y, width, height, **kwargs):
-        """ Implement a method to draw centered rectangles on an axes."""
+        """Implement a method to draw centered rectangles on an axes."""
 
     @abstractmethod
     def _draw_line(self, ax, x, y, **kwargs):
-        """ Implement a method to draw lines on an axes."""
+        """Implement a method to draw lines on an axes."""
 
     @abstractmethod
     def _draw_ellipse(self, ax, x, y, width, height, **kwargs):
-        """ Implement a method to draw ellipses (circles) on an axes."""
+        """Implement a method to draw ellipses (circles) on an axes."""
 
     @abstractmethod
     def _draw_arc(self, ax, x, y, width, height, theta1, theta2, **kwargs):
-        """ Implement a method to draw arcs on an axes."""
+        """Implement a method to draw arcs on an axes."""
 
     @staticmethod
     @abstractmethod
     def _reverse_if_vertical(x, y):
-        """ Implement a method to reverse x and y coordinates if drawing on a vertical pitch."""
+        """Implement a method to reverse x and y coordinates if drawing on a vertical pitch."""
 
     @staticmethod
     @abstractmethod
     def _reverse_vertices_if_vertical(vert):
-        """ Implement a method to reverse vertices if drawing on a vertical pitch."""
+        """Implement a method to reverse vertices if drawing on a vertical pitch."""
 
     @staticmethod
     @abstractmethod
     def _reverse_annotate_if_vertical(annotate):
-        """ Implement a method to reverse annotations if drawing on a vertical pitch."""
+        """Implement a method to reverse annotations if drawing on a vertical pitch."""
