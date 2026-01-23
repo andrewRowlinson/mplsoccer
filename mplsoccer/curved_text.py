@@ -162,13 +162,13 @@ class CurvedText(Artist):
 
         prop = self._template.get_fontproperties()
 
-        widths = [0.0]
-        for i in range(1, len(line.text) + 1):
-            w, _, _ = renderer.get_text_width_height_descent(
-                line.text[:i], prop, ismath=False
-            )
-            widths.append(float(w))
-        advances_px = [widths[i + 1] - widths[i] for i in range(len(line.text))]
+        # Use individual character widths instead of cumulative text widths.
+        # Cumulative widths include kerning adjustments that don't apply when
+        # each character is rendered individually, causing spacing mismatches.
+        advances_px = []
+        for ch in line.text:
+            w, _, _ = renderer.get_text_width_height_descent(ch, prop, ismath=False)
+            advances_px.append(float(w))
 
         letter_spacing_px = self._letter_spacing_points * self.figure.dpi / 72.0
         total_width_px = float(sum(advances_px))
@@ -393,7 +393,9 @@ class PolarCurvedText(Artist):
         p_right = self.axes.transData.transform((theta + dtheta, radius))
         return float(np.hypot(*(p_right - p_left)) / (2 * dtheta))
 
-    def _glyph_rotation(self, theta: float, radius: float, direction_sign: int) -> float:
+    def _glyph_rotation(
+        self, theta: float, radius: float, direction_sign: int
+    ) -> float:
         assert self.axes is not None
         dtheta = 1e-3
         p_left = self.axes.transData.transform((theta - dtheta, radius))
@@ -430,21 +432,25 @@ class PolarCurvedText(Artist):
 
         prop = self._template.get_fontproperties()
 
-        widths = [0.0]
-        for i in range(1, len(line.text) + 1):
-            w, _, _ = renderer.get_text_width_height_descent(
-                line.text[:i], prop, ismath=False
-            )
-            widths.append(float(w))
-        advances_px = [widths[i + 1] - widths[i] for i in range(len(line.text))]
+        # Use individual character widths instead of cumulative text widths.
+        # Cumulative widths include kerning adjustments that don't apply when
+        # each character is rendered individually, causing spacing mismatches.
+        advances_px = []
+        for ch in line.text:
+            w, _, _ = renderer.get_text_width_height_descent(ch, prop, ismath=False)
+            advances_px.append(float(w))
 
-        letter_spacing_px = self._points_to_display(renderer, self._letter_spacing_points)
+        letter_spacing_px = self._points_to_display(
+            renderer, self._letter_spacing_points
+        )
         total_width_px = float(sum(advances_px))
         if len(advances_px) > 1:
             total_width_px += letter_spacing_px * (len(advances_px) - 1)
 
         if self._align == "center":
-            start_theta = start_theta - direction_sign * (total_width_px / (2 * arc_per_rad))
+            start_theta = start_theta - direction_sign * (
+                total_width_px / (2 * arc_per_rad)
+            )
         elif self._align == "end":
             start_theta = start_theta - direction_sign * (total_width_px / arc_per_rad)
 
@@ -458,7 +464,9 @@ class PolarCurvedText(Artist):
             if artist is not None:
                 artist.set_position((theta_i, radius_data))
                 artist.set_rotation(
-                    self._glyph_rotation(theta_i, radius_data, direction_sign=direction_sign)
+                    self._glyph_rotation(
+                        theta_i, radius_data, direction_sign=direction_sign
+                    )
                 )
                 artist.draw(renderer)
 
@@ -499,9 +507,13 @@ class PolarCurvedText(Artist):
         for line_idx, line in enumerate(self._lines):
             if self._radii == "center":
                 half = (num_lines - 1) / 2
-                offset_factor = (half - line_idx) if outward_is_up else (line_idx - half)
+                offset_factor = (
+                    (half - line_idx) if outward_is_up else (line_idx - half)
+                )
             else:
-                offset_factor = (num_lines - 1) - line_idx if outward_is_up else line_idx
+                offset_factor = (
+                    (num_lines - 1) - line_idx if outward_is_up else line_idx
+                )
             radius_data = self._radius + offset_factor * line_spacing_r
             self._layout_line(
                 renderer,
