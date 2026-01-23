@@ -17,13 +17,14 @@ import os
 import sys
 import mplsoccer
 import warnings
-sys.path.insert(0, os.path.abspath('.'))
+
+sys.path.insert(0, os.path.abspath("."))
 
 # -- Project information -----------------------------------------------------
 
-project = 'mplsoccer'
-copyright = '2025, Anmol Durgapal & Andrew Rowlinson'
-author = 'Anmol Durgapal & Andrew Rowlinson'
+project = "mplsoccer"
+copyright = "2025, Anmol Durgapal & Andrew Rowlinson"
+author = "Anmol Durgapal & Andrew Rowlinson"
 
 # The full version, including alpha/beta/rc tags
 VERSION = mplsoccer.__version__
@@ -35,17 +36,19 @@ release = VERSION
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.imgmath',
-              'sphinx.ext.viewcode',
-              'sphinx_gallery.gen_gallery',
-              'sphinx.ext.autosectionlabel',
-              'sphinx.ext.napoleon',
-              'numpydoc']
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.imgmath",
+    "sphinx.ext.viewcode",
+    "sphinx_gallery.gen_gallery",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.napoleon",
+    "numpydoc",
+]
 
 # https://github.com/readthedocs/readthedocs.org/issues/2569
-master_doc = 'index'
+master_doc = "index"
 
 # this is needed for some reason...
 # see https://github.com/numpy/numpydoc/issues/69
@@ -59,44 +62,53 @@ napoleon_use_admonition_for_examples = True
 # generate autosummary even if no references
 autosummary_generate = True
 # order api docs by order they appear in the code
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build']
+exclude_patterns = ["_build"]
 
 # sphinx gallery
 sphinx_gallery_conf = {
-    'examples_dirs': ['../../examples'],
-    'gallery_dirs': ['gallery'],
-	'image_scrapers': ('matplotlib'),
-    'matplotlib_animations': True,
-	'within_subsection_order': ExampleTitleSortKey,
-    'subsection_order': ExplicitOrder(['../../examples/radar',
-                                       '../../examples/pizza_plots',
-                                       '../../examples/bumpy_charts',
-									   '../../examples/pitch_plots',
-									   '../../examples/sonars',
-									   '../../examples/tutorials',
-                                       '../../examples/statsbomb',
-                                       '../../examples/pitch_setup', ])}
+    "examples_dirs": ["../../examples"],
+    "gallery_dirs": ["gallery"],
+    "image_scrapers": ("matplotlib"),
+    "matplotlib_animations": True,
+    "within_subsection_order": ExampleTitleSortKey,
+    "subsection_order": ExplicitOrder(
+        [
+            "../../examples/radar",
+            "../../examples/pizza_plots",
+            "../../examples/bumpy_charts",
+            "../../examples/pitch_plots",
+            "../../examples/speedometer",
+            "../../examples/sonars",
+            "../../examples/tutorials",
+            "../../examples/statsbomb",
+            "../../examples/pitch_setup",
+        ]
+    ),
+}
 
 
 # filter warning messages
-warnings.filterwarnings("ignore", category=UserWarning,
-                        message='Matplotlib is currently using agg, which is a'
-                                ' non-GUI backend, so cannot show the figure.')
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message="Matplotlib is currently using agg, which is a"
+    " non-GUI backend, so cannot show the figure.",
+)
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -105,5 +117,4 @@ html_static_path = []
 
 # add logo
 html_logo = "logo-white.png"
-html_theme_options = {'logo_only': True,
-                      'display_version': False}
+html_theme_options = {"logo_only": True, "display_version": False}

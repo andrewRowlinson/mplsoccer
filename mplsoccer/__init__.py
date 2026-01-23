@@ -15,3 +15,4 @@ from .utils import *
 from .bumpy_chart import *
 from .py_pizza import *
 from .grid import *
+from .speedometer import *

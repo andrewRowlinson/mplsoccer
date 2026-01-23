@@ -1,3 +1,12 @@
+:rocket: Version 1.6.2
+----------------------
+
+### Added
+* :icecream: Added ``Speedometer`` class for plotting speedometer/gauge charts \
+to visualize player speed metrics and performance indicators. \
+Inspired by @znstrider's [speedo library](https://github.com/znstrider/speedo). \
+Contributed by @PGupta-Git.
+
 :rocket: Version 1.6.1
 ----------------------
 
