@@ -194,14 +194,14 @@ fm_scada = FontManager('https://raw.githubusercontent.com/googlefonts/scada/main
 # Load the Club/ Statsbomb logos
 # these are the property of the respective clubs/ StatsBomb.
 BARCA_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/en/thumb/4/47/'
-                  'FC_Barcelona_%28crest%29.svg/142px-FC_Barcelona_%28crest%29.svg.png')
+                  'FC_Barcelona_%28crest%29.svg/120px-FC_Barcelona_%28crest%29.svg.png')
 request_barca = Request(BARCA_LOGO_URL)
 request_barca.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
 barca_logo = Image.open(urlopen(request_barca))
 
 DEPORTIVO_LOGO_URL = ('https://upload.wikimedia.org/wikipedia/en/thumb/f/f8/'
                       'Deportivo_Alaves_logo_%282020%29.svg/'
-                      '300px-Deportivo_Alaves_logo_%282020%29.svg.png')
+                      '250px-Deportivo_Alaves_logo_%282020%29.svg.png')
 request_deportivo = Request(DEPORTIVO_LOGO_URL)
 request_deportivo.add_header('User-Agent', 'mplsoccerdocs (https://mplsoccer.rtfd.io)')
 deportivo_logo = Image.open(urlopen(request_deportivo))
