@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pytest
 
 from mplsoccer import Radar
 from mplsoccer.curved_text import CurvedText
@@ -101,4 +102,87 @@ def test_radar_curved_param_labels_multiline_order_bottom_half():
     assert radii_b
     # At the bottom half, the first line ("AAA") should be innermost (closer to the plot).
     assert np.mean(radii_a) < np.mean(radii_b)
+    plt.close(fig)
+
+
+def test_radar_curved_param_labels_mathtext_raises():
+    params = [r'$\alpha$ Rating', 'Right', 'Bottom', 'Left']
+    radar = Radar(params, min_range=[0, 0, 0, 0], max_range=[1, 1, 1, 1])
+    fig, ax = radar.setup_axis(figsize=(4, 4))
+
+    with pytest.raises(NotImplementedError, match='mathtext'):
+        radar.draw_param_labels(ax=ax, curved=True)
+    plt.close(fig)
+
+
+def test_radar_curved_param_labels_escaped_dollar_allowed():
+    params = [r'Cost \$M', 'Right', 'Bottom', 'Left']
+    radar = Radar(params, min_range=[0, 0, 0, 0], max_range=[1, 1, 1, 1])
+    fig, ax = radar.setup_axis(figsize=(4, 4))
+
+    labels = radar.draw_param_labels(ax=ax, curved=True)
+    fig.canvas.draw()
+    assert len(labels) == len(params)
+    # the escape renders as a plain '$', not a literal backslash
+    chars = [child._mplsoccer_char for child in labels[0].get_children()]
+    assert '$' in chars
+    assert '\\' not in chars
+    plt.close(fig)
+
+
+def test_radar_curved_param_labels_warns_on_ignored_kwargs():
+    params = ['Top', 'Right', 'Bottom', 'Left']
+    radar = Radar(params, min_range=[0, 0, 0, 0], max_range=[1, 1, 1, 1])
+    fig, ax = radar.setup_axis(figsize=(4, 4))
+
+    with pytest.warns(UserWarning, match='ignores'):
+        radar.draw_param_labels(ax=ax, curved=True, rotation=45)
+    plt.close(fig)
+
+    # the warning is per-call, not once-per-process: a second chart
+    # with a different ignored argument warns again
+    fig, ax = radar.setup_axis(figsize=(4, 4))
+    with pytest.warns(UserWarning, match='ignores'):
+        radar.draw_param_labels(ax=ax, curved=True,
+                                bbox={'facecolor': 'yellow'})
+    plt.close(fig)
+
+
+def test_radar_curved_param_labels_horizontal_spokes_deterministic():
+    # horizontal spokes (left/right) sit exactly on the flip boundary;
+    # the direction must not depend on how the angle was computed
+    fig, ax = plt.subplots()
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
+    thetas_horizontal = [np.pi / 2, 3 * np.pi / 2,          # exact
+                         (2 * np.pi / 4) * 3,               # 4 params, left
+                         (2 * np.pi / 12) * 3,              # 12 params, right
+                         (2 * np.pi / 12) * 9]              # 12 params, left
+    for theta in thetas_horizontal:
+        label = CurvedText(ax, 'Label', radius=1, theta=theta)
+        assert label._direction_sign() == 1, theta
+    # just below horizontal (bottom half) still flips
+    label = CurvedText(ax, 'Label', radius=1, theta=np.pi / 2 + 0.01)
+    assert label._direction_sign() == -1
+    plt.close(fig)
+
+
+def test_radar_curved_param_labels_support_text_setters():
+    # labels can be restyled after creation like straight Text labels
+    params = ['Top', 'Right', 'Bottom', 'Left']
+    radar = Radar(params, min_range=[0, 0, 0, 0], max_range=[1, 1, 1, 1])
+    fig, ax = radar.setup_axis(figsize=(4, 4))
+
+    labels = radar.draw_param_labels(ax=ax, curved=True, fontsize=12)
+    for label in labels:
+        label.set_fontsize(20)
+        label.set_color('red')
+        label.set_alpha(0.5)
+    fig.canvas.draw()
+
+    assert labels[0].get_fontsize() == 20
+    assert labels[0].get_color() == 'red'
+    glyph = labels[0].get_children()[0]
+    assert glyph.get_facecolor()[:3] == (1.0, 0.0, 0.0)  # red reached the glyphs
+    assert glyph.get_alpha() == 0.5
     plt.close(fig)
