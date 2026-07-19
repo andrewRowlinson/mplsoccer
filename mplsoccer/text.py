@@ -8,8 +8,6 @@ and is used by the radar charts to render curved parameter labels.
 CurvedText author: PGupta-Git (https://github.com/PGupta-Git)
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Literal
 import warnings
