@@ -347,7 +347,7 @@ class FontManager:
         return f'{self.__class__.__name__}(font_url={self.url})'
 
 def copy_doc(func):
-    """ Decorator to copy a docstring to a new function/method.
+    """ Decorator to copy a docstring to a new function/method. 
     Inspired by estnani's answer: https://stackoverflow.com/questions/4056983/how-do-i-programmatically-set-the-docstring
     """
     def _doc(new_func):

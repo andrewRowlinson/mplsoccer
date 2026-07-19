@@ -92,7 +92,7 @@ class BasePitchSoccer(BasePitch):
     pitch_length : float, default None
         The pitch length in meters. Only used for the 'tracab' and 'metricasports',
         'skillcorner', 'secondspectrum' and 'custom' pitch_type.
-    pitch_width : float, default None
+    pitch_width : float, default None    
         The pitch width in meters. Only used for the 'tracab' and 'metricasports',
         'skillcorner', 'secondspectrum' and 'custom' pitch_type
     goal_type : str, default 'line'
@@ -607,14 +607,14 @@ class BasePitchSoccer(BasePitch):
             A collection of position identifiers to map the xoffset, yoffset, image and text
             arguments to mplsoccer positions. Only necessary for pitch_type='statsbomb',
             kind='image', kind='text' or where one of the xoffset/yoffset is not None
-
+            
             For StatsBomb pitches, the position identifiers are between 1 and 25.
             For Opta pitches, the position identifiers are between 1 and 11.
             For Wyscout pitches, the position identifiers are:
             'gk', 'rwb', 'rb5', 'rb', 'rcb3', 'rcb', 'cb', 'lcb', 'lcb3', 'lb', 'lb5',
             'lwb', 'rdmf', 'dmf', 'ldmf', 'rcmf3', 'rcmf', 'lcmf', 'lcmf3', 'rw',
             'ramf', 'amf', 'lamf', 'lw', 'ss', 'cf'.
-            For other pitches, the position identifiers are:
+            For other pitches, the position identifiers are: 
             'GK', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'RWB', 'LWB', 'RDM', 'CDM', 'LDM',
             'RM', 'RCM', 'CM', 'LCM', 'LM', 'RW', 'RAM', 'CAM', 'LAM', 'LW', 'RCF',
             'ST', 'LCF', 'SS'.
