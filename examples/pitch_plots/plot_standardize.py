@@ -121,11 +121,10 @@ parser = Sbopen()
 df_statsbomb = parser.event(7579)[0]  # events are the zero index
 
 dataset = wyscout.load_open_data(match_id=2058002, coordinates='wyscout')
-df_wyscout = dataset.to_pandas(
-        additional_columns={
-            'player_name': lambda event: str(event.player),
-            'team_name': lambda event: str(event.player.team)
-        },
+df_wyscout = dataset.to_df(
+        '*',
+        player_name=lambda event: str(event.player),
+        team_name=lambda event: str(event.player.team),
     ) 
 
 ##############################################################################
