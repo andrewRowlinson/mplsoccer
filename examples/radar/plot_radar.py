@@ -103,7 +103,7 @@ range_labels = radar.draw_range_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop)  # draw the range labels
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop,
-                                       curved=True)  # draw the (curved) param labels
+                                       curved=True)  # optional curved labels
 
 ##############################################################################
 # Adding lines from the center to the edge
@@ -119,7 +119,8 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15, zorder=2.5,
                                        fontproperties=robotto_thin.prop)  # draw the range labels
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
-                                       fontproperties=robotto_thin.prop)  # draw the param labels
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 lines = radar.spoke(ax=ax, color='#a6a4a1', linestyle='--', zorder=2)
 
 ##############################################################################
@@ -137,7 +138,8 @@ radar_poly, radar_poly2, vertices1, vertices2 = radar_output
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=ax, fontsize=15,
-                                       fontproperties=robotto_thin.prop)
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 
 ##############################################################################
 # Comparing three or more players
@@ -175,7 +177,8 @@ ax.scatter(vertices3[:, 0], vertices3[:, 1],
            c='#697cd4', edgecolors='#222b54', marker='o', s=150, zorder=2)
 
 range_labels = radar.draw_range_labels(ax=ax, fontsize=25, fontproperties=robotto_thin.prop)
-param_labels = radar.draw_param_labels(ax=ax, fontsize=25, fontproperties=robotto_thin.prop)
+param_labels = radar.draw_param_labels(ax=ax, fontsize=25, fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 
 ##############################################################################
 # Making a Clean Radar
@@ -209,7 +212,8 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25,
-                                       fontproperties=robotto_thin.prop)
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 
 # adding the endnote and title text (these axes range from 0-1, i.e. 0, 0 is the bottom left)
 # Note we are slightly offsetting the text from the edges by 0.01 (1%, e.g. 0.99)
@@ -247,7 +251,8 @@ radar_poly, radar_poly2, vertices1, vertices2 = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25,
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25,
-                                       fontproperties=robotto_thin.prop)
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 axs['radar'].scatter(vertices1[:, 0], vertices1[:, 1],
                      c='#00f2c1', edgecolors='#6d6c6d', marker='o', s=150, zorder=2)
 axs['radar'].scatter(vertices2[:, 0], vertices2[:, 1],
@@ -287,7 +292,8 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#fcfcfc',
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#fcfcfc',
-                                       fontproperties=robotto_thin.prop)
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 
 # adding the endnote and title text (these axes range from 0-1, i.e. 0, 0 is the bottom left)
 # Note we are slightly offsetting the text from the edges by 0.01 (1%, e.g. 0.99)
@@ -332,7 +338,8 @@ radar_poly, rings_outer, vertices = radar_output
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#f0f6f6',
                                        fontproperties=robotto_thin.prop)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#f0f6f6',
-                                       fontproperties=robotto_thin.prop)
+                                       fontproperties=robotto_thin.prop,
+                                       curved=True)  # optional curved labels
 axs['radar'].scatter(vertices[:, 0], vertices[:, 1], c='#eeb743', edgecolors='#070707',
                      marker='D', s=220, zorder=2)
 
@@ -394,7 +401,8 @@ radar_output2 = radar2.draw_radar(values=[5, 2, 4, 3, 1], ax=axs['radar'],
 range_labels = radar2.draw_range_labels(ax=axs['radar'], fontproperties=serif_extra_light.prop,
                                         fontsize=25)
 param_labels = radar2.draw_param_labels(ax=axs['radar'], fontproperties=serif_regular.prop,
-                                        fontsize=25)
+                                        fontsize=25,
+                                        curved=True)  # optional curved labels
 
 # adding the endnote and title text (these axes range from 0-1, i.e. 0, 0 is the bottom left)
 # Note we are slightly offsetting the text from the edges by 0.01 (1%, e.g. 0.99)
