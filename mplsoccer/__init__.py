@@ -11,6 +11,7 @@ from .linecollection import *
 from .quiver import *
 from .radar_chart import *
 from .scatterutils import *
+from .text import *
 from .utils import *
 from .bumpy_chart import *
 from .py_pizza import *

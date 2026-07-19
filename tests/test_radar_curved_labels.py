@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from mplsoccer import Radar
-from mplsoccer.curved_text import CurvedText
+from mplsoccer import CurvedText
 
 
 def test_radar_curved_param_labels_smoke():

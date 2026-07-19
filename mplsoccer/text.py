@@ -1,9 +1,11 @@
-"""Utilities for drawing text along a circular arc (radar convention).
+"""mplsoccer's text artists.
 
-This module is currently used by mplsoccer's radar charts to render curved
-parameter labels.
+Text drawn from glyph outlines (``TextPath``) rather than ``ax.text``,
+for geometric control that normal text rendering cannot give.
+Currently contains ``CurvedText``, which draws text along a circular arc
+and is used by the radar charts to render curved parameter labels.
 
-Author: PGupta-Git (https://github.com/PGupta-Git)
+CurvedText author: PGupta-Git (https://github.com/PGupta-Git)
 """
 
 from __future__ import annotations
@@ -20,7 +22,7 @@ from matplotlib.text import Text
 from matplotlib.textpath import TextPath, text_to_path
 from matplotlib.transforms import Affine2D, Bbox
 
-__all__ = ["CurvedText"]
+__all__ = ['CurvedText']
 
 
 _Align = Literal["center", "start", "end"]

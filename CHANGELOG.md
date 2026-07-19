@@ -4,6 +4,11 @@
 ### Breaking Changes
 * Requires matplotlib 3.8 or above (curved radar labels use text \
 antialiasing APIs added in matplotlib 3.8).
+* The undocumented ``Radar.rotation`` attribute now always holds the angle \
+of each parameter around the chart (zero at the top, increasing clockwise). \
+Previously the lower-half angles were flipped 180 degrees so the text \
+labels are not upside down; this flip is now only applied to \
+``Radar.rotation_degrees``.
 
 ### Added
 * :heart_eyes: Added curved text labels for radar charts by \

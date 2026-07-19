@@ -13,6 +13,7 @@ import seaborn as sns
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon, Wedge
 
+from .text import CurvedText
 from .utils import set_visible, validate_ax
 
 __all__ = ['Radar']
@@ -103,15 +104,15 @@ class Radar:
             self.min_range = np.where(self.greater_is_better, min_range_copy, max_range_copy)
             self.max_range = np.where(self.greater_is_better, max_range_copy, min_range_copy)
 
-        # get the rotation angles
+        # the angle of each parameter around the chart (zero at the top, increasing clockwise)
         self.rotation = (2 * np.pi / self.num_labels) * np.arange(self.num_labels)
         self.rotation_sin = np.sin(self.rotation)
         self.rotation_cos = np.cos(self.rotation)
 
-        # flip the rotation if the label is in lower half
-        mask_flip_label = (self.rotation > np.pi / 2) & (self.rotation < np.pi / 2 * 3)
-        self.rotation[mask_flip_label] = self.rotation[mask_flip_label] + np.pi
+        # rotate the label text 180 degrees in the lower half so it isn't upside down
         self.rotation_degrees = -np.rad2deg(self.rotation)
+        mask_flip_label = (self.rotation > np.pi / 2) & (self.rotation < np.pi / 2 * 3)
+        self.rotation_degrees[mask_flip_label] = self.rotation_degrees[mask_flip_label] - 180
 
         # rotation kdes
         angle_from = np.pi / 2
@@ -503,7 +504,7 @@ class Radar:
 
         Returns
         -------
-        label_list : list of matplotlib.text.Text or list of mplsoccer.curved_text.CurvedText
+        label_list : list of matplotlib.text.Text or list of mplsoccer.text.CurvedText
 
         Examples
         --------
@@ -528,16 +529,11 @@ class Radar:
         param_radius = self.outer_ring + offset
         label_list = []
         if curved:
-            from .curved_text import CurvedText
-
-            # use the un-flipped spoke angles (theta=0 at top, increasing clockwise);
-            # self.rotation is flipped in __init__ for straight-label readability
-            thetas = (2 * np.pi / self.num_labels) * np.arange(self.num_labels)
             for idx, label in enumerate(self.params):
                 if wrap is not None:
                     label = '\n'.join(textwrap.wrap(label, wrap, break_long_words=False))
                 curved_text = CurvedText(ax=ax, text=label, radius=param_radius,
-                                         theta=thetas[idx], align=curved_align,
+                                         theta=self.rotation[idx], align=curved_align,
                                          direction=curved_direction, radii=curved_radii,
                                          line_spacing=curved_line_spacing,
                                          letter_spacing=curved_letter_spacing, **kwargs)
