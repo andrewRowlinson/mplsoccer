@@ -13,16 +13,14 @@ from typing import Literal
 import warnings
 
 import numpy as np
+from matplotlib import cbook
 from matplotlib.artist import Artist
 from matplotlib.patches import PathPatch
 from matplotlib.text import Text
 from matplotlib.textpath import TextPath, text_to_path
-from matplotlib.transforms import Affine2D
+from matplotlib.transforms import Affine2D, Bbox
 
 __all__ = ["CurvedText"]
-
-
-_WARNED_UNSUPPORTED_BBOX = False
 
 
 _Align = Literal["center", "start", "end"]
@@ -66,15 +64,16 @@ class CurvedText(Artist):
     ):
         super().__init__()
 
-        # Text kwargs that do not translate cleanly to per-glyph PathPatches.
-        global _WARNED_UNSUPPORTED_BBOX
-        if (
-            "bbox" in text_kwargs or "backgroundcolor" in text_kwargs
-        ) and not _WARNED_UNSUPPORTED_BBOX:
-            _WARNED_UNSUPPORTED_BBOX = True
+        # Text kwargs that do not translate to per-glyph curved layout are
+        # accepted but ignored, with a warning (like the 'colors' argument
+        # of the lines method).
+        unsupported = ("rotation", "rotation_mode", "ha", "horizontalalignment",
+                       "va", "verticalalignment", "transform", "bbox",
+                       "backgroundcolor")
+        ignored = [key for key in unsupported if key in text_kwargs]
+        if ignored:
             warnings.warn(
-                "CurvedText draws curved labels as vector glyph paths; text 'bbox' and "
-                "'backgroundcolor' are not supported and will be ignored.",
+                f"curved text ignores the argument(s): {ignored}",
                 UserWarning,
                 stacklevel=2,
             )
@@ -92,21 +91,26 @@ class CurvedText(Artist):
         self._letter_spacing_points = float(letter_spacing)
 
         self._text = "" if text is None else str(text)
+        self._validate_no_mathtext()
 
         self._text_kwargs = dict(text_kwargs)
-        self._text_kwargs.pop("rotation", None)
-        self._text_kwargs.pop("rotation_mode", None)
-        self._text_kwargs.pop("ha", None)
-        self._text_kwargs.pop("horizontalalignment", None)
-        self._text_kwargs.pop("va", None)
-        self._text_kwargs.pop("verticalalignment", None)
-        self._text_kwargs.pop("transform", None)
+        for key in unsupported:
+            self._text_kwargs.pop(key, None)
         self._text_kwargs.setdefault("parse_math", False)
         self._text_kwargs.setdefault("usetex", False)
 
         # Match Matplotlib Text default zorder (3) so curved labels layer similarly.
         zorder = self._text_kwargs.pop("zorder", 3)
         self.set_zorder(zorder)
+
+        # Axes.add_artist assigns the axes patch as this artist's clip path.
+        # Combined with the default clip_on=True that would clip the label
+        # out of tight bounding boxes (savefig(bbox_inches='tight') would
+        # crop labels outside the axes), which Axes.text-created labels do
+        # not suffer. Default to unclipped like regular text unless the
+        # caller explicitly asks for clipping.
+        if not self._text_kwargs.get("clip_on"):
+            self.set_clip_on(False)
 
         self._template = Text(0, 0, "", **self._text_kwargs)
         self._template.set_parse_math(False)
@@ -117,13 +121,54 @@ class CurvedText(Artist):
         self._lines: list[_LineGlyphs] = []
         self._rebuild()
 
+    def _validate_no_mathtext(self) -> None:
+        # curved text is laid out one glyph at a time along the arc, which
+        # cannot represent mathtext's two-dimensional layout (superscripts,
+        # fractions), so fail loudly rather than draw the markup literally
+        for line in self._text.splitlines():
+            if cbook.is_math_text(line):
+                raise NotImplementedError(
+                    f"mathtext is not implemented for curved text: {line!r}. "
+                    "Use plain text, or escape dollar signs as \\$ "
+                    "for a literal '$'."
+                )
+
     def set_text(self, text: str) -> None:
         self._text = "" if text is None else str(text)
+        self._validate_no_mathtext()
         self._rebuild()
         self.stale = True
 
     def get_text(self) -> str:
         return self._text
+
+    # Common Text setters, so labels returned by draw_param_labels can be
+    # restyled the same way whether or not they are curved. Each routes
+    # through the template Text and rebuilds the glyph patches, which
+    # otherwise bake in the properties at construction.
+    def set_color(self, color) -> None:
+        self._template.set_color(color)
+        self._rebuild()
+        self.stale = True
+
+    def get_color(self):
+        return self._template.get_color()
+
+    def set_fontsize(self, fontsize) -> None:
+        self._template.set_fontsize(fontsize)
+        self._rebuild()
+        self.stale = True
+
+    def get_fontsize(self):
+        return self._template.get_fontsize()
+
+    def set_alpha(self, alpha) -> None:
+        super().set_alpha(alpha)
+        self._template.set_alpha(alpha)
+        self._rebuild()
+
+    def get_alpha(self):
+        return self._template.get_alpha()
 
     def get_children(self):
         children: list[Artist] = []
@@ -135,7 +180,10 @@ class CurvedText(Artist):
 
     def _rebuild(self) -> None:
         self._lines.clear()
-        lines = self._text.splitlines() or [""]
+        # unescape \$ like matplotlib's non-math text path does, so the
+        # escape recommended by the mathtext error renders as a plain '$'
+        text = self._text.replace(r"\$", "$")
+        lines = text.splitlines() or [""]
         for line in lines:
             chars = list(line)
             artists: list[PathPatch | None] = []
@@ -149,9 +197,6 @@ class CurvedText(Artist):
                 glyph_path = TextPath(
                     (0, 0), ch, size=fontsize_points, prop=prop, usetex=False
                 )
-
-                bbox = glyph_path.get_extents()
-                x_center_pt = (bbox.x0 + bbox.x1) / 2.0
 
                 patch = PathPatch(
                     glyph_path,
@@ -174,7 +219,6 @@ class CurvedText(Artist):
 
                 # Stash the glyph for tests/debugging.
                 patch._mplsoccer_char = ch  # type: ignore[attr-defined]
-                patch._mplsoccer_x_center_pt = float(x_center_pt)  # type: ignore[attr-defined]
 
                 artists.append(patch)
             self._lines.append(_LineGlyphs(text=line, chars=chars, artists=artists))
@@ -184,12 +228,15 @@ class CurvedText(Artist):
             return 1
         if self._direction == "counterclockwise":
             return -1
-        theta = self._theta % (2 * np.pi)
-        return -1 if (np.pi / 2) < theta < (3 * np.pi / 2) else 1
+        # flip in the lower half of the chart so labels stay readable.
+        # cos(theta) < 0 is the lower half; the tolerance makes exactly
+        # horizontal spokes (cos(theta) == 0, i.e. the left/right spokes)
+        # always take the unflipped branch rather than letting
+        # floating-point rounding of (2 * pi / num_params) * k decide.
+        return -1 if np.cos(self._theta) < -1e-9 else 1
 
     def _layout_line(
         self,
-        renderer,
         line: _LineGlyphs,
         radius_data: float,
         start_theta: float,
@@ -238,8 +285,8 @@ class CurvedText(Artist):
             start_theta = start_theta - direction_sign * (total_width_px / radius_px)
 
         cumulative = 0.0
-        for idx, (ch, adv_px, artist) in enumerate(
-            zip(line.chars, advances_px, line.artists)
+        for idx, (ch, adv_pt, adv_px, artist) in enumerate(
+            zip(line.chars, advances_pt, advances_px, line.artists)
         ):
             center_dist_px = cumulative + (adv_px / 2)
             theta_i = start_theta + direction_sign * (center_dist_px / radius_px)
@@ -251,15 +298,16 @@ class CurvedText(Artist):
                 if direction_sign == -1:
                     rotation += 180
 
-                x_center_pt = getattr(artist, "_mplsoccer_x_center_pt", None)
-                if x_center_pt is None:
-                    bbox = artist.get_path().get_extents()
-                    x_center_pt = (bbox.x0 + bbox.x1) / 2.0
                 x_px, y_px = self.axes.transData.transform((x_i, y_i))
 
+                # Anchor each glyph by the centre of its advance box -- the
+                # same quantity used to place it along the arc. Anchoring by
+                # the ink bounding-box centre instead shifts every glyph by
+                # its side-bearing asymmetry (up to ~5% of the em for e.g.
+                # 'r'), which makes the letter spacing visibly wobble.
                 transform = (
                     Affine2D()
-                    .translate(-x_center_pt, 0.0)
+                    .translate(-adv_pt / 2.0, 0.0)
                     .scale(pt_to_px)
                     .rotate_deg(rotation)
                     .translate(x_px, y_px)
@@ -270,18 +318,12 @@ class CurvedText(Artist):
                 artist._mplsoccer_position = (x_i, y_i)  # type: ignore[attr-defined]
                 artist._mplsoccer_rotation = float(rotation)  # type: ignore[attr-defined]
 
-                artist.draw(renderer)
-
             cumulative += adv_px
             if idx < (len(advances_px) - 1):
                 cumulative += letter_spacing_px
 
-    def draw(self, renderer) -> None:
-        if not self.get_visible():
-            return
-        if self.axes is None or self.figure is None:
-            return
-
+    def _layout(self) -> None:
+        """Set display-space transforms on every glyph patch (no drawing)."""
         direction_sign = self._direction_sign()
 
         fontsize_points = float(self._template.get_fontsize())
@@ -356,9 +398,44 @@ class CurvedText(Artist):
                 radius_data_center - direction_sign * center_to_baseline_data
             )
             self._layout_line(
-                renderer,
                 line=line,
                 radius_data=radius_data_baseline,
                 start_theta=self._theta,
                 direction_sign=direction_sign,
             )
+
+    def draw(self, renderer) -> None:
+        if not self.get_visible():
+            return
+        if self.axes is None or self.figure is None:
+            return
+        self._layout()
+        for artist in self.get_children():
+            artist.draw(renderer)
+
+    def get_window_extent(self, renderer=None):
+        """Return the bounding box of the laid-out glyphs in display space.
+
+        Implementing this lets curved labels participate in tight bounding
+        box calculations (``savefig(bbox_inches='tight')``, ``tight_layout``,
+        ``constrained_layout``) instead of reporting a zero-size box, which
+        would crop the labels out of saved figures.
+        """
+        if self.axes is None or self.figure is None:
+            return Bbox.null()
+        self._layout()
+        extents = [artist.get_window_extent(renderer)
+                   for artist in self.get_children()]
+        if not extents:
+            return Bbox.null()
+        return Bbox.union(extents)
+
+    def contains(self, mouseevent):
+        """Hit-test against the laid-out glyphs so picking works."""
+        if (self.axes is None or self.figure is None
+                or mouseevent.canvas is not self.figure.canvas):
+            return False, {}
+        self._layout()
+        inside = any(artist.contains(mouseevent)[0]
+                     for artist in self.get_children())
+        return inside, {}
