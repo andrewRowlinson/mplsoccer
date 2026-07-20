@@ -5,7 +5,7 @@ Curved text
 
 This example shows how to draw text along a circular arc with mplsoccer's
 CurvedText artist. Radar uses CurvedText internally see the
-:ref:`radar examples <sphx_glr_gallery_radar_plot_radar.py>`), but you can
+:ref:`radar examples <sphx_glr_gallery_radar_plot_radar.py>`, but you can
 also use it on normal axes.
 """
 import matplotlib.pyplot as plt
@@ -35,7 +35,7 @@ ax.plot(x, y, 'o', color='#fc5f5f')  # mark the start point
 
 text = CurvedText(ax, x, y, 'The quick brown fox jumps over the lazy dog',
                   align='start', fontsize=14)
-ax.add_artist(text)
+ax.add_artist(text);
 
 ##############################################################################
 # Alignment

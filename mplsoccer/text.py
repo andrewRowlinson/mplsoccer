@@ -69,8 +69,7 @@ class CurvedText(Artist):
         Additional spacing between characters in points, added on top of the
         font's natural character widths. The default of 0 uses the font's
         normal spacing; negative values tighten it.
-    **text_kwargs : All other keyword arguments are passed on to \
-matplotlib.axes.Axes.text.
+    **text_kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text.
         Arguments that do not translate to per-glyph curved layout
         (e.g. ``rotation`` and the alignment arguments) are ignored
         with a warning.
