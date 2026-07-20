@@ -15,7 +15,7 @@ labels are not upside down; this flip is now only applied to \
 [PGupta-Git](https://github.com/PGupta-Git). The ``curved=True`` argument \
 in ``Radar.draw_param_labels()`` curves parameter labels around the radar \
 perimeter instead of using straight rotated text. Includes support for \
-multi-line labels with automatic visual ordering, configurable \
+multi-line labels with automatic visual ordering and configurable \
 letter spacing (``curved_letter_spacing``).
 
 :rocket: Version 1.6.1
