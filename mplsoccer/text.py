@@ -25,7 +25,7 @@ __all__ = ['CurvedText']
 
 _Align = Literal["center", "start", "end"]
 _Direction = Literal["auto", "clockwise", "counterclockwise"]
-_RadiiMode = Literal["outward", "center"]
+_RadialAnchor = Literal["inner", "center"]
 
 
 @dataclass
@@ -38,11 +38,45 @@ class _LineGlyphs:
 class CurvedText(Artist):
     """Draw text along a circular arc for mplsoccer radar charts.
 
+    Parameters
+    ----------
+    ax : matplotlib axis
+        The axis to plot on.
+    x, y : float
+        The position to place the text in data coordinates. The text curves
+        along the circle through ``(x, y)`` around ``center``, with the line
+        of text vertically centered on the circle. Must differ from ``center``.
+    s : str
+        The text to draw. Newlines split the text into multiple arcs
+        stacked radially (see ``radial_anchor``).
+    center : tuple of float, default (0, 0)
+        The point the text curves around, in data coordinates.
+    align : {'center', 'start', 'end'}, default 'center'
+        How to align the text relative to ``(x, y)``. ``'start'`` and ``'end'``
+        refer to the text's reading direction along the arc rather than
+        left/right, because ``direction='auto'`` can flip the direction
+        the text flows.
+    direction : {'auto', 'clockwise', 'counterclockwise'}, default 'auto'
+        Direction to lay out characters along the arc. ``'auto'`` flips
+        direction in the lower half of the circle so the text stays readable.
+    radial_anchor : {'inner', 'center'}, default 'inner'
+        How multiline text stacks relative to the circle through ``(x, y)``:
+        ``'inner'`` centers the innermost line on the circle with further
+        lines stacking outward, while ``'center'`` centers the whole block
+        of lines on the circle. Single-line text is centered on the
+        circle either way.
+    letter_spacing : float, default 0
+        Additional spacing between characters in points, added on top of the
+        font's natural character widths. The default of 0 uses the font's
+        normal spacing; negative values tighten it.
+    **text_kwargs : All other keyword arguments are passed on to \
+matplotlib.axes.Axes.text.
+        Arguments that do not translate to per-glyph curved layout
+        (e.g. ``rotation`` and the alignment arguments) are ignored
+        with a warning.
+
     Notes
     -----
-    - The angle convention matches mplsoccer's radar charts:
-      `theta=0` at the top, increasing clockwise, with coordinates:
-      `x = r * sin(theta)`, `y = r * cos(theta)`.
     - Mathtext/TeX rendering is disabled for curved text (it is non-trivial to
       support when placing per-character glyphs along an arc).
     """
@@ -50,15 +84,14 @@ class CurvedText(Artist):
     def __init__(
         self,
         ax,
-        text: str,
-        radius: float,
-        theta: float,
+        x: float,
+        y: float,
+        s: str,
         *,
         center: tuple[float, float] = (0.0, 0.0),
         align: _Align = "center",
         direction: _Direction = "auto",
-        radii: _RadiiMode = "outward",
-        line_spacing: float | None = None,
+        radial_anchor: _RadialAnchor = "inner",
         letter_spacing: float = 0.0,
         **text_kwargs,
     ):
@@ -82,15 +115,23 @@ class CurvedText(Artist):
         self.set_figure(ax.figure)
 
         self._center = (float(center[0]), float(center[1]))
-        self._radius = float(radius)
-        self._theta = float(theta)
+        delta_x = float(x) - self._center[0]
+        delta_y = float(y) - self._center[1]
+        self._radius = float(np.hypot(delta_x, delta_y))
+        if self._radius == 0:
+            raise ValueError(
+                f"The text position ({x}, {y}) must differ from the center "
+                f"{center} so it defines the circle the text curves along."
+            )
+        # The angle convention matches mplsoccer's radar charts: theta=0 at
+        # the top, increasing clockwise, so x = r * sin(theta), y = r * cos(theta).
+        self._theta = float(np.arctan2(delta_x, delta_y))
         self._align: _Align = align
         self._direction: _Direction = direction
-        self._radii: _RadiiMode = radii
-        self._line_spacing_points = line_spacing
+        self._radial_anchor: _RadialAnchor = radial_anchor
         self._letter_spacing_points = float(letter_spacing)
 
-        self._text = "" if text is None else str(text)
+        self._text = "" if s is None else str(s)
         self._validate_no_mathtext()
 
         self._text_kwargs = dict(text_kwargs)
@@ -328,11 +369,7 @@ class CurvedText(Artist):
 
         fontsize_points = float(self._template.get_fontsize())
         linespacing = float(self._text_kwargs.get("linespacing", 1.2))
-        line_spacing_points = (
-            float(self._line_spacing_points)
-            if self._line_spacing_points is not None
-            else fontsize_points * linespacing
-        )
+        line_spacing_points = fontsize_points * linespacing
         line_spacing_px = line_spacing_points * self.figure.dpi / 72.0
 
         num_lines = len(self._lines)
@@ -363,7 +400,7 @@ class CurvedText(Artist):
         lp_d = float(lp_d)
 
         for line_idx, line in enumerate(self._lines):
-            if self._radii == "center":
+            if self._radial_anchor == "center":
                 # Center the block around the given radius, while keeping the line order
                 # consistent with standard multiline text (top-to-bottom in display coords).
                 half = (num_lines - 1) / 2

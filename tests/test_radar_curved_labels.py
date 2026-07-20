@@ -159,10 +159,11 @@ def test_radar_curved_param_labels_horizontal_spokes_deterministic():
                          (2 * np.pi / 12) * 3,              # 12 params, right
                          (2 * np.pi / 12) * 9]              # 12 params, left
     for theta in thetas_horizontal:
-        label = CurvedText(ax, 'Label', radius=1, theta=theta)
+        label = CurvedText(ax, np.sin(theta), np.cos(theta), 'Label')
         assert label._direction_sign() == 1, theta
     # just below horizontal (bottom half) still flips
-    label = CurvedText(ax, 'Label', radius=1, theta=np.pi / 2 + 0.01)
+    theta = np.pi / 2 + 0.01
+    label = CurvedText(ax, np.sin(theta), np.cos(theta), 'Label')
     assert label._direction_sign() == -1
     plt.close(fig)
 

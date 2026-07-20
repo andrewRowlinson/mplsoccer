@@ -470,9 +470,7 @@ class Radar:
         return label_list
 
     def draw_param_labels(self, ax=None, wrap=15, offset=1, curved=False,
-                          curved_line_spacing=None, curved_letter_spacing=0,
-                          curved_align='center', curved_direction='auto',
-                          curved_radii='outward', **kwargs):
+                          curved_letter_spacing=0, **kwargs):
         """ Draw the parameter labels (e.g. 'Key Passes') on the edge of the chart.
 
         Parameters
@@ -488,19 +486,16 @@ class Radar:
             If True, draw curved labels following the radar perimeter.
             Mathtext params (e.g. ``'$\\alpha$'``) are not supported for
             curved labels and raise a NotImplementedError.
-        curved_line_spacing : float, default None
-            The spacing between wrapped lines in points (only used when ``curved=True``).
-            If None, defaults to ``fontsize * linespacing``.
+            For finer control over the curved layout,
+            use :class:`mplsoccer.text.CurvedText` directly.
         curved_letter_spacing : float, default 0
-            Extra spacing between characters in points (only used when ``curved=True``).
-        curved_align : {'center', 'start', 'end'}, default 'center'
-            How to align the curved label relative to the spoke angle.
-        curved_direction : {'auto', 'clockwise', 'counterclockwise'}, default 'auto'
-            Direction to lay out characters along the arc. ``'auto'`` flips direction
-            for the lower half so labels stay readable.
-        curved_radii : {'outward', 'center'}, default 'outward'
-            How to position wrapped lines radially (only used when ``curved=True``).
-        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text.
+            Additional spacing between characters in points, added on top of the
+            font's natural character widths (only used when ``curved=True``).
+            The default of 0 uses the font's normal spacing;
+            negative values tighten it.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.text
+            (e.g. ``fontsize``, ``color``, and ``linespacing``, which also controls
+            the spacing between wrapped lines of curved labels).
 
         Returns
         -------
@@ -527,27 +522,21 @@ class Radar:
         # default places one-and-a-half units (offset) away from the edge of the last circle
 
         param_radius = self.outer_ring + offset
-        label_list = []
-        if curved:
-            for idx, label in enumerate(self.params):
-                if wrap is not None:
-                    label = '\n'.join(textwrap.wrap(label, wrap, break_long_words=False))
-                curved_text = CurvedText(ax=ax, text=label, radius=param_radius,
-                                         theta=self.rotation[idx], align=curved_align,
-                                         direction=curved_direction, radii=curved_radii,
-                                         line_spacing=curved_line_spacing,
-                                         letter_spacing=curved_letter_spacing, **kwargs)
-                ax.add_artist(curved_text)
-                label_list.append(curved_text)
-            return label_list
         param_xs = param_radius * self.rotation_sin
         param_ys = param_radius * self.rotation_cos
         # write the labels on the axis
+        label_list = []
         for idx, label in enumerate(self.params):
             if wrap is not None:
                 label = '\n'.join(textwrap.wrap(label, wrap, break_long_words=False))
-            text = ax.text(param_xs[idx], param_ys[idx], label,
-                           rotation=self.rotation_degrees[idx], ha='center', va='center', **kwargs)
+            if curved:
+                text = CurvedText(ax, param_xs[idx], param_ys[idx], label,
+                                  letter_spacing=curved_letter_spacing, **kwargs)
+                ax.add_artist(text)
+            else:
+                text = ax.text(param_xs[idx], param_ys[idx], label,
+                               rotation=self.rotation_degrees[idx],
+                               ha='center', va='center', **kwargs)
             label_list.append(text)
         return label_list
 
