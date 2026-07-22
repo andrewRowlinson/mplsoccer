@@ -8,6 +8,8 @@ The idea is inspired by Tom Worville, Football Slices, Soma Zero FC and Soumyaji
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .text import CurvedText
+
 __all__ = ["PyPizza"]
 
 
@@ -107,7 +109,7 @@ class PyPizza:
                    compare_colors=None, value_bck_colors=None, compare_value_colors=None,
                    compare_value_bck_colors=None, color_blank_space=None, blank_alpha=0.5,
                    kwargs_slices=None, kwargs_compare=None, kwargs_params=None, kwargs_values=None,
-                   kwargs_compare_values=None):
+                   kwargs_compare_values=None, curved_params=False, curved_letter_spacing=0):
         """To make the pizza plot.
 
             Parameters
@@ -149,6 +151,18 @@ class PyPizza:
                         if sequence of str --> colors from the defined sequence
             blank_alpha : float, default 0.5
                 Alpha value for blank-space-colors
+            curved_params : bool, default False
+                If True, draw the parameter labels curved around the chart
+                using :class:`mplsoccer.text.CurvedText` instead of straight
+                rotated text. Mathtext params (e.g. ``'$\\alpha$'``) are not
+                supported for curved labels and raise a NotImplementedError.
+                For finer control over the curved layout,
+                use :class:`mplsoccer.text.CurvedText` directly.
+            curved_letter_spacing : float, default 0
+                Additional spacing between characters in points, added on top
+                of the font's natural character widths (only used when
+                ``curved_params=True``). The default of 0 uses the font's
+                normal spacing; negative values tighten it.
 
             **kwargs_slices : All keyword arguments are passed on to axes.Axes.bar for slices.
             **kwargs_compare : All keyword arguments are passed on to axes.Axes.bar
@@ -303,7 +317,8 @@ class PyPizza:
             temp_values=temp_values, temp_compare_values=temp_compare_values,
             compare_value_bck_colors=compare_value_bck_colors,
             kwargs_params=kwargs_params, kwargs_values=kwargs_values,
-            kwargs_compare_values=kwargs_compare_values
+            kwargs_compare_values=kwargs_compare_values,
+            curved_params=curved_params, curved_letter_spacing=curved_letter_spacing
         )
 
         if return_fig_ax:
@@ -368,7 +383,8 @@ class PyPizza:
                     value_colors=None, value_bck_colors=None,
                     compare_values=None, compare_value_colors=None,
                     compare_value_bck_colors=None,
-                    kwargs_params=None, kwargs_values=None, kwargs_compare_values=None):
+                    kwargs_params=None, kwargs_values=None, kwargs_compare_values=None,
+                    curved_params=False, curved_letter_spacing=0):
         """To make the pizza plot.
 
             Parameters
@@ -393,6 +409,12 @@ class PyPizza:
                 Color for the individual comparison-values-text.
             compare_value_bck_colors : sequence of str, default None
                 Color for background text-box for individual comparison-value-text.
+            curved_params : bool, default False
+                If True, draw the parameter labels curved around the chart
+                using :class:`mplsoccer.text.CurvedText`.
+            curved_letter_spacing : float, default 0
+                Additional spacing between characters in points for curved
+                parameter labels (only used when ``curved_params=True``).
 
             **kwargs_params : All keyword arguments are passed on to axes.Axes.text
                               for adding parameters.
@@ -427,11 +449,21 @@ class PyPizza:
 
         # plot params
         for x, rotation, label in zip(self.theta, rotation_degrees, self.params):
-            temp_text = ax.text(
-                x, param_location, label,
-                rotation=rotation, rotation_mode="anchor",
-                ha="center", **kwargs_params
-            )
+            if curved_params:
+                # CurvedText lays out the label around the polar origin and
+                # flips it in the lower half itself, so the straight-label
+                # rotation and alignment arguments are not passed on
+                temp_text = CurvedText(
+                    ax, x, param_location, label,
+                    letter_spacing=curved_letter_spacing, **kwargs_params
+                )
+                ax.add_artist(temp_text)
+            else:
+                temp_text = ax.text(
+                    x, param_location, label,
+                    rotation=rotation, rotation_mode="anchor",
+                    ha="center", **kwargs_params
+                )
 
             self.param_texts.append(temp_text)
 
@@ -517,7 +549,8 @@ class PyPizza:
             ))
 
     def get_param_texts(self):
-        """To fetch list of axes.text for params."""
+        """To fetch list of text artists for params (matplotlib.text.Text,
+        or mplsoccer.text.CurvedText when ``curved_params=True``)."""
         return self.param_texts
 
     def get_value_texts(self):

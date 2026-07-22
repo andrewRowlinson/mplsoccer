@@ -1,7 +1,7 @@
 """mplsoccer's text artists.
 
 The module contains ``CurvedText``, which draws text along a circular arc
-and is used by the radar charts to render curved parameter labels.
+and is used by the radar and pizza charts to render curved parameter labels.
 
 CurvedText author: PGupta-Git (https://github.com/PGupta-Git)
 """
@@ -42,16 +42,25 @@ class CurvedText(Artist):
     Parameters
     ----------
     ax : matplotlib axis
-        The axis to plot on.
+        The axis to plot on. Both Cartesian and polar axes are supported.
     x, y : float
-        The position to place the text in data coordinates. The text curves
-        along the circle through ``(x, y)`` around ``center``, with the line
-        of text vertically centered on the circle. Must differ from ``center``.
+        The position to place the text in data coordinates, with the same
+        meaning as matplotlib's ``Axes.text``. On a Cartesian axis, the text
+        curves along the circle through ``(x, y)`` around ``center``, with
+        the line of text vertically centered on the circle; the position
+        must differ from ``center``. On a polar axis (e.g. a pizza chart),
+        ``x`` is the angle theta in radians and ``y`` is the radius, and the
+        text curves along the circle of that radius around the polar origin
+        (respecting the axes' theta direction, theta offset and origin
+        radius).
     s : str
         The text to draw. Newlines split the text into multiple arcs
         stacked radially (see ``radial_anchor``).
-    center : tuple of float, default (0, 0)
-        The point the text curves around, in data coordinates.
+    center : tuple of float, optional
+        The point the text curves around, in data coordinates. Defaults to
+        (0, 0). Only valid on Cartesian axes: on polar axes the text always
+        curves around the polar origin, and passing ``center`` raises a
+        ValueError.
     align : {'center', 'start', 'end'}, default 'center'
         How to align the text relative to ``(x, y)``. ``'start'`` and ``'end'``
         refer to the text's reading direction along the arc rather than
@@ -91,6 +100,9 @@ class CurvedText(Artist):
     - The data-to-pixel scale is measured from the axes transform on every
       draw rather than assumed, so unequal aspect ratios, inverted axes
       and figure resizes are handled.
+    - On polar axes the arc geometry (theta offset, theta direction and the
+      origin radius) is also read from the axes on every draw, so the text
+      stays correct if the axes are reconfigured after it is created.
     """
 
     def __init__(
@@ -100,7 +112,7 @@ class CurvedText(Artist):
         y: float,
         s: str,
         *,
-        center: tuple[float, float] = (0.0, 0.0),
+        center: tuple[float, float] | None = None,
         align: _Align = "center",
         direction: _Direction = "auto",
         radial_anchor: _RadialAnchor = "inner",
@@ -127,18 +139,34 @@ class CurvedText(Artist):
         self.axes = ax
         self.set_figure(ax.figure)
 
-        self._center = (float(center[0]), float(center[1]))
-        delta_x = float(x) - self._center[0]
-        delta_y = float(y) - self._center[1]
-        self._radius = float(np.hypot(delta_x, delta_y))
-        if self._radius == 0:
-            raise ValueError(
-                f"The text position ({x}, {y}) must differ from the center "
-                f"{center} so it defines the circle the text curves along."
-            )
-        # The angle convention matches mplsoccer's radar charts: theta=0 at
-        # the top, increasing clockwise, so x = r * sin(theta), y = r * cos(theta).
-        self._theta = float(np.arctan2(delta_x, delta_y))
+        # On polar axes (x, y) means (theta, radius) like matplotlib's
+        # ax.text, and the text always curves around the polar origin.
+        self._polar = ax.name == "polar"
+        if self._polar:
+            if center is not None:
+                raise ValueError(
+                    "center is not supported on polar axes: the text always "
+                    "curves around the polar origin. Position the text with "
+                    "x (theta in radians) and y (radius) instead."
+                )
+            self._center = None
+            self._theta_data = float(x)
+            self._radius = float(y)
+        else:
+            center = (0.0, 0.0) if center is None else center
+            self._center = (float(center[0]), float(center[1]))
+            delta_x = float(x) - self._center[0]
+            delta_y = float(y) - self._center[1]
+            self._radius = float(np.hypot(delta_x, delta_y))
+            if self._radius == 0:
+                raise ValueError(
+                    f"The text position ({x}, {y}) must differ from the center "
+                    f"{center} so it defines the circle the text curves along."
+                )
+            # The angle convention matches mplsoccer's radar charts: theta=0 at
+            # the top, increasing clockwise, so x = r * sin(theta),
+            # y = r * cos(theta).
+            self._theta = float(np.arctan2(delta_x, delta_y))
         self._align: _Align = align
         self._direction: _Direction = direction
         self._radial_anchor: _RadialAnchor = radial_anchor
@@ -304,6 +332,38 @@ class CurvedText(Artist):
             self._lines.append(_LineGlyphs(text=line, chars=chars, artists=artists,
                                            advances_pt=advances_pt))
 
+    def _anchor_theta(self) -> float:
+        """The anchor angle in screen terms: 0 at the top of the circle,
+        increasing clockwise. On polar axes this is derived from the axes'
+        theta offset and direction on every call, so it stays correct if
+        they change after the text is created."""
+        if self._polar:
+            return float(np.pi / 2 - (self.axes.get_theta_offset()
+                                      + self.axes.get_theta_direction()
+                                      * self._theta_data))
+        return self._theta
+
+    def _arc_xy(self, theta: float, radius: float) -> tuple[float, float]:
+        """Data coordinates of the point at screen angle ``theta`` (0 at the
+        top of the circle, increasing clockwise) and ``radius`` from the arc
+        center. This is the inverse of ``_anchor_theta``'s convention: on
+        polar axes the screen angle is mapped back to a data theta, on
+        Cartesian axes the point is measured out from ``center``."""
+        if self._polar:
+            direction = self.axes.get_theta_direction()
+            offset = self.axes.get_theta_offset()
+            return ((np.pi / 2 - theta - offset) / direction, radius)
+        return (self._center[0] + radius * float(np.sin(theta)),
+                self._center[1] + radius * float(np.cos(theta)))
+
+    def _center_px(self):
+        """The pixel position of the point the text curves around."""
+        if self._polar:
+            # the point at the origin radius maps to the screen center of
+            # the polar disc (the theta value is irrelevant there)
+            return self.axes.transData.transform((0.0, self.axes.get_rorigin()))
+        return self.axes.transData.transform(self._center)
+
     def _direction_sign(self) -> int:
         """The sign of the angular step per character: 1 for clockwise, -1
         for counterclockwise ('auto' flips in the lower half for readability)."""
@@ -314,7 +374,7 @@ class CurvedText(Artist):
         # the tolerance keeps text exactly at the left/right of the circle
         # (cos(theta) == 0) on the unflipped branch rather than letting
         # floating-point rounding decide
-        return -1 if np.cos(self._theta) < -1e-9 else 1
+        return -1 if np.cos(self._anchor_theta()) < -1e-9 else 1
 
     def _hide_glyphs(self, lines) -> None:
         """Hide glyphs whose positions cannot be computed.
@@ -349,14 +409,10 @@ class CurvedText(Artist):
         # The arc radius in pixels: the distance between the transformed
         # center and a transformed point on the arc. Pixel widths divided
         # by this radius give the angular steps along the arc.
-        center_x, center_y = self._center
         assert self.axes is not None
-        center_px = self.axes.transData.transform((center_x, center_y))
-        anchor_xy = (
-            center_x + radius_data * float(np.sin(anchor_theta)),
-            center_y + radius_data * float(np.cos(anchor_theta)),
-        )
-        anchor_px = self.axes.transData.transform(anchor_xy)
+        center_px = self._center_px()
+        anchor_px = self.axes.transData.transform(
+            self._arc_xy(anchor_theta, radius_data))
         radius_px = float(np.hypot(*(anchor_px - center_px)))
         if not np.isfinite(radius_px) or radius_px <= 0:
             self._hide_glyphs([line])
@@ -384,15 +440,14 @@ class CurvedText(Artist):
         ):
             glyph_center_px = arc_offset_px + (advance_px / 2)
             glyph_theta = start_theta + direction_sign * (glyph_center_px / radius_px)
-            glyph_x = center_x + radius_data * float(np.sin(glyph_theta))
-            glyph_y = center_y + radius_data * float(np.cos(glyph_theta))
+            glyph_xy = self._arc_xy(glyph_theta, radius_data)
 
             if artist is not None:
                 rotation = -np.rad2deg(glyph_theta)
                 if direction_sign == -1:
                     rotation += 180
 
-                glyph_px = self.axes.transData.transform((glyph_x, glyph_y))
+                glyph_px = self.axes.transData.transform(glyph_xy)
 
                 # Anchor each glyph by the centre of its advance box -- the
                 # same quantity used to place it along the arc. Anchoring by
@@ -411,7 +466,7 @@ class CurvedText(Artist):
                 artist.set_visible(True)
 
                 # Stash the data-space anchor and rotation for tests/debugging.
-                artist._mplsoccer_position = (glyph_x, glyph_y)
+                artist._mplsoccer_position = glyph_xy
                 artist._mplsoccer_rotation = float(rotation)
 
             arc_offset_px += advance_px
@@ -432,15 +487,10 @@ class CurvedText(Artist):
         instead of assuming handles unequal aspect ratios, inverted
         axes and nonlinear scales.
         """
-        center_x, center_y = self._center
+        anchor_theta = self._anchor_theta()
         nudge = max(1e-6, abs(self._radius) * 1e-3)
-        # the x/y change per unit travelled away from the center
-        step_x = float(np.sin(self._theta))
-        step_y = float(np.cos(self._theta))
-        anchor = (center_x + self._radius * step_x,
-                  center_y + self._radius * step_y)
-        nudged = (center_x + (self._radius + nudge) * step_x,
-                  center_y + (self._radius + nudge) * step_y)
+        anchor = self._arc_xy(anchor_theta, self._radius)
+        nudged = self._arc_xy(anchor_theta, self._radius + nudge)
         anchor_px = self.axes.transData.transform(anchor)
         nudged_px = self.axes.transData.transform(nudged)
         flip_line_order = bool(nudged_px[1] < anchor_px[1])
@@ -505,6 +555,7 @@ class CurvedText(Artist):
         line_spacing_px = fontsize_points * float(linespacing) * self.figure.dpi / 72.0
         line_spacing_data = line_spacing_px / px_per_data_radial
 
+        anchor_theta = self._anchor_theta()
         num_lines = len(self._lines)
         for line_idx, line in enumerate(self._lines):
             stack_offset = self._line_stack_offset(line_idx, num_lines,
@@ -516,7 +567,7 @@ class CurvedText(Artist):
             self._layout_line(
                 line=line,
                 radius_data=baseline_radius,
-                anchor_theta=self._theta,
+                anchor_theta=anchor_theta,
                 direction_sign=direction_sign,
             )
 

@@ -5,8 +5,10 @@ Curved text
 
 This example shows how to draw text along a circular arc with mplsoccer's
 CurvedText artist. Radar uses CurvedText internally see the
-:ref:`radar examples <sphx_glr_gallery_radar_plot_radar.py>`, but you can
-also use it on normal axes.
+:ref:`radar examples <sphx_glr_gallery_radar_plot_radar.py>`, and PyPizza
+uses it for curved parameter labels (``curved_params=True``) see the
+:ref:`pizza examples <sphx_glr_gallery_pizza_plots_plot_pizza_basic.py>`,
+but you can also use it on normal axes.
 """
 import matplotlib.pyplot as plt
 import numpy as np
@@ -99,5 +101,22 @@ text_center = CurvedText(ax, 0.87, 0.5, 'centered\non the circle', fontsize=14,
 text_spaced = CurvedText(ax, 0, -1, 'spaced out', fontsize=14, letter_spacing=6)
 for text in (text_inner, text_center, text_spaced):
     ax.add_artist(text)
+
+##############################################################################
+# Polar axes
+# ----------
+# CurvedText also works on polar axes, where (like matplotlib's text) x is
+# the angle theta in radians and y is the radius. The text curves around the
+# polar origin, respecting the axes' theta direction, theta offset and
+# origin radius, so it works with the pizza charts. PyPizza uses this for
+# curved parameter labels via ``curved_params=True``.
+fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={'projection': 'polar'})
+ax.set_theta_zero_location('N')  # angle zero at the top
+ax.set_theta_direction(-1)  # angles increase clockwise
+ax.set_rmax(1)
+
+text_polar = CurvedText(ax, np.radians(45), 0.9, 'curved on a polar axis',
+                        fontsize=14)
+ax.add_artist(text_polar)
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

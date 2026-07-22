@@ -17,6 +17,12 @@ in ``Radar.draw_param_labels()`` curves parameter labels around the radar \
 perimeter instead of using straight rotated text. Includes support for \
 multi-line labels with automatic visual ordering and configurable \
 letter spacing (``curved_letter_spacing``).
+* :pizza: Added curved parameter labels for pizza charts. The \
+``curved_params=True`` argument in ``PyPizza.make_pizza()`` curves the \
+parameter labels around the chart (with ``curved_letter_spacing`` \
+controlling the letter spacing). To support this, ``CurvedText`` \
+works on polar axes, where the position is (x = theta, y = radius) like \
+matplotlib's text and the text curves around the polar origin.
 
 :rocket: Version 1.6.1
 ----------------------
