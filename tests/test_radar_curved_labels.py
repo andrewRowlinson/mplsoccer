@@ -22,7 +22,6 @@ def test_radar_curved_param_labels_smoke():
     # Regression: vector glyph artists expose stable positions/rotations.
     glyphs = labels[0].get_children()
     assert glyphs
-    assert all(hasattr(g, "_mplsoccer_char") for g in glyphs)
     assert all(hasattr(g, "_mplsoccer_position") for g in glyphs)
     assert all(hasattr(g, "_mplsoccer_rotation") for g in glyphs)
     plt.close(fig)
@@ -59,18 +58,11 @@ def test_radar_curved_param_labels_multiline_uses_multiple_radii():
     labels = radar.draw_param_labels(ax=ax, curved=True, wrap=None, fontsize=12)
     fig.canvas.draw()
 
-    label0 = labels[0]
-    children = label0.get_children()
-    radii_a = [
-        float(np.hypot(*child._mplsoccer_position))
-        for child in children
-        if child._mplsoccer_char == "A"
-    ]
-    radii_b = [
-        float(np.hypot(*child._mplsoccer_position))
-        for child in children
-        if child._mplsoccer_char == "B"
-    ]
+    line_a, line_b = labels[0]._lines
+    radii_a = [float(np.hypot(*artist._mplsoccer_position))
+               for artist in line_a.artists if artist is not None]
+    radii_b = [float(np.hypot(*artist._mplsoccer_position))
+               for artist in line_b.artists if artist is not None]
     assert radii_a
     assert radii_b
     # The first line ("AAA") should be outermost, i.e. on a larger radius.
@@ -86,18 +78,11 @@ def test_radar_curved_param_labels_multiline_order_bottom_half():
     labels = radar.draw_param_labels(ax=ax, curved=True, wrap=None, fontsize=12)
     fig.canvas.draw()
 
-    bottom_label = labels[2]
-    children = bottom_label.get_children()
-    radii_a = [
-        float(np.hypot(*child._mplsoccer_position))
-        for child in children
-        if child._mplsoccer_char == "A"
-    ]
-    radii_b = [
-        float(np.hypot(*child._mplsoccer_position))
-        for child in children
-        if child._mplsoccer_char == "B"
-    ]
+    line_a, line_b = labels[2]._lines
+    radii_a = [float(np.hypot(*artist._mplsoccer_position))
+               for artist in line_a.artists if artist is not None]
+    radii_b = [float(np.hypot(*artist._mplsoccer_position))
+               for artist in line_b.artists if artist is not None]
     assert radii_a
     assert radii_b
     # At the bottom half, the first line ("AAA") should be innermost (closer to the plot).
@@ -124,8 +109,9 @@ def test_radar_curved_param_labels_escaped_dollar_allowed():
     fig.canvas.draw()
     assert len(labels) == len(params)
     # the escape renders as a plain '$', not a literal backslash
-    chars = [child._mplsoccer_char for child in labels[0].get_children()]
+    chars = [ch for line in labels[0]._lines for ch in line.chars]
     assert '$' in chars
+    assert '\\' not in chars
     assert '\\' not in chars
     plt.close(fig)
 
@@ -147,6 +133,12 @@ def test_radar_curved_param_labels_warns_on_ignored_kwargs():
                                 bbox={'facecolor': 'yellow'})
     plt.close(fig)
 
+    # mathtext/TeX rendering is unsupported, so those kwargs warn too
+    fig, ax = radar.setup_axis(figsize=(4, 4))
+    with pytest.warns(UserWarning, match='usetex'):
+        radar.draw_param_labels(ax=ax, curved=True, usetex=True)
+    plt.close(fig)
+
 
 def test_radar_curved_param_labels_horizontal_spokes_deterministic():
     # horizontal spokes (left/right) sit exactly on the flip boundary;
@@ -165,6 +157,30 @@ def test_radar_curved_param_labels_horizontal_spokes_deterministic():
     theta = np.pi / 2 + 0.01
     label = CurvedText(ax, np.sin(theta), np.cos(theta), 'Label')
     assert label._direction_sign() == -1
+    plt.close(fig)
+
+
+def test_curved_text_linespacing_normal():
+    # matplotlib accepts linespacing='normal'; curved labels must not crash on it
+    fig, ax = plt.subplots()
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
+    label = CurvedText(ax, 0, 1, 'Two\nLines', linespacing='normal')
+    ax.add_artist(label)
+    fig.canvas.draw()
+    plt.close(fig)
+
+
+def test_curved_text_non_finite_position_hides_glyphs():
+    # when the layout cannot be computed (e.g. a NaN position) the glyphs
+    # must be hidden, not drawn with identity transforms at the figure origin
+    fig, ax = plt.subplots()
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
+    label = CurvedText(ax, np.nan, 1, 'Label')
+    ax.add_artist(label)
+    fig.canvas.draw()
+    assert all(not glyph.get_visible() for glyph in label.get_children())
     plt.close(fig)
 
 
