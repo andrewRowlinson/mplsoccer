@@ -50,9 +50,7 @@ class CurvedText(Artist):
         the line of text vertically centered on the circle; the position
         must differ from ``center``. On a polar axis (e.g. a pizza chart),
         ``x`` is the angle theta in radians and ``y`` is the radius, and the
-        text curves along the circle of that radius around the polar origin
-        (respecting the axes' theta direction, theta offset and origin
-        radius).
+        text curves along the circle of that radius around the polar origin.
     s : str
         The text to draw. Newlines split the text into multiple arcs
         stacked radially (see ``radial_anchor``).

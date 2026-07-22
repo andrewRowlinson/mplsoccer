@@ -123,12 +123,7 @@ plt.show()
 ##############################################################################
 # Curved Parameter Labels
 # -----------------------
-# Pass ``curved_params=True`` to curve the parameter labels around the chart
-# with mplsoccer's CurvedText artist instead of using straight rotated text.
-# The labels follow the circle at ``param_location`` and flip in the lower
-# half so they stay readable. Newlines still split a label into multiple
-# arcs, but there is no need for the leading-newline spacing hack used to
-# position straight labels.
+# Pass ``curved_params=True`` in ``make_pizza`` to curve the parameter labels.
 
 # parameters without the straight-label spacing hacks
 params_curved = [
