@@ -37,7 +37,7 @@ ax.plot(x, y, 'o', color='#fc5f5f')  # mark the start point
 
 text = CurvedText(ax, x, y, 'The quick brown fox jumps over the lazy dog',
                   align='start', fontsize=14)
-ax.add_artist(text);
+text_artist = ax.add_artist(text)
 
 ##############################################################################
 # Alignment

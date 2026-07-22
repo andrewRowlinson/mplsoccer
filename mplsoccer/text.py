@@ -198,6 +198,14 @@ class CurvedText(Artist):
         self._glyphs_stale = False
         self._rebuild()
 
+    def __repr__(self) -> str:
+        if self._polar:
+            x, y = self._theta_data, self._radius
+        else:
+            x = self._center[0] + self._radius * np.sin(self._theta)
+            y = self._center[1] + self._radius * np.cos(self._theta)
+        return f"CurvedText({x:g}, {y:g}, {self._text!r})"
+
     def _validate_no_mathtext(self) -> None:
         """
         Curved text is laid out one glyph at a time along the arc, which
