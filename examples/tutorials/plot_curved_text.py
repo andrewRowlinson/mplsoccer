@@ -4,10 +4,11 @@ Curved text
 ===========
 
 This example shows how to draw text along a circular arc with mplsoccer's
-CurvedText artist. Radar uses CurvedText internally see the
-:ref:`radar examples <sphx_glr_gallery_radar_plot_radar.py>`, and PyPizza
-uses it for curved parameter labels (``curved_params=True``) see the
-:ref:`pizza examples <sphx_glr_gallery_pizza_plots_plot_pizza_basic.py>`,
+CurvedText artist. Radar uses it for curved parameter labels
+(``curved=True``, see the
+:ref:`radar examples <sphx_glr_gallery_radar_plot_radar.py>`), and so does
+PyPizza (``curved_params=True``, see the
+:ref:`pizza examples <sphx_glr_gallery_pizza_plots_plot_pizza_basic.py>`),
 but you can also use it on normal axes.
 """
 import matplotlib.pyplot as plt
@@ -85,10 +86,10 @@ for text in (text_top, text_bottom, text_forced):
 # --------------
 # Newlines split the text into multiple arcs. The radial_anchor argument
 # controls how the lines stack relative to the circle through (x, y):
-# ``'inner'`` (the default) places the first line on the circle with further
-# lines stacking outward, while ``'center'`` centers the block of lines on
-# the circle. The letter_spacing argument adds extra space (in points)
-# between the characters.
+# ``'inner'`` (the default) centers the innermost line on the circle with
+# further lines stacking outward, while ``'center'`` centers the block of
+# lines on the circle. The letter_spacing argument adds extra space
+# (in points) between the characters.
 fig, ax = plt.subplots(figsize=(6, 6))
 ax.set_xlim(-1.5, 1.5)
 ax.set_ylim(-1.5, 1.5)

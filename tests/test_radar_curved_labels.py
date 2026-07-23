@@ -190,6 +190,10 @@ def test_radar_curved_param_labels_support_text_setters():
     fig, ax = radar.setup_axis(figsize=(4, 4))
 
     labels = radar.draw_param_labels(ax=ax, curved=True, fontsize=12)
+    fig.canvas.draw()
+    center_before = np.array(
+        labels[0].get_children()[0].get_window_extent().get_points().mean(axis=0))
+
     for label in labels:
         label.set_fontsize(20)
         label.set_color('red')
@@ -201,4 +205,8 @@ def test_radar_curved_param_labels_support_text_setters():
     glyph = labels[0].get_children()[0]
     assert glyph.get_facecolor()[:3] == (1.0, 0.0, 0.0)  # red reached the glyphs
     assert glyph.get_alpha() == 0.5
+    # regression: the first draw after a restyle must lay out the rebuilt
+    # glyphs, not render them untransformed at the figure origin
+    center_after = np.array(glyph.get_window_extent().get_points().mean(axis=0))
+    assert np.allclose(center_before, center_after, atol=30)
     plt.close(fig)

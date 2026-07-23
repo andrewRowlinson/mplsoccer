@@ -545,6 +545,11 @@ class CurvedText(Artist):
 
     def _layout(self) -> None:
         """Set display-space transforms on every glyph patch (no drawing)."""
+        # rebuild first: laying out stale glyphs and rebuilding afterwards
+        # would leave the fresh patches without transforms, drawing them
+        # untransformed at the figure origin
+        if self._glyphs_stale:
+            self._rebuild()
         direction_sign = self._direction_sign()
 
         px_per_data_radial, flip_line_order = self._radial_pixel_scale()
