@@ -1,5 +1,7 @@
 """Tests for curved parameter labels in mplsoccer radar charts."""
 
+import math
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pytest
@@ -42,10 +44,8 @@ def test_radar_curved_param_labels_bottom_reads_left_to_right():
     xs = [child._mplsoccer_position[0] for child in children]
     assert xs[0] < xs[-1]  # reading direction is left-to-right
 
-    rotations = [child._mplsoccer_rotation for child in children]
-    rotations = [
-        ((rot + 180) % 360) - 180 for rot in rotations
-    ]  # normalize to [-180, 180)
+    rotations = [math.remainder(child._mplsoccer_rotation, 360)
+                 for child in children]  # wrapped to [-180, 180]
     assert all(-90 <= rot <= 90 for rot in rotations)  # not upside-down
     plt.close(fig)
 
@@ -111,7 +111,6 @@ def test_radar_curved_param_labels_escaped_dollar_allowed():
     # the escape renders as a plain '$', not a literal backslash
     chars = [ch for line in labels[0]._lines for ch in line.chars]
     assert '$' in chars
-    assert '\\' not in chars
     assert '\\' not in chars
     plt.close(fig)
 

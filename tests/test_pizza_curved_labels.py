@@ -1,5 +1,7 @@
 """Tests for curved text on polar axes and curved pizza parameter labels."""
 
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -112,8 +114,15 @@ def test_curved_text_polar_default_orientation():
     for offset, rotation in glyphs:
         # screen angle of the position vector, clockwise from the screen top
         screen_theta = np.degrees(np.arctan2(offset[0], offset[1]))
-        # tangent to the circle means rotation == -screen_theta (upper half)
-        mismatch = ((rotation + screen_theta + 180) % 360) - 180
+        # these glyphs sit clockwise of the top of the circle, so they
+        # must tilt clockwise by their screen angle (screen_theta) to stay
+        # tangent. matplotlib text rotations are counterclockwise-positive,
+        # so a clockwise tilt is a negative rotation: rotation is negative
+        # while screen_theta is positive, and they cancel. remainder()
+        # guards the cancellation: arctan2 confines screen_theta to
+        # (-180, 180] but rotation is not normalized, so a perfect glyph
+        # can sum to a whole turn (+-360) instead of 0
+        mismatch = math.remainder(rotation + screen_theta, 360)
         assert mismatch == pytest.approx(0, abs=1e-6)
     plt.close(fig)
 
@@ -140,8 +149,8 @@ def test_pizza_curved_param_labels_bottom_reads_left_to_right():
                 for child in children]
     assert pixel_xs[0] < pixel_xs[-1]  # reading direction is left-to-right
 
-    rotations = [((child._mplsoccer_rotation + 180) % 360) - 180
-                 for child in children]
+    rotations = [math.remainder(child._mplsoccer_rotation, 360)
+                 for child in children]  # wrapped to [-180, 180]
     assert all(-90 <= rot <= 90 for rot in rotations)  # not upside-down
     plt.close(fig)
 
