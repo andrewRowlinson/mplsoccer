@@ -9,6 +9,7 @@ API
    mplsoccer.soccer.statsbomb
    mplsoccer.bumpy_chart
    mplsoccer.py_pizza
+   mplsoccer.text
    mplsoccer.utils
    mplsoccer.quiver
    mplsoccer.linecollection

@@ -1,3 +1,29 @@
+:rocket: Version 1.7.0
+----------------------
+
+### Breaking Changes
+* Requires matplotlib 3.8 or above (curved radar labels use text \
+antialiasing APIs added in matplotlib 3.8).
+* The undocumented ``Radar.rotation`` attribute now always holds the angle \
+of each parameter around the chart (zero at the top, increasing clockwise). \
+Previously the lower-half angles were flipped 180 degrees so the text \
+labels are not upside down; this flip is now only applied to \
+``Radar.rotation_degrees``.
+
+### Added
+* :heart_eyes: Added curved text labels for radar charts by \
+[PGupta-Git](https://github.com/PGupta-Git). The ``curved=True`` argument \
+in ``Radar.draw_param_labels()`` curves parameter labels around the radar \
+perimeter instead of using straight rotated text. Includes support for \
+multi-line labels with automatic visual ordering and configurable \
+letter spacing (``curved_letter_spacing``).
+* :pizza: Added curved parameter labels for pizza charts. The \
+``curved_params=True`` argument in ``PyPizza.make_pizza()`` curves the \
+parameter labels around the chart (with ``curved_letter_spacing`` \
+controlling the letter spacing). To support this, ``CurvedText`` \
+works on polar axes, where the position is (x = theta, y = radius) like \
+matplotlib's text and the text curves around the polar origin.
+
 :rocket: Version 1.6.1
 ----------------------
 

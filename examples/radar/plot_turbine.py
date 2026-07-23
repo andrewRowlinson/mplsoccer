@@ -83,7 +83,8 @@ turbine_output = radar.turbine(player_values, df[params].values, ax=ax,
 # plot some dashed rings and the labels for the values and parameter names
 rings_inner = radar.draw_circles(ax=ax, facecolor='None', edgecolor='black', linestyle='--')
 range_labels = radar.draw_range_labels(ax=ax, fontsize=15, fontproperties=fm.prop, zorder=2)
-param_labels = radar.draw_param_labels(ax=ax, fontsize=15, fontproperties=fm.prop, zorder=2)
+param_labels = radar.draw_param_labels(ax=ax, fontsize=15, fontproperties=fm.prop, zorder=2,
+                                       curved=True)  # optional curved labels
 
 ##############################################################################
 # Adding a title and endnote
@@ -109,7 +110,8 @@ rings_inner = radar.draw_circles(ax=axs['radar'], facecolor='None',
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=15,
                                        fontproperties=fm.prop, zorder=2)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=15,
-                                       fontproperties=fm.prop, zorder=2)
+                                       fontproperties=fm.prop, zorder=2,
+                                       curved=True)  # optional curved labels
 
 # adding a title and endnote
 title1_text = axs['title'].text(0.01, 0.65, 'Random player', fontsize=25,
@@ -147,7 +149,8 @@ rings_inner = radar.draw_circles(ax=axs['radar'], facecolor='None',
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=15,
                                        fontproperties=fm.prop, zorder=12)
 param_labels = radar.draw_param_labels(ax=axs['radar'], fontsize=15,
-                                       fontproperties=fm.prop, zorder=2)
+                                       fontproperties=fm.prop, zorder=2,
+                                       curved=True)  # optional curved labels
 # overlay the radar
 radar_output = radar.draw_radar(player_values, ax=axs['radar'],
                                 kwargs_radar={'facecolor': '#9dc7ff', 'alpha': 0.7},

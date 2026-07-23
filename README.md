@@ -107,6 +107,16 @@ interested in football analytics
 
 ---
 
+## Claude for Open Source
+
+Some mplsoccer development has been helped by [Claude Code](https://claude.com/claude-code),
+with free access generously provided through Anthropic's
+[Claude for Open Source](https://claude.com/open-source-max) program.
+If you maintain an open-source project, you can apply at
+[claude.com/open-source-max](https://claude.com/open-source-max).
+
+---
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit)
