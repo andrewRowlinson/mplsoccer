@@ -11,7 +11,8 @@ from matplotlib import rcParams
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
-from .heatmap import bin_statistic, bin_statistic_sonar, sonar, heatmap
+from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap,
+                      bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones)
 from .linecollection import lines
 from .quiver import arrows
 from .scatterutils import scatter_rotation
@@ -1116,6 +1117,33 @@ class BasePitch(ABC):
     @copy_doc(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
+
+    @copy_doc(bin_statistic_zones)
+    def bin_statistic_zones(self, x, y, regions, values=None, statistic='count',
+                            normalize=False, standardized=False, names=None, edge_tol=None):
+        return bin_statistic_zones(x, y, regions, dim=self.dim, values=values,
+                                   statistic=statistic, normalize=normalize,
+                                   standardized=standardized, names=names, edge_tol=edge_tol)
+
+    @staticmethod
+    @copy_doc(zone_statistic_from_binnumber)
+    def zone_statistic_from_binnumber(binnumber, values=None, statistic='count',
+                                      patches=None, cx=None, cy=None,
+                                      names=None, area=None, normalize=False):
+        return zone_statistic_from_binnumber(binnumber, values=values, statistic=statistic,
+                                             patches=patches, cx=cx, cy=cy,
+                                             names=names, area=area, normalize=normalize)
+
+    @copy_doc(heatmap_zones)
+    def heatmap_zones(self, stats, ax=None, **kwargs):
+        collection = heatmap_zones(stats, ax=ax, vertical=self.vertical, **kwargs)
+        # clip patches that extend past the pitch edges (e.g. wedges) to the pitch boundary
+        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                 self.visible_pitch[1] - self.visible_pitch[0],
+                                 self.visible_pitch[3] - self.visible_pitch[2],
+                                 transform=ax.transData)
+        collection.set_clip_path(rect)
+        return collection
 
     def label_heatmap(self, stats, str_format=None, exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):

@@ -1,3 +1,36 @@
+:rocket: Version 1.8.0
+----------------------
+
+### Added
+* :dart: Added support for custom heatmaps. \
+``Pitch.bin_statistic_zones`` bins events into custom rectangular tiles. \
+It returns the ``ZoneStatisticResult`` which aggregates the ``statistic`` \
+results for each zone, while also returning the ``binnumber`` for individual events. \
+``Pitch.heatmap_zones`` draws the zones as a single matplotlib collection \
+so ``cmap``/ ``vmin``/ ``vmax`` and ``fig.colorbar`` work without any syncing, and \
+``Pitch.label_heatmap`` works on the results unchanged.
+* :pie: Added ``Pitch.zone_statistic_from_binnumber``, for \
+non-rectangular zones: supply your own zone identifiers and \
+matplotlib patches (e.g. polar wedges) and plot them with \
+``Pitch.heatmap_zones`` and ``Pitch.label_heatmap``. Patches that \
+extend past the pitch edges are clipped to the pitch boundaries \
+(like hexbin and kdeplot).
+* Added ``Pitch.positional_zones`` returning the Juego de Posición layout \
+as (regions, names) data for use with ``Pitch.bin_statistic_zones``.
+
+### Changes
+* ``Pitch.bin_statistic_positional`` with ``positional='full'`` is \
+reimplemented on top of the zones machinery (one binning pass instead of \
+three); its return format and results are unchanged.
+
+### Fixed
+* Fixed ``bin_statistic`` and ``bin_statistic_sonar`` attaching the \
+statistics to the wrong y bands when explicit non-uniform y bin edges were \
+supplied on inverted-y pitches ('statsbomb', 'wyscout', 'metricasports'): \
+the data was flipped before binning but the user-supplied edges were not. \
+Integer bins (uniform edges) and the symmetric positional layouts were \
+unaffected.
+
 :rocket: Version 1.7.0
 ----------------------
 

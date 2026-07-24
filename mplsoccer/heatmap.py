@@ -5,10 +5,14 @@ from functools import partial
 from typing import Optional
 
 import numpy as np
-from scipy.stats import binned_statistic_2d, binned_statistic_dd, circmean
+from scipy.stats import binned_statistic, binned_statistic_2d, binned_statistic_dd, circmean
 from matplotlib.projections.polar import PolarAxes
 from matplotlib import colormaps
+from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, Normalize
+from matplotlib.patches import Rectangle
+from matplotlib.path import Path
+from matplotlib.transforms import Affine2D
 
 from .utils import validate_ax
 
@@ -25,6 +29,20 @@ class BinnedStatisticResult:
     inside: Optional[np.ndarray] = None
     angle_grid: Optional[np.ndarray] = None
     angle_widths: Optional[np.ndarray] = None
+
+
+@dataclass
+class ZoneStatisticResult:
+    """ Dataclass for the zone statistic results."""
+    statistic: np.ndarray
+    count: np.ndarray
+    patches: Optional[list]
+    cx: Optional[np.ndarray]
+    cy: Optional[np.ndarray]
+    binnumber: np.ndarray
+    inside: np.ndarray
+    area: Optional[np.ndarray] = None
+    names: Optional[list] = None
 
 
 def _nan_safe(statistic):
@@ -46,6 +64,29 @@ def _nan_safe(statistic):
     else:
         statistic = statistic
     return statistic
+
+
+def _flip_y_bin_edges(bins, bottom):
+    """ Flip explicit y bin-edges into the flipped binning space used for
+    inverted-y pitches (where the data is binned as bottom - y).
+
+    Returns the bins to give to scipy and the original ascending y-edges
+    (None if the y bins are a number of bins rather than explicit edges).
+    Uniform edges (from an integer number of bins) need no flipping because
+    they are symmetric about the pitch midline."""
+    try:
+        num = len(bins)
+    except TypeError:
+        return bins, None  # a single number of bins for both dimensions
+    if num == 2:  # (nx, ny), (x_edges, y_edges) or a mix
+        x_bins, y_bins = bins
+        if np.iterable(y_bins):
+            y_edges = np.asarray(y_bins, dtype=float)
+            return (x_bins, (bottom - y_edges)[::-1]), y_edges
+        return bins, None
+    # otherwise bins is a single array of edges for both dimensions
+    edges = np.asarray(bins, dtype=float)
+    return (edges, (bottom - edges)[::-1]), edges
 
 
 def bin_statistic(x, y, values=None, dim=None, statistic='count',
@@ -115,17 +156,23 @@ def bin_statistic(x, y, values=None, dim=None, statistic='count',
         values = x
     if (values is None) & (statistic != 'count'):
         raise ValueError("values on which to calculate the statistic are missing")
+    y_edge_original = None
     if standardized:
         pitch_range = np.array([dim.standardized_extent[0:2],
                                 dim.standardized_extent[2:]])
     elif dim.invert_y:
         pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom]]
         y = dim.bottom - y
+        # explicit y-edges must be flipped with the data; the original edges
+        # are restored after binning for building the grids/ centers
+        bins, y_edge_original = _flip_y_bin_edges(bins, dim.bottom)
     else:
         pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top]]
     statistic, x_edge, y_edge, binnumber = binned_statistic_2d(x, y, values, statistic=statistic,
                                                                bins=bins, range=pitch_range,
                                                                expand_binnumbers=True)
+    if y_edge_original is not None:
+        y_edge = y_edge_original
 
     statistic = np.flip(statistic.T, axis=0)
     if statistic.ndim == 3:
@@ -239,6 +286,7 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
     if center:
         angle = np.mod(angle + first_width / 2, 2 * np.pi)
 
+    y_edge_original = None
     if standardized:
         pitch_range = np.array([dim.standardized_extent[0:2],
                                 dim.standardized_extent[2:],
@@ -247,6 +295,11 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
         if dim.invert_y:
             pitch_range = [[dim.left, dim.right], [dim.top, dim.bottom], [0, 2 * np.pi]]
             y = dim.bottom - y  # for inverted axis flip the coordinates
+            # explicit y-edges must be flipped with the data; the original edges
+            # are restored after binning for building the grids/ centers
+            if np.iterable(bins[1]):
+                y_edge_original = np.asarray(bins[1], dtype=float)
+                bins = (bins[0], (dim.bottom - y_edge_original)[::-1], bins[2])
         else:
             pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top], [0, 2 * np.pi]]
 
@@ -264,6 +317,8 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
         statistic = statistic / statistic.sum()
 
     x_edge, y_edge, angle_grid = bin_edges
+    if y_edge_original is not None:
+        y_edge = y_edge_original
     if center:
         angle_grid = angle_grid - first_width / 2
     angle_widths = np.diff(angle_grid)
@@ -336,6 +391,360 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     if vertical:
         return ax.pcolormesh(stats['y_grid'], stats['x_grid'], stats['statistic'], **kwargs)
     return ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
+
+
+def _merge_close_edges(edges, atol):
+    """ Sort and deduplicate edges, merging values that differ only
+    by float noise into one canonical float each."""
+    edges = np.sort(np.unique(np.asarray(edges, dtype=float)))
+    keep = [edges[0]]
+    for edge in edges[1:]:
+        if not np.isclose(edge, keep[-1], rtol=0, atol=atol):
+            keep.append(edge)
+    return np.array(keep)
+
+
+def _snap_to_edges(values, canonical):
+    """ Snap each value to the nearest canonical edge. The order of values is preserved."""
+    return canonical[np.abs(values[:, None] - canonical[None, :]).argmin(axis=1)]
+
+
+def _validate_regions(regions, extent, atol):
+    """ Validate that the regions exactly tile the extent.
+
+    Returns the regions snapped to the canonical edges, the canonical
+    fine-grid x/y edges, and the fine-cell to zone mapping (ny, nx).
+    The zone order is the order the regions were supplied in; it is never reordered.
+    """
+    regions = np.asarray(regions, dtype=float)
+    if regions.ndim != 2 or regions.shape[1] != 4:
+        raise ValueError('regions must be a sequence of (x0, x1, y0, y1) rectangles')
+    xmin, xmax, ymin, ymax = extent
+    bad = np.where((regions[:, 1] <= regions[:, 0]) | (regions[:, 3] <= regions[:, 2]))[0]
+    if bad.size:
+        raise ValueError(f'region {bad[0]} is invalid: regions must have x1 > x0 and y1 > y0')
+    bad = np.where((regions[:, 0] < xmin - atol) | (regions[:, 1] > xmax + atol))[0]
+    if bad.size:
+        raise ValueError(f'region {bad[0]} x-edges are outside the pitch extent {extent}')
+    bad = np.where((regions[:, 2] < ymin - atol) | (regions[:, 3] > ymax + atol))[0]
+    if bad.size:
+        raise ValueError(f'region {bad[0]} y-edges are outside the pitch extent {extent}')
+    x_edges = _merge_close_edges(np.concatenate([regions[:, 0], regions[:, 1],
+                                                 [xmin, xmax]]), atol)
+    y_edges = _merge_close_edges(np.concatenate([regions[:, 2], regions[:, 3],
+                                                 [ymin, ymax]]), atol)
+    snapped = regions.copy()
+    snapped[:, 0] = _snap_to_edges(regions[:, 0], x_edges)
+    snapped[:, 1] = _snap_to_edges(regions[:, 1], x_edges)
+    snapped[:, 2] = _snap_to_edges(regions[:, 2], y_edges)
+    snapped[:, 3] = _snap_to_edges(regions[:, 3], y_edges)
+    # map each fine-grid cell to a zone by testing the cell centre against each region.
+    # centres never sit on edges so strict inequalities are safe
+    fine_x = 0.5 * (x_edges[:-1] + x_edges[1:])
+    fine_y = 0.5 * (y_edges[:-1] + y_edges[1:])
+    fine_x_grid, fine_y_grid = np.meshgrid(fine_x, fine_y)
+    cell_zone = np.full(fine_x_grid.shape, -1, dtype=int)
+    for i, (x0, x1, y0, y1) in enumerate(snapped):
+        mask = ((fine_x_grid > x0) & (fine_x_grid < x1) &
+                (fine_y_grid > y0) & (fine_y_grid < y1))
+        clash = mask & (cell_zone != -1)
+        if clash.any():
+            raise ValueError(f'regions {cell_zone[clash].ravel()[0]} and {i} overlap')
+        cell_zone[mask] = i
+    if (cell_zone == -1).any():
+        gap_y_index, gap_x_index = np.argwhere(cell_zone == -1)[0]
+        raise ValueError('regions do not tile the pitch: gap around '
+                         f'x={fine_x[gap_x_index]:.6g}, y={fine_y[gap_y_index]:.6g}')
+    return snapped, x_edges, y_edges, cell_zone
+
+
+def _patch_centroid(patch):
+    """ Best-effort centroid of a patch from its path vertices."""
+    path = patch.get_path().transformed(patch.get_patch_transform())
+    if path.codes is not None:
+        vertices = path.vertices[path.codes != Path.CLOSEPOLY]
+    else:
+        vertices = path.vertices
+    return vertices.mean(axis=0)
+
+
+def zone_statistic_from_binnumber(binnumber, values=None, statistic='count',
+                                  patches=None, cx=None, cy=None,
+                                  names=None, area=None, normalize=False):
+    """ Calculates zone statistics from per-point zone identifiers.
+
+    This is the second half of bin_statistic_zones exposed publicly:
+    you supply the zone each point belongs to (the binnumber), computed however
+    you like (e.g. polar wedges via numpy.arctan2/ numpy.digitize), and it
+    computes the statistic and count per zone and assembles the zone
+    statistics dictionary for plotting with heatmap_zones.
+
+    Parameters
+    ----------
+    binnumber : array-like of int
+        The zone identifier for each point. Use -1 for points outside the zones.
+        Zone identifiers are zero indexed and correspond to the order
+        of the patches/ names.
+    values : array-like or scalar, default None
+        The values on which to calculate the statistic.
+        If the statistic is 'count' then values are ignored.
+    statistic : string or callable, optional
+        The statistic to compute (default is 'count').
+        The following statistics are available: 'count' (default),
+        'mean', 'std', 'median', 'sum', 'min', 'max', 'circmean'
+        or a user-defined function. See:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic.html
+    patches : list of matplotlib.patches.Patch, default None
+        One patch per zone in pitch coordinates for plotting with heatmap_zones.
+        If None, the number of zones is inferred from binnumber.max() + 1.
+    cx, cy : array-like, default None
+        The annotation centres for each zone in pitch coordinates
+        (used by label_heatmap). Only the caller knows where text should sit
+        on an arbitrary patch (e.g. the visual centre of a Wedge is at
+        mid-radius/ mid-angle, not the polygon centroid) so supply them
+        where possible. If None, they fall back to a best-effort centroid
+        of the patch path vertices, which may sit outside curved patches.
+    names : list of str, default None
+        An optional name for each zone.
+    area : array-like, default None
+        An optional area for each zone (e.g. for normalising by area).
+    normalize : bool, default False
+        Whether to normalize the statistic by dividing by the total.
+
+    Returns
+    -------
+    zone_statistic : dict.
+        The keys are 'statistic' (a flat array of the calculated statistic per zone),
+        'count' (the number of points in each zone, always populated),
+        'patches' (one matplotlib patch per zone), 'cx' and 'cy' (the zone centres),
+        'binnumber' (the zone identifier per point, -1 if outside the zones),
+        'inside' (whether each point is inside the zones),
+        'area' (the zone areas) and 'names' (the zone names).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from mplsoccer import Pitch
+    >>> pitch = Pitch()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> binnumber = (x > 60).astype(int)  # two zones: own half (0) and opposition half (1)
+    >>> stats = pitch.zone_statistic_from_binnumber(binnumber)
+    """
+    binnumber = np.ravel(np.asarray(binnumber))
+    if binnumber.size and not np.issubdtype(binnumber.dtype, np.integer):
+        raise TypeError('binnumber must be an array of integers (-1 for points outside the zones)')
+    if binnumber.size and binnumber.min() < -1:
+        raise ValueError('binnumber must be >= -1 (-1 for points outside the zones)')
+    if patches is not None:
+        num_zones = len(patches)
+        if binnumber.size and binnumber.max() >= num_zones:
+            raise ValueError(f'binnumber contains zone {binnumber.max()} but there '
+                             f'are only {num_zones} patches')
+    elif binnumber.size and binnumber.max() >= 0:
+        num_zones = int(binnumber.max()) + 1
+    else:
+        raise ValueError('cannot infer the number of zones: supply patches or a '
+                         'binnumber with at least one point inside the zones')
+    statistic = _nan_safe(statistic)
+    if (values is None) & (statistic != 'count'):
+        raise ValueError('values on which to calculate the statistic are missing')
+    if values is None:
+        values = np.zeros(binnumber.shape)  # ignored by the 'count' statistic
+    values = np.ravel(values)
+    if values.size != binnumber.size:
+        raise ValueError('binnumber and values must be the same size')
+    inside = binnumber >= 0
+    stat, _, _ = binned_statistic(binnumber[inside], values[inside], statistic=statistic,
+                                  bins=num_zones, range=(-0.5, num_zones - 0.5))
+    count = np.bincount(binnumber[inside], minlength=num_zones)
+    if normalize:
+        stat = stat / np.nansum(stat)
+    if patches is not None and (cx is None or cy is None):
+        centroids = np.array([_patch_centroid(patch) for patch in patches])
+        if cx is None:
+            cx = centroids[:, 0]
+        if cy is None:
+            cy = centroids[:, 1]
+    if cx is not None:
+        cx = np.ravel(cx).astype(float)
+    if cy is not None:
+        cy = np.ravel(cy).astype(float)
+    if area is not None:
+        area = np.ravel(area).astype(float)
+    return asdict(ZoneStatisticResult(stat, count, patches, cx, cy,
+                                      binnumber=binnumber, inside=inside,
+                                      area=area, names=names))
+
+
+def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
+                        normalize=False, standardized=False, names=None, edge_tol=None):
+    """ Calculates statistics for zones: any tiling of the pitch by
+    axis-aligned rectangles.
+
+    Unlike bin_statistic, the zones do not have to form a regular grid:
+    rectangles can span multiple rows/ columns of other rectangles
+    (e.g. the Juego de Posición layout) as long as together they exactly
+    tile the pitch with no gaps or overlaps. The results are flat arrays with
+    one value per zone. Zone k always corresponds to regions[k]/ names[k]
+    as supplied; the regions are never reordered, so you can safely join the
+    results back to a dataframe, e.g. df['zone'] = stats['binnumber'].
+
+    Parameters
+    ----------
+    x, y : array-like or scalar.
+        Commonly, these parameters are 1D arrays.
+    regions : array-like of shape (num_zones, 4)
+        A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates
+        (x0 < x1 and y0 < y1) that together exactly tile the pitch.
+    dim : mplsoccer pitch dimensions
+        One of FixedDims, MetricasportsDims, VariableCenterDims, or CustomDims.
+        Automatically populated when using Pitch/ VerticalPitch class
+    values : array-like or scalar, default None
+        The values on which to calculate the statistic.
+        If the statistic is 'count' then values are ignored.
+    statistic : string or callable, optional
+        The statistic to compute (default is 'count').
+        The following statistics are available: 'count' (default),
+        'mean', 'std', 'median', 'sum', 'min', 'max', 'circmean'
+        or a user-defined function. Because the statistic is computed
+        directly on the points in each zone (not on pre-aggregated cells),
+        all statistics are exact for merged zones. See:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic.html
+    normalize : bool, default False
+        Whether to normalize the statistic by dividing by the total.
+    standardized : bool, default False
+        Whether the x, y and region values have been standardized to the
+        'uefa' pitch coordinates (105m x 68m)
+    names : list of str, default None
+        An optional name for each zone (in the same order as regions).
+    edge_tol : float, default None
+        The absolute tolerance for merging region edges that differ only by
+        floating point noise into one canonical edge. The default None uses
+        a scale-aware tolerance of max(abs(pitch extent)) * 1e-9.
+
+    Returns
+    -------
+    zone_statistic : dict.
+        The keys are 'statistic' (a flat array of the calculated statistic per zone),
+        'count' (the number of points in each zone, always populated),
+        'patches' (one matplotlib.patches.Rectangle per zone), 'cx' and 'cy'
+        (the zone centres), 'binnumber' (the zone identifier per point,
+        -1 if outside the pitch), 'inside' (whether each point is inside the pitch),
+        'area' (the zone areas) and 'names' (the zone names).
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> import numpy as np
+    >>> pitch = Pitch(line_zorder=2)
+    >>> fig, ax = pitch.draw()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> regions = [(0, 60, 0, 80), (60, 120, 0, 40), (60, 120, 40, 80)]
+    >>> stats = pitch.bin_statistic_zones(x, y, regions)
+    >>> pc = pitch.heatmap_zones(stats, edgecolors='black', cmap='hot', ax=ax)
+    """
+    x = np.ravel(x).astype(float)
+    y = np.ravel(y).astype(float)
+    if x.size != y.size:
+        raise ValueError('x and y must be the same size')
+    statistic = _nan_safe(statistic)
+    if (values is None) & (statistic != 'count'):
+        raise ValueError('values on which to calculate the statistic are missing')
+    if standardized:
+        extent = np.asarray(dim.standardized_extent, dtype=float)
+    else:
+        extent = np.asarray(dim.pitch_extent, dtype=float)
+    if edge_tol is None:
+        edge_tol = np.abs(extent).max() * 1e-9
+    snapped, x_edges, y_edges, cell_zone = _validate_regions(regions, extent, edge_tol)
+    # mirror bin_statistic: for inverted-y pitches flip the point coordinates and
+    # the fine-grid edges so points on shared edges bin identically to bin_statistic
+    if dim.invert_y and not standardized:
+        y = dim.bottom - y
+        y_bin_edges = (dim.bottom - y_edges)[::-1]
+        cell_zone_binning = cell_zone[::-1]
+    else:
+        y_bin_edges = y_edges
+        cell_zone_binning = cell_zone
+    _, _, _, fine_binnumber = binned_statistic_2d(x, y, x, statistic='count',
+                                                  bins=[x_edges, y_bin_edges],
+                                                  expand_binnumbers=True)
+    num_x = len(x_edges) - 1
+    num_y = len(y_bin_edges) - 1
+    inside = ((fine_binnumber[0] >= 1) & (fine_binnumber[0] <= num_x) &
+              (fine_binnumber[1] >= 1) & (fine_binnumber[1] <= num_y))
+    binnumber = np.full(x.size, -1, dtype=int)
+    binnumber[inside] = cell_zone_binning[fine_binnumber[1][inside] - 1,
+                                          fine_binnumber[0][inside] - 1]
+    patches = [Rectangle((x0, y0), x1 - x0, y1 - y0) for x0, x1, y0, y1 in snapped]
+    return zone_statistic_from_binnumber(binnumber, values=values, statistic=statistic,
+                                         patches=patches,
+                                         cx=0.5 * (snapped[:, 0] + snapped[:, 1]),
+                                         cy=0.5 * (snapped[:, 2] + snapped[:, 3]),
+                                         names=names,
+                                         area=((snapped[:, 1] - snapped[:, 0]) *
+                                               (snapped[:, 3] - snapped[:, 2])),
+                                         normalize=normalize)
+
+
+def heatmap_zones(stats, ax=None, vertical=False, **kwargs):
+    """ Plots zone statistics as a single matplotlib.collections.PatchCollection.
+
+    Because the zones are one artist, cmap/ norm/ vmin/ vmax apply across
+    all zones and fig.colorbar(pc) works without any syncing.
+    The stats dictionary only requires the keys 'patches' and 'statistic'
+    so you can also plot dictionaries from zone_statistic_from_binnumber
+    with your own patches (e.g. matplotlib.patches.Wedge).
+    The Pitch/ VerticalPitch heatmap_zones methods additionally clip the
+    collection to the pitch boundaries (like hexbin and kdeplot), so patches
+    that extend past the pitch edges are snapped to the pitch.
+
+    Parameters
+    ----------
+    stats : dict.
+        This should be calculated via bin_statistic_zones()
+        or zone_statistic_from_binnumber().
+        The 'patches' (one patch per zone in pitch coordinates) and
+        'statistic' (a flat array of values per zone) keys are used for plotting.
+    ax : matplotlib.axes.Axes, default None
+        The axis to plot on.
+    vertical : bool, default False
+        If the orientation is vertical (True), then the code switches the x and y coordinates.
+    **kwargs : All other keyword arguments are passed on to
+        matplotlib.collections.PatchCollection, except vmin/ vmax
+        which set the color limits of the collection.
+
+    Returns
+    -------
+    collection : matplotlib.collections.PatchCollection
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> import numpy as np
+    >>> pitch = Pitch(line_zorder=2)
+    >>> fig, ax = pitch.draw()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> y = np.random.uniform(low=0, high=80, size=100)
+    >>> regions = [(0, 60, 0, 80), (60, 120, 0, 40), (60, 120, 40, 80)]
+    >>> stats = pitch.bin_statistic_zones(x, y, regions)
+    >>> pc = pitch.heatmap_zones(stats, edgecolors='black', cmap='hot', ax=ax)
+    """
+    validate_ax(ax)
+    vmin = kwargs.pop('vmin', None)
+    vmax = kwargs.pop('vmax', None)
+    collection = PatchCollection(stats['patches'], **kwargs)
+    collection.set_array(np.asarray(stats['statistic'], dtype=float))
+    collection.set_clim(vmin, vmax)
+    if vertical:
+        # the patches are authored in pitch coordinates; swap the x and y
+        # coordinates of the whole collection with an affine transform
+        swap = Affine2D(np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]]))
+        collection.set_transform(swap + ax.transData)
+    ax.add_collection(collection)
+    return collection
 
 
 def sonar(stats_length, xindex=0, yindex=0,

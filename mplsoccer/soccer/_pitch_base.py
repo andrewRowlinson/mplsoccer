@@ -10,7 +10,7 @@ from matplotlib import rcParams
 
 from .dimensions import Standardizer, create_pitch_dims, BaseSoccerDims, valid, size_varies
 from .markers import scatter_football
-from .heatmap import bin_statistic_positional, heatmap_positional
+from .heatmap import bin_statistic_positional, heatmap_positional, positional_zones
 from .._pitch_base import BasePitch
 from ..cm import grass_cmap
 from ..utils import validate_ax, copy_doc
@@ -908,6 +908,10 @@ class BasePitchSoccer(BasePitch):
     @copy_doc(heatmap_positional)
     def heatmap_positional(self, stats, ax=None, **kwargs):
         return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
+
+    @copy_doc(positional_zones)
+    def positional_zones(self, positional='full'):
+        return positional_zones(self.dim, positional=positional)
 
     # The methods below for drawing/ setting attributes for some pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)
