@@ -3,6 +3,7 @@
 import math
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import pytest
 
@@ -159,6 +160,9 @@ def test_radar_curved_param_labels_horizontal_spokes_deterministic():
     plt.close(fig)
 
 
+@pytest.mark.skipif(
+    tuple(int(part) for part in matplotlib.__version__.split('.')[:2]) < (3, 11),
+    reason="matplotlib only accepts linespacing='normal' from version 3.11")
 def test_curved_text_linespacing_normal():
     # matplotlib accepts linespacing='normal'; curved labels must not crash on it
     fig, ax = plt.subplots()

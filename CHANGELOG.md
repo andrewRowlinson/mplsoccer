@@ -1,3 +1,10 @@
+:rocket: Version 1.7.1
+----------------------
+
+### Fixes
+* Fixed curved text labels crashing on matplotlib 3.8 to 3.10 \
+(``Text.get_linespacing`` is only available from matplotlib 3.11).
+
 :rocket: Version 1.7.0
 ----------------------
 
