@@ -373,3 +373,120 @@ def test_normalize():
     regions, _ = pitch.positional_zones('full')
     stats = pitch.bin_statistic_zones(x, y, regions, normalize=True)
     assert np.isclose(stats['statistic'].sum(), 1)
+
+
+def test_bin_statistic_sonar_zones():
+    """ Test the zone sonar statistics match a direct per-zone/ per-segment
+    computation via binnumber masks and digitized angles."""
+    num_points = 100000
+    num_angle = 8
+    pitch = Pitch(pitch_type='statsbomb')
+    x, y = random_points(pitch, num_points)
+    angle = np.random.uniform(low=0, high=2 * np.pi, size=num_points)
+    values = np.random.normal(size=num_points)
+    regions, names = pitch.positional_zones('full')
+    stats = pitch.bin_statistic_sonar_zones(x, y, angle, regions, names=names,
+                                            angle_bins=num_angle, center=True)
+    assert stats['statistic'].shape == (len(regions), num_angle)
+    assert stats['statistic'].sum() == num_points
+    assert np.array_equal(stats['count'], stats['statistic'].sum(axis=1))
+    first_width = 2 * np.pi / num_angle
+    shifted = np.mod(angle + first_width / 2, 2 * np.pi)
+    segment = np.clip(np.digitize(shifted, np.linspace(0, 2 * np.pi, num_angle + 1)) - 1,
+                      0, num_angle - 1)
+    direct = np.zeros((len(regions), num_angle))
+    np.add.at(direct, (stats['binnumber'], segment), 1)
+    assert np.array_equal(stats['statistic'], direct)
+    # the mean statistic per zone/ segment matches a direct computation
+    stats_mean = pitch.bin_statistic_sonar_zones(x, y, angle, regions, values=values,
+                                                 statistic='mean', angle_bins=num_angle)
+    mask = (stats['binnumber'] == 5) & (segment == 3)
+    assert np.isclose(stats_mean['statistic'][5, 3], values[mask].mean())
+
+
+def test_bin_statistic_sonar_zones_grid_equivalence():
+    """ Test the zone sonars reproduce bin_statistic_sonar when the zones
+    form the same regular grid, for both center options."""
+    num_points = 100000
+    for pitch_type in ['statsbomb', 'uefa']:
+        pitch = Pitch(pitch_type=pitch_type)
+        x, y = random_points(pitch, num_points)
+        angle = np.random.uniform(low=0, high=2 * np.pi, size=num_points)
+        xmin, xmax, ymin, ymax = pitch.dim.pitch_extent
+        x_edges = np.linspace(xmin, xmax, 5)
+        y_edges = np.linspace(ymin, ymax, 4)
+        # zone order matches the sonar raster: unlike bin_statistic, the sonar
+        # statistic rows are ordered by ascending y for both pitch orientations
+        # (they pair with the unflipped cy centres)
+        regions = [(x_edges[j], x_edges[j + 1], y_edges[i], y_edges[i + 1])
+                   for i in range(3) for j in range(4)]
+        for center in [True, False]:
+            grid = pitch.bin_statistic_sonar(x, y, angle, bins=(4, 3, 6), center=center)
+            zones = pitch.bin_statistic_sonar_zones(x, y, angle, regions,
+                                                    angle_bins=6, center=center)
+            assert np.array_equal(grid['statistic'].reshape(-1, 6), zones['statistic'])
+            assert np.array_equal(grid['angle_grid'], zones['angle_grid'])
+            assert np.array_equal(grid['angle_widths'], zones['angle_widths'])
+
+
+def test_zone_sonar_from_binnumber():
+    """ Test the sonar escape hatch: feeding bin_statistic_sonar_zones' own
+    binnumber back through zone_sonar_from_binnumber reproduces its statistics."""
+    num_points = 10000
+    pitch = Pitch(pitch_type='statsbomb')
+    x, y = random_points(pitch, num_points)
+    angle = np.random.uniform(low=0, high=2 * np.pi, size=num_points)
+    regions, _ = pitch.positional_zones('full')
+    stats = pitch.bin_statistic_sonar_zones(x, y, angle, regions, angle_bins=6)
+    round_trip = pitch.zone_sonar_from_binnumber(stats['binnumber'], angle, angle_bins=6,
+                                                 patches=stats['patches'],
+                                                 cx=stats['cx'], cy=stats['cy'])
+    assert np.array_equal(round_trip['statistic'], stats['statistic'])
+    assert np.array_equal(round_trip['count'], stats['count'])
+    assert np.array_equal(round_trip['angle_grid'], stats['angle_grid'])
+
+
+def test_sonar_zones_plotting():
+    """ Test sonar_zones places one polar inset per zone with the bar heights
+    matching the statistic, on both pitch orientations."""
+    num_points = 10000
+    for pitch_class in [Pitch, VerticalPitch]:
+        pitch = pitch_class(pitch_type='statsbomb')
+        fig, ax = pitch.draw()
+        x, y = random_points(pitch, num_points)
+        angle = np.random.uniform(low=0, high=2 * np.pi, size=num_points)
+        regions, _ = pitch.positional_zones('full')
+        stats = pitch.bin_statistic_sonar_zones(x, y, angle, regions, angle_bins=6)
+        axs = pitch.sonar_zones(stats, width=10, ax=ax)
+        assert axs.shape == (len(regions),)
+        for zone, ax_inset in enumerate(axs):
+            heights = [patch.get_height() for patch in ax_inset.patches]
+            assert np.allclose(heights, np.nan_to_num(stats['statistic'][zone]))
+    # zones with no points are excluded when exclude_zeros is True
+    stats['statistic'][3, :] = 0
+    fig, ax = pitch.draw()
+    axs = pitch.sonar_zones(stats, width=10, ax=ax)
+    assert axs[3] is None
+    # a zone statistics dict has two dimensions so sonar_grid must fail loudly
+    with pytest.raises(ValueError, match='three dimensions'):
+        pitch.sonar_grid(stats, width=10, ax=ax)
+    with pytest.raises(ValueError, match='different shapes'):
+        wrong = pitch.bin_statistic_sonar_zones(x, y, angle, regions, angle_bins=4)
+        pitch.sonar_zones(stats, stats_color=wrong, cmap='viridis', width=10, ax=ax)
+
+
+def test_sonar_grid_unchanged():
+    """ Test sonar_grid still returns a grid of polar insets with bar heights
+    matching the statistic (regression for the shared _sonar_insets refactor)."""
+    num_points = 10000
+    pitch = Pitch(pitch_type='statsbomb')
+    fig, ax = pitch.draw()
+    x, y = random_points(pitch, num_points)
+    angle = np.random.uniform(low=0, high=2 * np.pi, size=num_points)
+    stats = pitch.bin_statistic_sonar(x, y, angle, bins=(3, 2, 5))
+    axs = pitch.sonar_grid(stats, width=15, ax=ax)
+    assert axs.shape == (2, 3)
+    for yindex in range(2):
+        for xindex in range(3):
+            heights = [patch.get_height() for patch in axs[yindex, xindex].patches]
+            assert np.allclose(heights, np.nan_to_num(stats['statistic'][yindex, xindex]))

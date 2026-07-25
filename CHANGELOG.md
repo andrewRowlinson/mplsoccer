@@ -17,6 +17,14 @@ extend past the pitch edges are clipped to the pitch boundaries \
 (like hexbin and kdeplot).
 * Added ``Pitch.positional_zones`` returning the Juego de Posición layout \
 as (regions, names) data for use with ``Pitch.bin_statistic_zones``.
+* :dark_sunglasses: Added Sonars for zones. \
+``Pitch.bin_statistic_sonar_zones`` bins the event angles within each zone \
+and ``Pitch.sonar_zones`` plots a sonar at the centre of each zone, so \
+sonars work for irregular layouts (e.g. the Juego de Posición zones) that \
+a regular grid cannot express. ``Pitch.zone_sonar_from_binnumber`` is the \
+equivalent for your own zone identifiers and patches. Internally \
+``sonar_grid`` and ``sonar_zones`` share the same plotting code: both \
+place polar bar charts at a collection of centres.
 
 ### Changes
 * ``Pitch.bin_statistic_positional`` with ``positional='full'`` is \

@@ -43,6 +43,8 @@ class ZoneStatisticResult:
     inside: np.ndarray
     area: Optional[np.ndarray] = None
     names: Optional[list] = None
+    angle_grid: Optional[np.ndarray] = None
+    angle_widths: Optional[np.ndarray] = None
 
 
 def _nan_safe(statistic):
@@ -747,6 +749,252 @@ def heatmap_zones(stats, ax=None, vertical=False, **kwargs):
     return collection
 
 
+def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
+                              angle_bins=10, patches=None, cx=None, cy=None,
+                              names=None, area=None, normalize=False, center=True):
+    """ Calculates sonar statistics (zone by angle segment) from per-point
+    zone identifiers.
+
+    This is the sonar equivalent of zone_statistic_from_binnumber:
+    you supply the zone each point belongs to (the binnumber), computed
+    however you like, and it bins the angles within each zone for plotting
+    with sonar_zones. The angle wrap-around at 2 pi is your responsibility:
+    shift the angles with numpy.mod so a segment does not straddle
+    the 0/ 2 pi boundary (or use the default center=True behaviour).
+
+    Parameters
+    ----------
+    binnumber : array-like of int
+        The zone identifier for each point. Use -1 for points outside the zones.
+        Zone identifiers are zero indexed and correspond to the order
+        of the patches/ names.
+    angle : array-like or scalar.
+        The angle for each point in radians between 0 and 2*pi.
+    values : array-like or scalar, default None
+        The values on which to calculate the statistic.
+        If the statistic is 'count' then values are ignored.
+    statistic : string or callable, optional
+        The statistic to compute (default is 'count').
+        The following statistics are available: 'count' (default),
+        'mean', 'std', 'median', 'sum', 'min', 'max', 'circmean'
+        or a user-defined function. See:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
+    angle_bins : int or array_like, default 10
+        The number of angle segments, or the segment edges in
+        radians between 0 and 2*pi.
+    patches : list of matplotlib.patches.Patch, default None
+        One patch per zone in pitch coordinates for plotting with heatmap_zones.
+        If None, the number of zones is inferred from binnumber.max() + 1.
+    cx, cy : array-like, default None
+        The centres for each zone in pitch coordinates where the
+        sonars are placed by sonar_zones. If None, they fall back to a
+        best-effort centroid of the patch path vertices.
+    names : list of str, default None
+        An optional name for each zone.
+    area : array-like, default None
+        An optional area for each zone.
+    normalize : bool, default False
+        Whether to normalize the statistic by dividing by the total.
+    center : bool, default True
+        Whether to center the sonars so the first segment is centered around zero (True)
+        or starts at zero (False)
+
+    Returns
+    -------
+    zone_sonar : dict.
+        The keys are 'statistic' (the calculated statistic with one row per zone
+        and one column per angle segment), 'count' (the total number of points in
+        each zone), 'patches', 'cx' and 'cy' (the zone centres),
+        'binnumber' (the zone identifier per point, -1 if outside the zones),
+        'inside' (whether each point is inside the zones), 'area', 'names',
+        'angle_grid' (the segment start angles) and
+        'angle_widths' (the segment widths).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from mplsoccer import Pitch
+    >>> pitch = Pitch()
+    >>> x = np.random.uniform(low=0, high=120, size=100)
+    >>> angle = np.random.uniform(low=0, high=2 * np.pi, size=100)
+    >>> binnumber = (x > 60).astype(int)  # two zones: own half (0) and opposition half (1)
+    >>> stats = pitch.zone_sonar_from_binnumber(binnumber, angle, angle_bins=4)
+    """
+    result = zone_statistic_from_binnumber(binnumber, patches=patches, cx=cx, cy=cy,
+                                           names=names, area=area)
+    binnumber = result['binnumber']
+    num_zones = result['count'].size
+    angle = np.ravel(angle)
+    if angle.size != binnumber.size:
+        raise ValueError('binnumber and angle must be the same size')
+    statistic = _nan_safe(statistic)
+    if (values is None) & (statistic != 'count'):
+        raise ValueError('values on which to calculate the statistic are missing')
+    if values is None:
+        values = np.zeros(binnumber.shape)  # ignored by the 'count' statistic
+    values = np.ravel(values)
+    if values.size != binnumber.size:
+        raise ValueError('binnumber and values must be the same size')
+    if isinstance(angle_bins, int):
+        first_width = 2 * np.pi / angle_bins
+    else:
+        if not np.isclose(np.min(angle_bins), 0) or not np.isclose(np.max(angle_bins),
+                                                                   2 * np.pi):
+            raise ValueError('bin angles should be radians between 0 and 2 pi')
+        first_width = np.sort(angle_bins)[1]
+    if center:
+        angle = np.mod(angle + first_width / 2, 2 * np.pi)
+    inside = result['inside']
+    stat, _, angle_edge, _ = binned_statistic_2d(binnumber[inside], angle[inside],
+                                                 values[inside], statistic=statistic,
+                                                 bins=[num_zones, angle_bins],
+                                                 range=[[-0.5, num_zones - 0.5],
+                                                        [0, 2 * np.pi]])
+    if normalize:
+        stat = stat / np.nansum(stat)
+    if center:
+        angle_edge = angle_edge - first_width / 2
+    result['statistic'] = stat
+    result['angle_widths'] = np.diff(angle_edge)
+    # remove the last edge as only the segment start locations are needed
+    result['angle_grid'] = angle_edge[:-1]
+    return result
+
+
+def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
+                              statistic='count', angle_bins=10, normalize=False,
+                              standardized=False, names=None, edge_tol=None,
+                              center=True):
+    """ Calculates sonar statistics (angle segments per zone) for zones:
+    any tiling of the pitch by axis-aligned rectangles.
+
+    This is the sonar equivalent of bin_statistic_zones: each point is
+    assigned to a zone and the angles are binned within each zone.
+    Unlike bin_statistic_sonar, the zones do not have to form a regular grid,
+    e.g. the Juego de Posición layout from positional_zones.
+    Plot the results with sonar_zones.
+
+    Parameters
+    ----------
+    x, y, angle : array-like or scalar.
+        Commonly, these parameters are 1D arrays. The angle is in radians
+        between 0 and 2*pi.
+    regions : array-like of shape (num_zones, 4)
+        A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates
+        (x0 < x1 and y0 < y1) that together exactly tile the pitch.
+    dim : mplsoccer pitch dimensions
+        One of FixedDims, MetricasportsDims, VariableCenterDims, or CustomDims.
+        Automatically populated when using Pitch/ VerticalPitch class
+    values : array-like or scalar, default None
+        The values on which to calculate the statistic.
+        If the statistic is 'count' then values are ignored.
+    statistic : string or callable, optional
+        The statistic to compute (default is 'count').
+        The following statistics are available: 'count' (default),
+        'mean', 'std', 'median', 'sum', 'min', 'max', 'circmean'
+        or a user-defined function. See:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_2d.html
+    angle_bins : int or array_like, default 10
+        The number of angle segments, or the segment edges in
+        radians between 0 and 2*pi.
+    normalize : bool, default False
+        Whether to normalize the statistic by dividing by the total.
+    standardized : bool, default False
+        Whether the x, y and region values have been standardized to the
+        'uefa' pitch coordinates (105m x 68m)
+    names : list of str, default None
+        An optional name for each zone (in the same order as regions).
+    edge_tol : float, default None
+        The absolute tolerance for merging region edges that differ only by
+        floating point noise into one canonical edge. The default None uses
+        a scale-aware tolerance of max(abs(pitch extent)) * 1e-9.
+    center : bool, default True
+        Whether to center the sonars so the first segment is centered around zero (True)
+        or starts at zero (False)
+
+    Returns
+    -------
+    zone_sonar : dict.
+        The keys are 'statistic' (the calculated statistic with one row per zone
+        and one column per angle segment), 'count' (the total number of points in
+        each zone), 'patches' (one matplotlib.patches.Rectangle per zone),
+        'cx' and 'cy' (the zone centres), 'binnumber' (the zone identifier
+        per point, -1 if outside the pitch), 'inside' (whether each point is
+        inside the pitch), 'area', 'names', 'angle_grid' (the segment start
+        angles) and 'angle_widths' (the segment widths).
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch, Sbopen
+    >>> parser = Sbopen()
+    >>> df = parser.event(69251)[0]
+    >>> df = df[(df.type_name == 'Pass') &
+    ...         (df.outcome_name.isnull())].copy()
+    >>> pitch = Pitch()
+    >>> angle, distance = pitch.calculate_angle_and_distance(df.x, df.y,
+    ...                                                      df.end_x, df.end_y)
+    >>> regions, names = pitch.positional_zones('full')
+    >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, regions,
+    ...                                      angle_bins=4)
+    >>> fig, ax = pitch.draw(figsize=(8, 5.5))
+    >>> axs = pitch.sonar_zones(bs, width=10, fc='cornflowerblue', ec='black', ax=ax)
+    """
+    x = np.ravel(x)
+    angle = np.ravel(angle)
+    if x.size != angle.size:
+        raise ValueError('x and angle must be the same size')
+    zone_stats = bin_statistic_zones(x, y, regions, dim=dim, standardized=standardized,
+                                     names=names, edge_tol=edge_tol)
+    return zone_sonar_from_binnumber(zone_stats['binnumber'], angle, values=values,
+                                     statistic=statistic, angle_bins=angle_bins,
+                                     patches=zone_stats['patches'],
+                                     cx=zone_stats['cx'], cy=zone_stats['cy'],
+                                     names=names, area=zone_stats['area'],
+                                     normalize=normalize, center=center)
+
+
+def _sonar(lengths, colors, angle_grid, angle_widths,
+           cmap=None, vmin=None, vmax=None, rmin=0, rmax=None,
+           sonar_alpha=1, sonar_facecolor='None',
+           axis=False, label=False, ax=None, **kwargs):
+    """ Plot a single sonar (polar bar chart) from 1d arrays of
+    segment lengths and optional segment color values."""
+    if not isinstance(ax, PolarAxes):
+        raise TypeError('The ax argument must be of type matplotlib.projections.polar.PolarAxes.')
+    ax.patch.set_alpha(sonar_alpha)
+    ax.grid(axis)
+    ax.spines['polar'].set_visible(axis)
+    ax.set_rlim(rmin, rmax)
+    ax.set_facecolor(sonar_facecolor)
+    if label is False:
+        ax.set_yticklabels([])
+        ax.set_xticklabels([])
+
+    kwargs.pop('align', None)
+    # set colors for the cmap
+    if cmap is not None:
+        kwargs.pop('color', None)
+        kwargs.pop('fc', None)
+        kwargs.pop('facecolor', None)
+        if isinstance(cmap, str):
+            cmap = colormaps.get_cmap(cmap)
+        if not isinstance(cmap, (ListedColormap, LinearSegmentedColormap)):
+            raise ValueError("cmap: not a recognised cmap type.")
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        color = cmap(norm(colors))
+        return ax.bar(angle_grid,
+                      np.nan_to_num(lengths),
+                      width=angle_widths,
+                      color=color,
+                      align='edge',
+                      **kwargs)
+    return ax.bar(angle_grid,
+                  np.nan_to_num(lengths),
+                  width=angle_widths,
+                  align='edge',
+                  **kwargs)
+
+
 def sonar(stats_length, xindex=0, yindex=0,
           stats_color=None, cmap=None, vmin=None, vmax=None,
           rmin=0, rmax=None,
@@ -815,8 +1063,6 @@ def sonar(stats_length, xindex=0, yindex=0,
         raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
                          f"should have three dimensions. "
                          'Try creating the statistics again using bin_statistic_sonar.')
-    if not isinstance(ax, PolarAxes):
-        raise TypeError('The ax argument must be of type matplotlib.projections.polar.PolarAxes.')
     if stats_color is not None and cmap is None:
         raise ValueError("You must supply a cmap for varying the color using stats_color.")
     if stats_color is None and cmap is not None:
@@ -826,42 +1072,17 @@ def sonar(stats_length, xindex=0, yindex=0,
                          f"and stats_length['statistic'] {stats_length['statistic'].shape} are different shapes. "
                          'Try creating the statistics again using bin_statistic_sonar '
                          'with the same bins argument.')
-    ax.patch.set_alpha(sonar_alpha)
-    ax.grid(axis)
-    ax.spines['polar'].set_visible(axis)
     if rmax is None:
         rmax = np.nanmax(stats_length['statistic'])
-    ax.set_rlim(rmin, rmax)
-    ax.set_facecolor(sonar_facecolor)
-    if label is False:
-        ax.set_yticklabels([])
-        ax.set_xticklabels([])
-
-    kwargs.pop('align', None)
-    # set colors for the cmap
-    if cmap is not None:
-        kwargs.pop('color', None)
-        kwargs.pop('fc', None)
-        kwargs.pop('facecolor', None)
-        if isinstance(cmap, str):
-            cmap = colormaps.get_cmap(cmap)
-        if not isinstance(cmap, (ListedColormap, LinearSegmentedColormap)):
-            raise ValueError("cmap: not a recognised cmap type.")
+    colors = None
+    if stats_color is not None:
         if vmin is None:
             vmin = np.nanmin(stats_color['statistic'])
         if vmax is None:
             vmax = np.nanmax(stats_color['statistic'])
-        norm = Normalize(vmin=vmin, vmax=vmax)
-        norm_stats_color = norm(stats_color['statistic'][yindex, xindex, :])
-        color = cmap(norm_stats_color)
-        return ax.bar(stats_length['angle_grid'],
-                      np.nan_to_num(stats_length['statistic'])[yindex, xindex, :],
-                      width=stats_length['angle_widths'],
-                      color=color,
-                      align='edge',
-                      **kwargs)
-    return ax.bar(stats_length['angle_grid'],
-                  np.nan_to_num(stats_length['statistic'])[yindex, xindex, :],
-                  width=stats_length['angle_widths'],
-                  align='edge',
-                  **kwargs)
+        colors = stats_color['statistic'][yindex, xindex, :]
+    return _sonar(stats_length['statistic'][yindex, xindex, :], colors,
+                  stats_length['angle_grid'], stats_length['angle_widths'],
+                  cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
+                  sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                  axis=axis, label=label, ax=ax, **kwargs)

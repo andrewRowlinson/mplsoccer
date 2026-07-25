@@ -12,7 +12,8 @@ from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
 from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap,
-                      bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones)
+                      bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones,
+                      bin_statistic_sonar_zones, zone_sonar_from_binnumber, _sonar)
 from .linecollection import lines
 from .quiver import arrows
 from .scatterutils import scatter_rotation
@@ -1088,31 +1089,171 @@ class BasePitch(ABC):
         >>> axs = pitch.sonar_grid(bs, width=10, fc='cornflowerblue',
         ...                        ec='black', ax=ax)
         """
-        validate_ax(ax)
-        mask_zero = np.all(np.isclose(stats_length['statistic'], 0), axis=2)
-        mask_null = np.all(np.isnan(stats_length['statistic']), axis=2)
-        axs = np.empty(stats_length['cx'].shape, dtype='O')
-        it = np.nditer(stats_length['cx'], flags=['multi_index'])
-        for cx in it:
-            if mask_zero[it.multi_index] and exclude_zeros:
-                ax_inset = None
-            elif mask_null[it.multi_index] and exclude_nan:
-                ax_inset = None
-            else:
-                ax_inset = self.inset_axes(cx, stats_length['cy'][it.multi_index],
-                                        width=width, height=height, ax=ax, polar=True)
-                sonar(stats_length=stats_length,
-                    xindex=it.multi_index[1], yindex=it.multi_index[0],
-                    stats_color=stats_color, cmap=cmap, vmin=vmin, vmax=vmax,
-                    rmin=rmin, rmax=rmax,
-                    sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
-                    axis=axis, label=label,
-                    ax=ax_inset, **kwargs)
-            axs[it.multi_index] = ax_inset
-        axs = np.squeeze(axs)
+        if stats_length['statistic'].ndim != 3:
+            raise ValueError(f"stats_length['statistic'] {stats_length['statistic'].shape} "
+                             'should have three dimensions. '
+                             'Try creating the statistics again using bin_statistic_sonar.')
+        if (stats_color is not None and
+                stats_color['statistic'].shape != stats_length['statistic'].shape):
+            raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
+                             f"and stats_length['statistic'] "
+                             f"{stats_length['statistic'].shape} are different shapes. "
+                             'Try creating the statistics again using bin_statistic_sonar '
+                             'with the same bins argument.')
+        num_y, num_x, num_angle = stats_length['statistic'].shape
+        lengths = stats_length['statistic'].reshape(-1, num_angle)
+        colors = None if stats_color is None else stats_color['statistic'].reshape(-1, num_angle)
+        axs = self._sonar_insets(lengths, colors,
+                                 np.ravel(stats_length['cx']), np.ravel(stats_length['cy']),
+                                 stats_length['angle_grid'], stats_length['angle_widths'],
+                                 cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
+                                 sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                                 axis=axis, label=label, width=width, height=height,
+                                 exclude_zeros=exclude_zeros, exclude_nan=exclude_nan,
+                                 ax=ax, **kwargs)
+        axs = np.squeeze(axs.reshape(num_y, num_x))
         if axs.size == 1:
             axs = axs.item()
         return axs
+
+    def _sonar_insets(self, lengths, colors, cx, cy, angle_grid, angle_widths,
+                      cmap=None, vmin=None, vmax=None, rmin=0, rmax=None,
+                      sonar_alpha=1, sonar_facecolor='None', axis=False, label=False,
+                      width=None, height=None, exclude_zeros=True, exclude_nan=True,
+                      ax=None, **kwargs):
+        """ Place a polar bar chart (sonar) inset at each of a collection of centres.
+        The lengths/ colors are (num_centres, num_angles) arrays and cx/ cy
+        are the centres in pitch coordinates. Returns an object array of the
+        inset axes (None where a centre is excluded)."""
+        validate_ax(ax)
+        if colors is not None and cmap is None:
+            raise ValueError("You must supply a cmap for varying the color using stats_color.")
+        if colors is None and cmap is not None:
+            raise ValueError("You must supply a stats_color for varying the color using a cmap.")
+        if rmax is None:
+            rmax = np.nanmax(lengths)
+        if colors is not None:
+            if vmin is None:
+                vmin = np.nanmin(colors)
+            if vmax is None:
+                vmax = np.nanmax(colors)
+        mask_zero = np.all(np.isclose(lengths, 0), axis=1)
+        mask_null = np.all(np.isnan(lengths), axis=1)
+        axs = np.empty(len(cx), dtype='O')
+        for i in range(len(cx)):
+            if mask_zero[i] and exclude_zeros:
+                ax_inset = None
+            elif mask_null[i] and exclude_nan:
+                ax_inset = None
+            else:
+                ax_inset = self.inset_axes(cx[i], cy[i],
+                                           width=width, height=height, ax=ax, polar=True)
+                _sonar(lengths[i], None if colors is None else colors[i],
+                       angle_grid, angle_widths,
+                       cmap=cmap, vmin=vmin, vmax=vmax,
+                       rmin=rmin, rmax=rmax,
+                       sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                       axis=axis, label=label,
+                       ax=ax_inset, **kwargs)
+            axs[i] = ax_inset
+        return axs
+
+    def sonar_zones(self, stats_length,
+                    stats_color=None, cmap=None, vmin=None, vmax=None,
+                    rmin=0, rmax=None,
+                    sonar_alpha=1, sonar_facecolor='None',
+                    axis=False, label=False,
+                    width=None, height=None,
+                    exclude_zeros=True, exclude_nan=True,
+                    ax=None, **kwargs):
+        """ Plot a polar bar chart (sonar) at the centre of each zone.
+
+        Parameters
+        ----------
+        stats_length : dict
+            This should be calculated via bin_statistic_sonar_zones()
+            or zone_sonar_from_binnumber(). It controls the length of the bars.
+        stats_color : dict, default None
+            This should be calculated via bin_statistic_sonar_zones()
+            or zone_sonar_from_binnumber().
+            It controls the color of the bars via a cmap. The vmin/vmax
+            arguments will set the boundaries for the cmap.
+            If stats_color is None then the color of the bars is controlled
+            by 'color', 'fc', or 'facecolor' arguments.
+        cmap : str or matplotlib.colros.Colormap, default None
+            Controls the color of the bars via stats_color.
+        vmin, vmax : float, default None
+            The cmap is mapped linearly to the range vmin to vmax, so that values
+            equal to or less than vmin are given the first color in the cmap
+            and values equal to or greater than vmax are given the last color
+            in the cmap. The default of None sets the values to the minimum value of
+            stats_color['statistic'] and the maximum value of stats_color['statistic'].
+        rmin, rmax : float, default 0 and None
+            The radial axis limits. The default rmax of None sets the values to the maximum
+            of stats_length['statistic'].
+        sonar_alpha : float, default 1
+            The alpha/ transparency of the sonar axes patch.
+        sonar_facecolor : any Matplotlib color, default 'None'
+            The facecolor of the sonar axes. The default 'None' makes the axes transparent.
+        axis : bool, default False
+            Whether to set the axis spines to visible.
+        label : bool, default False
+            Whether to include the axis labels.
+        width, height : float, default None
+            The width, height of the inset Polar axes in the x/y data coordinates.
+            You should only provide one of the width or height arguments
+            since the Polar axes are square and the other values is set dynamically.
+        exclude_zeros : bool, default True
+            Whether to draw the Polar axes where all the values are zero for the zone.
+        exclude_nan : bool, default True
+            Whether to draw the Polar axes where all the values are numpy.nan for the zone.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
+
+        Returns
+        -------
+        axs : numpy.ndarray of matplotlib.projections.polar.PolarAxes
+            One inset axes per zone in the zone order
+            (None where the zone is excluded).
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch, Sbopen
+        >>> parser = Sbopen()
+        >>> df = parser.event(69251)[0]
+        >>> df = df[(df.type_name == 'Pass') &
+        ...         (df.outcome_name.isnull())].copy()
+        >>> pitch = Pitch()
+        >>> angle, distance = pitch.calculate_angle_and_distance(df.x, df.y,
+        ...                                                      df.end_x, df.end_y)
+        >>> regions, names = pitch.positional_zones('full')
+        >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, regions,
+        ...                                      angle_bins=4)
+        >>> fig, ax = pitch.draw(figsize=(8, 5.5))
+        >>> axs = pitch.sonar_zones(bs, width=10, fc='cornflowerblue',
+        ...                         ec='black', ax=ax)
+        """
+        if stats_length['statistic'].ndim != 2:
+            raise ValueError(f"stats_length['statistic'] {stats_length['statistic'].shape} "
+                             'should have two dimensions (zone, angle). '
+                             'Try creating the statistics again using bin_statistic_sonar_zones.')
+        if (stats_color is not None and
+                stats_color['statistic'].shape != stats_length['statistic'].shape):
+            raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
+                             f"and stats_length['statistic'] "
+                             f"{stats_length['statistic'].shape} are different shapes. "
+                             'Try creating the statistics again using bin_statistic_sonar_zones '
+                             'with the same angle_bins argument.')
+        colors = None if stats_color is None else stats_color['statistic']
+        return self._sonar_insets(stats_length['statistic'], colors,
+                                  np.ravel(stats_length['cx']), np.ravel(stats_length['cy']),
+                                  stats_length['angle_grid'], stats_length['angle_widths'],
+                                  cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
+                                  sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                                  axis=axis, label=label, width=width, height=height,
+                                  exclude_zeros=exclude_zeros, exclude_nan=exclude_nan,
+                                  ax=ax, **kwargs)
 
     @copy_doc(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
@@ -1133,6 +1274,27 @@ class BasePitch(ABC):
         return zone_statistic_from_binnumber(binnumber, values=values, statistic=statistic,
                                              patches=patches, cx=cx, cy=cy,
                                              names=names, area=area, normalize=normalize)
+
+    @copy_doc(bin_statistic_sonar_zones)
+    def bin_statistic_sonar_zones(self, x, y, angle, regions, values=None,
+                                  statistic='count', angle_bins=10, normalize=False,
+                                  standardized=False, names=None, edge_tol=None,
+                                  center=True):
+        return bin_statistic_sonar_zones(x, y, angle, regions, dim=self.dim, values=values,
+                                         statistic=statistic, angle_bins=angle_bins,
+                                         normalize=normalize, standardized=standardized,
+                                         names=names, edge_tol=edge_tol, center=center)
+
+    @staticmethod
+    @copy_doc(zone_sonar_from_binnumber)
+    def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
+                                  angle_bins=10, patches=None, cx=None, cy=None,
+                                  names=None, area=None, normalize=False, center=True):
+        return zone_sonar_from_binnumber(binnumber, angle, values=values,
+                                         statistic=statistic, angle_bins=angle_bins,
+                                         patches=patches, cx=cx, cy=cy,
+                                         names=names, area=area,
+                                         normalize=normalize, center=center)
 
     @copy_doc(heatmap_zones)
     def heatmap_zones(self, stats, ax=None, **kwargs):
