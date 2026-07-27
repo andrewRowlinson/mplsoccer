@@ -558,7 +558,9 @@ class CurvedText(Artist):
             return
 
         fontsize_points = float(self._template.get_fontsize())
-        linespacing = self._template.get_linespacing()
+        # Text.get_linespacing (a plain attribute return) only exists from
+        # matplotlib 3.11, so read the attribute to support 3.8 to 3.10
+        linespacing = self._template._linespacing
         if linespacing == "normal":
             # approximate the font-derived 'normal' of newer matplotlib
             # with its classic default: 1.2 multiples of the fontsize

@@ -50,6 +50,13 @@ or 'pitch') skips out-of-view positions (returned as None). \
 ``label_heatmap`` labels are now clipped to the axes \
 (pass ``clip_on=False`` for the old behaviour).
 
+:rocket: Version 1.7.1
+----------------------
+
+### Fixes
+* Fixed curved text labels crashing on matplotlib 3.8 to 3.10 \
+(``Text.get_linespacing`` is only available from matplotlib 3.11).
+
 :rocket: Version 1.7.0
 ----------------------
 
