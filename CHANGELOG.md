@@ -25,6 +25,9 @@ a regular grid cannot express. ``Pitch.zone_sonar_from_binnumber`` is the \
 equivalent for your own zone identifiers and patches. Internally \
 ``sonar_grid`` and ``sonar_zones`` share the same plotting code: both \
 place polar bar charts at a collection of centres.
+* Added the ``sonar_zorder`` argument to ``sonar_grid`` and \
+``sonar_zones`` to control where the sonar axes are drawn amongst the \
+other artists on the pitch axes (matplotlib's default for inset axes is 5).
 
 ### Changes
 * ``Pitch.bin_statistic_positional`` with ``positional='full'`` is \
@@ -38,6 +41,14 @@ supplied on inverted-y pitches ('statsbomb', 'wyscout', 'metricasports'): \
 the data was flipped before binning but the user-supplied edges were not. \
 Integer bins (uniform edges) and the symmetric positional layouts were \
 unaffected.
+* Fixed artists drawing outside the pitch when parts of the pitch are \
+hidden (negative pads or half pitches). Inset axes are not clipped by \
+their parent axes, so ``sonar_grid``/ ``sonar_zones`` now skip insets \
+whose centre falls outside the axes limits (returned as None; disable \
+with ``exclude_outside=False``) and ``formation`` (kind='axes', 'image' \
+or 'pitch') skips out-of-view positions (returned as None). \
+``label_heatmap`` labels are now clipped to the axes \
+(pass ``clip_on=False`` for the old behaviour).
 
 :rocket: Version 1.7.0
 ----------------------

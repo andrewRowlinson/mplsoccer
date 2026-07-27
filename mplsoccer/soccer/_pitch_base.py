@@ -659,6 +659,9 @@ class BasePitchSoccer(BasePitch):
               for kind='image', kind='pitch' or kind='axes'.
               If the formation is a valid formation used by the data provider (pitch_type),
             the dictionary keys will be the data provider's position identifiers.
+            Positions outside the axes limits (e.g. a full-pitch formation
+            on a half pitch) are not drawn and their value is None, as inset
+            axes are not clipped by their parent axes.
             - matplotlib.PathCollection for kind='scatter'.
             - A list of matplotlib.Text for kind='text'.
 
@@ -861,9 +864,16 @@ class BasePitchSoccer(BasePitch):
 
         if kind == 'scatter':
             return self.scatter(x, y, ax=ax, **kwargs)
+        # inset axes are not clipped by their parent axes, so skip positions
+        # outside the axes limits (e.g. a full-pitch formation on a half pitch)
+        # rather than rendering the insets outside the pitch (returned as None)
+        visible = self._inset_visible(x, y, ax)
         if kind == 'image':
             axes = {}
             for i in range(len(formation_positions)):
+                if not visible[i]:
+                    axes[position_names[i]] = None
+                    continue
                 axes[position_names[i]] = self.inset_image(x[i], y[i], sorted_image[i], width=width,
                                                            height=height, ax=ax, **kwargs)
             return axes
@@ -873,6 +883,9 @@ class BasePitchSoccer(BasePitch):
                         hasattr(self, key)}
             self._set_multiple_attributes(kwargs)
             for i in range(len(formation_positions)):
+                if not visible[i]:
+                    axes[position_names[i]] = None
+                    continue
                 axes[position_names[i]] = self.inset_axes(x=x[i], y=y[i], height=height,
                                                           width=width,
                                                           aspect=1 / self.ax_aspect, polar=False,
@@ -883,6 +896,9 @@ class BasePitchSoccer(BasePitch):
         if kind == 'axes':
             axes = {}
             for i in range(len(formation_positions)):
+                if not visible[i]:
+                    axes[position_names[i]] = None
+                    continue
                 axes[position_names[i]] = self.inset_axes(x=x[i], y=y[i], height=height,
                                                           width=width,
                                                           aspect=aspect, polar=polar, ax=ax,

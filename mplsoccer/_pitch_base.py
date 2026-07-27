@@ -1024,10 +1024,10 @@ class BasePitch(ABC):
     def sonar_grid(self, stats_length,
                    stats_color=None, cmap=None, vmin=None, vmax=None,
                    rmin=0, rmax=None,
-                   sonar_alpha=1, sonar_facecolor='None',
+                   sonar_alpha=1, sonar_facecolor='None', sonar_zorder=5,
                    axis=False, label=False,
                    width=None, height=None,
-                   exclude_zeros=True, exclude_nan=True,
+                   exclude_zeros=True, exclude_nan=True, exclude_outside=True,
                    ax=None, **kwargs):
         """ Plot a grid of polar bar charts on an existing axes.
 
@@ -1057,6 +1057,11 @@ class BasePitch(ABC):
             The alpha/ transparency of the sonar axes patch.
         sonar_facecolor : any Matplotlib color, default 'None'
             The facecolor of the sonar axes. The default 'None' makes the axes transparent.
+        sonar_zorder : float, default 5
+            The zorder of the sonar axes. The sonar axes are drawn amongst the
+            other artists on the pitch axes according to this value
+            (matplotlib's default for inset axes is 5). Artists with a higher
+            zorder are drawn on top of the sonars.
         axis : bool, default False
             Whether to set the axis spines to visible.
         label : bool, default False
@@ -1069,6 +1074,11 @@ class BasePitch(ABC):
             Whether to draw the Polar axes where all the values are zero for the grid cell.
         exclude_nan : bool, default True
             Whether to draw the Polar axes where all the values are numpy.nan for the grid cell.
+        exclude_outside : bool, default True
+            Whether to exclude the Polar axes where the grid cell centre falls
+            outside the axes limits (e.g. with negative pads or a half pitch).
+            Inset axes are not clipped by their parent axes, so without this
+            they render outside the pitch.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
@@ -1108,19 +1118,32 @@ class BasePitch(ABC):
                                  stats_length['angle_grid'], stats_length['angle_widths'],
                                  cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
                                  sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                                 sonar_zorder=sonar_zorder,
                                  axis=axis, label=label, width=width, height=height,
                                  exclude_zeros=exclude_zeros, exclude_nan=exclude_nan,
+                                 exclude_outside=exclude_outside,
                                  ax=ax, **kwargs)
         axs = np.squeeze(axs.reshape(num_y, num_x))
         if axs.size == 1:
             axs = axs.item()
         return axs
 
+    def _inset_visible(self, x, y, ax):
+        """ Whether centres given in pitch coordinates are inside the current axes limits.
+        Inset axes are not clipped by their parent axes, so insets outside the
+        limits (e.g. with negative pads or a half pitch) render outside the pitch."""
+        x, y = self._reverse_if_vertical(np.asarray(x, dtype=float),
+                                         np.asarray(y, dtype=float))
+        xmin, xmax = sorted(ax.get_xlim())
+        ymin, ymax = sorted(ax.get_ylim())
+        return (x >= xmin) & (x <= xmax) & (y >= ymin) & (y <= ymax)
+
     def _sonar_insets(self, lengths, colors, cx, cy, angle_grid, angle_widths,
                       cmap=None, vmin=None, vmax=None, rmin=0, rmax=None,
-                      sonar_alpha=1, sonar_facecolor='None', axis=False, label=False,
+                      sonar_alpha=1, sonar_facecolor='None', sonar_zorder=5,
+                      axis=False, label=False,
                       width=None, height=None, exclude_zeros=True, exclude_nan=True,
-                      ax=None, **kwargs):
+                      exclude_outside=True, ax=None, **kwargs):
         """ Place a polar bar chart (sonar) inset at each of a collection of centres.
         The lengths/ colors are (num_centres, num_angles) arrays and cx/ cy
         are the centres in pitch coordinates. Returns an object array of the
@@ -1139,15 +1162,19 @@ class BasePitch(ABC):
                 vmax = np.nanmax(colors)
         mask_zero = np.all(np.isclose(lengths, 0), axis=1)
         mask_null = np.all(np.isnan(lengths), axis=1)
+        visible = self._inset_visible(cx, cy, ax)
         axs = np.empty(len(cx), dtype='O')
         for i in range(len(cx)):
-            if mask_zero[i] and exclude_zeros:
+            if exclude_outside and not visible[i]:
+                ax_inset = None
+            elif mask_zero[i] and exclude_zeros:
                 ax_inset = None
             elif mask_null[i] and exclude_nan:
                 ax_inset = None
             else:
                 ax_inset = self.inset_axes(cx[i], cy[i],
-                                           width=width, height=height, ax=ax, polar=True)
+                                           width=width, height=height, ax=ax, polar=True,
+                                           zorder=sonar_zorder)
                 _sonar(lengths[i], None if colors is None else colors[i],
                        angle_grid, angle_widths,
                        cmap=cmap, vmin=vmin, vmax=vmax,
@@ -1161,10 +1188,10 @@ class BasePitch(ABC):
     def sonar_zones(self, stats_length,
                     stats_color=None, cmap=None, vmin=None, vmax=None,
                     rmin=0, rmax=None,
-                    sonar_alpha=1, sonar_facecolor='None',
+                    sonar_alpha=1, sonar_facecolor='None', sonar_zorder=5,
                     axis=False, label=False,
                     width=None, height=None,
-                    exclude_zeros=True, exclude_nan=True,
+                    exclude_zeros=True, exclude_nan=True, exclude_outside=True,
                     ax=None, **kwargs):
         """ Plot a polar bar chart (sonar) at the centre of each zone.
 
@@ -1195,6 +1222,11 @@ class BasePitch(ABC):
             The alpha/ transparency of the sonar axes patch.
         sonar_facecolor : any Matplotlib color, default 'None'
             The facecolor of the sonar axes. The default 'None' makes the axes transparent.
+        sonar_zorder : float, default 5
+            The zorder of the sonar axes. The sonar axes are drawn amongst the
+            other artists on the pitch axes according to this value
+            (matplotlib's default for inset axes is 5). Artists with a higher
+            zorder are drawn on top of the sonars.
         axis : bool, default False
             Whether to set the axis spines to visible.
         label : bool, default False
@@ -1207,6 +1239,11 @@ class BasePitch(ABC):
             Whether to draw the Polar axes where all the values are zero for the zone.
         exclude_nan : bool, default True
             Whether to draw the Polar axes where all the values are numpy.nan for the zone.
+        exclude_outside : bool, default True
+            Whether to exclude the Polar axes where the zone centre falls
+            outside the axes limits (e.g. with negative pads or a half pitch).
+            Inset axes are not clipped by their parent axes, so without this
+            they render outside the pitch.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
@@ -1251,8 +1288,10 @@ class BasePitch(ABC):
                                   stats_length['angle_grid'], stats_length['angle_widths'],
                                   cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
                                   sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                                  sonar_zorder=sonar_zorder,
                                   axis=axis, label=label, width=width, height=height,
                                   exclude_zeros=exclude_zeros, exclude_nan=exclude_nan,
+                                  exclude_outside=exclude_outside,
                                   ax=ax, **kwargs)
 
     @copy_doc(heatmap)
@@ -1311,6 +1350,10 @@ class BasePitch(ABC):
                       xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
 
+        The labels are clipped to the axes, so labels for hidden parts of the
+        pitch (e.g. with negative pads or a half pitch) are not drawn.
+        Pass clip_on=False to draw labels outside the axes.
+
         Parameters
         ----------
         stats : A dictionary or list of dictionaries.
@@ -1350,6 +1393,9 @@ class BasePitch(ABC):
         validate_ax(ax)
         va = kwargs.pop('va', 'center')
         ha = kwargs.pop('ha', 'center')
+        # clip labels to the axes so they do not draw outside the pitch
+        # when parts of the pitch are hidden (e.g. negative pads or a half pitch)
+        clip_on = kwargs.pop('clip_on', True)
 
         if not isinstance(stats, list):
             stats = [stats]
@@ -1375,7 +1421,7 @@ class BasePitch(ABC):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
                 annotation = self.text(cx[idx], cy[idx], text_str, ax=ax,
-                                       va=va, ha=ha, **kwargs)
+                                       va=va, ha=ha, clip_on=clip_on, **kwargs)
                 annotation_list.append(annotation)
 
         return annotation_list
