@@ -11,9 +11,13 @@ from matplotlib import rcParams
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
+from matplotlib.collections import PatchCollection
+from matplotlib.transforms import Affine2D
+
 from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap,
                       bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones,
-                      bin_statistic_sonar_zones, zone_sonar_from_binnumber, _sonar)
+                      bin_statistic_sonar_zones, zone_sonar_from_binnumber, _sonar,
+                      mirror_zones)
 from .linecollection import lines
 from .quiver import arrows
 from .scatterutils import scatter_rotation
@@ -1345,6 +1349,103 @@ class BasePitch(ABC):
                                  transform=ax.transData)
         collection.set_clip_path(rect)
         return collection
+
+    def draw_zones(self, regions, names=None, facecolor=None, edgecolor=None, alpha=0.5,
+                   zorder=3, label=True, ax=None, **kwargs):
+        """ Draw a zone layout to help build custom heatmap zones iteratively.
+
+        Unlike bin_statistic_zones, an invalid layout does not raise an error:
+        the zones are drawn as they are, so with a translucent alpha,
+        overlapping zones show up darker and gaps show the pitch underneath.
+        Each zone is labelled with its index (and name if provided) so you can
+        find the region to edit in your regions list. Once the layout is
+        complete, use it with bin_statistic_zones, which validates it exactly.
+
+        Parameters
+        ----------
+        regions : array-like of shape (num_zones, 4)
+            A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates.
+        names : list of str, default None
+            An optional name for each zone (in the same order as regions).
+        facecolor : any Matplotlib color or a sequence of colors, default None
+            The zone face colors (one color or one per zone). If None,
+            defaults to the first color of rcParams['axes.prop_cycle'].
+            A single color makes overlapping zones show up as an
+            unambiguous darker shade; the zone edges and labels
+            distinguish neighbouring zones.
+        edgecolor : any Matplotlib color, default None
+            The zone edge color. If None, defaults to rcParams['patch.edgecolor'].
+        alpha : float, default 0.5
+            The transparency of the zones. A translucent alpha shows the
+            pitch markings underneath, draws overlapping zones darker and
+            leaves gaps as the pitch background.
+        zorder : float, default 3
+            The zorder for the zones and labels. The default draws them above
+            the pitch markings (line_zorder is often set to 2 for heatmaps).
+        label : bool, default True
+            Whether to label each zone with its index, or 'index: name'
+            when names are given.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to
+            matplotlib.collections.PatchCollection.
+
+        Returns
+        -------
+        collection : matplotlib.collections.PatchCollection
+        annotations : list of matplotlib.text.Text
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> regions = [(0, 60, 0, 80), (60, 120, 0, 40)]  # gap at (60, 120, 40, 80)
+        >>> collection, annotations = pitch.draw_zones(regions, ax=ax)
+        """
+        validate_ax(ax)
+        regions = np.asarray(regions, dtype=float)
+        if regions.ndim != 2 or regions.shape[1] != 4:
+            raise ValueError('regions must be a sequence of (x0, x1, y0, y1) rectangles')
+        if names is not None and len(names) != len(regions):
+            raise ValueError('names must be the same length as regions')
+        facecolor = kwargs.pop('fc', facecolor)
+        edgecolor = kwargs.pop('ec', edgecolor)
+        if facecolor is None:
+            facecolor = rcParams['axes.prop_cycle'].by_key().get('color', ['C0'])[0]
+        if edgecolor is None:
+            edgecolor = rcParams['patch.edgecolor']
+        zone_patches = [patches.Rectangle((x0, y0), x1 - x0, y1 - y0)
+                        for x0, x1, y0, y1 in regions]
+        collection = PatchCollection(zone_patches, facecolor=facecolor,
+                                     edgecolor=edgecolor, alpha=alpha,
+                                     zorder=zorder, **kwargs)
+        if self.vertical:
+            # the regions are in pitch coordinates; swap the x and y
+            # coordinates of the whole collection with an affine transform
+            swap = Affine2D(np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]]))
+            collection.set_transform(swap + ax.transData)
+        ax.add_collection(collection)
+        # clip to the pitch boundary like heatmap_zones
+        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                 self.visible_pitch[1] - self.visible_pitch[0],
+                                 self.visible_pitch[3] - self.visible_pitch[2],
+                                 transform=ax.transData)
+        collection.set_clip_path(rect)
+        annotations = []
+        if label:
+            cx = 0.5 * (regions[:, 0] + regions[:, 1])
+            cy = 0.5 * (regions[:, 2] + regions[:, 3])
+            for i in range(len(regions)):
+                text_str = f'{i}: {names[i]}' if names is not None else f'{i}'
+                annotations.append(self.text(cx[i], cy[i], text_str, ax=ax,
+                                             va='center', ha='center', clip_on=True,
+                                             zorder=zorder))
+        return collection, annotations
+
+    @copy_doc(mirror_zones)
+    def mirror_zones(self, regions, names=None, axis='x', suffixes=None):
+        return mirror_zones(regions, dim=self.dim, names=names, axis=axis, suffixes=suffixes)
 
     def label_heatmap(self, stats, str_format=None, exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):

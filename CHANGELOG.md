@@ -28,6 +28,15 @@ place polar bar charts at a collection of centres.
 * Added the ``sonar_zorder`` argument to ``sonar_grid`` and \
 ``sonar_zones`` to control where the sonar axes are drawn amongst the \
 other artists on the pitch axes (matplotlib's default for inset axes is 5).
+* Added ``Pitch.draw_zones`` for building custom zone layouts iteratively: \
+it draws the regions without validating them, labelling each zone with \
+its index/ name, so overlapping zones show up darker and gaps show the \
+pitch underneath.
+* Added ``Pitch.mirror_zones`` for completing a zone layout by reflecting \
+it about the halfway line (axis='x'), the y midline (axis='y') or \
+both (axis='both', e.g. to complete a quarter-pitch layout). Zones that \
+straddle a mirror line symmetrically (e.g. a middle third) are not \
+duplicated on top of themselves.
 
 ### Changes
 * ``Pitch.bin_statistic_positional`` with ``positional='full'`` is \

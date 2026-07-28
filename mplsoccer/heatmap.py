@@ -953,6 +953,136 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
                                      normalize=normalize, center=center)
 
 
+def _reflect_regions(regions, center, low_col, high_col):
+    """ Reflect the rectangles about a mirror line on one axis."""
+    reflected = regions.copy()
+    reflected[:, low_col] = 2 * center - regions[:, high_col]
+    reflected[:, high_col] = 2 * center - regions[:, low_col]
+    return reflected
+
+
+def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
+    """ Complete a zone layout by reflecting it about the middle of the pitch.
+
+    Zone layouts are often symmetric, so you can define the zones for one
+    half (or one quarter) of the pitch and mirror them to cover the whole
+    pitch. Zones that straddle a mirror line symmetrically (e.g. a middle
+    third) are only reflected about the other axis (or kept once), rather
+    than duplicated on top of themselves. Zones that straddle a mirror line
+    asymmetrically raise a ValueError as their reflection would overlap them.
+
+    The returned regions start with the supplied regions unchanged (zone k
+    keeps its index), followed by the reflected zones (for axis='both' the
+    x-reflections, then the y-reflections, then the reflections about both
+    axes), each in the same relative order as the supplied regions.
+    Overlaps (e.g. mirroring a layout that already covers the whole pitch)
+    are not detected here; they raise when the layout is used with
+    bin_statistic_zones.
+
+    Parameters
+    ----------
+    regions : array-like of shape (num_zones, 4)
+        A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates
+        (x0 < x1 and y0 < y1).
+    dim : mplsoccer pitch dimensions
+        One of FixedDims, MetricasportsDims, VariableCenterDims, or CustomDims.
+        Automatically populated when using Pitch/ VerticalPitch class
+    names : list of str, default None
+        An optional name for each zone (in the same order as regions).
+    axis : str, default 'x'
+        The reflection axis. 'x' reflects about the halfway line,
+        'y' reflects about the y midline running from goal to goal and
+        'both' reflects about both (e.g. to complete a quarter-pitch layout).
+    suffixes : tuple of str, default None
+        The suffixes added to the zone names, one per copy of the layout:
+        (supplied, mirrored) for axis='x'/'y', or
+        (supplied, x-mirrored, y-mirrored, xy-mirrored) for axis='both'.
+        The default None uses ('', '-mirror') and
+        ('', '-mirror-x', '-mirror-y', '-mirror-xy') respectively.
+        Zones that produce no reflections because they straddle the mirror
+        line(s) symmetrically are not given a suffix.
+
+    Returns
+    -------
+    regions : list of tuple
+        The supplied (x0, x1, y0, y1) rectangles followed by the reflected rectangles.
+    names : list of str or None
+        A name for each zone, or None if names was None.
+
+    Examples
+    --------
+    >>> from mplsoccer import Pitch
+    >>> pitch = Pitch()  # statsbomb dimensions: the halfway line is x=60
+    >>> regions = [(80, 120, 0, 80), (40, 80, 0, 80)]
+    >>> names = ['final-third', 'middle-third']
+    >>> regions, names = pitch.mirror_zones(regions, names, suffixes=('-att', '-def'))
+    >>> names  # the middle third straddles halfway symmetrically so is kept once
+    ['final-third-att', 'middle-third', 'final-third-def']
+    """
+    regions = np.asarray(regions, dtype=float)
+    if regions.ndim != 2 or regions.shape[1] != 4:
+        raise ValueError('regions must be a sequence of (x0, x1, y0, y1) rectangles')
+    bad = np.where((regions[:, 1] <= regions[:, 0]) | (regions[:, 3] <= regions[:, 2]))[0]
+    if bad.size:
+        raise ValueError(f'region {bad[0]} is invalid: regions must have x1 > x0 and y1 > y0')
+    if names is not None and len(names) != len(regions):
+        raise ValueError('names must be the same length as regions')
+    if axis not in ('x', 'y', 'both'):
+        raise ValueError("axis must be one of 'x', 'y' or 'both'")
+    mirror_x = axis in ('x', 'both')
+    mirror_y = axis in ('y', 'both')
+    if suffixes is None:
+        suffixes = (('', '-mirror-x', '-mirror-y', '-mirror-xy') if axis == 'both'
+                    else ('', '-mirror'))
+    if len(suffixes) != 2 + 2 * (axis == 'both'):
+        raise ValueError('suffixes must have one suffix per copy of the layout: '
+                         "two for axis='x'/'y' or four for axis='both'")
+    tol = np.abs(np.asarray(dim.pitch_extent, dtype=float)).max() * 1e-9
+
+    def reflect(low_col, high_col, center, line_name):
+        """ Reflected regions, whether each region maps onto itself (symmetric),
+        and raise for regions straddling the mirror line asymmetrically."""
+        reflected = _reflect_regions(regions, center, low_col, high_col)
+        symmetric = (np.isclose(reflected[:, low_col], regions[:, low_col],
+                                rtol=0, atol=tol) &
+                     np.isclose(reflected[:, high_col], regions[:, high_col],
+                                rtol=0, atol=tol))
+        straddle = ((regions[:, low_col] < center - tol) &
+                    (regions[:, high_col] > center + tol) & ~symmetric)
+        if straddle.any():
+            raise ValueError(f'region {np.where(straddle)[0][0]} straddles the '
+                             f'{line_name} asymmetrically so its reflection '
+                             'would overlap it')
+        return reflected, symmetric
+
+    x_center = (dim.left + dim.right) / 2
+    y_center = (dim.bottom + dim.top) / 2
+    x_symmetric = np.ones(len(regions), dtype=bool)
+    y_symmetric = np.ones(len(regions), dtype=bool)
+    # each copy of the layout is (regions, mask of the zones included in the copy)
+    copies = [(regions, np.ones(len(regions), dtype=bool))]
+    if mirror_x:
+        reflected_x, x_symmetric = reflect(0, 1, x_center, "halfway line (axis='x')")
+        copies.append((reflected_x, ~x_symmetric))
+    if mirror_y:
+        reflected_y, y_symmetric = reflect(2, 3, y_center, "y midline (axis='y')")
+        copies.append((reflected_y, ~y_symmetric))
+    if mirror_x and mirror_y:
+        reflected_xy = _reflect_regions(reflected_x, y_center, 2, 3)
+        copies.append((reflected_xy, ~x_symmetric & ~y_symmetric))
+
+    out_regions = [tuple(float(value) for value in region)
+                   for copy, mask in copies for region in copy[mask]]
+    if names is None:
+        return out_regions, None
+    no_suffix = x_symmetric & y_symmetric  # zones producing no reflections at all
+    out_names = []
+    for suffix, (_, mask) in zip(suffixes, copies):
+        out_names += [name if no_suffix[i] else name + suffix
+                      for i, name in enumerate(names) if mask[i]]
+    return out_regions, out_names
+
+
 def _sonar(lengths, colors, angle_grid, angle_widths,
            cmap=None, vmin=None, vmax=None, rmin=0, rmax=None,
            sonar_alpha=1, sonar_facecolor='None',

@@ -475,6 +475,117 @@ def test_sonar_zones_plotting():
         pitch.sonar_zones(stats, stats_color=wrong, cmap='viridis', width=10, ax=ax)
 
 
+def test_mirror_zones():
+    """ Test mirroring completes a layout, keeps symmetric straddlers once,
+    preserves the supplied zone order and produces a valid tiling."""
+    pitch = Pitch(pitch_type='statsbomb')
+    regions = [(80, 120, 0, 40), (80, 120, 40, 80), (40, 80, 0, 80)]
+    names = ['right', 'left', 'middle']
+    out_regions, out_names = pitch.mirror_zones(regions, names, suffixes=('-att', '-def'))
+    assert out_regions == [(80., 120., 0., 40.), (80., 120., 40., 80.), (40., 80., 0., 80.),
+                           (0., 40., 0., 40.), (0., 40., 40., 80.)]
+    assert out_names == ['right-att', 'left-att', 'middle', 'right-def', 'left-def']
+    # the completed layout passes the strict binning validation
+    x, y = random_points(pitch, 10000)
+    stats = pitch.bin_statistic_zones(x, y, out_regions, names=out_names)
+    assert stats['statistic'].sum() == 10000
+    # names=None returns None names; axis='y' reflects about the y midline
+    out_regions, out_names = pitch.mirror_zones([(0, 120, 0, 18)], axis='y')
+    assert out_regions == [(0., 120., 0., 18.), (0., 120., 62., 80.)]
+    assert out_names is None
+    with pytest.raises(ValueError, match='region 0 straddles the halfway line'):
+        pitch.mirror_zones([(40, 90, 0, 80)])
+    with pytest.raises(ValueError, match='straddles the y midline'):
+        pitch.mirror_zones([(0, 120, 10, 60)], axis='both')
+    with pytest.raises(ValueError, match='region 1 is invalid'):
+        pitch.mirror_zones([(80, 120, 0, 80), (80, 40, 0, 80)])
+
+
+def test_mirror_zones_both():
+    """ Test axis='both' completes a quarter-pitch layout, reflecting in x,
+    y and both, with per-axis symmetry handled per zone."""
+    pitch = Pitch(pitch_type='statsbomb')
+    # a quarter-pitch layout plus a zone that is symmetric in x only
+    regions = [(60, 90, 40, 80), (90, 120, 40, 80), (40, 80, 40, 80)]
+    names = ['near', 'far', 'mid']
+    out_regions, out_names = pitch.mirror_zones(regions, names, axis='both')
+    # copies ordered: supplied, x-mirrored, y-mirrored, xy-mirrored;
+    # 'mid' is x-symmetric so it only produces a y reflection
+    assert out_names == ['near', 'far', 'mid',
+                         'near-mirror-x', 'far-mirror-x',
+                         'near-mirror-y', 'far-mirror-y', 'mid-mirror-y',
+                         'near-mirror-xy', 'far-mirror-xy']
+    assert out_regions[3] == (30., 60., 40., 80.)   # near-mirror-x
+    assert out_regions[7] == (40., 80., 0., 40.)    # mid-mirror-y
+    assert out_regions[8] == (30., 60., 0., 40.)    # near-mirror-xy
+    # the quarter layout without the overlapping mid zone tiles the pitch
+    quarter_regions, _ = pitch.mirror_zones([(60, 90, 40, 80), (90, 120, 40, 80)],
+                                            axis='both')
+    x, y = random_points(pitch, 10000)
+    stats = pitch.bin_statistic_zones(x, y, quarter_regions)
+    assert stats['statistic'].sum() == 10000
+    # a fully symmetric zone is kept once with no suffix
+    out_regions, out_names = pitch.mirror_zones([(40, 80, 0, 80), (80, 120, 0, 30)],
+                                                ['mid', 'corner'], axis='both')
+    assert out_names == ['mid', 'corner', 'corner-mirror-x',
+                         'corner-mirror-y', 'corner-mirror-xy']
+    with pytest.raises(ValueError, match='suffixes must have one suffix per copy'):
+        pitch.mirror_zones(regions, names, axis='both', suffixes=('', '-mirror'))
+
+
+def test_draw_zones():
+    """ Test the zone preview draws invalid layouts without raising,
+    labels the zones and cycles the face colors."""
+    regions = [(0, 60, 0, 80), (50, 120, 0, 50)]  # overlapping, with a gap
+    for pitch_class in [Pitch, VerticalPitch]:
+        pitch = pitch_class(pitch_type='statsbomb')
+        fig, ax = pitch.draw()
+        collection, annotations = pitch.draw_zones(regions, ['big', 'low'], ax=ax)
+        assert isinstance(collection, PatchCollection)
+        assert [annotation.get_text() for annotation in annotations] == ['0: big', '1: low']
+        assert all(annotation.get_clip_on() for annotation in annotations)
+        # indices only when no names are given; no labels when label=False
+        fig, ax = pitch.draw()
+        _, annotations = pitch.draw_zones(regions, ax=ax)
+        assert [annotation.get_text() for annotation in annotations] == ['0', '1']
+        _, annotations = pitch.draw_zones(regions, label=False, ax=ax)
+        assert annotations == []
+    # the default is a single face color; a sequence gives per-zone colors.
+    # the zones and labels draw above pitch lines (zorder 3 by default)
+    pitch = Pitch(pitch_type='statsbomb', line_zorder=2)
+    fig, ax = pitch.draw()
+    collection, annotations = pitch.draw_zones(regions, ax=ax)
+    assert len(collection.get_facecolor()) == 1
+    assert collection.get_zorder() == 3
+    assert all(annotation.get_zorder() == 3 for annotation in annotations)
+    collection, _ = pitch.draw_zones(regions, facecolor=['red', 'blue'], zorder=4, ax=ax)
+    facecolors = collection.get_facecolor()
+    assert len(facecolors) == 2
+    assert not np.array_equal(facecolors[0], facecolors[1])
+    assert collection.get_zorder() == 4
+
+
+def test_draw_zones_overlaps_darker():
+    """ Test overlapping zones render darker than single zones and gaps
+    show the background (the visual diagnostics of the preview)."""
+    pitch = Pitch(pitch_type='statsbomb')
+    fig, ax = pitch.draw()
+    regions = [(0, 60, 0, 80), (50, 120, 0, 50)]  # overlap x 50-60, gap x 60-120 y 50-80
+    pitch.draw_zones(regions, facecolor='blue', label=False, ax=ax)
+    fig.canvas.draw()
+    buffer = np.asarray(fig.canvas.buffer_rgba())
+    height = buffer.shape[0]
+
+    def red_channel(x, y):
+        pixel_x, pixel_y = ax.transData.transform((x, y))
+        return buffer[int(height - pixel_y), int(pixel_x), 0]
+
+    single = red_channel(20, 70)
+    overlap = red_channel(55, 25)
+    gap = red_channel(100, 70)
+    assert overlap < single < gap
+
+
 def test_sonar_grid_unchanged():
     """ Test sonar_grid still returns a grid of polar insets with bar heights
     matching the statistic (regression for the shared _sonar_insets refactor)."""

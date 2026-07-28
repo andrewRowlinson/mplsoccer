@@ -3,17 +3,14 @@
 Heatmap custom zones
 ====================
 
-This example shows how to plot heatmaps for a custom zone layout:
-axis-aligned rectangles of different sizes that together tile the pitch.
+This example shows how to plot heatmaps for a custom zone layout.
 Unlike ``bin_statistic``, the zones do not have to form a regular grid,
 so you can merge areas (e.g. a whole third) while splitting others
-into channels and halfspaces. The zones are drawn as a single
-matplotlib collection so a colorbar works without any syncing.
+such as halfspaces. The zones are drawn as a single
+matplotlib collection so colorbars work.
 """
 
 import matplotlib.patheffects as path_effects
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -42,23 +39,43 @@ path_eff = [path_effects.Stroke(linewidth=1.5, foreground='black'),
 ##############################################################################
 # Define the zones
 # ----------------
-# Each zone is a rectangle (x0, x1, y0, y1) in pitch coordinates and together
-# the rectangles must exactly tile the pitch (no gaps or overlaps).
-# Here we merge the whole defensive third into one zone, split the middle
-# third into two halves, and split the attacking third into wings,
-# halfspaces and the centre. Zone k of the results always corresponds
-# to regions[k]/ names[k] so you can safely join the results to a dataframe.
-regions = [(0, 40, 0, 80),      # defensive third
-           (40, 80, 0, 40),     # middle third: left half
-           (40, 80, 40, 80),    # middle third: right half
-           (80, 120, 0, 18),    # attacking third: left wing
-           (80, 120, 18, 30),   # attacking third: left halfspace
-           (80, 120, 30, 50),   # attacking third: centre
-           (80, 120, 50, 62),   # attacking third: right halfspace
-           (80, 120, 62, 80)]   # attacking third: right wing
-names = ['defensive third', 'middle: left', 'middle: right',
-         'wing: left', 'halfspace: left', 'centre',
-         'halfspace: right', 'wing: right']
+# The zones are a list of lists, each sub-list is
+# a rectangle (x0, x1, y0, y1) where x0 < x1 and y0 < y1.
+# We will define it for half the pitch and mirror it later.
+pitch = Pitch(pitch_type='statsbomb', line_zorder=2)
+zones = [[pitch.dim.penalty_area_right, pitch.dim.right,
+          pitch.dim.top, pitch.dim.penalty_area_top],
+         [pitch.dim.positional_x[-3], pitch.dim.penalty_area_right,
+          pitch.dim.top, pitch.dim.penalty_area_top],
+         [pitch.dim.center_length, pitch.dim.positional_x[-3],
+          pitch.dim.top, pitch.dim.penalty_area_top],
+         [pitch.dim.six_yard_right, pitch.dim.right,
+          pitch.dim.penalty_area_top, pitch.dim.six_yard_top],
+         [pitch.dim.penalty_area_right, pitch.dim.six_yard_right,
+          pitch.dim.penalty_area_top, pitch.dim.six_yard_top],
+         [pitch.dim.center_length, pitch.dim.penalty_area_right,
+          pitch.dim.penalty_area_top, pitch.dim.six_yard_top],
+         [pitch.dim.six_yard_right, pitch.dim.right,
+          pitch.dim.six_yard_top, pitch.dim.six_yard_bottom],
+         [pitch.dim.penalty_area_right, pitch.dim.six_yard_right,
+          pitch.dim.six_yard_top, pitch.dim.six_yard_bottom],
+         [pitch.dim.center_length, pitch.dim.penalty_area_right,
+          pitch.dim.six_yard_top, pitch.dim.six_yard_bottom],
+        ]
+fig, ax = pitch.draw(figsize=(6.6, 4.125))
+# there is no validation so you can draw the
+# zones iteratively and check for any overlaps and gaps
+collection, annotations = pitch.draw_zones(zones, ax=ax)
+
+##############################################################################
+# Mirror the zones
+# ----------------
+# Layouts are often symmetric about the halfway line, so you can define one
+# half and complete the layout with ``mirror_zones``. Zones that straddle
+# the halfway line symmetrically (like the middle zone here) are kept once.
+mirror_zones, mirror_names = pitch.mirror_zones(zones, axis='both')
+fig, ax = pitch.draw(figsize=(6.6, 4.125))
+collection, annotations = pitch.draw_zones(mirror_zones, mirror_names, ax=ax)
 
 ##############################################################################
 # Plot a custom zone heatmap
@@ -68,43 +85,8 @@ names = ['defensive third', 'middle: left', 'middle: right',
 # directly and ``label_heatmap`` labels the zone centres.
 pitch = Pitch(pitch_type='statsbomb', line_zorder=2, pitch_color='#f4edf0')
 fig, ax = pitch.draw(figsize=(6.6, 4.125))
-fig.set_facecolor('#f4edf0')
-stats = pitch.bin_statistic_zones(df.x, df.y, regions, names=names, normalize=True)
+stats = pitch.bin_statistic_zones(df.x, df.y, mirror_zones, names=mirror_names, normalize=True)
 pc = pitch.heatmap_zones(stats, ax=ax, cmap=flamingo_cmap, edgecolor='#f9f9f9')
-labels = pitch.label_heatmap(stats, color='#f4edf0', fontsize=18,
+labels = pitch.label_heatmap(stats, color='#f4edf0', fontsize=12,
                              ax=ax, ha='center', va='center',
                              str_format='{:.0%}', path_effects=path_eff)
-cbar = fig.colorbar(pc, ax=ax, shrink=0.6)
-cbar.outline.set_edgecolor('#efefef')
-cbar.ax.yaxis.set_tick_params(color='#efefef')
-
-##############################################################################
-# Join the zones to a dataframe
-# -----------------------------
-# The 'binnumber' key gives the zone each event belongs to
-# (-1 if outside the pitch), so the zones also work for
-# dataframe aggregations beyond plotting.
-df['zone'] = stats['binnumber']
-df['zone_name'] = df['zone'].map(dict(enumerate(stats['names'])))
-df.groupby('zone_name', sort=False).agg(num_pressures=('zone', 'size'),
-                                        mean_duration=('duration', 'mean'))
-
-##############################################################################
-# Statistics on small samples
-# ---------------------------
-# The 'count' key is always populated regardless of the requested statistic,
-# so you can mask out zones with a small sample in one line.
-# Here we plot the mean pressure duration per zone
-# and exclude zones with fewer than 50 pressure events.
-pitch = Pitch(pitch_type='statsbomb', line_zorder=2, pitch_color='#f4edf0')
-fig, ax = pitch.draw(figsize=(6.6, 4.125))
-fig.set_facecolor('#f4edf0')
-stats = pitch.bin_statistic_zones(df.x, df.y, regions, names=names,
-                                  values=df.duration, statistic='mean')
-stats['statistic'][stats['count'] < 50] = np.nan  # mask small samples
-pc = pitch.heatmap_zones(stats, ax=ax, cmap=flamingo_cmap, edgecolor='#f9f9f9')
-labels = pitch.label_heatmap(stats, color='#f4edf0', fontsize=15,
-                             ax=ax, ha='center', va='center', exclude_nan=True,
-                             str_format='{:.2f}s', path_effects=path_eff)
-
-plt.show()  # If you are using a Jupyter notebook you do not need this line
