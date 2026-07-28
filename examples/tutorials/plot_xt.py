@@ -234,8 +234,5 @@ move_success.groupby('player_name')['xt'].sum().sort_values(ascending=False).hea
 # ------------
 # Now we have a simple model, let's try to make some
 # :ref:`sphx_glr_gallery_tutorials_plot_xt_improvements.py` model.
-# You can also build the model over any zone layout
-# (e.g. Juego de Posición) rather than a regular grid - see the
-# :ref:`sphx_glr_gallery_tutorials_plot_xt_zones.py` tutorial.
 
 plt.show()  # If you are using a Jupyter notebook you do not need this line

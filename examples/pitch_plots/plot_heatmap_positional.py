@@ -82,28 +82,4 @@ axs['title'].text(0.5, 0.5, "Pressure applied by\n Chelsea FC Women", color='#de
                   fontproperties=robotto_regular.prop, fontsize=25)
 # sphinx_gallery_thumbnail_path = 'gallery/pitch_plots/images/sphx_glr_plot_heatmap_positional_002.png'
 
-##############################################################################
-# Juego de Posición zones
-# -----------------------
-# The same layout is also available as data through ``positional_zones``,
-# for use with ``bin_statistic_zones``/ ``heatmap_zones``. While
-# ``heatmap_positional`` plots several meshes that need their color limits
-# synced, ``heatmap_zones`` plots all the zones as a single matplotlib
-# collection, so cmap/ vmin/ vmax apply across all zones
-# and ``fig.colorbar`` works directly.
-pitch = VerticalPitch(pitch_type='statsbomb', line_zorder=2,
-                      pitch_color='#22312b', line_color='white')
-fig, ax = pitch.draw(figsize=(4.125, 6))
-fig.set_facecolor('#22312b')
-regions, names = pitch.positional_zones('full')
-stats = pitch.bin_statistic_zones(df.x, df.y, regions, names=names, normalize=True)
-pc = pitch.heatmap_zones(stats, ax=ax, cmap=pearl_earring_cmap, edgecolor='#22312b')
-labels = pitch.label_heatmap(stats, color='#f4edf0', fontsize=15,
-                             ax=ax, ha='center', va='center',
-                             str_format='{:.0%}', path_effects=path_eff)
-cbar = fig.colorbar(pc, ax=ax, shrink=0.6)
-cbar.outline.set_edgecolor('#efefef')
-cbar.ax.yaxis.set_tick_params(color='#efefef')
-plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='#efefef')
-
 plt.show()  # If you are using a Jupyter notebook you do not need this line
