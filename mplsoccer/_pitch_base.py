@@ -1268,8 +1268,8 @@ class BasePitch(ABC):
         >>> pitch = Pitch()
         >>> angle, distance = pitch.calculate_angle_and_distance(df.x, df.y,
         ...                                                      df.end_x, df.end_y)
-        >>> regions, names = pitch.positional_zones('full')
-        >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, regions,
+        >>> zones, names = pitch.positional_zones('full')
+        >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, zones,
         ...                                      angle_bins=4)
         >>> fig, ax = pitch.draw(figsize=(8, 5.5))
         >>> axs = pitch.sonar_zones(bs, width=10, fc='cornflowerblue',
@@ -1303,9 +1303,9 @@ class BasePitch(ABC):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
     @copy_doc(bin_statistic_zones)
-    def bin_statistic_zones(self, x, y, regions, values=None, statistic='count',
+    def bin_statistic_zones(self, x, y, zones, values=None, statistic='count',
                             normalize=False, standardized=False, names=None, edge_tol=None):
-        return bin_statistic_zones(x, y, regions, dim=self.dim, values=values,
+        return bin_statistic_zones(x, y, zones, dim=self.dim, values=values,
                                    statistic=statistic, normalize=normalize,
                                    standardized=standardized, names=names, edge_tol=edge_tol)
 
@@ -1319,11 +1319,11 @@ class BasePitch(ABC):
                                              names=names, area=area, normalize=normalize)
 
     @copy_doc(bin_statistic_sonar_zones)
-    def bin_statistic_sonar_zones(self, x, y, angle, regions, values=None,
+    def bin_statistic_sonar_zones(self, x, y, angle, zones, values=None,
                                   statistic='count', angle_bins=10, normalize=False,
                                   standardized=False, names=None, edge_tol=None,
                                   center=True):
-        return bin_statistic_sonar_zones(x, y, angle, regions, dim=self.dim, values=values,
+        return bin_statistic_sonar_zones(x, y, angle, zones, dim=self.dim, values=values,
                                          statistic=statistic, angle_bins=angle_bins,
                                          normalize=normalize, standardized=standardized,
                                          names=names, edge_tol=edge_tol, center=center)
@@ -1350,7 +1350,7 @@ class BasePitch(ABC):
         collection.set_clip_path(rect)
         return collection
 
-    def draw_zones(self, regions, names=None, facecolor=None, edgecolor=None, alpha=0.5,
+    def draw_zones(self, zones, names=None, facecolor=None, edgecolor=None, alpha=0.5,
                    zorder=3, label=True, ax=None, **kwargs):
         """ Draw a zone layout to help build custom heatmap zones iteratively.
 
@@ -1358,15 +1358,15 @@ class BasePitch(ABC):
         the zones are drawn as they are, so with a translucent alpha,
         overlapping zones show up darker and gaps show the pitch underneath.
         Each zone is labelled with its index (and name if provided) so you can
-        find the region to edit in your regions list. Once the layout is
+        find the zone to edit in your zones list. Once the layout is
         complete, use it with bin_statistic_zones, which validates it exactly.
 
         Parameters
         ----------
-        regions : array-like of shape (num_zones, 4)
+        zones : array-like of shape (num_zones, 4)
             A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates.
         names : list of str, default None
-            An optional name for each zone (in the same order as regions).
+            An optional name for each zone (in the same order as zones).
         facecolor : any Matplotlib color or a sequence of colors, default None
             The zone face colors (one color or one per zone). If None,
             defaults to the first color of rcParams['axes.prop_cycle'].
@@ -1400,15 +1400,15 @@ class BasePitch(ABC):
         >>> from mplsoccer import Pitch
         >>> pitch = Pitch()
         >>> fig, ax = pitch.draw()
-        >>> regions = [(0, 60, 0, 80), (60, 120, 0, 40)]  # gap at (60, 120, 40, 80)
-        >>> collection, annotations = pitch.draw_zones(regions, ax=ax)
+        >>> zones = [(0, 60, 0, 80), (60, 120, 0, 40)]  # gap at (60, 120, 40, 80)
+        >>> collection, annotations = pitch.draw_zones(zones, ax=ax)
         """
         validate_ax(ax)
-        regions = np.asarray(regions, dtype=float)
-        if regions.ndim != 2 or regions.shape[1] != 4:
-            raise ValueError('regions must be a sequence of (x0, x1, y0, y1) rectangles')
-        if names is not None and len(names) != len(regions):
-            raise ValueError('names must be the same length as regions')
+        zones = np.asarray(zones, dtype=float)
+        if zones.ndim != 2 or zones.shape[1] != 4:
+            raise ValueError('zones must be a sequence of (x0, x1, y0, y1) rectangles')
+        if names is not None and len(names) != len(zones):
+            raise ValueError('names must be the same length as zones')
         facecolor = kwargs.pop('fc', facecolor)
         edgecolor = kwargs.pop('ec', edgecolor)
         if facecolor is None:
@@ -1416,12 +1416,12 @@ class BasePitch(ABC):
         if edgecolor is None:
             edgecolor = rcParams['patch.edgecolor']
         zone_patches = [patches.Rectangle((x0, y0), x1 - x0, y1 - y0)
-                        for x0, x1, y0, y1 in regions]
+                        for x0, x1, y0, y1 in zones]
         collection = PatchCollection(zone_patches, facecolor=facecolor,
                                      edgecolor=edgecolor, alpha=alpha,
                                      zorder=zorder, **kwargs)
         if self.vertical:
-            # the regions are in pitch coordinates; swap the x and y
+            # the zones are in pitch coordinates; swap the x and y
             # coordinates of the whole collection with an affine transform
             swap = Affine2D(np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]]))
             collection.set_transform(swap + ax.transData)
@@ -1434,9 +1434,9 @@ class BasePitch(ABC):
         collection.set_clip_path(rect)
         annotations = []
         if label:
-            cx = 0.5 * (regions[:, 0] + regions[:, 1])
-            cy = 0.5 * (regions[:, 2] + regions[:, 3])
-            for i in range(len(regions)):
+            cx = 0.5 * (zones[:, 0] + zones[:, 1])
+            cy = 0.5 * (zones[:, 2] + zones[:, 3])
+            for i in range(len(zones)):
                 text_str = f'{i}: {names[i]}' if names is not None else f'{i}'
                 annotations.append(self.text(cx[i], cy[i], text_str, ax=ax,
                                              va='center', ha='center', clip_on=True,
@@ -1444,8 +1444,8 @@ class BasePitch(ABC):
         return collection, annotations
 
     @copy_doc(mirror_zones)
-    def mirror_zones(self, regions, names=None, axis='x', suffixes=None):
-        return mirror_zones(regions, dim=self.dim, names=names, axis=axis, suffixes=suffixes)
+    def mirror_zones(self, zones, names=None, axis='x', suffixes=None):
+        return mirror_zones(zones, dim=self.dim, names=names, axis=axis, suffixes=suffixes)
 
     def label_heatmap(self, stats, str_format=None, exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):

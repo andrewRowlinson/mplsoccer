@@ -923,7 +923,7 @@ class BasePitchSoccer(BasePitch):
 
     @copy_doc(heatmap_positional)
     def heatmap_positional(self, stats, ax=None, **kwargs):
-        return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
+        return self.heatmap_zones(stats, ax=ax, **kwargs)
 
     @copy_doc(positional_zones)
     def positional_zones(self, positional='full'):

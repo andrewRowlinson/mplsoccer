@@ -1,4 +1,4 @@
-""" A module with functions for binning data into 2d bins and plotting heatmaps.´´."""
+""" A module with functions for binning data into 2d bins and plotting heatmaps."""
 
 from dataclasses import dataclass, asdict
 from functools import partial
@@ -415,41 +415,41 @@ def _snap_to_edges(values, edges):
     return edges[np.abs(values[:, None] - edges[None, :]).argmin(axis=1)]
 
 
-def _validate_regions(regions, extent, atol):
-    """ Validate that the regions exactly tile the extent.
+def _validate_zones(zones, extent, atol):
+    """ Validate that the zones exactly tile the extent.
 
     Region edges that differ only by float noise are merged into a single
-    shared edge and the region coordinates are snapped to the merged edges.
+    shared edge and the zone coordinates are snapped to the merged edges.
     The merged edges define the fine grid: every distinct x-edge crossed
-    with every distinct y-edge, the finest grid that all the regions
+    with every distinct y-edge, the finest grid that all the zones
     line up with.
-    Returns the snapped regions, the fine-grid x/y edges, and the
+    Returns the snapped zones, the fine-grid x/y edges, and the
     fine-cell to zone mapping (ny, nx).
-    The zone order is the order the regions were supplied in; it is never reordered.
+    The zone order is the order the zones were supplied in; it is never reordered.
     """
-    regions = np.asarray(regions, dtype=float)
-    if regions.ndim != 2 or regions.shape[1] != 4:
-        raise ValueError('regions must be a sequence of (x0, x1, y0, y1) rectangles')
+    zones = np.asarray(zones, dtype=float)
+    if zones.ndim != 2 or zones.shape[1] != 4:
+        raise ValueError('zones must be a sequence of (x0, x1, y0, y1) rectangles')
     xmin, xmax, ymin, ymax = extent
-    bad = np.where((regions[:, 1] <= regions[:, 0]) | (regions[:, 3] <= regions[:, 2]))[0]
+    bad = np.where((zones[:, 1] <= zones[:, 0]) | (zones[:, 3] <= zones[:, 2]))[0]
     if bad.size:
-        raise ValueError(f'region {bad[0]} is invalid: regions must have x1 > x0 and y1 > y0')
-    bad = np.where((regions[:, 0] < xmin - atol) | (regions[:, 1] > xmax + atol))[0]
+        raise ValueError(f'zone {bad[0]} is invalid: zones must have x1 > x0 and y1 > y0')
+    bad = np.where((zones[:, 0] < xmin - atol) | (zones[:, 1] > xmax + atol))[0]
     if bad.size:
-        raise ValueError(f'region {bad[0]} x-edges are outside the pitch extent {extent}')
-    bad = np.where((regions[:, 2] < ymin - atol) | (regions[:, 3] > ymax + atol))[0]
+        raise ValueError(f'zone {bad[0]} x-edges are outside the pitch extent {extent}')
+    bad = np.where((zones[:, 2] < ymin - atol) | (zones[:, 3] > ymax + atol))[0]
     if bad.size:
-        raise ValueError(f'region {bad[0]} y-edges are outside the pitch extent {extent}')
-    x_edges = _merge_close_edges(np.concatenate([regions[:, 0], regions[:, 1],
+        raise ValueError(f'zone {bad[0]} y-edges are outside the pitch extent {extent}')
+    x_edges = _merge_close_edges(np.concatenate([zones[:, 0], zones[:, 1],
                                                  [xmin, xmax]]), atol)
-    y_edges = _merge_close_edges(np.concatenate([regions[:, 2], regions[:, 3],
+    y_edges = _merge_close_edges(np.concatenate([zones[:, 2], zones[:, 3],
                                                  [ymin, ymax]]), atol)
-    snapped = regions.copy()
-    snapped[:, 0] = _snap_to_edges(regions[:, 0], x_edges)
-    snapped[:, 1] = _snap_to_edges(regions[:, 1], x_edges)
-    snapped[:, 2] = _snap_to_edges(regions[:, 2], y_edges)
-    snapped[:, 3] = _snap_to_edges(regions[:, 3], y_edges)
-    # map each fine-grid cell to a zone by testing the cell centre against each region.
+    snapped = zones.copy()
+    snapped[:, 0] = _snap_to_edges(zones[:, 0], x_edges)
+    snapped[:, 1] = _snap_to_edges(zones[:, 1], x_edges)
+    snapped[:, 2] = _snap_to_edges(zones[:, 2], y_edges)
+    snapped[:, 3] = _snap_to_edges(zones[:, 3], y_edges)
+    # map each fine-grid cell to a zone by testing the cell centre against each zone.
     # centres never sit on edges so strict inequalities are safe
     fine_x = 0.5 * (x_edges[:-1] + x_edges[1:])
     fine_y = 0.5 * (y_edges[:-1] + y_edges[1:])
@@ -460,11 +460,11 @@ def _validate_regions(regions, extent, atol):
                 (fine_y_grid > y0) & (fine_y_grid < y1))
         clash = mask & (cell_zone != -1)
         if clash.any():
-            raise ValueError(f'regions {cell_zone[clash].ravel()[0]} and {i} overlap')
+            raise ValueError(f'zones {cell_zone[clash].ravel()[0]} and {i} overlap')
         cell_zone[mask] = i
     if (cell_zone == -1).any():
         gap_y_index, gap_x_index = np.argwhere(cell_zone == -1)[0]
-        raise ValueError('regions do not tile the pitch: gap around '
+        raise ValueError('zones do not tile the pitch: gap around '
                          f'x={fine_x[gap_x_index]:.6g}, y={fine_y[gap_y_index]:.6g}. '
                          'If the edges around the gap are meant to coincide, '
                          'increase edge_tol.')
@@ -511,12 +511,9 @@ def zone_statistic_from_binnumber(binnumber, values=None, statistic='count',
         One patch per zone in pitch coordinates for plotting with heatmap_zones.
         If None, the number of zones is inferred from binnumber.max() + 1.
     cx, cy : array-like, default None
-        The annotation centres for each zone in pitch coordinates
-        (used by label_heatmap). Only the caller knows where text should sit
-        on an arbitrary patch (e.g. the visual centre of a Wedge is at
-        mid-radius/ mid-angle, not the polygon centroid) so supply them
-        where possible. If None, they fall back to a best-effort centroid
-        of the patch path vertices, which may sit outside curved patches.
+        The centre of each zone in pitch coordinates, used to place labels
+        (label_heatmap). Supply them for curved patches: the fallback is the
+        centroid of the patch vertices, which can sit outside a Wedge.
     names : list of str, default None
         An optional name for each zone.
     area : array-like, default None
@@ -590,7 +587,7 @@ def zone_statistic_from_binnumber(binnumber, values=None, statistic='count',
                                       area=area, names=names))
 
 
-def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
+def bin_statistic_zones(x, y, zones, dim=None, values=None, statistic='count',
                         normalize=False, standardized=False, names=None, edge_tol=None):
     """ Calculates statistics for zones: any tiling of the pitch by
     axis-aligned rectangles.
@@ -599,15 +596,15 @@ def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
     rectangles can span multiple rows/ columns of other rectangles
     (e.g. the Juego de Posición layout) as long as together they exactly
     tile the pitch with no gaps or overlaps. The results are flat arrays with
-    one value per zone. Zone k always corresponds to regions[k]/ names[k]
-    as supplied; the regions are never reordered, so you can safely join the
+    one value per zone. Zone k always corresponds to zones[k]/ names[k]
+    as supplied; the zones are never reordered, so you can safely join the
     results back to a dataframe, e.g. df['zone'] = stats['binnumber'].
 
     Parameters
     ----------
     x, y : array-like or scalar.
         Commonly, these parameters are 1D arrays.
-    regions : array-like of shape (num_zones, 4)
+    zones : array-like of shape (num_zones, 4)
         A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates
         (x0 < x1 and y0 < y1) that together exactly tile the pitch.
     dim : mplsoccer pitch dimensions
@@ -620,19 +617,18 @@ def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
         The statistic to compute (default is 'count').
         The following statistics are available: 'count' (default),
         'mean', 'std', 'median', 'sum', 'min', 'max', 'circmean'
-        or a user-defined function. Because the statistic is computed
-        directly on the points in each zone (not on pre-aggregated cells),
-        all statistics are exact for merged zones. See:
+        or a user-defined function. The statistic is computed on the points
+        in each zone, so mean and median are exact for merged zones. See:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic.html
     normalize : bool, default False
         Whether to normalize the statistic by dividing by the total.
     standardized : bool, default False
-        Whether the x, y and region values have been standardized to the
+        Whether the x, y and zone values have been standardized to the
         'uefa' pitch coordinates (105m x 68m)
     names : list of str, default None
-        An optional name for each zone (in the same order as regions).
+        An optional name for each zone (in the same order as zones).
     edge_tol : float, default None
-        The absolute tolerance for merging region edges that differ only by
+        The absolute tolerance for merging zone edges that differ only by
         floating point noise into one shared edge. The default None uses
         a scale-aware tolerance of max(abs(pitch extent)) * 1e-9.
 
@@ -654,8 +650,8 @@ def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
     >>> fig, ax = pitch.draw()
     >>> x = np.random.uniform(low=0, high=120, size=100)
     >>> y = np.random.uniform(low=0, high=80, size=100)
-    >>> regions = [(0, 60, 0, 80), (60, 120, 0, 40), (60, 120, 40, 80)]
-    >>> stats = pitch.bin_statistic_zones(x, y, regions)
+    >>> zones = [(0, 60, 0, 80), (60, 120, 0, 40), (60, 120, 40, 80)]
+    >>> stats = pitch.bin_statistic_zones(x, y, zones)
     >>> pc = pitch.heatmap_zones(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     x = np.ravel(x).astype(float)
@@ -671,7 +667,7 @@ def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
         extent = np.asarray(dim.pitch_extent, dtype=float)
     if edge_tol is None:
         edge_tol = np.abs(extent).max() * 1e-9
-    snapped, x_edges, y_edges, cell_zone = _validate_regions(regions, extent, edge_tol)
+    snapped, x_edges, y_edges, cell_zone = _validate_zones(zones, extent, edge_tol)
     # mirror bin_statistic: for inverted-y pitches flip the point coordinates and
     # the fine-grid edges so points on shared edges bin identically to bin_statistic
     if dim.invert_y and not standardized:
@@ -741,8 +737,8 @@ def heatmap_zones(stats, ax=None, vertical=False, **kwargs):
     >>> fig, ax = pitch.draw()
     >>> x = np.random.uniform(low=0, high=120, size=100)
     >>> y = np.random.uniform(low=0, high=80, size=100)
-    >>> regions = [(0, 60, 0, 80), (60, 120, 0, 40), (60, 120, 40, 80)]
-    >>> stats = pitch.bin_statistic_zones(x, y, regions)
+    >>> zones = [(0, 60, 0, 80), (60, 120, 0, 40), (60, 120, 40, 80)]
+    >>> stats = pitch.bin_statistic_zones(x, y, zones)
     >>> pc = pitch.heatmap_zones(stats, edgecolors='black', cmap='hot', ax=ax)
     """
     validate_ax(ax)
@@ -873,7 +869,7 @@ def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
     return result
 
 
-def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
+def bin_statistic_sonar_zones(x, y, angle, zones, dim=None, values=None,
                               statistic='count', angle_bins=10, normalize=False,
                               standardized=False, names=None, edge_tol=None,
                               center=True):
@@ -891,7 +887,7 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
     x, y, angle : array-like or scalar.
         Commonly, these parameters are 1D arrays. The angle is in radians
         between 0 and 2*pi.
-    regions : array-like of shape (num_zones, 4)
+    zones : array-like of shape (num_zones, 4)
         A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates
         (x0 < x1 and y0 < y1) that together exactly tile the pitch.
     dim : mplsoccer pitch dimensions
@@ -912,12 +908,12 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
     normalize : bool, default False
         Whether to normalize the statistic by dividing by the total.
     standardized : bool, default False
-        Whether the x, y and region values have been standardized to the
+        Whether the x, y and zone values have been standardized to the
         'uefa' pitch coordinates (105m x 68m)
     names : list of str, default None
-        An optional name for each zone (in the same order as regions).
+        An optional name for each zone (in the same order as zones).
     edge_tol : float, default None
-        The absolute tolerance for merging region edges that differ only by
+        The absolute tolerance for merging zone edges that differ only by
         floating point noise into one shared edge. The default None uses
         a scale-aware tolerance of max(abs(pitch extent)) * 1e-9.
     center : bool, default True
@@ -946,8 +942,8 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
     >>> pitch = Pitch()
     >>> angle, distance = pitch.calculate_angle_and_distance(df.x, df.y,
     ...                                                      df.end_x, df.end_y)
-    >>> regions, names = pitch.positional_zones('full')
-    >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, regions,
+    >>> zones, names = pitch.positional_zones('full')
+    >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, zones,
     ...                                      angle_bins=4)
     >>> fig, ax = pitch.draw(figsize=(8, 5.5))
     >>> axs = pitch.sonar_zones(bs, width=10, fc='cornflowerblue', ec='black', ax=ax)
@@ -956,7 +952,7 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
     angle = np.ravel(angle)
     if x.size != angle.size:
         raise ValueError('x and angle must be the same size')
-    zone_stats = bin_statistic_zones(x, y, regions, dim=dim, standardized=standardized,
+    zone_stats = bin_statistic_zones(x, y, zones, dim=dim, standardized=standardized,
                                      names=names, edge_tol=edge_tol)
     return zone_sonar_from_binnumber(zone_stats['binnumber'], angle, values=values,
                                      statistic=statistic, angle_bins=angle_bins,
@@ -966,15 +962,15 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
                                      normalize=normalize, center=center)
 
 
-def _reflect_regions(regions, center, low_col, high_col):
+def _reflect_zones(zones, center, low_col, high_col):
     """ Reflect the rectangles about a mirror line on one axis."""
-    reflected = regions.copy()
-    reflected[:, low_col] = 2 * center - regions[:, high_col]
-    reflected[:, high_col] = 2 * center - regions[:, low_col]
+    reflected = zones.copy()
+    reflected[:, low_col] = 2 * center - zones[:, high_col]
+    reflected[:, high_col] = 2 * center - zones[:, low_col]
     return reflected
 
 
-def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
+def mirror_zones(zones, dim=None, names=None, axis='x', suffixes=None):
     """ Complete a zone layout by reflecting it about the middle of the pitch.
 
     Zone layouts are often symmetric, so you can define the zones for one
@@ -984,24 +980,24 @@ def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
     than duplicated on top of themselves. Zones that straddle a mirror line
     asymmetrically raise a ValueError as their reflection would overlap them.
 
-    The returned regions start with the supplied regions unchanged (zone k
+    The returned zones start with the supplied zones unchanged (zone k
     keeps its index), followed by the reflected zones (for axis='both' the
     x-reflections, then the y-reflections, then the reflections about both
-    axes), each in the same relative order as the supplied regions.
+    axes), each in the same relative order as the supplied zones.
     Overlaps (e.g. mirroring a layout that already covers the whole pitch)
     are not detected here; they raise when the layout is used with
     bin_statistic_zones.
 
     Parameters
     ----------
-    regions : array-like of shape (num_zones, 4)
+    zones : array-like of shape (num_zones, 4)
         A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates
         (x0 < x1 and y0 < y1).
     dim : mplsoccer pitch dimensions
         One of FixedDims, MetricasportsDims, VariableCenterDims, or CustomDims.
         Automatically populated when using Pitch/ VerticalPitch class
     names : list of str, default None
-        An optional name for each zone (in the same order as regions).
+        An optional name for each zone (in the same order as zones).
     axis : str, default 'x'
         The reflection axis. 'x' reflects about the halfway line,
         'y' reflects about the y midline running from goal to goal and
@@ -1017,7 +1013,7 @@ def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
 
     Returns
     -------
-    regions : list of tuple
+    zones : list of tuple
         The supplied (x0, x1, y0, y1) rectangles followed by the reflected rectangles.
     names : list of str or None
         A name for each zone, or None if names was None.
@@ -1026,20 +1022,20 @@ def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
     --------
     >>> from mplsoccer import Pitch
     >>> pitch = Pitch()  # statsbomb dimensions: the halfway line is x=60
-    >>> regions = [(80, 120, 0, 80), (40, 80, 0, 80)]
+    >>> zones = [(80, 120, 0, 80), (40, 80, 0, 80)]
     >>> names = ['final-third', 'middle-third']
-    >>> regions, names = pitch.mirror_zones(regions, names, suffixes=('-att', '-def'))
+    >>> zones, names = pitch.mirror_zones(zones, names, suffixes=('-att', '-def'))
     >>> names  # the middle third straddles halfway symmetrically so is kept once
     ['final-third-att', 'middle-third', 'final-third-def']
     """
-    regions = np.asarray(regions, dtype=float)
-    if regions.ndim != 2 or regions.shape[1] != 4:
-        raise ValueError('regions must be a sequence of (x0, x1, y0, y1) rectangles')
-    bad = np.where((regions[:, 1] <= regions[:, 0]) | (regions[:, 3] <= regions[:, 2]))[0]
+    zones = np.asarray(zones, dtype=float)
+    if zones.ndim != 2 or zones.shape[1] != 4:
+        raise ValueError('zones must be a sequence of (x0, x1, y0, y1) rectangles')
+    bad = np.where((zones[:, 1] <= zones[:, 0]) | (zones[:, 3] <= zones[:, 2]))[0]
     if bad.size:
-        raise ValueError(f'region {bad[0]} is invalid: regions must have x1 > x0 and y1 > y0')
-    if names is not None and len(names) != len(regions):
-        raise ValueError('names must be the same length as regions')
+        raise ValueError(f'zone {bad[0]} is invalid: zones must have x1 > x0 and y1 > y0')
+    if names is not None and len(names) != len(zones):
+        raise ValueError('names must be the same length as zones')
     if axis not in ('x', 'y', 'both'):
         raise ValueError("axis must be one of 'x', 'y' or 'both'")
     mirror_x = axis in ('x', 'both')
@@ -1053,27 +1049,27 @@ def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
     tol = np.abs(np.asarray(dim.pitch_extent, dtype=float)).max() * 1e-9
 
     def reflect(low_col, high_col, center, line_name):
-        """ Reflected regions, whether each region maps onto itself (symmetric),
-        and raise for regions straddling the mirror line asymmetrically."""
-        reflected = _reflect_regions(regions, center, low_col, high_col)
-        symmetric = (np.isclose(reflected[:, low_col], regions[:, low_col],
+        """ Reflected zones, whether each zone maps onto itself (symmetric),
+        and raise for zones straddling the mirror line asymmetrically."""
+        reflected = _reflect_zones(zones, center, low_col, high_col)
+        symmetric = (np.isclose(reflected[:, low_col], zones[:, low_col],
                                 rtol=0, atol=tol) &
-                     np.isclose(reflected[:, high_col], regions[:, high_col],
+                     np.isclose(reflected[:, high_col], zones[:, high_col],
                                 rtol=0, atol=tol))
-        straddle = ((regions[:, low_col] < center - tol) &
-                    (regions[:, high_col] > center + tol) & ~symmetric)
+        straddle = ((zones[:, low_col] < center - tol) &
+                    (zones[:, high_col] > center + tol) & ~symmetric)
         if straddle.any():
-            raise ValueError(f'region {np.where(straddle)[0][0]} straddles the '
+            raise ValueError(f'zone {np.where(straddle)[0][0]} straddles the '
                              f'{line_name} asymmetrically so its reflection '
                              'would overlap it')
         return reflected, symmetric
 
     x_center = (dim.left + dim.right) / 2
     y_center = (dim.bottom + dim.top) / 2
-    x_symmetric = np.ones(len(regions), dtype=bool)
-    y_symmetric = np.ones(len(regions), dtype=bool)
-    # each copy of the layout is (regions, mask of the zones included in the copy)
-    copies = [(regions, np.ones(len(regions), dtype=bool))]
+    x_symmetric = np.ones(len(zones), dtype=bool)
+    y_symmetric = np.ones(len(zones), dtype=bool)
+    # each copy of the layout is (zones, mask of the zones included in the copy)
+    copies = [(zones, np.ones(len(zones), dtype=bool))]
     if mirror_x:
         reflected_x, x_symmetric = reflect(0, 1, x_center, "halfway line (axis='x')")
         copies.append((reflected_x, ~x_symmetric))
@@ -1081,19 +1077,19 @@ def mirror_zones(regions, dim=None, names=None, axis='x', suffixes=None):
         reflected_y, y_symmetric = reflect(2, 3, y_center, "y midline (axis='y')")
         copies.append((reflected_y, ~y_symmetric))
     if mirror_x and mirror_y:
-        reflected_xy = _reflect_regions(reflected_x, y_center, 2, 3)
+        reflected_xy = _reflect_zones(reflected_x, y_center, 2, 3)
         copies.append((reflected_xy, ~x_symmetric & ~y_symmetric))
 
-    out_regions = [tuple(float(value) for value in region)
-                   for copy, mask in copies for region in copy[mask]]
+    out_zones = [tuple(float(value) for value in zone)
+                   for copy, mask in copies for zone in copy[mask]]
     if names is None:
-        return out_regions, None
+        return out_zones, None
     no_suffix = x_symmetric & y_symmetric  # zones producing no reflections at all
     out_names = []
     for suffix, (_, mask) in zip(suffixes, copies):
         out_names += [name if no_suffix[i] else name + suffix
                       for i, name in enumerate(names) if mask[i]]
-    return out_regions, out_names
+    return out_zones, out_names
 
 
 def _sonar(lengths, colors, angle_grid, angle_widths,
@@ -1203,8 +1199,8 @@ def sonar(stats_length, xindex=0, yindex=0,
     >>> bars = pitch.sonar(bs, fc='cornflowerblue', ec='black', ax=ax_inset)
     """
     if stats_length['statistic'].ndim != 3:
-        raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
-                         f"should have three dimensions. "
+        raise ValueError(f"stats_length['statistic'] {stats_length['statistic'].shape} "
+                         'should have three dimensions. '
                          'Try creating the statistics again using bin_statistic_sonar.')
     if stats_color is not None and cmap is None:
         raise ValueError("You must supply a cmap for varying the color using stats_color.")

@@ -111,7 +111,7 @@ def test_bin_statistic_positional_points():
         y = np.random.uniform(low=pitch.dim.pitch_extent[2], high=pitch.dim.pitch_extent[3],
                               size=num_points)
         stats = pitch.bin_statistic_positional(x, y)
-        assert np.array([stat["statistic"].sum() for stat in stats]).sum() == num_points
+        assert stats['statistic'].sum() == num_points
 
         
 def test_bin_statistic_positional_yedge():
@@ -126,7 +126,7 @@ def test_bin_statistic_positional_yedge():
         x = np.random.uniform(low=pitch.dim.pitch_extent[0], high=pitch.dim.pitch_extent[1],
                               size=y.size)
         stats = pitch.bin_statistic_positional(x, y)
-        assert np.array([stat["statistic"].sum() for stat in stats]).sum() == 8000000
+        assert stats['statistic'].sum() == 8000000
         
 
 def test_bin_statistic_positional_xedge():
@@ -141,4 +141,4 @@ def test_bin_statistic_positional_xedge():
         y = np.random.uniform(low=pitch.dim.pitch_extent[2], high=pitch.dim.pitch_extent[3],
                               size=x.size)
         stats = pitch.bin_statistic_positional(x, y)
-        assert np.array([stat["statistic"].sum() for stat in stats]).sum() == 9000000
+        assert stats['statistic'].sum() == 9000000

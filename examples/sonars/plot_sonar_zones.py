@@ -34,10 +34,10 @@ df_pass['success'] = df_pass['outcome_name'].isnull()
 pitch = Pitch(line_color='#f0eded', line_zorder=2)
 angle, distance = pitch.calculate_angle_and_distance(df_pass.x, df_pass.y, df_pass.end_x,
                                                      df_pass.end_y)
-regions, names = pitch.positional_zones('full')
-bs_count = pitch.bin_statistic_sonar_zones(df_pass.x, df_pass.y, angle, regions,
+zones, names = pitch.positional_zones('full')
+bs_count = pitch.bin_statistic_sonar_zones(df_pass.x, df_pass.y, angle, zones,
                                            names=names, angle_bins=5, center=True)
-bs_success = pitch.bin_statistic_sonar_zones(df_pass.x, df_pass.y, angle, regions,
+bs_success = pitch.bin_statistic_sonar_zones(df_pass.x, df_pass.y, angle, zones,
                                              values=df_pass.success, statistic='mean',
                                              names=names, angle_bins=5, center=True)
 

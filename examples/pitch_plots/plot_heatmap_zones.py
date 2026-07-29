@@ -73,9 +73,9 @@ collection, annotations = pitch.draw_zones(zones, ax=ax)
 # Layouts are often symmetric about the halfway line, so you can define one
 # half and complete the layout with ``mirror_zones``. Zones that straddle
 # the halfway line symmetrically (like the middle zone here) are kept once.
-mirror_zones, mirror_names = pitch.mirror_zones(zones, axis='both')
+zones_full, names_full = pitch.mirror_zones(zones, axis='both')
 fig, ax = pitch.draw(figsize=(6.6, 4.125))
-collection, annotations = pitch.draw_zones(mirror_zones, mirror_names, ax=ax)
+collection, annotations = pitch.draw_zones(zones_full, names_full, ax=ax)
 
 ##############################################################################
 # Plot a custom zone heatmap
@@ -85,7 +85,7 @@ collection, annotations = pitch.draw_zones(mirror_zones, mirror_names, ax=ax)
 # directly and ``label_heatmap`` labels the zone centres.
 pitch = Pitch(pitch_type='statsbomb', line_zorder=2, pitch_color='#f4edf0')
 fig, ax = pitch.draw(figsize=(6.6, 4.125))
-stats = pitch.bin_statistic_zones(df.x, df.y, mirror_zones, names=mirror_names, normalize=True)
+stats = pitch.bin_statistic_zones(df.x, df.y, zones_full, names=names_full, normalize=True)
 pc = pitch.heatmap_zones(stats, ax=ax, cmap=flamingo_cmap, edgecolor='#f9f9f9')
 labels = pitch.label_heatmap(stats, color='#f4edf0', fontsize=12,
                              ax=ax, ha='center', va='center',

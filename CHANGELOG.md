@@ -1,63 +1,38 @@
 :rocket: Version 1.8.0
 ----------------------
 
-### Added
-* :dart: Added support for custom heatmaps. \
-``Pitch.bin_statistic_zones`` bins events into custom rectangular tiles. \
-It returns the ``ZoneStatisticResult`` which aggregates the ``statistic`` \
-results for each zone, while also returning the ``binnumber`` for individual events. \
-``Pitch.heatmap_zones`` draws the zones as a single matplotlib collection \
-so ``cmap``/ ``vmin``/ ``vmax`` and ``fig.colorbar`` work without any syncing, and \
-``Pitch.label_heatmap`` works on the results unchanged.
-* :pie: Added ``Pitch.zone_statistic_from_binnumber``, for \
-non-rectangular zones: supply your own zone identifiers and \
-matplotlib patches (e.g. polar wedges) and plot them with \
-``Pitch.heatmap_zones`` and ``Pitch.label_heatmap``. Patches that \
-extend past the pitch edges are clipped to the pitch boundaries \
-(like hexbin and kdeplot).
-* Added ``Pitch.positional_zones`` returning the Juego de Posición layout \
-as (regions, names) data for use with ``Pitch.bin_statistic_zones``.
-* :dark_sunglasses: Added Sonars for zones. \
-``Pitch.bin_statistic_sonar_zones`` bins the event angles within each zone \
-and ``Pitch.sonar_zones`` plots a sonar at the centre of each zone, so \
-sonars work for irregular layouts (e.g. the Juego de Posición zones) that \
-a regular grid cannot express. ``Pitch.zone_sonar_from_binnumber`` is the \
-equivalent for your own zone identifiers and patches. Internally \
-``sonar_grid`` and ``sonar_zones`` share the same plotting code: both \
-place polar bar charts at a collection of centres.
-* Added the ``sonar_zorder`` argument to ``sonar_grid`` and \
-``sonar_zones`` to control where the sonar axes are drawn amongst the \
-other artists on the pitch axes (matplotlib's default for inset axes is 5).
-* Added ``Pitch.draw_zones`` for building custom zone layouts iteratively: \
-it draws the regions without validating them, labelling each zone with \
-its index/ name, so overlapping zones show up darker and gaps show the \
-pitch underneath.
-* Added ``Pitch.mirror_zones`` for completing a zone layout by reflecting \
-it about the halfway line (axis='x'), the y midline (axis='y') or \
-both (axis='both', e.g. to complete a quarter-pitch layout). Zones that \
-straddle a mirror line symmetrically (e.g. a middle third) are not \
-duplicated on top of themselves.
+### Breaking Changes
+* :x: ``bin_statistic_positional`` now returns the flat zone statistics \
+dictionary (the same as ``bin_statistic_zones``) instead of a list of \
+dictionaries, and ``heatmap_positional`` plots the zones as a single \
+collection so colorbars work.
 
-### Changes
-* ``Pitch.bin_statistic_positional`` with ``positional='full'`` is \
-reimplemented on top of the zones machinery (one binning pass instead of \
-three); its return format and results are unchanged.
+### Added
+* :dart: Added heatmaps for custom zones. The ``bin_statistic_zones`` \
+method bins events into any rectangular layout. \
+The ``heatmap_zones`` method plots the zones as a single collection so \
+colorbars work, and ``label_heatmap`` works on the results.
+* Added the ``positional_zones`` method returning the Juego de Posición \
+layout as (zones, names) for use with ``bin_statistic_zones``.
+* Added the ``draw_zones`` method for drawing a zone layout without \
+validating it, so you can build a layout iteratively.
+* Added the ``mirror_zones`` method for completing a zone layout by \
+reflecting it about the middle of the pitch.
+* :dark_sunglasses: Added Sonars for zones. The ``bin_statistic_sonar_zones`` \
+method bins the event angles within each zone and the ``sonar_zones`` \
+method plots a sonar at the centre of each zone.
+* Added the ``sonar_zorder`` argument to ``sonar_grid`` and ``sonar_zones`` \
+to control where the sonar axes are drawn amongst the other artists.
 
 ### Fixed
-* Fixed ``bin_statistic`` and ``bin_statistic_sonar`` attaching the \
-statistics to the wrong y bands when explicit non-uniform y bin edges were \
-supplied on inverted-y pitches ('statsbomb', 'wyscout', 'metricasports'): \
-the data was flipped before binning but the user-supplied edges were not. \
-Integer bins (uniform edges) and the symmetric positional layouts were \
-unaffected.
+* Fixed ``bin_statistic`` and ``bin_statistic_sonar`` binning the data \
+into the wrong y bands when asymmetric y bin edges were supplied \
+on inverted-y pitches ('statsbomb', 'wyscout', 'metricasports').
 * Fixed artists drawing outside the pitch when parts of the pitch are \
-hidden (negative pads or half pitches). Inset axes are not clipped by \
-their parent axes, so ``sonar_grid``/ ``sonar_zones`` now skip insets \
-whose centre falls outside the axes limits (returned as None; disable \
-with ``exclude_outside=False``) and ``formation`` (kind='axes', 'image' \
-or 'pitch') skips out-of-view positions (returned as None). \
-``label_heatmap`` labels are now clipped to the axes \
-(pass ``clip_on=False`` for the old behaviour).
+hidden (negative pads or half pitches). The ``sonar_grid``, ``sonar_zones`` \
+(disable with ``exclude_outside=False``) and ``formation`` methods skip \
+out-of-view insets (returned as None) and ``label_heatmap`` labels are \
+clipped to the axes (pass ``clip_on=False`` for the old behaviour).
 
 :rocket: Version 1.7.1
 ----------------------

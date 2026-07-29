@@ -52,12 +52,12 @@ def test_negative_pad_sonar_zones():
     for pitch_class in [Pitch, VerticalPitch]:
         pitch = pitch_class(pitch_type='statsbomb', **PAD)
         fig, ax = pitch.draw()
-        regions, _ = pitch.positional_zones('full')
-        stats = pitch.bin_statistic_sonar_zones(x, y, angle, regions, angle_bins=5)
+        zones, _ = pitch.positional_zones('full')
+        stats = pitch.bin_statistic_sonar_zones(x, y, angle, zones, angle_bins=5)
         axs = pitch.sonar_zones(stats, width=12, ax=ax)
         visible = pitch._inset_visible(stats['cx'], stats['cy'], ax)
         assert np.array_equal(np.array([a is not None for a in axs]), visible)
-        assert visible.sum() < len(regions)  # the negative pads hide some zones
+        assert visible.sum() < len(zones)  # the negative pads hide some zones
         assert_insets_inside(axs, ax)
 
 
