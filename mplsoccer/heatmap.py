@@ -241,7 +241,8 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
         'uefa' pitch coordinates (105m x 68m)
     center : bool, default True
         Whether to center the sonars so the first segment is centered around zero (True)
-        or starts at zero (False)
+        or starts at zero (False). Centering shifts the angles by half the
+        width of the first segment.
     Returns
     -------
     bin_statistic : BinnedStatisticResultSonar dataclass
@@ -396,8 +397,11 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
 
 
 def _merge_close_edges(edges, atol):
-    """ Sort and deduplicate edges, merging values that differ only
-    by float noise into one canonical float each."""
+    """ Sort and deduplicate edges, merging values that differ only by
+    float noise into a single shared edge value (sometimes called vertex
+    welding or snap rounding). Each edge is compared against the last kept
+    edge, so a run of closely spaced edges never collapses into one value
+    wider than the tolerance."""
     edges = np.sort(np.unique(np.asarray(edges, dtype=float)))
     keep = [edges[0]]
     for edge in edges[1:]:
@@ -406,16 +410,21 @@ def _merge_close_edges(edges, atol):
     return np.array(keep)
 
 
-def _snap_to_edges(values, canonical):
-    """ Snap each value to the nearest canonical edge. The order of values is preserved."""
-    return canonical[np.abs(values[:, None] - canonical[None, :]).argmin(axis=1)]
+def _snap_to_edges(values, edges):
+    """ Snap each value to the nearest merged edge. The order of values is preserved."""
+    return edges[np.abs(values[:, None] - edges[None, :]).argmin(axis=1)]
 
 
 def _validate_regions(regions, extent, atol):
     """ Validate that the regions exactly tile the extent.
 
-    Returns the regions snapped to the canonical edges, the canonical
-    fine-grid x/y edges, and the fine-cell to zone mapping (ny, nx).
+    Region edges that differ only by float noise are merged into a single
+    shared edge and the region coordinates are snapped to the merged edges.
+    The merged edges define the fine grid: every distinct x-edge crossed
+    with every distinct y-edge, the finest grid that all the regions
+    line up with.
+    Returns the snapped regions, the fine-grid x/y edges, and the
+    fine-cell to zone mapping (ny, nx).
     The zone order is the order the regions were supplied in; it is never reordered.
     """
     regions = np.asarray(regions, dtype=float)
@@ -456,7 +465,9 @@ def _validate_regions(regions, extent, atol):
     if (cell_zone == -1).any():
         gap_y_index, gap_x_index = np.argwhere(cell_zone == -1)[0]
         raise ValueError('regions do not tile the pitch: gap around '
-                         f'x={fine_x[gap_x_index]:.6g}, y={fine_y[gap_y_index]:.6g}')
+                         f'x={fine_x[gap_x_index]:.6g}, y={fine_y[gap_y_index]:.6g}. '
+                         'If the edges around the gap are meant to coincide, '
+                         'increase edge_tol.')
     return snapped, x_edges, y_edges, cell_zone
 
 
@@ -622,7 +633,7 @@ def bin_statistic_zones(x, y, regions, dim=None, values=None, statistic='count',
         An optional name for each zone (in the same order as regions).
     edge_tol : float, default None
         The absolute tolerance for merging region edges that differ only by
-        floating point noise into one canonical edge. The default None uses
+        floating point noise into one shared edge. The default None uses
         a scale-aware tolerance of max(abs(pitch extent)) * 1e-9.
 
     Returns
@@ -797,7 +808,8 @@ def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
         Whether to normalize the statistic by dividing by the total.
     center : bool, default True
         Whether to center the sonars so the first segment is centered around zero (True)
-        or starts at zero (False)
+        or starts at zero (False). Centering shifts the angles by half the
+        width of the first segment.
 
     Returns
     -------
@@ -906,11 +918,12 @@ def bin_statistic_sonar_zones(x, y, angle, regions, dim=None, values=None,
         An optional name for each zone (in the same order as regions).
     edge_tol : float, default None
         The absolute tolerance for merging region edges that differ only by
-        floating point noise into one canonical edge. The default None uses
+        floating point noise into one shared edge. The default None uses
         a scale-aware tolerance of max(abs(pitch extent)) * 1e-9.
     center : bool, default True
         Whether to center the sonars so the first segment is centered around zero (True)
-        or starts at zero (False)
+        or starts at zero (False). Centering shifts the angles by half the
+        width of the first segment.
 
     Returns
     -------
@@ -1148,7 +1161,7 @@ def sonar(stats_length, xindex=0, yindex=0,
         arguments will set the boundaries for the cmap.
         If stats_color is None then the color of the bars is controlled
         by 'color', 'fc', or 'facecolor' arguments.
-    cmap : str or matplotlib.colros.Colormap, default None
+    cmap : str or matplotlib.colors.Colormap, default None
         Controls the color of the bars via stats_color.
     vmin, vmax : float, default None
         The cmap is mapped linearly to the range vmin to vmax, so that values

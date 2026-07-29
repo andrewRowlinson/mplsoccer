@@ -1046,7 +1046,7 @@ class BasePitch(ABC):
             arguments will set the boundaries for the cmap.
             If stats_color is None then the color of the bars is controlled
             by 'color', 'fc', or 'facecolor' arguments.
-        cmap : str or matplotlib.colros.Colormap, default None
+        cmap : str or matplotlib.colors.Colormap, default None
             Controls the color of the bars via stats_color.
         vmin, vmax : float, default None
             The cmap is mapped linearly to the range vmin to vmax, so that values
@@ -1211,7 +1211,7 @@ class BasePitch(ABC):
             arguments will set the boundaries for the cmap.
             If stats_color is None then the color of the bars is controlled
             by 'color', 'fc', or 'facecolor' arguments.
-        cmap : str or matplotlib.colros.Colormap, default None
+        cmap : str or matplotlib.colors.Colormap, default None
             Controls the color of the bars via stats_color.
         vmin, vmax : float, default None
             The cmap is mapped linearly to the range vmin to vmax, so that values

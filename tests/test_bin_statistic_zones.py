@@ -178,7 +178,7 @@ def test_bin_statistic_positional_regression():
 
 def test_float_noise_edges():
     """ Test regions with edges perturbed by one ulp give identical results
-    after edge canonicalisation."""
+    after the edges are merged."""
     num_points = 100000
     for pitch_type in ['statsbomb', 'metricasports']:
         pitch = Pitch(pitch_type=pitch_type, **pitch_kwargs(pitch_type))
@@ -192,6 +192,22 @@ def test_float_noise_edges():
         stats_noisy = pitch.bin_statistic_zones(x, y, noisy)
         assert np.array_equal(stats['statistic'], stats_noisy['statistic'])
         assert np.array_equal(stats['binnumber'], stats_noisy['binnumber'])
+
+
+def test_point_on_merged_edge():
+    """ Test a point exactly on a shared edge bins consistently with
+    bin_statistic when the regions state the edge with float noise
+    (region 0 ends at 60, region 1 starts one ulp above 60)."""
+    pitch = Pitch(pitch_type='statsbomb')
+    regions = [(0., 60., 0., 80.), (np.nextafter(60., np.inf), 120., 0., 80.)]
+    x = np.array([60., 30., 90.])
+    y = np.array([40., 40., 40.])
+    stats = pitch.bin_statistic_zones(x, y, regions)
+    # scipy's convention: a point on an internal edge belongs to the right-hand bin
+    assert np.array_equal(stats['binnumber'], [1, 0, 1])
+    assert np.array_equal(stats['statistic'], [1., 2.])
+    grid = pitch.bin_statistic(x, y, bins=(2, 1))
+    assert np.array_equal(grid['statistic'], [[1., 2.]])
 
 
 def test_statistic_parity():
