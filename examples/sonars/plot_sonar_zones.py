@@ -2,13 +2,9 @@
 ===========
 Sonar Zones
 ===========
-Sonars do not have to be plotted on a regular grid.
-The ``bin_statistic_sonar_zones`` method bins the angles within any
-tiling of the pitch by rectangles, and ``sonar_zones`` plots a sonar at
-the centre of each zone. Here we use the Juego de Posición zones from
-``positional_zones``, which merge areas (e.g. the penalty-area columns)
-that a regular grid cannot express. You can also combine the sonars with
-``heatmap_zones`` to shade the zones underneath.
+The ``bin_statistic_sonar_zones`` method bins angles within any
+rectangular tiling and ``sonar_zones`` plots a sonar at
+the centre of each zone. Here we use the Juego de Posición zones.
 
 More information is available on how to customize the segments in
 :ref:`sphx_glr_gallery_sonars_plot_bin_statistic_sonar.py` and on the
@@ -59,13 +55,11 @@ axs = pitch.sonar_zones(bs_count,
 ##############################################################################
 # The zone statistics also work with ``heatmap_zones``, so you can shade
 # each zone by its total number of passes underneath the sonars.
-# The 'count' key holds the total number of points in each zone
-# whatever the requested statistic.
 pearl_earring_cmap = LinearSegmentedColormap.from_list("Pearl Earring - 10 colors",
                                                        ['#15242e', '#4393c4'], N=10)
 fig, ax = pitch.draw(figsize=(8, 5.5))
-shading = {'patches': bs_count['patches'], 'statistic': bs_count['count']}
-pc = pitch.heatmap_zones(shading, ax=ax, cmap=pearl_earring_cmap, edgecolor='#202020')
+zones_count = pitch.bin_statistic_zones(df_pass.x, df_pass.y, zones)
+pc = pitch.heatmap_zones(zones_count, ax=ax, cmap=pearl_earring_cmap, edgecolor='#202020')
 axs = pitch.sonar_zones(bs_count, ec='#202020', fc='cornflowerblue',
                         zorder=3, width=13, ax=ax)
 
