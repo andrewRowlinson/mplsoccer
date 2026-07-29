@@ -68,6 +68,22 @@ def _nan_safe(statistic):
     return statistic
 
 
+def _center_angles(angle, angle_bins, center):
+    """ The width of the first angle segment and, if centering the sonars,
+    the angles shifted by half that width so the first segment is centered
+    around zero. Explicit segment edges must be radians spanning 0 to 2*pi."""
+    if isinstance(angle_bins, int):
+        first_width = 2 * np.pi / angle_bins
+    else:
+        if not np.isclose(np.min(angle_bins), 0) or not np.isclose(np.max(angle_bins),
+                                                                   2 * np.pi):
+            raise ValueError('bin angles should be radians between 0 and 2 pi')
+        first_width = np.sort(angle_bins)[1]
+    if center:
+        angle = np.mod(angle + first_width / 2, 2 * np.pi)
+    return angle, first_width
+
+
 def _flip_y_bin_edges(bins, bottom):
     """ Flip explicit y bin-edges into the flipped binning space used for
     inverted-y pitches (where the data is binned as bottom - y).
@@ -245,14 +261,16 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
         width of the first segment.
     Returns
     -------
-    bin_statistic : BinnedStatisticResultSonar dataclass
-        The attributes are statistic (the calculated statistic),
-        x_grid, y_grid, angle_grid (the bin's edges), angle_widths (the angle bin width),
-        cx and cy (the bin centers), binnumber (the bin indices each point belongs to)
-        and inside (whether the point is inside the pitch).
-        binnumber is a (2, N) array that represents the bin in which the observation
-        falls if the observations falls outside the pitch the value is -1 for the dimension. The
-        binnumber are zero indexed and start from the top and left handside of the pitch.
+    bin_statistic : dict.
+        The keys are 'statistic' (the calculated statistic),
+        'x_grid', 'y_grid' and 'angle_grid' (the bin's edges),
+        'angle_widths' (the angle bin widths), 'cx' and 'cy' (the bin centers),
+        'binnumber' (the bin indices each point belongs to)
+        and 'inside' (whether the point is inside the pitch).
+        'binnumber' is a (3, N) array (x, y and angle) that represents the bin
+        in which the observation falls, and is -1 for a dimension if the
+        observation falls outside the pitch/ angle range. The binnumber are zero
+        indexed and start from the top and left handside of the pitch.
     Examples
     --------
     >>> from mplsoccer import Pitch
@@ -279,15 +297,7 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
         bins = (bins, bins, bins)
     if not len(bins) == 3:
         raise ValueError("bins should be either an int, [int, int, int] or [array, array, array]")
-    if isinstance(bins[2], int):
-        first_width = 2 * np.pi / bins[2]
-    else:
-        if not np.isclose(np.min(bins[2]), 0) or not np.isclose(np.max(bins[2]), 2 * np.pi):
-            raise ValueError("bin angles should be radians between 0 and 2 pi")
-        first_width = np.sort(bins[2])[1]
-
-    if center:
-        angle = np.mod(angle + first_width / 2, 2 * np.pi)
+    angle, first_width = _center_angles(angle, bins[2], center)
 
     y_edge_original = None
     if standardized:
@@ -300,9 +310,8 @@ def bin_statistic_sonar(x, y, angle, values=None, dim=None, statistic='count',
             y = dim.bottom - y  # for inverted axis flip the coordinates
             # explicit y-edges must be flipped with the data; the original edges
             # are restored after binning for building the grids/ centers
-            if np.iterable(bins[1]):
-                y_edge_original = np.asarray(bins[1], dtype=float)
-                bins = (bins[0], (dim.bottom - y_edge_original)[::-1], bins[2])
+            (x_bins, y_bins), y_edge_original = _flip_y_bin_edges(bins[:2], dim.bottom)
+            bins = (x_bins, y_bins, bins[2])
         else:
             pitch_range = [[dim.left, dim.right], [dim.bottom, dim.top], [0, 2 * np.pi]]
 
@@ -843,15 +852,7 @@ def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
     values = np.ravel(values)
     if values.size != binnumber.size:
         raise ValueError('binnumber and values must be the same size')
-    if isinstance(angle_bins, int):
-        first_width = 2 * np.pi / angle_bins
-    else:
-        if not np.isclose(np.min(angle_bins), 0) or not np.isclose(np.max(angle_bins),
-                                                                   2 * np.pi):
-            raise ValueError('bin angles should be radians between 0 and 2 pi')
-        first_width = np.sort(angle_bins)[1]
-    if center:
-        angle = np.mod(angle + first_width / 2, 2 * np.pi)
+    angle, first_width = _center_angles(angle, angle_bins, center)
     inside = result['inside']
     stat, _, angle_edge, _ = binned_statistic_2d(binnumber[inside], angle[inside],
                                                  values[inside], statistic=statistic,
