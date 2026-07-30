@@ -5,7 +5,7 @@
 * :x: ``bin_statistic_positional`` now returns the flat zone statistics \
 dictionary (the same as ``bin_statistic_zones``) instead of a list of \
 dictionaries, and ``heatmap_positional`` plots the zones as a single \
-collection so colorbars work.
+collection instead of a list of QuadMesh.
 
 ### Added
 * :dart: Added heatmaps for custom zones. The ``bin_statistic_zones`` \

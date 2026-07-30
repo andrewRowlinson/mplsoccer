@@ -69,9 +69,10 @@ def _nan_safe(statistic):
 
 
 def _center_angles(angle, angle_bins, center):
-    """ The width of the first angle segment and, if centering the sonars,
-    the angles shifted by half that width so the first segment is centered
-    around zero. Explicit segment edges must be radians spanning 0 to 2*pi."""
+    """ Returns the event angles, and the width of the first sonar segment.
+    If centered, every angle is shifted by half the first segment's width,
+    which is equivalent to rotating the segments so the first segment
+    is centered around zero."""
     if isinstance(angle_bins, int):
         first_width = 2 * np.pi / angle_bins
     else:
@@ -85,13 +86,8 @@ def _center_angles(angle, angle_bins, center):
 
 
 def _flip_y_bin_edges(bins, bottom):
-    """ Flip explicit y bin-edges into the flipped binning space used for
-    inverted-y pitches (where the data is binned as bottom - y).
-
-    Returns the bins to give to scipy and the original ascending y-edges
-    (None if the y bins are a number of bins rather than explicit edges).
-    Uniform edges (from an integer number of bins) need no flipping because
-    they are symmetric about the pitch midline."""
+    """ Reflect explicit y bin-edges (y -> bottom - y), reversed back
+    to ascending order. """
     try:
         num = len(bins)
     except TypeError:
@@ -598,8 +594,7 @@ def zone_statistic_from_binnumber(binnumber, values=None, statistic='count',
 
 def bin_statistic_zones(x, y, zones, dim=None, values=None, statistic='count',
                         normalize=False, standardized=False, names=None, edge_tol=None):
-    """ Calculates statistics for zones: any tiling of the pitch by
-    axis-aligned rectangles.
+    """ Calculates statistics for zones: any tiling of the pitch by rectangles.
 
     Unlike bin_statistic, the zones do not have to form a regular grid:
     rectangles can span multiple rows/ columns of other rectangles
@@ -686,6 +681,7 @@ def bin_statistic_zones(x, y, zones, dim=None, values=None, statistic='count',
     else:
         y_bin_edges = y_edges
         cell_zone_binning = cell_zone
+    # values are ignored by 'count' (second x is a placeholder to satisfy scipy)
     _, _, _, fine_binnumber = binned_statistic_2d(x, y, x, statistic='count',
                                                   bins=[x_edges, y_bin_edges],
                                                   expand_binnumbers=True)
@@ -709,15 +705,6 @@ def bin_statistic_zones(x, y, zones, dim=None, values=None, statistic='count',
 
 def heatmap_zones(stats, ax=None, vertical=False, **kwargs):
     """ Plots zone statistics as a single matplotlib.collections.PatchCollection.
-
-    Because the zones are one artist, cmap/ norm/ vmin/ vmax apply across
-    all zones and fig.colorbar(pc) works without any syncing.
-    The stats dictionary only requires the keys 'patches' and 'statistic'
-    so you can also plot dictionaries from zone_statistic_from_binnumber
-    with your own patches (e.g. matplotlib.patches.Wedge).
-    The Pitch/ VerticalPitch heatmap_zones methods additionally clip the
-    collection to the pitch boundaries (like hexbin and kdeplot), so patches
-    that extend past the pitch edges are snapped to the pitch.
 
     Parameters
     ----------
@@ -770,13 +757,6 @@ def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
                               names=None, area=None, normalize=False, center=True):
     """ Calculates sonar statistics (zone by angle segment) from per-point
     zone identifiers.
-
-    This is the sonar equivalent of zone_statistic_from_binnumber:
-    you supply the zone each point belongs to (the binnumber), computed
-    however you like, and it bins the angles within each zone for plotting
-    with sonar_zones. The angle wrap-around at 2 pi is your responsibility:
-    shift the angles with numpy.mod so a segment does not straddle
-    the 0/ 2 pi boundary (or use the default center=True behaviour).
 
     Parameters
     ----------
@@ -874,14 +854,9 @@ def bin_statistic_sonar_zones(x, y, angle, zones, dim=None, values=None,
                               statistic='count', angle_bins=10, normalize=False,
                               standardized=False, names=None, edge_tol=None,
                               center=True):
-    """ Calculates sonar statistics (angle segments per zone) for zones:
-    any tiling of the pitch by axis-aligned rectangles.
+    """ Calculates sonar statistics (angle segments per zone) for zones.
 
-    This is the sonar equivalent of bin_statistic_zones: each point is
-    assigned to a zone and the angles are binned within each zone.
-    Unlike bin_statistic_sonar, the zones do not have to form a regular grid,
-    e.g. the Juego de Posición layout from positional_zones.
-    Plot the results with sonar_zones.
+    Each point is assigned to a zone and the angles are binned within each zone.
 
     Parameters
     ----------
@@ -980,14 +955,6 @@ def mirror_zones(zones, dim=None, names=None, axis='x', suffixes=None):
     third) are only reflected about the other axis (or kept once), rather
     than duplicated on top of themselves. Zones that straddle a mirror line
     asymmetrically raise a ValueError as their reflection would overlap them.
-
-    The returned zones start with the supplied zones unchanged (zone k
-    keeps its index), followed by the reflected zones (for axis='both' the
-    x-reflections, then the y-reflections, then the reflections about both
-    axes), each in the same relative order as the supplied zones.
-    Overlaps (e.g. mirroring a layout that already covers the whole pitch)
-    are not detected here; they raise when the layout is used with
-    bin_statistic_zones.
 
     Parameters
     ----------

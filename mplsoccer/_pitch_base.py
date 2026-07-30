@@ -1062,10 +1062,7 @@ class BasePitch(ABC):
         sonar_facecolor : any Matplotlib color, default 'None'
             The facecolor of the sonar axes. The default 'None' makes the axes transparent.
         sonar_zorder : float, default 5
-            The zorder of the sonar axes. The sonar axes are drawn amongst the
-            other artists on the pitch axes according to this value
-            (matplotlib's default for inset axes is 5). Artists with a higher
-            zorder are drawn on top of the sonars.
+            The zorder of the sonar axes (matplotlib's default for inset axes is 5).
         axis : bool, default False
             Whether to set the axis spines to visible.
         label : bool, default False
@@ -1079,10 +1076,8 @@ class BasePitch(ABC):
         exclude_nan : bool, default True
             Whether to draw the Polar axes where all the values are numpy.nan for the grid cell.
         exclude_outside : bool, default True
-            Whether to exclude the Polar axes where the grid cell centre falls
-            outside the axes limits (e.g. with negative pads or a half pitch).
-            Inset axes are not clipped by their parent axes, so without this
-            they render outside the pitch.
+            Whether to exclude the Polar axes where the grid cell center falls
+            outside the axes limits.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
@@ -1133,9 +1128,7 @@ class BasePitch(ABC):
         return axs
 
     def _inset_visible(self, x, y, ax):
-        """ Whether centres given in pitch coordinates are inside the current axes limits.
-        Inset axes are not clipped by their parent axes, so insets outside the
-        limits (e.g. with negative pads or a half pitch) render outside the pitch."""
+        """ Whether coordinates x/y are both inside the current axes limits."""
         x, y = self._reverse_if_vertical(np.asarray(x, dtype=float),
                                          np.asarray(y, dtype=float))
         xmin, xmax = sorted(ax.get_xlim())
@@ -1148,10 +1141,7 @@ class BasePitch(ABC):
                       axis=False, label=False,
                       width=None, height=None, exclude_zeros=True, exclude_nan=True,
                       exclude_outside=True, ax=None, **kwargs):
-        """ Place a polar bar chart (sonar) inset at each of a collection of centres.
-        The lengths/ colors are (num_centres, num_angles) arrays and cx/ cy
-        are the centres in pitch coordinates. Returns an object array of the
-        inset axes (None where a centre is excluded)."""
+        """ Plot a polar bar chart (sonar) at a collection of centers"""
         validate_ax(ax)
         if colors is not None and cmap is None:
             raise ValueError("You must supply a cmap for varying the color using stats_color.")
@@ -1197,7 +1187,7 @@ class BasePitch(ABC):
                     width=None, height=None,
                     exclude_zeros=True, exclude_nan=True, exclude_outside=True,
                     ax=None, **kwargs):
-        """ Plot a polar bar chart (sonar) at the centre of each zone.
+        """ Plot a polar bar chart (sonar) at the center of each zone.
 
         Parameters
         ----------
@@ -1227,10 +1217,7 @@ class BasePitch(ABC):
         sonar_facecolor : any Matplotlib color, default 'None'
             The facecolor of the sonar axes. The default 'None' makes the axes transparent.
         sonar_zorder : float, default 5
-            The zorder of the sonar axes. The sonar axes are drawn amongst the
-            other artists on the pitch axes according to this value
-            (matplotlib's default for inset axes is 5). Artists with a higher
-            zorder are drawn on top of the sonars.
+            The zorder of the sonar axes (matplotlib's default for inset axes is 5).
         axis : bool, default False
             Whether to set the axis spines to visible.
         label : bool, default False
@@ -1244,10 +1231,8 @@ class BasePitch(ABC):
         exclude_nan : bool, default True
             Whether to draw the Polar axes where all the values are numpy.nan for the zone.
         exclude_outside : bool, default True
-            Whether to exclude the Polar axes where the zone centre falls
-            outside the axes limits (e.g. with negative pads or a half pitch).
-            Inset axes are not clipped by their parent axes, so without this
-            they render outside the pitch.
+            Whether to exclude the Polar axes where the zone center falls
+            outside the axes limits.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
@@ -1354,12 +1339,9 @@ class BasePitch(ABC):
                    zorder=3, label=True, ax=None, **kwargs):
         """ Draw a zone layout to help build custom heatmap zones iteratively.
 
-        Unlike bin_statistic_zones, an invalid layout does not raise an error:
-        the zones are drawn as they are, so with a translucent alpha,
-        overlapping zones show up darker and gaps show the pitch underneath.
-        Each zone is labelled with its index (and name if provided) so you can
-        find the zone to edit in your zones list. Once the layout is
-        complete, use it with bin_statistic_zones, which validates it exactly.
+        The default settings show overlapping zones in darker colors
+        and gaps show the pitch color. You can validate the zones
+        with bin_statistic_zones.
 
         Parameters
         ----------
@@ -1368,20 +1350,13 @@ class BasePitch(ABC):
         names : list of str, default None
             An optional name for each zone (in the same order as zones).
         facecolor : any Matplotlib color or a sequence of colors, default None
-            The zone face colors (one color or one per zone). If None,
-            defaults to the first color of rcParams['axes.prop_cycle'].
-            A single color makes overlapping zones show up as an
-            unambiguous darker shade; the zone edges and labels
-            distinguish neighbouring zones.
+            If None, defaults to the first color of rcParams['axes.prop_cycle'].
         edgecolor : any Matplotlib color, default None
             The zone edge color. If None, defaults to rcParams['patch.edgecolor'].
         alpha : float, default 0.5
-            The transparency of the zones. A translucent alpha shows the
-            pitch markings underneath, draws overlapping zones darker and
-            leaves gaps as the pitch background.
+            The transparency of the zones.
         zorder : float, default 3
-            The zorder for the zones and labels. The default draws them above
-            the pitch markings (line_zorder is often set to 2 for heatmaps).
+            The zorder for the zones and labels.
         label : bool, default True
             Whether to label each zone with its index, or 'index: name'
             when names are given.
@@ -1421,12 +1396,9 @@ class BasePitch(ABC):
                                      edgecolor=edgecolor, alpha=alpha,
                                      zorder=zorder, **kwargs)
         if self.vertical:
-            # the zones are in pitch coordinates; swap the x and y
-            # coordinates of the whole collection with an affine transform
             swap = Affine2D(np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]]))
             collection.set_transform(swap + ax.transData)
         ax.add_collection(collection)
-        # clip to the pitch boundary like heatmap_zones
         rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
                                  self.visible_pitch[1] - self.visible_pitch[0],
                                  self.visible_pitch[3] - self.visible_pitch[2],
