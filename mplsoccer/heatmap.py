@@ -1,4 +1,19 @@
-""" A module with functions for binning data into 2d bins and plotting heatmaps."""
+""" A module with functions for binning data into 2d bins and plotting heatmaps.
+
+The regular functions (bin_statistic, bin_statistic_sonar) bin x/y coordinates
+into a grid via scipy.
+
+The zone functions (bin_statistic_zones, bin_statistic_sonar_zones) take any
+tiling of the pitch by rectangles. The zones do not need to line up in a
+regular grid: a zone can be as wide as several of its neighbours
+(e.g. the Juego de Posición layout). Near-identical zone edges are merged
+and snapped to a single value, and the unique edges form a fine grid where
+each cell belongs to exactly one zone. The points are binned on the fine
+grid with scipy and the results aggregated per zone.
+The results are flat arrays with one value per zone, in the order
+the zones were supplied. Each binning function has a plotting counterpart
+that draws the result
+"""
 
 from dataclasses import dataclass, asdict
 from functools import partial
@@ -63,8 +78,6 @@ def _nan_safe(statistic):
         statistic = np.nanmax
     elif statistic == 'circmean':
         statistic = partial(circmean, nan_policy='omit')
-    else:
-        statistic = statistic
     return statistic
 
 
@@ -454,6 +467,11 @@ def _validate_zones(zones, extent, atol):
     snapped[:, 1] = _snap_to_edges(zones[:, 1], x_edges)
     snapped[:, 2] = _snap_to_edges(zones[:, 2], y_edges)
     snapped[:, 3] = _snap_to_edges(zones[:, 3], y_edges)
+    bad = np.where((snapped[:, 0] == snapped[:, 1]) | (snapped[:, 2] == snapped[:, 3]))[0]
+    if bad.size:
+        raise ValueError(f'zone {bad[0]} collapsed to zero size: its edges are '
+                         'within edge_tol of each other, so decrease edge_tol '
+                         'or remove the zone')
     # map each fine-grid cell to a zone by testing the cell centre against each zone.
     # centres never sit on edges so strict inequalities are safe
     fine_x = 0.5 * (x_edges[:-1] + x_edges[1:])
@@ -1174,11 +1192,12 @@ def sonar(stats_length, xindex=0, yindex=0,
         raise ValueError("You must supply a cmap for varying the color using stats_color.")
     if stats_color is None and cmap is not None:
         raise ValueError("You must supply a stats_color for varying the color using a cmap.")
-    if stats_color is not None and stats_color['statistic'].shape != stats_length['statistic'].shape:
+    if (stats_color is not None
+            and stats_color['statistic'].shape != stats_length['statistic'].shape):
         raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
-                         f"and stats_length['statistic'] {stats_length['statistic'].shape} are different shapes. "
-                         'Try creating the statistics again using bin_statistic_sonar '
-                         'with the same bins argument.')
+                         f"and stats_length['statistic'] {stats_length['statistic'].shape} "
+                         'are different shapes. Try creating the statistics again '
+                         'using bin_statistic_sonar with the same bins argument.')
     if rmax is None:
         rmax = np.nanmax(stats_length['statistic'])
     colors = None

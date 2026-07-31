@@ -6,6 +6,14 @@
 dictionary (the same as ``bin_statistic_zones``) instead of a list of \
 dictionaries, and ``heatmap_positional`` plots the zones as a single \
 collection instead of a list of QuadMesh.
+* :x: On inverted-y pitches ('statsbomb', 'wyscout', 'metricasports'), \
+explicit y bin edges are now flipped along with the data in \
+``bin_statistic``, ``bin_statistic_sonar``, ``bin_statistic_positional`` \
+and the zones methods. Results only change if you used asymmetric \
+y edges (previously counted in the wrong bands) or have points \
+exactly on the 'metricasports' positional band edges (previously \
+assigned to a band by floating point rounding, now always the band \
+displayed above the edge).
 
 ### Added
 * :dart: Added heatmaps for custom zones. The ``bin_statistic_zones`` \
@@ -25,9 +33,6 @@ method plots a sonar at the centre of each zone.
 to control where the sonar axes are drawn amongst the other artists.
 
 ### Fixed
-* Fixed ``bin_statistic`` and ``bin_statistic_sonar`` binning the data \
-into the wrong y bands when asymmetric y bin edges were supplied \
-on inverted-y pitches ('statsbomb', 'wyscout', 'metricasports').
 * Fixed artists drawing outside the pitch when parts of the pitch are \
 hidden (negative pads or half pitches). The ``sonar_grid``, ``sonar_zones`` \
 (disable with ``exclude_outside=False``) and ``formation`` methods skip \

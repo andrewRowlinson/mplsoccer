@@ -133,9 +133,11 @@ class BasePitchSoccer(BasePitch):
         super().__init__(dim=dim, pitch_type=pitch_type,
                          half=half,
                          pitch_color=pitch_color,
-                         line_color=line_color, line_alpha=line_alpha, linewidth=linewidth, linestyle=linestyle, line_zorder=line_zorder,
-                         pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom, pad_top=pad_top,
-                         shade_middle=shade_middle, shade_color=shade_color, shade_alpha=shade_alpha, shade_zorder=shade_zorder,
+                         line_color=line_color, line_alpha=line_alpha, linewidth=linewidth,
+                         linestyle=linestyle, line_zorder=line_zorder,
+                         pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom,
+                         pad_top=pad_top, shade_middle=shade_middle, shade_color=shade_color,
+                         shade_alpha=shade_alpha, shade_zorder=shade_zorder,
                          pitch_length=pitch_length, pitch_width=pitch_width,
                          axis=axis, label=label, tick=tick,
                          )
@@ -381,10 +383,12 @@ class BasePitchSoccer(BasePitch):
 
         # draw center circle and penalty area arcs
         self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
-                           self.dim.circle_diameter_length, self.dim.circle_diameter_width, **circ_prop)
+                           self.dim.circle_diameter_length,
+                           self.dim.circle_diameter_width, **circ_prop)
         self._draw_arc(ax, self.dim.penalty_left, self.dim.center_width,
                        self.dim.circle_diameter_length, self.dim.circle_diameter_width,
-                       theta1=self.dim.arc1_theta1, theta2=self.dim.arc1_theta2, **circ_prop)
+                       theta1=self.dim.arc1_theta1, theta2=self.dim.arc1_theta2,
+                       **circ_prop)
         self._draw_arc(ax, self.dim.penalty_right, self.dim.center_width,
                        self.dim.circle_diameter_length, self.dim.circle_diameter_width,
                        theta1=self.dim.arc2_theta1, theta2=self.dim.arc2_theta2, **circ_prop)
@@ -402,7 +406,8 @@ class BasePitchSoccer(BasePitch):
                              (self.dim.left, self.dim.bottom)]
             for i, (x, y) in enumerate(corner_points):
                 t1, t2 = thetas[i]
-                self._draw_arc(ax, x, y, self.dim.corner_diameter_length, self.dim.corner_diameter_width,
+                self._draw_arc(ax, x, y, self.dim.corner_diameter_length,
+                               self.dim.corner_diameter_width,
                                theta1=t1, theta2=t2, **circ_prop)
 
         # draw center and penalty spots
@@ -689,7 +694,8 @@ class BasePitchSoccer(BasePitch):
         >>> from mplsoccer import VerticalPitch
         >>> from urllib.request import urlopen
         >>> from PIL import Image
-        >>> image = Image.open(urlopen('https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'))
+        >>> url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+        >>> image = Image.open(urlopen(url))
         >>> pitch = VerticalPitch()
         >>> fig, ax = pitch.draw(figsize=(6.875, 10))
         >>> position_image = pitch.formation('442',

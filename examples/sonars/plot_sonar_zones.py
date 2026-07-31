@@ -11,7 +11,6 @@ More information is available on how to customize the segments in
 zone layouts in :ref:`sphx_glr_gallery_pitch_plots_plot_heatmap_zones.py`.
 """
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 from mplsoccer import Pitch, Sbopen

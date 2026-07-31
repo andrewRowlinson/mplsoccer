@@ -1,18 +1,17 @@
-""" Base class for drawing the soccer/ football pitch."""
+""" Base class for drawing pitches."""
 
 import warnings
 from abc import ABC, abstractmethod
 
 import numpy as np
 import seaborn as sns
-from matplotlib import patches
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib import rcParams
-from scipy.spatial import Voronoi, ConvexHull
-from scipy.stats import circmean
-
 from matplotlib.collections import PatchCollection
 from matplotlib.transforms import Affine2D
+from scipy.spatial import Voronoi, ConvexHull
+from scipy.stats import circmean
 
 from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap,
                       bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones,
@@ -26,6 +25,7 @@ from .grid import _grid_dimensions, _draw_grid, grid_dimensions
 
 
 class BasePitch(ABC):
+    """ Abstract base class for drawing pitches with Matplotlib."""
 
     def __init__(self,
                  dim=None,
@@ -156,7 +156,7 @@ class BasePitch(ABC):
             figsize = rcParams['figure.figsize']
         if ax is None:
             fig, axs = self._setup_subplots(nrows, ncols, figsize, constrained_layout)
-            fig.set_tight_layout(tight_layout)
+            fig.set_layout_engine('tight' if tight_layout else 'none')
             for axis in axs.flat:
                 self._draw_ax(axis)
             if axs.size == 1:
@@ -262,8 +262,8 @@ class BasePitch(ABC):
         >>> from PIL import Image
         >>> pitch = VerticalPitch()
         >>> fig, ax = pitch.draw()
-        >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-        >>> image = urlopen(image_url)
+        >>> url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+        >>> image = urlopen(url)
         >>> image = Image.open(image)
         >>> ax_image = pitch.inset_image(60, 40, image, width=30, ax=ax)
         """
@@ -838,10 +838,10 @@ class BasePitch(ABC):
         gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
         extent = kwargs.pop('extent', self.hex_extent)
         hexbin = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
-        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
-                                 self.visible_pitch[1] - self.visible_pitch[0],
-                                 self.visible_pitch[3] - self.visible_pitch[2],
-                                 fill=False)
+        rect = mpatches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                  self.visible_pitch[1] - self.visible_pitch[0],
+                                  self.visible_pitch[3] - self.visible_pitch[2],
+                                  fill=False)
         ax.add_patch(rect)
         hexbin.set_clip_path(rect)
         return hexbin
@@ -879,7 +879,7 @@ class BasePitch(ABC):
         for vert in verts:
             vert = np.asarray(vert)
             vert = self._reverse_vertices_if_vertical(vert)
-            polygon = patches.Polygon(vert, closed=True, **kwargs)
+            polygon = mpatches.Polygon(vert, closed=True, **kwargs)
             patch_list.append(polygon)
             ax.add_patch(polygon)
         return patch_list
@@ -1328,10 +1328,10 @@ class BasePitch(ABC):
     def heatmap_zones(self, stats, ax=None, **kwargs):
         collection = heatmap_zones(stats, ax=ax, vertical=self.vertical, **kwargs)
         # clip patches that extend past the pitch edges (e.g. wedges) to the pitch boundary
-        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
-                                 self.visible_pitch[1] - self.visible_pitch[0],
-                                 self.visible_pitch[3] - self.visible_pitch[2],
-                                 transform=ax.transData)
+        rect = mpatches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                  self.visible_pitch[1] - self.visible_pitch[0],
+                                  self.visible_pitch[3] - self.visible_pitch[2],
+                                  transform=ax.transData)
         collection.set_clip_path(rect)
         return collection
 
@@ -1390,7 +1390,7 @@ class BasePitch(ABC):
             facecolor = rcParams['axes.prop_cycle'].by_key().get('color', ['C0'])[0]
         if edgecolor is None:
             edgecolor = rcParams['patch.edgecolor']
-        zone_patches = [patches.Rectangle((x0, y0), x1 - x0, y1 - y0)
+        zone_patches = [mpatches.Rectangle((x0, y0), x1 - x0, y1 - y0)
                         for x0, x1, y0, y1 in zones]
         collection = PatchCollection(zone_patches, facecolor=facecolor,
                                      edgecolor=edgecolor, alpha=alpha,
@@ -1399,10 +1399,10 @@ class BasePitch(ABC):
             swap = Affine2D(np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]]))
             collection.set_transform(swap + ax.transData)
         ax.add_collection(collection)
-        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
-                                 self.visible_pitch[1] - self.visible_pitch[0],
-                                 self.visible_pitch[3] - self.visible_pitch[2],
-                                 transform=ax.transData)
+        rect = mpatches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                  self.visible_pitch[1] - self.visible_pitch[0],
+                                  self.visible_pitch[3] - self.visible_pitch[2],
+                                  transform=ax.transData)
         collection.set_clip_path(rect)
         annotations = []
         if label:

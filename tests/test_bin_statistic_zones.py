@@ -300,6 +300,15 @@ def test_validation_outside_extent():
         pitch.bin_statistic_zones([60.], [40.], [(0, 60, 0, 80), (60, 130, 0, 80)])
 
 
+def test_validation_zone_collapsed_by_edge_tol():
+    """ Test a zone thinner than edge_tol raises an error rather than
+    silently snapping to zero width."""
+    pitch = Pitch(pitch_type='statsbomb')
+    zones = [(0, 60, 0, 80), (60, 60.5, 0, 80), (60.5, 120, 0, 80)]
+    with pytest.raises(ValueError, match='zone 1 collapsed to zero size'):
+        pitch.bin_statistic_zones([5.], [40.], zones, edge_tol=1.0)
+
+
 def test_ordering_preserved():
     """ Test zone k statistics match zone k for a deliberately shuffled zone list."""
     num_points = 100000
