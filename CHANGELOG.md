@@ -1,3 +1,44 @@
+:rocket: Version 1.8.0
+----------------------
+
+### Breaking Changes
+* :x: ``bin_statistic_positional`` now returns the flat zone statistics \
+dictionary (the same as ``bin_statistic_zones``) instead of a list of \
+dictionaries, and ``heatmap_positional`` plots the zones as a single \
+collection instead of a list of QuadMesh.
+* :x: On inverted-y pitches ('statsbomb', 'wyscout', 'metricasports'), \
+explicit y bin edges are now flipped along with the data in \
+``bin_statistic``, ``bin_statistic_sonar``, ``bin_statistic_positional`` \
+and the zones methods. Results only change if you used asymmetric \
+y edges (previously counted in the wrong bands) or have points \
+exactly on the 'metricasports' positional band edges (previously \
+assigned to a band by floating point rounding, now always the band \
+displayed above the edge).
+
+### Added
+* :dart: Added heatmaps for custom zones. The ``bin_statistic_zones`` \
+method bins events into any rectangular layout. \
+The ``heatmap_zones`` method plots the zones as a single collection so \
+colorbars work, and ``label_heatmap`` works on the results.
+* Added the ``positional_zones`` method returning the Juego de Posición \
+layout as (zones, names) for use with ``bin_statistic_zones``.
+* Added the ``draw_zones`` method for drawing a zone layout without \
+validating it, so you can build a layout iteratively.
+* Added the ``mirror_zones`` method for completing a zone layout by \
+reflecting it about the middle of the pitch.
+* :dark_sunglasses: Added Sonars for zones. The ``bin_statistic_sonar_zones`` \
+method bins the event angles within each zone and the ``sonar_zones`` \
+method plots a sonar at the centre of each zone.
+* Added the ``sonar_zorder`` argument to ``sonar_grid`` and ``sonar_zones`` \
+to control where the sonar axes are drawn amongst the other artists.
+
+### Fixed
+* Fixed artists drawing outside the pitch when parts of the pitch are \
+hidden (negative pads or half pitches). The ``sonar_grid``, ``sonar_zones`` \
+(disable with ``exclude_outside=False``) and ``formation`` methods skip \
+out-of-view insets (returned as None) and ``label_heatmap`` labels are \
+clipped to the axes (pass ``clip_on=False`` for the old behaviour).
+
 :rocket: Version 1.7.1
 ----------------------
 

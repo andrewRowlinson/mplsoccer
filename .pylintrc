@@ -21,7 +21,7 @@ analyse-fallback-blocks=no
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code.
-extension-pkg-allow-list=
+extension-pkg-allow-list=scipy
 
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
@@ -86,10 +86,6 @@ py-version=3.10
 
 # Discover python modules and packages in the file system subtree.
 recursive=no
-
-# When enabled, pylint would attempt to guess common misconfiguration and emit
-# user-friendly hints instead of false-positive error messages.
-suggestion-mode=yes
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
@@ -163,8 +159,8 @@ enable=c-extension-no-member
 [EXCEPTIONS]
 
 # Exceptions that will emit a warning when caught.
-overgeneral-exceptions=BaseException,
-                       Exception
+overgeneral-exceptions=builtins.BaseException,
+                       builtins.Exception
 
 
 [CLASSES]
@@ -535,7 +531,7 @@ ignored-checks-for-mixins=no-member,
 # List of class names for which member attributes should not be checked (useful
 # for classes with dynamically set attributes). This supports the use of
 # qualified names.
-ignored-classes=optparse.Values,thread._local,_thread._local,argparse.Namespace
+ignored-classes=optparse.Values,thread._local,_thread._local,argparse.Namespace,Voronoi
 
 # Show a hint with possible names when a member name was not found. The aspect
 # of finding the hint is based on edit distance.

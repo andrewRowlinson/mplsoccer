@@ -10,7 +10,7 @@ from matplotlib import rcParams
 
 from .dimensions import Standardizer, create_pitch_dims, BaseSoccerDims, valid, size_varies
 from .markers import scatter_football
-from .heatmap import bin_statistic_positional, heatmap_positional
+from .heatmap import bin_statistic_positional, heatmap_positional, positional_zones
 from .._pitch_base import BasePitch
 from ..cm import grass_cmap
 from ..utils import validate_ax, copy_doc
@@ -133,9 +133,11 @@ class BasePitchSoccer(BasePitch):
         super().__init__(dim=dim, pitch_type=pitch_type,
                          half=half,
                          pitch_color=pitch_color,
-                         line_color=line_color, line_alpha=line_alpha, linewidth=linewidth, linestyle=linestyle, line_zorder=line_zorder,
-                         pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom, pad_top=pad_top,
-                         shade_middle=shade_middle, shade_color=shade_color, shade_alpha=shade_alpha, shade_zorder=shade_zorder,
+                         line_color=line_color, line_alpha=line_alpha, linewidth=linewidth,
+                         linestyle=linestyle, line_zorder=line_zorder,
+                         pad_left=pad_left, pad_right=pad_right, pad_bottom=pad_bottom,
+                         pad_top=pad_top, shade_middle=shade_middle, shade_color=shade_color,
+                         shade_alpha=shade_alpha, shade_zorder=shade_zorder,
                          pitch_length=pitch_length, pitch_width=pitch_width,
                          axis=axis, label=label, tick=tick,
                          )
@@ -381,10 +383,12 @@ class BasePitchSoccer(BasePitch):
 
         # draw center circle and penalty area arcs
         self._draw_ellipse(ax, self.dim.center_length, self.dim.center_width,
-                           self.dim.circle_diameter_length, self.dim.circle_diameter_width, **circ_prop)
+                           self.dim.circle_diameter_length,
+                           self.dim.circle_diameter_width, **circ_prop)
         self._draw_arc(ax, self.dim.penalty_left, self.dim.center_width,
                        self.dim.circle_diameter_length, self.dim.circle_diameter_width,
-                       theta1=self.dim.arc1_theta1, theta2=self.dim.arc1_theta2, **circ_prop)
+                       theta1=self.dim.arc1_theta1, theta2=self.dim.arc1_theta2,
+                       **circ_prop)
         self._draw_arc(ax, self.dim.penalty_right, self.dim.center_width,
                        self.dim.circle_diameter_length, self.dim.circle_diameter_width,
                        theta1=self.dim.arc2_theta1, theta2=self.dim.arc2_theta2, **circ_prop)
@@ -402,7 +406,8 @@ class BasePitchSoccer(BasePitch):
                              (self.dim.left, self.dim.bottom)]
             for i, (x, y) in enumerate(corner_points):
                 t1, t2 = thetas[i]
-                self._draw_arc(ax, x, y, self.dim.corner_diameter_length, self.dim.corner_diameter_width,
+                self._draw_arc(ax, x, y, self.dim.corner_diameter_length,
+                               self.dim.corner_diameter_width,
                                theta1=t1, theta2=t2, **circ_prop)
 
         # draw center and penalty spots
@@ -659,6 +664,9 @@ class BasePitchSoccer(BasePitch):
               for kind='image', kind='pitch' or kind='axes'.
               If the formation is a valid formation used by the data provider (pitch_type),
             the dictionary keys will be the data provider's position identifiers.
+            Positions outside the axes limits (e.g. a full-pitch formation
+            on a half pitch) are not drawn and their value is None, as inset
+            axes are not clipped by their parent axes.
             - matplotlib.PathCollection for kind='scatter'.
             - A list of matplotlib.Text for kind='text'.
 
@@ -686,7 +694,8 @@ class BasePitchSoccer(BasePitch):
         >>> from mplsoccer import VerticalPitch
         >>> from urllib.request import urlopen
         >>> from PIL import Image
-        >>> image = Image.open(urlopen('https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'))
+        >>> url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+        >>> image = Image.open(urlopen(url))
         >>> pitch = VerticalPitch()
         >>> fig, ax = pitch.draw(figsize=(6.875, 10))
         >>> position_image = pitch.formation('442',
@@ -861,9 +870,16 @@ class BasePitchSoccer(BasePitch):
 
         if kind == 'scatter':
             return self.scatter(x, y, ax=ax, **kwargs)
+        # inset axes are not clipped by their parent axes, so skip positions
+        # outside the axes limits (e.g. a full-pitch formation on a half pitch)
+        # rather than rendering the insets outside the pitch (returned as None)
+        visible = self._inset_visible(x, y, ax)
         if kind == 'image':
             axes = {}
             for i in range(len(formation_positions)):
+                if not visible[i]:
+                    axes[position_names[i]] = None
+                    continue
                 axes[position_names[i]] = self.inset_image(x[i], y[i], sorted_image[i], width=width,
                                                            height=height, ax=ax, **kwargs)
             return axes
@@ -873,6 +889,9 @@ class BasePitchSoccer(BasePitch):
                         hasattr(self, key)}
             self._set_multiple_attributes(kwargs)
             for i in range(len(formation_positions)):
+                if not visible[i]:
+                    axes[position_names[i]] = None
+                    continue
                 axes[position_names[i]] = self.inset_axes(x=x[i], y=y[i], height=height,
                                                           width=width,
                                                           aspect=1 / self.ax_aspect, polar=False,
@@ -883,6 +902,9 @@ class BasePitchSoccer(BasePitch):
         if kind == 'axes':
             axes = {}
             for i in range(len(formation_positions)):
+                if not visible[i]:
+                    axes[position_names[i]] = None
+                    continue
                 axes[position_names[i]] = self.inset_axes(x=x[i], y=y[i], height=height,
                                                           width=width,
                                                           aspect=aspect, polar=polar, ax=ax,
@@ -907,7 +929,11 @@ class BasePitchSoccer(BasePitch):
 
     @copy_doc(heatmap_positional)
     def heatmap_positional(self, stats, ax=None, **kwargs):
-        return heatmap_positional(stats, ax=ax, vertical=self.vertical, **kwargs)
+        return self.heatmap_zones(stats, ax=ax, **kwargs)
+
+    @copy_doc(positional_zones)
+    def positional_zones(self, positional='full'):
+        return positional_zones(self.dim, positional=positional)
 
     # The methods below for drawing/ setting attributes for some pitch elements
     # are defined in pitch.py (Pitch/ VerticalPitch classes)

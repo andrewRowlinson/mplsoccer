@@ -1,17 +1,22 @@
-""" Base class for drawing the soccer/ football pitch."""
+""" Base class for drawing pitches."""
 
 import warnings
 from abc import ABC, abstractmethod
 
 import numpy as np
 import seaborn as sns
-from matplotlib import patches
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib import rcParams
+from matplotlib.collections import PatchCollection
+from matplotlib.transforms import Affine2D
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
-from .heatmap import bin_statistic, bin_statistic_sonar, sonar, heatmap
+from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap,
+                      bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones,
+                      bin_statistic_sonar_zones, zone_sonar_from_binnumber, _sonar,
+                      mirror_zones)
 from .linecollection import lines
 from .quiver import arrows
 from .scatterutils import scatter_rotation
@@ -20,6 +25,7 @@ from .grid import _grid_dimensions, _draw_grid, grid_dimensions
 
 
 class BasePitch(ABC):
+    """ Abstract base class for drawing pitches with Matplotlib."""
 
     def __init__(self,
                  dim=None,
@@ -150,7 +156,7 @@ class BasePitch(ABC):
             figsize = rcParams['figure.figsize']
         if ax is None:
             fig, axs = self._setup_subplots(nrows, ncols, figsize, constrained_layout)
-            fig.set_tight_layout(tight_layout)
+            fig.set_layout_engine('tight' if tight_layout else 'none')
             for axis in axs.flat:
                 self._draw_ax(axis)
             if axs.size == 1:
@@ -256,8 +262,8 @@ class BasePitch(ABC):
         >>> from PIL import Image
         >>> pitch = VerticalPitch()
         >>> fig, ax = pitch.draw()
-        >>> image_url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
-        >>> image = urlopen(image_url)
+        >>> url = 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Messi_vs_Nigeria_2018.jpg'
+        >>> image = urlopen(url)
         >>> image = Image.open(image)
         >>> ax_image = pitch.inset_image(60, 40, image, width=30, ax=ax)
         """
@@ -832,10 +838,10 @@ class BasePitch(ABC):
         gridsize = kwargs.pop('gridsize', self.hexbin_gridsize)
         extent = kwargs.pop('extent', self.hex_extent)
         hexbin = ax.hexbin(x, y, mincnt=mincnt, gridsize=gridsize, extent=extent, **kwargs)
-        rect = patches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
-                                 self.visible_pitch[1] - self.visible_pitch[0],
-                                 self.visible_pitch[3] - self.visible_pitch[2],
-                                 fill=False)
+        rect = mpatches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                  self.visible_pitch[1] - self.visible_pitch[0],
+                                  self.visible_pitch[3] - self.visible_pitch[2],
+                                  fill=False)
         ax.add_patch(rect)
         hexbin.set_clip_path(rect)
         return hexbin
@@ -873,7 +879,7 @@ class BasePitch(ABC):
         for vert in verts:
             vert = np.asarray(vert)
             vert = self._reverse_vertices_if_vertical(vert)
-            polygon = patches.Polygon(vert, closed=True, **kwargs)
+            polygon = mpatches.Polygon(vert, closed=True, **kwargs)
             patch_list.append(polygon)
             ax.add_patch(polygon)
         return patch_list
@@ -1022,10 +1028,10 @@ class BasePitch(ABC):
     def sonar_grid(self, stats_length,
                    stats_color=None, cmap=None, vmin=None, vmax=None,
                    rmin=0, rmax=None,
-                   sonar_alpha=1, sonar_facecolor='None',
+                   sonar_alpha=1, sonar_facecolor='None', sonar_zorder=5,
                    axis=False, label=False,
                    width=None, height=None,
-                   exclude_zeros=True, exclude_nan=True,
+                   exclude_zeros=True, exclude_nan=True, exclude_outside=True,
                    ax=None, **kwargs):
         """ Plot a grid of polar bar charts on an existing axes.
 
@@ -1040,7 +1046,7 @@ class BasePitch(ABC):
             arguments will set the boundaries for the cmap.
             If stats_color is None then the color of the bars is controlled
             by 'color', 'fc', or 'facecolor' arguments.
-        cmap : str or matplotlib.colros.Colormap, default None
+        cmap : str or matplotlib.colors.Colormap, default None
             Controls the color of the bars via stats_color.
         vmin, vmax : float, default None
             The cmap is mapped linearly to the range vmin to vmax, so that values
@@ -1055,6 +1061,8 @@ class BasePitch(ABC):
             The alpha/ transparency of the sonar axes patch.
         sonar_facecolor : any Matplotlib color, default 'None'
             The facecolor of the sonar axes. The default 'None' makes the axes transparent.
+        sonar_zorder : float, default 5
+            The zorder of the sonar axes (matplotlib's default for inset axes is 5).
         axis : bool, default False
             Whether to set the axis spines to visible.
         label : bool, default False
@@ -1067,6 +1075,9 @@ class BasePitch(ABC):
             Whether to draw the Polar axes where all the values are zero for the grid cell.
         exclude_nan : bool, default True
             Whether to draw the Polar axes where all the values are numpy.nan for the grid cell.
+        exclude_outside : bool, default True
+            Whether to exclude the Polar axes where the grid cell center falls
+            outside the axes limits.
         ax : matplotlib.axes.Axes, default None
             The axis to plot on.
         **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
@@ -1087,39 +1098,334 @@ class BasePitch(ABC):
         >>> axs = pitch.sonar_grid(bs, width=10, fc='cornflowerblue',
         ...                        ec='black', ax=ax)
         """
-        validate_ax(ax)
-        mask_zero = np.all(np.isclose(stats_length['statistic'], 0), axis=2)
-        mask_null = np.all(np.isnan(stats_length['statistic']), axis=2)
-        axs = np.empty(stats_length['cx'].shape, dtype='O')
-        it = np.nditer(stats_length['cx'], flags=['multi_index'])
-        for cx in it:
-            if mask_zero[it.multi_index] and exclude_zeros:
-                ax_inset = None
-            elif mask_null[it.multi_index] and exclude_nan:
-                ax_inset = None
-            else:
-                ax_inset = self.inset_axes(cx, stats_length['cy'][it.multi_index],
-                                        width=width, height=height, ax=ax, polar=True)
-                sonar(stats_length=stats_length,
-                    xindex=it.multi_index[1], yindex=it.multi_index[0],
-                    stats_color=stats_color, cmap=cmap, vmin=vmin, vmax=vmax,
-                    rmin=rmin, rmax=rmax,
-                    sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
-                    axis=axis, label=label,
-                    ax=ax_inset, **kwargs)
-            axs[it.multi_index] = ax_inset
-        axs = np.squeeze(axs)
+        if stats_length['statistic'].ndim != 3:
+            raise ValueError(f"stats_length['statistic'] {stats_length['statistic'].shape} "
+                             'should have three dimensions. '
+                             'Try creating the statistics again using bin_statistic_sonar.')
+        if (stats_color is not None and
+                stats_color['statistic'].shape != stats_length['statistic'].shape):
+            raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
+                             f"and stats_length['statistic'] "
+                             f"{stats_length['statistic'].shape} are different shapes. "
+                             'Try creating the statistics again using bin_statistic_sonar '
+                             'with the same bins argument.')
+        num_y, num_x, num_angle = stats_length['statistic'].shape
+        lengths = stats_length['statistic'].reshape(-1, num_angle)
+        colors = None if stats_color is None else stats_color['statistic'].reshape(-1, num_angle)
+        axs = self._sonar_insets(lengths, colors,
+                                 np.ravel(stats_length['cx']), np.ravel(stats_length['cy']),
+                                 stats_length['angle_grid'], stats_length['angle_widths'],
+                                 cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
+                                 sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                                 sonar_zorder=sonar_zorder,
+                                 axis=axis, label=label, width=width, height=height,
+                                 exclude_zeros=exclude_zeros, exclude_nan=exclude_nan,
+                                 exclude_outside=exclude_outside,
+                                 ax=ax, **kwargs)
+        axs = np.squeeze(axs.reshape(num_y, num_x))
         if axs.size == 1:
             axs = axs.item()
         return axs
+
+    def _inset_visible(self, x, y, ax):
+        """ Whether coordinates x/y are both inside the current axes limits."""
+        x, y = self._reverse_if_vertical(np.asarray(x, dtype=float),
+                                         np.asarray(y, dtype=float))
+        xmin, xmax = sorted(ax.get_xlim())
+        ymin, ymax = sorted(ax.get_ylim())
+        return (x >= xmin) & (x <= xmax) & (y >= ymin) & (y <= ymax)
+
+    def _sonar_insets(self, lengths, colors, cx, cy, angle_grid, angle_widths,
+                      cmap=None, vmin=None, vmax=None, rmin=0, rmax=None,
+                      sonar_alpha=1, sonar_facecolor='None', sonar_zorder=5,
+                      axis=False, label=False,
+                      width=None, height=None, exclude_zeros=True, exclude_nan=True,
+                      exclude_outside=True, ax=None, **kwargs):
+        """ Plot a polar bar chart (sonar) at a collection of centers"""
+        validate_ax(ax)
+        if colors is not None and cmap is None:
+            raise ValueError("You must supply a cmap for varying the color using stats_color.")
+        if colors is None and cmap is not None:
+            raise ValueError("You must supply a stats_color for varying the color using a cmap.")
+        if rmax is None:
+            rmax = np.nanmax(lengths)
+        if colors is not None:
+            if vmin is None:
+                vmin = np.nanmin(colors)
+            if vmax is None:
+                vmax = np.nanmax(colors)
+        mask_zero = np.all(np.isclose(lengths, 0), axis=1)
+        mask_null = np.all(np.isnan(lengths), axis=1)
+        visible = self._inset_visible(cx, cy, ax)
+        axs = np.empty(len(cx), dtype='O')
+        for i in range(len(cx)):
+            if exclude_outside and not visible[i]:
+                ax_inset = None
+            elif mask_zero[i] and exclude_zeros:
+                ax_inset = None
+            elif mask_null[i] and exclude_nan:
+                ax_inset = None
+            else:
+                ax_inset = self.inset_axes(cx[i], cy[i],
+                                           width=width, height=height, ax=ax, polar=True,
+                                           zorder=sonar_zorder)
+                _sonar(lengths[i], None if colors is None else colors[i],
+                       angle_grid, angle_widths,
+                       cmap=cmap, vmin=vmin, vmax=vmax,
+                       rmin=rmin, rmax=rmax,
+                       sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                       axis=axis, label=label,
+                       ax=ax_inset, **kwargs)
+            axs[i] = ax_inset
+        return axs
+
+    def sonar_zones(self, stats_length,
+                    stats_color=None, cmap=None, vmin=None, vmax=None,
+                    rmin=0, rmax=None,
+                    sonar_alpha=1, sonar_facecolor='None', sonar_zorder=5,
+                    axis=False, label=False,
+                    width=None, height=None,
+                    exclude_zeros=True, exclude_nan=True, exclude_outside=True,
+                    ax=None, **kwargs):
+        """ Plot a polar bar chart (sonar) at the center of each zone.
+
+        Parameters
+        ----------
+        stats_length : dict
+            This should be calculated via bin_statistic_sonar_zones()
+            or zone_sonar_from_binnumber(). It controls the length of the bars.
+        stats_color : dict, default None
+            This should be calculated via bin_statistic_sonar_zones()
+            or zone_sonar_from_binnumber().
+            It controls the color of the bars via a cmap. The vmin/vmax
+            arguments will set the boundaries for the cmap.
+            If stats_color is None then the color of the bars is controlled
+            by 'color', 'fc', or 'facecolor' arguments.
+        cmap : str or matplotlib.colors.Colormap, default None
+            Controls the color of the bars via stats_color.
+        vmin, vmax : float, default None
+            The cmap is mapped linearly to the range vmin to vmax, so that values
+            equal to or less than vmin are given the first color in the cmap
+            and values equal to or greater than vmax are given the last color
+            in the cmap. The default of None sets the values to the minimum value of
+            stats_color['statistic'] and the maximum value of stats_color['statistic'].
+        rmin, rmax : float, default 0 and None
+            The radial axis limits. The default rmax of None sets the values to the maximum
+            of stats_length['statistic'].
+        sonar_alpha : float, default 1
+            The alpha/ transparency of the sonar axes patch.
+        sonar_facecolor : any Matplotlib color, default 'None'
+            The facecolor of the sonar axes. The default 'None' makes the axes transparent.
+        sonar_zorder : float, default 5
+            The zorder of the sonar axes (matplotlib's default for inset axes is 5).
+        axis : bool, default False
+            Whether to set the axis spines to visible.
+        label : bool, default False
+            Whether to include the axis labels.
+        width, height : float, default None
+            The width, height of the inset Polar axes in the x/y data coordinates.
+            You should only provide one of the width or height arguments
+            since the Polar axes are square and the other values is set dynamically.
+        exclude_zeros : bool, default True
+            Whether to draw the Polar axes where all the values are zero for the zone.
+        exclude_nan : bool, default True
+            Whether to draw the Polar axes where all the values are numpy.nan for the zone.
+        exclude_outside : bool, default True
+            Whether to exclude the Polar axes where the zone center falls
+            outside the axes limits.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.bar.
+
+        Returns
+        -------
+        axs : numpy.ndarray of matplotlib.projections.polar.PolarAxes
+            One inset axes per zone in the zone order
+            (None where the zone is excluded).
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch, Sbopen
+        >>> parser = Sbopen()
+        >>> df = parser.event(69251)[0]
+        >>> df = df[(df.type_name == 'Pass') &
+        ...         (df.outcome_name.isnull())].copy()
+        >>> pitch = Pitch()
+        >>> angle, distance = pitch.calculate_angle_and_distance(df.x, df.y,
+        ...                                                      df.end_x, df.end_y)
+        >>> zones, names = pitch.positional_zones('full')
+        >>> bs = pitch.bin_statistic_sonar_zones(df.x, df.y, angle, zones,
+        ...                                      angle_bins=4)
+        >>> fig, ax = pitch.draw(figsize=(8, 5.5))
+        >>> axs = pitch.sonar_zones(bs, width=10, fc='cornflowerblue',
+        ...                         ec='black', ax=ax)
+        """
+        if stats_length['statistic'].ndim != 2:
+            raise ValueError(f"stats_length['statistic'] {stats_length['statistic'].shape} "
+                             'should have two dimensions (zone, angle). '
+                             'Try creating the statistics again using bin_statistic_sonar_zones.')
+        if (stats_color is not None and
+                stats_color['statistic'].shape != stats_length['statistic'].shape):
+            raise ValueError(f"stats_color['statistic'] {stats_color['statistic'].shape} "
+                             f"and stats_length['statistic'] "
+                             f"{stats_length['statistic'].shape} are different shapes. "
+                             'Try creating the statistics again using bin_statistic_sonar_zones '
+                             'with the same angle_bins argument.')
+        colors = None if stats_color is None else stats_color['statistic']
+        return self._sonar_insets(stats_length['statistic'], colors,
+                                  np.ravel(stats_length['cx']), np.ravel(stats_length['cy']),
+                                  stats_length['angle_grid'], stats_length['angle_widths'],
+                                  cmap=cmap, vmin=vmin, vmax=vmax, rmin=rmin, rmax=rmax,
+                                  sonar_alpha=sonar_alpha, sonar_facecolor=sonar_facecolor,
+                                  sonar_zorder=sonar_zorder,
+                                  axis=axis, label=label, width=width, height=height,
+                                  exclude_zeros=exclude_zeros, exclude_nan=exclude_nan,
+                                  exclude_outside=exclude_outside,
+                                  ax=ax, **kwargs)
 
     @copy_doc(heatmap)
     def heatmap(self, stats, ax=None, **kwargs):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
+    @copy_doc(bin_statistic_zones)
+    def bin_statistic_zones(self, x, y, zones, values=None, statistic='count',
+                            normalize=False, standardized=False, names=None, edge_tol=None):
+        return bin_statistic_zones(x, y, zones, dim=self.dim, values=values,
+                                   statistic=statistic, normalize=normalize,
+                                   standardized=standardized, names=names, edge_tol=edge_tol)
+
+    @staticmethod
+    @copy_doc(zone_statistic_from_binnumber)
+    def zone_statistic_from_binnumber(binnumber, values=None, statistic='count',
+                                      patches=None, cx=None, cy=None,
+                                      names=None, area=None, normalize=False):
+        return zone_statistic_from_binnumber(binnumber, values=values, statistic=statistic,
+                                             patches=patches, cx=cx, cy=cy,
+                                             names=names, area=area, normalize=normalize)
+
+    @copy_doc(bin_statistic_sonar_zones)
+    def bin_statistic_sonar_zones(self, x, y, angle, zones, values=None,
+                                  statistic='count', angle_bins=10, normalize=False,
+                                  standardized=False, names=None, edge_tol=None,
+                                  center=True):
+        return bin_statistic_sonar_zones(x, y, angle, zones, dim=self.dim, values=values,
+                                         statistic=statistic, angle_bins=angle_bins,
+                                         normalize=normalize, standardized=standardized,
+                                         names=names, edge_tol=edge_tol, center=center)
+
+    @staticmethod
+    @copy_doc(zone_sonar_from_binnumber)
+    def zone_sonar_from_binnumber(binnumber, angle, values=None, statistic='count',
+                                  angle_bins=10, patches=None, cx=None, cy=None,
+                                  names=None, area=None, normalize=False, center=True):
+        return zone_sonar_from_binnumber(binnumber, angle, values=values,
+                                         statistic=statistic, angle_bins=angle_bins,
+                                         patches=patches, cx=cx, cy=cy,
+                                         names=names, area=area,
+                                         normalize=normalize, center=center)
+
+    @copy_doc(heatmap_zones)
+    def heatmap_zones(self, stats, ax=None, **kwargs):
+        collection = heatmap_zones(stats, ax=ax, vertical=self.vertical, **kwargs)
+        # clip patches that extend past the pitch edges (e.g. wedges) to the pitch boundary
+        rect = mpatches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                  self.visible_pitch[1] - self.visible_pitch[0],
+                                  self.visible_pitch[3] - self.visible_pitch[2],
+                                  transform=ax.transData)
+        collection.set_clip_path(rect)
+        return collection
+
+    def draw_zones(self, zones, names=None, facecolor=None, edgecolor=None, alpha=0.5,
+                   zorder=3, label=True, ax=None, **kwargs):
+        """ Draw a zone layout to help build custom heatmap zones iteratively.
+
+        The default settings show overlapping zones in darker colors
+        and gaps show the pitch color. You can validate the zones
+        with bin_statistic_zones.
+
+        Parameters
+        ----------
+        zones : array-like of shape (num_zones, 4)
+            A sequence of (x0, x1, y0, y1) rectangles in pitch coordinates.
+        names : list of str, default None
+            An optional name for each zone (in the same order as zones).
+        facecolor : any Matplotlib color or a sequence of colors, default None
+            If None, defaults to the first color of rcParams['axes.prop_cycle'].
+        edgecolor : any Matplotlib color, default None
+            The zone edge color. If None, defaults to rcParams['patch.edgecolor'].
+        alpha : float, default 0.5
+            The transparency of the zones.
+        zorder : float, default 3
+            The zorder for the zones and labels.
+        label : bool, default True
+            Whether to label each zone with its index, or 'index: name'
+            when names are given.
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to
+            matplotlib.collections.PatchCollection.
+
+        Returns
+        -------
+        collection : matplotlib.collections.PatchCollection
+        annotations : list of matplotlib.text.Text
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> pitch = Pitch()
+        >>> fig, ax = pitch.draw()
+        >>> zones = [(0, 60, 0, 80), (60, 120, 0, 40)]  # gap at (60, 120, 40, 80)
+        >>> collection, annotations = pitch.draw_zones(zones, ax=ax)
+        """
+        validate_ax(ax)
+        zones = np.asarray(zones, dtype=float)
+        if zones.ndim != 2 or zones.shape[1] != 4:
+            raise ValueError('zones must be a sequence of (x0, x1, y0, y1) rectangles')
+        if names is not None and len(names) != len(zones):
+            raise ValueError('names must be the same length as zones')
+        facecolor = kwargs.pop('fc', facecolor)
+        edgecolor = kwargs.pop('ec', edgecolor)
+        if facecolor is None:
+            facecolor = rcParams['axes.prop_cycle'].by_key().get('color', ['C0'])[0]
+        if edgecolor is None:
+            edgecolor = rcParams['patch.edgecolor']
+        zone_patches = [mpatches.Rectangle((x0, y0), x1 - x0, y1 - y0)
+                        for x0, x1, y0, y1 in zones]
+        collection = PatchCollection(zone_patches, facecolor=facecolor,
+                                     edgecolor=edgecolor, alpha=alpha,
+                                     zorder=zorder, **kwargs)
+        if self.vertical:
+            swap = Affine2D(np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]]))
+            collection.set_transform(swap + ax.transData)
+        ax.add_collection(collection)
+        rect = mpatches.Rectangle((self.visible_pitch[0], self.visible_pitch[2]),
+                                  self.visible_pitch[1] - self.visible_pitch[0],
+                                  self.visible_pitch[3] - self.visible_pitch[2],
+                                  transform=ax.transData)
+        collection.set_clip_path(rect)
+        annotations = []
+        if label:
+            cx = 0.5 * (zones[:, 0] + zones[:, 1])
+            cy = 0.5 * (zones[:, 2] + zones[:, 3])
+            for i in range(len(zones)):
+                text_str = f'{i}: {names[i]}' if names is not None else f'{i}'
+                annotations.append(self.text(cx[i], cy[i], text_str, ax=ax,
+                                             va='center', ha='center', clip_on=True,
+                                             zorder=zorder))
+        return collection, annotations
+
+    @copy_doc(mirror_zones)
+    def mirror_zones(self, zones, names=None, axis='x', suffixes=None):
+        return mirror_zones(zones, dim=self.dim, names=names, axis=axis, suffixes=suffixes)
+
     def label_heatmap(self, stats, str_format=None, exclude_zeros=False, exclude_nan=False,
                       xoffset=0, yoffset=0, ax=None, **kwargs):
         """ Labels the heatmap(s) and automatically flips the coordinates if the pitch is vertical.
+
+        The labels are clipped to the axes, so labels for hidden parts of the
+        pitch (e.g. with negative pads or a half pitch) are not drawn.
+        Pass clip_on=False to draw labels outside the axes.
 
         Parameters
         ----------
@@ -1160,6 +1466,9 @@ class BasePitch(ABC):
         validate_ax(ax)
         va = kwargs.pop('va', 'center')
         ha = kwargs.pop('ha', 'center')
+        # clip labels to the axes so they do not draw outside the pitch
+        # when parts of the pitch are hidden (e.g. negative pads or a half pitch)
+        clip_on = kwargs.pop('clip_on', True)
 
         if not isinstance(stats, list):
             stats = [stats]
@@ -1185,7 +1494,7 @@ class BasePitch(ABC):
                 if str_format is not None:
                     text_str = str_format.format(text_str)
                 annotation = self.text(cx[idx], cy[idx], text_str, ax=ax,
-                                       va=va, ha=ha, **kwargs)
+                                       va=va, ha=ha, clip_on=clip_on, **kwargs)
                 annotation_list.append(annotation)
 
         return annotation_list
