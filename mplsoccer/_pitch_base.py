@@ -13,7 +13,7 @@ from matplotlib.transforms import Affine2D
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
-from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap, overlay_surface,
+from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap, pcolormesh,
                       bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones,
                       bin_statistic_sonar_zones, zone_sonar_from_binnumber, _sonar,
                       mirror_zones)
@@ -1287,11 +1287,11 @@ class BasePitch(ABC):
     def heatmap(self, stats, ax=None, **kwargs):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
-    @copy_doc(overlay_surface)
-    def overlay_surface(self, surface, extent=None, ax=None, **kwargs):
+    @copy_doc(pcolormesh)
+    def pcolormesh(self, surface, extent=None, ax=None, **kwargs):
         if extent is None:
             extent = self.dim.pitch_extent
-        return overlay_surface(surface, extent, ax=ax, vertical=self.vertical, **kwargs)
+        return pcolormesh(surface, extent, ax=ax, vertical=self.vertical, **kwargs)
 
     @copy_doc(bin_statistic_zones)
     def bin_statistic_zones(self, x, y, zones, values=None, statistic='count',

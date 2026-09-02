@@ -414,7 +414,7 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     return ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
 
 
-def overlay_surface(surface, extent, ax=None, vertical=False, **kwargs):
+def pcolormesh(surface, extent, ax=None, vertical=False, **kwargs):
     """ Utility wrapper around matplotlib.axes.Axes.pcolormesh for overlaying a dense
     two-dimensional surface (for example a pitch-control probability grid or an
     expected-threat surface) on the pitch. It builds the cell edges from the extent
@@ -447,7 +447,7 @@ def overlay_surface(surface, extent, ax=None, vertical=False, **kwargs):
     >>> pitch = Pitch(line_zorder=2)
     >>> fig, ax = pitch.draw()
     >>> surface = np.random.uniform(size=(80, 120))
-    >>> mesh = pitch.overlay_surface(surface, cmap='viridis', alpha=0.6, ax=ax)
+    >>> mesh = pitch.pcolormesh(surface, cmap='viridis', alpha=0.6, ax=ax)
     """
     validate_ax(ax)
     surface = np.asarray(surface)
