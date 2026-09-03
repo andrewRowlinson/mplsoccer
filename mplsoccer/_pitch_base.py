@@ -13,7 +13,7 @@ from matplotlib.transforms import Affine2D
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import circmean
 
-from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap, pcolormesh,
+from .heatmap import (bin_statistic, bin_statistic_sonar, sonar, heatmap,
                       bin_statistic_zones, zone_statistic_from_binnumber, heatmap_zones,
                       bin_statistic_sonar_zones, zone_sonar_from_binnumber, _sonar,
                       mirror_zones)
@@ -1287,11 +1287,56 @@ class BasePitch(ABC):
     def heatmap(self, stats, ax=None, **kwargs):
         return heatmap(stats, ax=ax, vertical=self.vertical, **kwargs)
 
-    @copy_doc(pcolormesh)
     def pcolormesh(self, surface, extent=None, ax=None, **kwargs):
+        """ Wrapper around matplotlib.axes.Axes.pcolormesh for overlaying a dense
+        two-dimensional surface (for example a pitch-control probability grid or an
+        expected-threat surface) on the pitch. It builds the cell edges from the
+        extent and automatically switches the x and y coordinates if the pitch
+        is vertical.
+
+        See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
+
+        Parameters
+        ----------
+        surface : array-like, shape (ny, nx)
+            A dense grid of values spanning the extent. The first row corresponds
+            to the lowest y edge of the extent; on pitches drawn with an inverted
+            y-axis (e.g. statsbomb) that is the top of the pitch as displayed.
+        extent : array-like, shape (4,), default None
+            The (xmin, xmax, ymin, ymax) pitch coordinates that the surface spans.
+            If None, defaults to the whole pitch (self.dim.pitch_extent).
+        ax : matplotlib.axes.Axes, default None
+            The axis to plot on.
+        **kwargs : All other keyword arguments are passed on to
+            matplotlib.axes.Axes.pcolormesh.
+
+        Returns
+        -------
+        mesh : matplotlib.collections.QuadMesh
+
+        Examples
+        --------
+        >>> from mplsoccer import Pitch
+        >>> import numpy as np
+        >>> pitch = Pitch(line_zorder=2)
+        >>> fig, ax = pitch.draw()
+        >>> surface = np.random.uniform(size=(80, 120))
+        >>> mesh = pitch.pcolormesh(surface, cmap='viridis', alpha=0.6, ax=ax)
+        """
+        validate_ax(ax)
+        surface = np.asarray(surface)
+        if surface.ndim != 2:
+            raise ValueError(f"surface must be two-dimensional; got shape {surface.shape}")
         if extent is None:
             extent = self.dim.pitch_extent
-        return pcolormesh(surface, extent, ax=ax, vertical=self.vertical, **kwargs)
+        ny, nx = surface.shape
+        xmin, xmax, ymin, ymax = np.asarray(extent, dtype=float)
+        x_edges = np.linspace(xmin, xmax, nx + 1)
+        y_edges = np.linspace(ymin, ymax, ny + 1)
+        x_grid, y_grid = np.meshgrid(x_edges, y_edges)
+        if self.vertical:
+            return ax.pcolormesh(y_grid, x_grid, surface, **kwargs)
+        return ax.pcolormesh(x_grid, y_grid, surface, **kwargs)
 
     @copy_doc(bin_statistic_zones)
     def bin_statistic_zones(self, x, y, zones, values=None, statistic='count',

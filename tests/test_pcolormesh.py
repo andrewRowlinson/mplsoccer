@@ -1,4 +1,4 @@
-""" Test the pcolormesh utility and Pitch.pcolormesh method."""
+""" Test the Pitch.pcolormesh method."""
 
 import matplotlib
 

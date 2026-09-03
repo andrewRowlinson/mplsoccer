@@ -414,55 +414,6 @@ def heatmap(stats, ax=None, vertical=False, **kwargs):
     return ax.pcolormesh(stats['x_grid'], stats['y_grid'], stats['statistic'], **kwargs)
 
 
-def pcolormesh(surface, extent, ax=None, vertical=False, **kwargs):
-    """ Utility wrapper around matplotlib.axes.Axes.pcolormesh for overlaying a dense
-    two-dimensional surface (for example a pitch-control probability grid or an
-    expected-threat surface) on the pitch. It builds the cell edges from the extent
-    and automatically switches the x and y coordinates if the pitch is vertical.
-
-    See: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html
-
-    Parameters
-    ----------
-    surface : array-like, shape (ny, nx)
-        A dense grid of values spanning the extent. The first row corresponds to
-        the lowest y edge of the extent; on pitches drawn with an inverted y-axis
-        (e.g. statsbomb) that is the top of the pitch as displayed.
-    extent : array-like, shape (4,)
-        The (xmin, xmax, ymin, ymax) pitch coordinates that the surface spans.
-    ax : matplotlib.axes.Axes, default None
-        The axis to plot on.
-    vertical : bool, default False
-        If the orientation is vertical (True), then the code switches the x and y coordinates.
-    **kwargs : All other keyword arguments are passed on to matplotlib.axes.Axes.pcolormesh.
-
-    Returns
-    -------
-    mesh : matplotlib.collections.QuadMesh
-
-    Examples
-    --------
-    >>> from mplsoccer import Pitch
-    >>> import numpy as np
-    >>> pitch = Pitch(line_zorder=2)
-    >>> fig, ax = pitch.draw()
-    >>> surface = np.random.uniform(size=(80, 120))
-    >>> mesh = pitch.pcolormesh(surface, cmap='viridis', alpha=0.6, ax=ax)
-    """
-    validate_ax(ax)
-    surface = np.asarray(surface)
-    if surface.ndim != 2:
-        raise ValueError(f"surface must be two-dimensional; got shape {surface.shape}")
-    ny, nx = surface.shape
-    xmin, xmax, ymin, ymax = np.asarray(extent, dtype=float)
-    x_edges = np.linspace(xmin, xmax, nx + 1)
-    y_edges = np.linspace(ymin, ymax, ny + 1)
-    x_grid, y_grid = np.meshgrid(x_edges, y_edges)
-    if vertical:
-        return ax.pcolormesh(y_grid, x_grid, surface, **kwargs)
-    return ax.pcolormesh(x_grid, y_grid, surface, **kwargs)
-
-
 def _merge_close_edges(edges, atol):
     """ Sort and deduplicate edges, merging values that differ only by
     float noise into a single shared edge value (sometimes called vertex
