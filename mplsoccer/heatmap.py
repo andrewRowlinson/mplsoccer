@@ -700,8 +700,11 @@ def bin_statistic_zones(x, y, zones, dim=None, values=None, statistic='count',
         y_bin_edges = y_edges
         cell_zone_binning = cell_zone
     # values are ignored by 'count' (second x is a placeholder to satisfy scipy)
+    # Supply bounds so scipy does not derive them from an empty event selection.
     _, _, _, fine_binnumber = binned_statistic_2d(x, y, x, statistic='count',
                                                   bins=[x_edges, y_bin_edges],
+                                                  range=[[x_edges[0], x_edges[-1]],
+                                                         [y_bin_edges[0], y_bin_edges[-1]]],
                                                   expand_binnumbers=True)
     num_x = len(x_edges) - 1
     num_y = len(y_bin_edges) - 1
