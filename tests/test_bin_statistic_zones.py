@@ -115,6 +115,52 @@ def test_bin_statistic_zones_points():
         assert stats['statistic'].sum() == num_points
 
 
+@pytest.mark.parametrize('pitch_type', ['statsbomb', 'opta', 'tracab'])
+@pytest.mark.parametrize('standardized', [False, True])
+@pytest.mark.parametrize('statistic', ['count', 'mean'])
+@pytest.mark.parametrize('sonar', [False, True])
+def test_bin_statistic_zones_empty(pitch_type, standardized, statistic, sonar):
+    """ Empty event selections retain the zones and SciPy's empty-bin statistics."""
+    pitch = Pitch(pitch_type=pitch_type, **pitch_kwargs(pitch_type))
+    if standardized:
+        x0, x1, y0, y1 = pitch.dim.standardized_extent
+    else:
+        x0, x1, y0, y1 = pitch.dim.pitch_extent
+    xm, ym = (x0 + x1) / 2, (y0 + y1) / 2
+    zones = [(x0, xm, y0, ym), (xm, x1, y0, ym),
+             (x0, xm, ym, y1), (xm, x1, ym, y1)]
+    kwargs = {'values': [], 'statistic': statistic,
+              'standardized': standardized, 'names': ['a', 'b', 'c', 'd']}
+    if sonar:
+        stats = pitch.bin_statistic_sonar_zones([], [], [], zones, angle_bins=6, **kwargs)
+        expected_shape = (4, 6)
+    else:
+        stats = pitch.bin_statistic_zones([], [], zones, **kwargs)
+        expected_shape = (4,)
+    assert stats['statistic'].shape == expected_shape
+    np.testing.assert_equal(stats['statistic'],
+                             np.full(expected_shape, 0. if statistic == 'count' else np.nan))
+    np.testing.assert_array_equal(stats['count'], np.zeros(4, dtype=int))
+    assert stats['binnumber'].shape == (0,)
+    assert stats['inside'].shape == (0,)
+    assert len(stats['patches']) == 4
+    assert stats['names'] == ['a', 'b', 'c', 'd']
+    assert np.isclose(stats['area'].sum(), (x1 - x0) * (y1 - y0))
+
+
+@pytest.mark.parametrize('positional', ['full', 'horizontal', 'vertical'])
+@pytest.mark.parametrize('statistic', ['count', 'mean'])
+def test_bin_statistic_positional_empty(positional, statistic):
+    """ Empty positional statistics match the implementation before zone binning."""
+    pitch = Pitch(pitch_type='statsbomb')
+    old = legacy_bin_statistic_positional([], [], values=[], dim=pitch.dim,
+                                          positional=positional, statistic=statistic)
+    stats = pitch.bin_statistic_positional([], [], values=[], positional=positional,
+                                            statistic=statistic)
+    old_flat = np.concatenate([section['statistic'].ravel() for section in old])
+    np.testing.assert_equal(stats['statistic'], old_flat)
+
+
 def test_bin_statistic_zones_edge_points():
     """ Test points exactly on the zone boundaries are all counted exactly once.
     This includes the 0-1 metricasports coordinate system, whose edges are
