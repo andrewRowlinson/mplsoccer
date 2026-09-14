@@ -1,3 +1,10 @@
+:rocket: Version 1.8.1
+----------------------
+
+### Fixes
+* Fixed ``bin_statistic_zones``, ``bin_statistic_sonar_zones`` and \
+``bin_statistic_positional`` raising an error for empty x, y coordinates (#126).
+
 :rocket: Version 1.8.0
 ----------------------
 
