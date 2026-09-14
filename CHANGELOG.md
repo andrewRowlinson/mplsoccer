@@ -1,6 +1,10 @@
 :rocket: Version 1.8.1
 ----------------------
 
+### Added
+* :white_check_mark: Added the ``pcolormesh`` method for plotting \
+a two-dimensional surface, e.g. pitch control or expected threat (#125).
+
 ### Fixes
 * Fixed ``bin_statistic_zones``, ``bin_statistic_sonar_zones`` and \
 ``bin_statistic_positional`` raising an error for empty x, y coordinates (#126).
