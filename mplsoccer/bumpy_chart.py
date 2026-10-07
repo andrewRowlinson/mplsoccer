@@ -3,17 +3,12 @@
 Author: Anmol_Durgapal(@slothfulwave612)
 """
 
-import warnings
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patches
 from matplotlib.path import Path
 
 from .utils import set_labels
-
-# ignore UserWarning
-warnings.simplefilter("ignore", UserWarning)
 
 __all__ = ['Bumpy']
 

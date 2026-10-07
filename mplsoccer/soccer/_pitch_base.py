@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import rcParams
 
-from .dimensions import Standardizer, create_pitch_dims, BaseSoccerDims, valid, size_varies
+from .dimensions import Standardizer, create_pitch_dims, BaseSoccerDims, size_varies
 from .markers import scatter_football
 from .heatmap import bin_statistic_positional, heatmap_positional, positional_zones
 from .._pitch_base import BasePitch
@@ -274,15 +274,7 @@ class BasePitchSoccer(BasePitch):
 
     def _validation_checks(self):
         # pitch validation
-        if (self.pitch_type not in valid and
-            not issubclass(type(self.pitch_type), BaseSoccerDims)
-           ):
-            raise TypeError(f'Invalid argument: pitch_type should be in {valid} '
-                            'or a subclass of BaseSoccerDims.')
-        if (self.pitch_length is None or self.pitch_width is None) \
-                and self.pitch_type in size_varies:
-            raise TypeError("Invalid argument: pitch_length and pitch_width must be specified.")
-        if ((self.pitch_type not in size_varies) and
+        if (not self.dim.size_varies and
                 ((self.pitch_length is not None) or (self.pitch_width is not None))):
             msg = f"Pitch length and widths are only used for {size_varies}" \
                   f" pitches and will be ignored"

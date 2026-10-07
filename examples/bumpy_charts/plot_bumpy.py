@@ -114,6 +114,9 @@ fig_text(
     size=25, fig=fig, fontproperties=font_bold.prop
 )
 
+# if space is left in the plot use this
+plt.tight_layout(pad=0.5)
+
 # add image
 fig = add_image(
      epl,
@@ -121,9 +124,6 @@ fig = add_image(
      0.02, 0.9,  # left and bottom dimensions
      0.08, 0.08  # height and width values
 )
-
-# if space is left in the plot use this
-plt.tight_layout(pad=0.5)
 
 ##############################################################################
 # Flip The y-axis
@@ -173,6 +173,9 @@ fig_text(
     size=25, fig=fig, fontproperties=font_bold.prop
 )
 
+# if space is left in the plot use this
+plt.tight_layout(pad=0.5)
+
 # add image
 fig = add_image(
      epl,
@@ -180,9 +183,6 @@ fig = add_image(
      0.02, 0.9,  # left and bottom dimensions
      0.08, 0.08  # height and width values
 )
-
-# if space is left in the plot use this
-plt.tight_layout(pad=0.5)
 
 ##############################################################################
 # Light Theme
