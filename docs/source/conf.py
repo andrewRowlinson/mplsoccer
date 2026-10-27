@@ -40,6 +40,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.imgmath',
               'sphinx.ext.viewcode',
               'sphinx_gallery.gen_gallery',
+              'sphinxcontrib.video',
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.napoleon',
               'numpydoc']
@@ -74,12 +75,15 @@ sphinx_gallery_conf = {
     'examples_dirs': ['../../examples'],
     'gallery_dirs': ['gallery'],
 	'image_scrapers': ('matplotlib'),
-    'matplotlib_animations': True,
+    # mp4 (via ffmpeg) rather than the default jshtml player, whose
+    # per-frame PNGs run past matplotlib's 20 MB embed limit for tracking clips
+    'matplotlib_animations': (True, 'mp4'),
 	'within_subsection_order': ExampleTitleSortKey,
     'subsection_order': ExplicitOrder(['../../examples/radar',
                                        '../../examples/pizza_plots',
                                        '../../examples/bumpy_charts',
 									   '../../examples/pitch_plots',
+									   '../../examples/animation',
 									   '../../examples/sonars',
 									   '../../examples/tutorials',
                                        '../../examples/statsbomb',
@@ -101,7 +105,8 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ['_static']
+html_css_files = ['gallery.css']
 
 # add logo
 html_logo = "logo-white.png"

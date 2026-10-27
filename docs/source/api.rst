@@ -5,6 +5,7 @@ API
    :maxdepth: 2
 
    mplsoccer.soccer.pitch
+   mplsoccer.animation
    mplsoccer.radar_chart
    mplsoccer.soccer.statsbomb
    mplsoccer.bumpy_chart

@@ -83,7 +83,7 @@ class BaseSoccerDims(BaseDims):
     penalty_area_length: float
     corner_diameter: float
     circle_diameter: float
-    # dimensions that can be calculated in __post_init__
+    # dimensions that can be calculated in calc_dims
     goal_bottom: Optional[float] = None
     goal_top: Optional[float] = None
     six_yard_left: Optional[float] = None
@@ -352,7 +352,7 @@ class FixedDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for pitches with fixed dimensions:
      'opta', 'wyscout', 'statsbomb' and 'uefa'."""
 
-    def __post_init__(self):
+    def calc_dims(self):
         self.setup_dims()
 
 
@@ -361,7 +361,7 @@ class VariableCenterDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for pitches where the origin is the center of the pitch:
     'tracab', 'skillcorner', 'impect', and 'secondspectrum'."""
 
-    def __post_init__(self):
+    def calc_dims(self):
         self.left = - self.pitch_length / 2
         self.right = - self.left
         self.bottom = - self.pitch_width / 2
@@ -382,7 +382,7 @@ class CustomDims(BaseSoccerDims):
     """ Dataclass holding the dimension for the custom pitch.
     This is a pitch where the dimensions (width/length) vary and the origin is (left, bottom)."""
 
-    def __post_init__(self):
+    def calc_dims(self):
         self.top = self.pitch_width
         self.right = self.pitch_length
         self.center_width = self.pitch_width / 2
@@ -396,7 +396,7 @@ class CustomDims(BaseSoccerDims):
 class MetricasportsDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
 
-    def __post_init__(self):
+    def calc_dims(self):
         self.aspect = self.pitch_width / self.pitch_length
         self.six_yard_width = round(self.six_yard_width / self.pitch_width, 4)
         self.six_yard_length = round(self.six_yard_length / self.pitch_length, 4)
@@ -414,7 +414,7 @@ class MetricasportsDims(BaseSoccerDims):
 class ScaleCenterDims(BaseSoccerDims):
     """ Dataclass holding the dimensions for the 'metricasports' pitch."""
 
-    def __post_init__(self):
+    def calc_dims(self):
         self.aspect = self.pitch_width / self.pitch_length * self.length / self.width
         self.six_yard_width = round(self.six_yard_width / self.pitch_width * self.width, 4)
         self.six_yard_length = round(self.six_yard_length / self.pitch_length * self.length, 4)
@@ -513,7 +513,8 @@ def metricasports_dims(pitch_width, pitch_length):
                              penalty_area_width=40.32, penalty_area_length=16.5,
                              circle_diameter=18.3, corner_diameter=2., goal_length=2.,
                              goal_width=7.32, invert_y=True, origin_center=False,
-                             pad_default=0.04, pad_multiplier=1, aspect_equal=False)
+                             pad_default=0.04, pad_multiplier=1, aspect_equal=False,
+                             size_varies=True)
 
 
 def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
@@ -526,11 +527,12 @@ def skillcorner_secondspectrum_dims(pitch_width, pitch_length):
                               penalty_area_bottom=-20.16, penalty_area_top=20.16, center_width=0.,
                               center_length=0., circle_diameter=18.3, corner_diameter=2.,
                               invert_y=False, origin_center=True,
-                              pad_default=4, pad_multiplier=1, aspect_equal=True)
+                              pad_default=4, pad_multiplier=1, aspect_equal=True,
+                              size_varies=True)
 
 
 def tracab_dims(pitch_width, pitch_length):
-    """ Create 'tracab' dimensions."""
+    """ Create 'tracab' dimensions. The pitch_width/ pitch_length are in centimeters."""
     return VariableCenterDims(aspect=1., pitch_width=pitch_width, pitch_length=pitch_length,
                               goal_width=732., goal_length=200., goal_bottom=-366., goal_top=366.,
                               six_yard_width=1832., six_yard_length=550., six_yard_bottom=-916.,
@@ -539,7 +541,8 @@ def tracab_dims(pitch_width, pitch_length):
                               penalty_area_bottom=-2016., penalty_area_top=2016.,
                               center_width=0., center_length=0., circle_diameter=1830.,
                               corner_diameter=200., invert_y=False, origin_center=True,
-                              pad_default=4, pad_multiplier=100, aspect_equal=True)
+                              pad_default=4, pad_multiplier=100, aspect_equal=True,
+                              size_varies=True)
 
 
 def impect_dims():
@@ -563,7 +566,8 @@ def custom_dims(pitch_width, pitch_length):
                       penalty_area_length=16.5, circle_diameter=18.3, corner_diameter=2.,
                       goal_length=2., goal_width=7.32, invert_y=False,
                       origin_center=False,
-                      pad_default=4, pad_multiplier=1, aspect_equal=True)
+                      pad_default=4, pad_multiplier=1, aspect_equal=True,
+                      size_varies=True)
 
 
 def center_scale_dims(pitch_width, pitch_length, width=2, length=2, invert_y=False):
@@ -594,7 +598,8 @@ def center_scale_dims(pitch_width, pitch_length, width=2, length=2, invert_y=Fal
                            penalty_area_width=40.32, penalty_area_length=16.5,
                            circle_diameter=18.3, corner_diameter=2., goal_length=2.,
                            goal_width=7.32, invert_y=invert_y, origin_center=True,
-                           pad_default=0.04 * width, pad_multiplier=1, aspect_equal=False)
+                           pad_default=0.04 * width, pad_multiplier=1, aspect_equal=False,
+                           size_varies=True)
 
 
 def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
@@ -631,12 +636,18 @@ def create_pitch_dims(pitch_type, pitch_width=None, pitch_length=None):
     if pitch_type in ['skillcorner', 'secondspectrum']:
         return skillcorner_secondspectrum_dims(pitch_width, pitch_length)
     if pitch_type == 'tracab':
-        pitch_width = pitch_width * 100.
-        pitch_length = pitch_length * 100.
+        # convert from meters to centimeters
+        if pitch_width is not None:
+            pitch_width = pitch_width * 100.
+        if pitch_length is not None:
+            pitch_length = pitch_length * 100.
         return tracab_dims(pitch_width, pitch_length)
     if pitch_type == 'impect':
         return impect_dims()
-    return custom_dims(pitch_width, pitch_length)
+    if pitch_type == 'custom':
+        return custom_dims(pitch_width, pitch_length)
+    raise TypeError(f'Invalid argument: pitch_type should be in {valid} '
+                    'or a subclass of BaseSoccerDims.')
 
 
 class Standardizer:

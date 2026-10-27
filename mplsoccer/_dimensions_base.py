@@ -17,8 +17,9 @@ class BaseDims:
     pad_multiplier: float
     aspect_equal: bool
 
-    # dimensions that can be calculated in __post_init__
+    # dimensions that can be calculated in calc_dims
     _: KW_ONLY
+    size_varies: bool = False
     left: Optional[float] = None
     right: Optional[float] = None
     bottom: Optional[float] = None
@@ -30,6 +31,16 @@ class BaseDims:
     center_length: Optional[float] = None
     pitch_extent: Optional[np.array] = None
     standardized_extent: Optional[np.array] = None
+
+    def __post_init__(self):
+        """ Validate the pitch size and then calculate the remaining dimensions."""
+        if self.pitch_width is None or self.pitch_length is None:
+            raise TypeError('Invalid argument: pitch_length and pitch_width must be specified.')
+        self.calc_dims()
+
+    def calc_dims(self):
+        """ Calculate the dimensions derived from the pitch size.
+        Overridden by each sport's dimension dataclasses."""
 
     @staticmethod
     def intersection_arc(diameter_length, diameter_width, center_x, center_y, line_x):

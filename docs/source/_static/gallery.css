@@ -1,0 +1,9 @@
+/* sphinx-gallery embeds mp4 animations through sphinxcontrib-video, which
+   aligns them left; the theme floats left-aligned blocks, so the text after
+   a tall (vertical pitch) video wrapped beside it. Centre them like images. */
+.sphinx-contrib-video-container.align-left {
+    float: none;
+    display: block;
+    margin: 0 auto 24px;
+    text-align: center;
+}
