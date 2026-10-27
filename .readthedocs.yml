@@ -9,6 +9,7 @@ build:
    os: ubuntu-24.04
    apt_packages:
      - python3-lxml
+     - ffmpeg
    tools:
       python: "3.12"
    jobs:

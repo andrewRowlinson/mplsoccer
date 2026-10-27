@@ -61,6 +61,7 @@ no-cov = "cov --no-cov"
 
 [dependency-groups]
 docs = ['adjustText',
+        "fast-forward-football==0.3.*; python_version >= '3.11'",
         'cmasher',
         'highlight-text',
         'kloppy',
@@ -70,6 +71,7 @@ docs = ['adjustText',
         'Sphinx',
         'sphinx-gallery',
         'sphinx-rtd-theme',
+        'sphinxcontrib-video',
 ]
 dev = ['grayskull',
        'hatch',
